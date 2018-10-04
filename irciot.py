@@ -18,7 +18,7 @@ class PyIRCIoT(object):
 
  irciot_protocol_version = '0.3.10'
 
- irciot_library_version  = '0.0.9'
+ irciot_library_version  = '0.0.11'
  
  def __init__(self):
   #
@@ -26,7 +26,7 @@ class PyIRCIoT(object):
   self.current_oid = 0 # Object ID
   self.current_did = 0 # Datum ID
   #
-  self.defrag_pool = None
+  self.defrag_pool = []
   #
   self.mid_method  = 0
   self.oid_method  = 0
@@ -41,6 +41,14 @@ class PyIRCIoT(object):
      self.current_oid = random.randint(  1000,  9999)
   if self.did_method == 0:
      self.current_did = random.randint(   100,   999)
+  #
+  # Fragmented Message Delete Timeout (in seconds)
+  #
+  self.FMDT = 3600
+  #
+  # Message Fragment auto re-Request Time (in seconds)
+  #
+  self.MFRT = 60
   #
   self.message_mtu = 450
   #
@@ -182,17 +190,35 @@ class PyIRCIoT(object):
   return True
   # End of is_irciot_()
   
- def irciot_defragemntation_(self, my_b64p, my_header):
+ def irciot_defragmentation_(self, my_b64p, my_header, orig_json):
   (my_dt, my_ot, my_src, my_dst, \
    my_dc, my_dp, my_bp, my_bc, my_did) = my_header
-  # foreach 
-  # my_item = (my_b64p, my_header)
-  # self.defrag_pool.append(my_item)
-
+  if not isinstance(self.defrag_pool, list):
+    self.defrag_pool = [] # Drop broken defrag_pool
+  my_dup = False
+  my_new = False
+  for my_item in self.defrag_pool:
+    (test_b64p, test_header, test_json) = my_item
+    (test_dt, test_ot, test_src, test_dst, \
+     test_dc, test_dp, test_bp, test_bc, test_did) = test_header
+    if (test_json == orig_json):
+      my_dup = True
+    else:
+      if ((test_did == my_did) and (test_ot  == my_ot) and \
+          (test_src == my_src) and (test_dst == my_dst)):
+        if ((test_dc == my_dc) and (test_dp == my_dp) and \
+            (test_bp == my_bp) and (test_bc == my_bc)):
+          if (test_b64p == my_b64p):
+             my_dup = True
+  if my_new:
+    my_item = (my_b64p, my_header, orig_json)
+    self.defrag_pool.append(my_item)
+  if my_dup:
+    return ""
   return ""
   # End of irciot_defragmentation_()
 
- def irciot_decrypt_datum_(self, my_datum, my_header):
+ def irciot_decrypt_datum_(self, my_datum, my_header, orig_json):
   (my_dt, my_ot, my_src, my_dst, my_dc, my_dp) = my_header
   my_bc  = None
   my_bp  = None
@@ -210,14 +236,15 @@ class PyIRCIoT(object):
   else:
      my_em = my_datum['em']
   if (my_em == 'b64p'):
-     my_derag_header = (my_dt, my_ot, my_src, my_dst, \
+     my_defrag_header = (my_dt, my_ot, my_src, my_dst, \
       my_dc, my_dp, my_bc, my_bp, my_did)
      my_b64p = my_datum['ed']
-     return irciot_defragmentation_(self, my_b64p, my_defrag_header)
+     return self.irciot_defragmentation_(my_b64p, \
+      my_defrag_header, orig_json)
   return ""
   # End of irciot_decrypt_datum_()
 
- def irciot_prepare_datum_(self, my_datum, my_header):
+ def irciot_prepare_datum_(self, my_datum, my_header, orig_json):
   if not 'ed' in my_datum.keys():
      (my_dt, my_ot, my_src, my_dst, my_dc, my_dp) = my_header
      if not 't' in my_datum.keys():
@@ -231,10 +258,10 @@ class PyIRCIoT(object):
      if (my_datum['t'] == None):
         del my_datum['t']
   else:
-     return irciot_decrypt_datum_(my_datum, my_header)
+     return self.irciot_decrypt_datum_(my_datum, my_header, orig_json)
   return json.dumps(my_datum, separators=(',',':'))
   
- def irciot_deinencap_object_(self, my_object):
+ def irciot_deinencap_object_(self, my_object, orig_json):
   iot_dt  = None
   iot_src = None
   iot_dst = None
@@ -269,7 +296,7 @@ class PyIRCIoT(object):
      str_datums = ""
      for iot_datum in iot_datums:
         str_datum = self.irciot_prepare_datum_(iot_datum, \
-         (iot_dt, iot_ot, iot_src, iot_dst, iot_dc, iot_dp))
+         (iot_dt, iot_ot, iot_src, iot_dst, iot_dc, iot_dp), orig_json)
         if (str_datum != ""):
            if (str_datums != ""):
               str_datums += ","
@@ -277,11 +304,11 @@ class PyIRCIoT(object):
      return str_datums
   if isinstance(iot_datums, dict):
      return self.irciot_prepare_datum_(iot_datums, \
-      (iot_dt, iot_ot, iot_src, iot_dst, iot_dc, iot_dp))
+      (iot_dt, iot_ot, iot_src, iot_dst, iot_dc, iot_dp), orig_json)
   return ""
   # End of irciot_deinencap_object_()
 
- def irciot_deinencap_container_(self, my_container):
+ def irciot_deinencap_container_(self, my_container, orig_json):
   try:
      iot_objects = my_container['o']
   except:
@@ -289,14 +316,14 @@ class PyIRCIoT(object):
   if isinstance(iot_objects, list):
     str_datums = ""
     for iot_object in iot_objects:
-       str_datum = self.irciot_deinencap_object_(iot_object)
+       str_datum = self.irciot_deinencap_object_(iot_object, orig_json)
        if (str_datum != ""):
           if (str_datums != ""):
              str_datums += ","
           str_datums += str_datum
     return str_datums
   if isinstance(iot_objects, dict):
-    return self.irciot_deinencap_object_(iot_objects)
+    return self.irciot_deinencap_object_(iot_objects, orig_json)
   return ""
   # End of irciot_deinencap_container_()
  
@@ -309,14 +336,14 @@ class PyIRCIoT(object):
   if isinstance(iot_containers, list):
     str_datums = "["
     for iot_container in iot_containers:
-       str_datum = self.irciot_deinencap_container_(iot_container)
+       str_datum = self.irciot_deinencap_container_(iot_container, my_json)
        if (str_datum != ""):
           if (str_datums != "["):
              str_datums += ","
           str_datums += str_datum
     return str_datums + "]"
   if isinstance(iot_containers, dict):
-    return self.irciot_deinencap_container_(iot_containers)
+    return self.irciot_deinencap_container_(iot_containers, my_json)
   return ""
   # End of irciot_deinencap_container_()
  

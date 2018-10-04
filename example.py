@@ -21,19 +21,24 @@ def main():
  datumset_text += '"src":"myengine","cnd":{"humidity":"?"},"ot":"request"}]'
   
  print ("input datumset: @%s@\n" % datumset_text)
- 
  json_text, skip_param, part_param \
   = irciot.irciot_encap_(datumset_text, 0, 0)
-
  if (not irciot.is_irciot_(json_text)):
    print ("*** Not an IRC-IoT message")
-
  else:
-   print("output json: @%s@len=%d@\n" % (json_text, len(json_text)))
+   print("output IRC-IoT: @%s@len=%d@\n" % (json_text, len(json_text)))
+   msg_text = irciot.irciot_deinencap_(json_text)
+   if (msg_text != ""):
+     print("output datumset: @%s@\n" % msg_text)
+   print("input it to self\n")
    while ((skip_param > 0) or (part_param > 0)):
      json_text, skip_param, part_param \
       = irciot.irciot_encap_(datumset_text, skip_param, part_param)
-     print("output json: @%s@len=%d@\n" % (json_text, len(json_text)))
+     print("output IRC-IoT: @%s@len=%d@\n" % (json_text, len(json_text)))
+     msg_text = irciot.irciot_deinencap_(json_text)
+     print("input it to self\n")
+     if (msg_text != ""):
+       print("output datumset: @%s@\n" % msg_text)
    
 main()
 
