@@ -16,17 +16,49 @@ import base64
 
 class PyIRCIoT(object):
 
- irciot_protocol_version = '0.3.10'
-
- irciot_library_version  = '0.0.11'
+ class CONST(object):
+  #
+  irciot_protocol_version = '0.3.10'
+  #
+  irciot_library_version  = '0.0.15'
+  #
+  # Errors
+  #
+  err_DEFRAG_INVALID_DID  = 103
+  err_CONTENT_MISSMATCH   = 104
+  err_DEFRAG_DP_MISSING   = 105
+  err_DEFRAG_BP_MISSING   = 106
+  err_DEFRAG_DC_EXCEEDED  = 107
+  err_DEFRAG_BC_EXCEEDED  = 108
+  #
+  pattern = "@"
+  #
+  default_mtu = 450
+  #
+  # Fragmented Message Delete Timeout (in seconds)
+  #
+  FMDT = 3600
+  #
+  # Message Fragment auto re-Request Time (in seconds)
+  #
+  MFRT = 60
+  #
+  def __setattr__(self, *_):
+      pass
  
  def __init__(self):
+  #
+  self.CONST = self.CONST()
   #
   self.current_mid = 0 # Message ID
   self.current_oid = 0 # Object ID
   self.current_did = 0 # Datum ID
+  self.mid_lock = 0
+  self.oid_lock = 0
+  self.did_lock = 0
   #
   self.defrag_pool = []
+  self.defrag_lock = False
   #
   self.mid_method  = 0
   self.oid_method  = 0
@@ -42,15 +74,7 @@ class PyIRCIoT(object):
   if self.did_method == 0:
      self.current_did = random.randint(   100,   999)
   #
-  # Fragmented Message Delete Timeout (in seconds)
-  #
-  self.FMDT = 3600
-  #
-  # Message Fragment auto re-Request Time (in seconds)
-  #
-  self.MFRT = 60
-  #
-  self.message_mtu = 450
+  self.message_mtu = self.CONST.default_mtu
   #
   # Default Maximum IRC message size:
   #
@@ -82,10 +106,11 @@ class PyIRCIoT(object):
   else:
      if not isinstance(in_datum['ot'], str):
         return False
-  if "bc" in in_datum:    # Bytes count must be int
+  # Fragmented message header:
+  if "bc" in in_datum:    # Bytes Count must be int
      if not isinstance(in_datum['bc'], int):
         return False
-     if "op" in in_datum: # Bytes passed must be int
+     if "bp" in in_datum: # Bytes Passed must be int
         if not isinstance(in_datum['bp'], int):
            return False
         if (in_datum['bp'] > in_datum['bc']):
@@ -128,6 +153,16 @@ class PyIRCIoT(object):
     my_dst = None
     if "dst" in in_object:
        my_dst = in_object['dst']
+    # Fragmented message header:
+    if "dc" in in_object:    # Datums Count must be int
+       if not isinstance(in_object['dc'], int):
+          return False
+       if "dp" in in_object: # Datums Passed must be int
+          if not isinstance(in_datum['dp'], int):
+             return False
+          if (in_object['bp'] > in_object['bc']):
+             return False
+    # Go deeper
     if isinstance(my_datums, list):
        for my_datum in my_datums:
           if (not self.is_irciot_datum_(my_datum, \
@@ -190,29 +225,103 @@ class PyIRCIoT(object):
   return True
   # End of is_irciot_()
   
+ def irciot_clear_defrag_chain_(self, my_did):
+  try:
+    if self.defrag_lock:
+       return
+    self.defrag_lock = True
+    pool_index = 0
+    for my_item in self.defrag_pool:
+       (test_b64p, test_header, test_json) = my_item
+       (test_dt, test_ot, test_src, test_dst, \
+        test_dc, test_dp, test_bp, test_bc, test_did) = test_header
+       if (my_did == test_did):
+          self.defrag_pool.remove(pool_index)
+       else:
+          pool_index += 1
+    self.defrag_lock = False
+  except:
+    self.defrag_lock = False
+  
  def irciot_defragmentation_(self, my_b64p, my_header, orig_json):
   (my_dt, my_ot, my_src, my_dst, \
    my_dc, my_dp, my_bp, my_bc, my_did) = my_header
+  if ((my_dc == None) and (my_dp != None)) or \
+     ((my_dc != None) and (my_dp == None)) or \
+     ((my_bc == None) and (my_bp != None)) or \
+     ((my_bc != None) and (my_bp == None)):
+    return ""
   if not isinstance(self.defrag_pool, list):
     self.defrag_pool = [] # Drop broken defrag_pool
   my_dup = False
   my_new = False
-  for my_item in self.defrag_pool:
+  my_err = 0
+  my_ok  = 0
+  defrag_array = []
+  defrag_buffer = ""
+  for my_item in self.defrag_pool: # IRC-IoT defragmentation loop
     (test_b64p, test_header, test_json) = my_item
     (test_dt, test_ot, test_src, test_dst, \
      test_dc, test_dp, test_bp, test_bc, test_did) = test_header
     if (test_json == orig_json):
       my_dup = True
+      break
     else:
-      if ((test_did == my_did) and (test_ot  == my_ot) and \
-          (test_src == my_src) and (test_dst == my_dst)):
-        if ((test_dc == my_dc) and (test_dp == my_dp) and \
-            (test_bp == my_bp) and (test_bc == my_bc)):
-          if (test_b64p == my_b64p):
-             my_dup = True
+      if (test_did == my_did):
+         if ((test_ot  == my_ot)  and \
+             (test_src == my_src) and \
+             (test_dst == my_dst)):
+            if ((test_dc == my_dc) and (test_dp == my_dp) and \
+                (test_bp == my_bp) and (test_bc == my_bc)):
+               if (test_b64p == my_b64p):
+                  my_dup = True
+               else:
+                  my_err = self.CONST.err_DEFRAG_CONTENT_MISSMATCH
+                  break
+            else:
+               if ((test_dc == None) and (test_dp == None)):
+                  if (my_dp != None):
+                     my_err = self.CONST.err_DEFRAG_DP_MISSING
+                     break
+                  if (defrag_array == []):
+                     defrag_item = (my_dp, my_b64p)
+                     defrag_array.append(defrag_item)
+                  defrag_item = (test_dp, test_b64p)
+                  defrag_array.append(defrag_item)
+                  if len(defrag_array) == my_dc:
+                     my_ok = 1
+                     break
+                  elif len(defrag_array) > my_dc:
+                     my_err = self.CONST.err_DEFRAG_DC_EXCEEDED
+                     break
+               elif ((test_bp == None) and (test_bc == None)):
+                  if (my_bp != None):
+                     my_err = self.CONST.err_DEFRAG_BP_MISSING
+                     break
+                  if (defrag_buffer == ""):
+                     defrag_buffer += self.pattern * my_bc
+               else: # Combo fragmentation method
+                  pass                  
+         else:
+            my_err = self.CONST.err_DEFRAG_INVALID_DID
+            break
+  if (my_err > 0):
+    irciot_clear_defrag_chain_(my_did)
+    return ""
   if my_new:
     my_item = (my_b64p, my_header, orig_json)
+    self.defrag_lock = True
     self.defrag_pool.append(my_item)
+    self.defrag_lock = False
+  if (my_ok > 0):
+    if (my_ok == 1):
+       pass
+    elif (my_ok == 2):
+       pass
+    else:
+       return ""
+    irciot_clear_defrag_chain_(my_did)
+    return ""
   if my_dup:
     return ""
   return ""
@@ -564,5 +673,4 @@ class PyIRCIoT(object):
     my_datums_skip = 0
   return my_irciot, my_skip + my_datums_skip, my_datums_part
   # End of irciot_encap_()
-  
-  
+
