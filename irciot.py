@@ -20,7 +20,7 @@ class PyIRCIoT(object):
   #
   irciot_protocol_version = '0.3.10'
   #
-  irciot_library_version  = '0.0.15'
+  irciot_library_version  = '0.0.17'
   #
   # Errors
   #
@@ -234,7 +234,7 @@ class PyIRCIoT(object):
     for my_item in self.defrag_pool:
        (test_b64p, test_header, test_json) = my_item
        (test_dt, test_ot, test_src, test_dst, \
-        test_dc, test_dp, test_bp, test_bc, test_did) = test_header
+        test_dc, test_dp, test_bc, test_bp, test_did) = test_header
        if (my_did == test_did):
           self.defrag_pool.remove(pool_index)
        else:
@@ -245,7 +245,7 @@ class PyIRCIoT(object):
   
  def irciot_defragmentation_(self, my_b64p, my_header, orig_json):
   (my_dt, my_ot, my_src, my_dst, \
-   my_dc, my_dp, my_bp, my_bc, my_did) = my_header
+   my_dc, my_dp, my_bc, my_bp, my_did) = my_header
   if ((my_dc == None) and (my_dp != None)) or \
      ((my_dc != None) and (my_dp == None)) or \
      ((my_bc == None) and (my_bp != None)) or \
@@ -262,7 +262,7 @@ class PyIRCIoT(object):
   for my_item in self.defrag_pool: # IRC-IoT defragmentation loop
     (test_b64p, test_header, test_json) = my_item
     (test_dt, test_ot, test_src, test_dst, \
-     test_dc, test_dp, test_bp, test_bc, test_did) = test_header
+     test_dc, test_dp, test_bc, test_bp, test_did) = test_header
     if (test_json == orig_json):
       my_dup = True
       break
@@ -279,8 +279,9 @@ class PyIRCIoT(object):
                   my_err = self.CONST.err_DEFRAG_CONTENT_MISSMATCH
                   break
             else:
-               if ((test_dc == None) and (test_dp == None)):
-                  if (my_dp != None):
+               if ((test_dc != None) and (test_dp != None) and \
+                   (test_bc == None) and (test_bp == None)):
+                  if (my_dp == None):
                      my_err = self.CONST.err_DEFRAG_DP_MISSING
                      break
                   if (defrag_array == []):
@@ -294,19 +295,31 @@ class PyIRCIoT(object):
                   elif len(defrag_array) > my_dc:
                      my_err = self.CONST.err_DEFRAG_DC_EXCEEDED
                      break
-               elif ((test_bp == None) and (test_bc == None)):
-                  if (my_bp != None):
+               elif ((test_bc != None) and (test_bp != None) and \
+                     (test_dc == None) and (test_dp == None)):
+                  if (my_bp == None):
                      my_err = self.CONST.err_DEFRAG_BP_MISSING
                      break
                   if (defrag_buffer == ""):
-                     defrag_buffer += self.pattern * my_bc
+                     defrag_buffer += self.CONST.pattern * my_bc
+                     defrag_buffer = defrag_buffer[:my_bp] + \
+                        my_b64p + defrag_buffer[my_bp + len(my_b64p):]
+                  if (defrag_buffer != ""):
+                     defrag_buffer = defrag_buffer[:test_bp] + \
+                        str(test_b64p) + defrag_buffer[test_bp + len(test_b64p):]
+                     if (defrag_buffer.count(self.CONST.pattern) == 0):
+                        my_ok = 2
+                     else:
+                        my_new = True
                else: # Combo fragmentation method
                   pass                  
          else:
             my_err = self.CONST.err_DEFRAG_INVALID_DID
             break
+  if (self.defrag_pool == []):
+    my_new = True
   if (my_err > 0):
-    irciot_clear_defrag_chain_(my_did)
+    self.irciot_clear_defrag_chain_(my_did)
     return ""
   if my_new:
     my_item = (my_b64p, my_header, orig_json)
@@ -317,10 +330,25 @@ class PyIRCIoT(object):
     if (my_ok == 1):
        pass
     elif (my_ok == 2):
-       pass
+       self.irciot_clear_defrag_chain_(my_did)
+       try:
+          out_json = str(base64.b64decode(defrag_buffer))[2:-1]
+          # Adding missing fields to the Datum from parent object
+          my_datum = json.loads(out_json)
+          if ((not "ot" in my_datum) and (my_ot != None)):
+              my_datum['ot'] = my_ot
+          if ((not "dt" in my_datum) and (my_dt != None)):
+              my_datum['dt'] = my_dt
+          if ((not "src" in my_datum) and (my_src != None)):
+              my_datum['src'] = my_src
+          if ((not "dst" in my_datum) and (my_dst != None)):
+              my_datum['dst'] = my_dst
+          return json.dumps(my_datum, separators=(',',':'))
+       except:
+          return ""
     else:
        return ""
-    irciot_clear_defrag_chain_(my_did)
+    self.irciot_clear_defrag_chain_(my_did)
     return ""
   if my_dup:
     return ""
@@ -392,15 +420,15 @@ class PyIRCIoT(object):
         return ""
      iot_dc = my_object['dc']
   else:
-     my_object['dc'] = 1
-     iot_dc = 1
+     my_object['dc'] = None
+     iot_dc = None
   if "dp" in my_object:
      if not isinstance(my_object['dp'], int):
         return ""
      iot_dp = my_object['dp']
   else:
-     my_object['dp'] = 1
-     iot_dp = 1
+     my_object['dp'] = None
+     iot_dp = None
   if isinstance(iot_datums, list):
      str_datums = ""
      for iot_datum in iot_datums:
@@ -430,9 +458,14 @@ class PyIRCIoT(object):
           if (str_datums != ""):
              str_datums += ","
           str_datums += str_datum
+    #if (str_datums != ""):
+    #   str_datums = "[" + str_datums + "]"
     return str_datums
   if isinstance(iot_objects, dict):
     return self.irciot_deinencap_object_(iot_objects, orig_json)
+    if (str_datums != ""):
+       str_datums = "[" + str_datums + "]"
+    return str_datums
   return ""
   # End of irciot_deinencap_container_()
  
@@ -564,7 +597,7 @@ class PyIRCIoT(object):
   if isinstance(my_bigdatum, dict):
      big_datum = my_bigdatum
      big_ot = my_bigdatum['ot']
-     del my_bigdatum['ot']
+     del my_datum['ot']
   if isinstance(my_bigdatum, list):
      my_current = 0
      for my_datum in my_bigdatum:
@@ -576,30 +609,31 @@ class PyIRCIoT(object):
   if (big_ot == None):
      return ("", 0)
   str_big_datum = json.dumps(big_datum, separators=(',',':'))
-  my_bc = len(str_big_datum)
   b64_big_datum = base64.b64encode(bytes(str_big_datum, "utf-8"))
-  raw_big_datum = str(b64_big_datum)[my_part+2:-1]
+  raw_big_datum = str(b64_big_datum)[2:-1]
+  my_bc = len(raw_big_datum)
   out_big_datum = '{"ed":"' + raw_big_datum + '"}'
   my_irciot = self.irciot_encap_internal_(out_big_datum)
   self.current_mid = save_mid # mid rollback
   out_skip  = len(my_irciot)
-  out_skip += len(big_ot) + 8 #"ot":"",#
-  out_skip += len(str(self.current_did)) + 9 #"did":"",#
-  out_skip += len(str(my_bc)) + 6 #"bc":,#
-  out_skip += len(str(my_part)) + 6 #"bp":,#
-  out_skip -= self.message_mtu
+  out_head  = len(big_ot) + 8 #"ot":"",#
+  out_head += len(str(self.current_did)) + 9 #"did":"",#
+  out_head += len(str(my_bc)) + 6 #"bc":,#
+  out_head += len(str(my_part)) + 6 #"bp":,#
+  out_skip += out_head - self.message_mtu
   out_big_datum = '{'
   out_big_datum += '"ot":"' + big_ot + '",'
   out_big_datum += '"did":"' + str(self.current_did) + '",'
   out_big_datum += '"bc":' + str(my_bc) + ','
   out_big_datum += '"bp":' + str(my_part) + ','
   out_big_datum += '"ed":"'
-  if (out_skip > 0):
-     out_big_datum += raw_big_datum[my_part:-out_skip] + '"}'
-  else:
-     out_big_datum += raw_big_datum + '"}'
+  my_okay = self.message_mtu - out_head - 48 # Must be calculated
+  my_size = my_bc - my_part
+  if (my_size > my_okay):
+     my_size = my_okay
+  out_big_datum += raw_big_datum[my_part:my_part + my_size] + '"}'
   my_irciot = self.irciot_encap_internal_(out_big_datum)
-  if (out_skip < 0):
+  if (my_size < my_okay):
     return (my_irciot, 0)
   return (my_irciot, len(raw_big_datum) + my_part - out_skip)
   # End of irciot_encap_bigdatum_()
