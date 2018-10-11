@@ -20,7 +20,7 @@ class PyIRCIoT(object):
   #
   irciot_protocol_version = '0.3.10'
   #
-  irciot_library_version  = '0.0.17'
+  irciot_library_version  = '0.0.18'
   #
   # Errors
   #
@@ -30,6 +30,7 @@ class PyIRCIoT(object):
   err_DEFRAG_BP_MISSING   = 106
   err_DEFRAG_DC_EXCEEDED  = 107
   err_DEFRAG_BC_EXCEEDED  = 108
+  err_OVERLAP_MISSMATCH   = 109
   #
   pattern = "@"
   #
@@ -181,12 +182,12 @@ class PyIRCIoT(object):
        return False
     if (in_container['mid'] == ""): # IRC-IoT Message ID
        return False
-    if "oc" in in_container:        # Objects count must be int
+    if "oc" in in_container:        # Objects Count must be int
        if not isinstance(in_container['oc'], int):
           return False
     else:
        in_container['oc'] = 1
-    if "op" in in_container:        # Objects passed must be int
+    if "op" in in_container:        # Objects Passed must be int
        if not isinstance(in_container['op'], int):
           return False
        if (in_container['op'] > in_container['oc']):
@@ -230,15 +231,12 @@ class PyIRCIoT(object):
     if self.defrag_lock:
        return
     self.defrag_lock = True
-    pool_index = 0
     for my_item in self.defrag_pool:
        (test_b64p, test_header, test_json) = my_item
        (test_dt, test_ot, test_src, test_dst, \
         test_dc, test_dp, test_bc, test_bp, test_did) = test_header
        if (my_did == test_did):
-          self.defrag_pool.remove(pool_index)
-       else:
-          pool_index += 1
+          self.defrag_pool.remove(my_item)
     self.defrag_lock = False
   except:
     self.defrag_lock = False
@@ -305,6 +303,7 @@ class PyIRCIoT(object):
                      defrag_buffer = defrag_buffer[:my_bp] + \
                         my_b64p + defrag_buffer[my_bp + len(my_b64p):]
                   if (defrag_buffer != ""):
+                     # here will be a comparison of overlapping buffer intervals
                      defrag_buffer = defrag_buffer[:test_bp] + \
                         str(test_b64p) + defrag_buffer[test_bp + len(test_b64p):]
                      if (defrag_buffer.count(self.CONST.pattern) == 0):
