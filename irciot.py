@@ -20,17 +20,50 @@ class PyIRCIoT(object):
   #
   irciot_protocol_version = '0.3.10'
   #
-  irciot_library_version  = '0.0.18'
+  irciot_library_version  = '0.0.19'
   #
-  # Errors
+  # IRC-IoT TAGs
+  #
+  tag_MESSAGE_ID   = 'mid' # Message ID
+  tag_MESSAGE_OC   = 'oc'  # Objects Count
+  tag_MESSAGE_OP   = 'op'  # Objects Passed
+  tag_OBJECT       = 'o'   # Object Tag
+  tag_OBJECT_ID    = 'oid' # Object ID
+  tag_OBJECT_TYPE  = 'ot'  # Object Type
+  tag_OBJECT_DC    = 'dc'  # Datums Count
+  tag_OBJECT_DP    = 'dp'  # Datums Passed
+  tag_DATUM        = 'd'   # Datum Tag
+  tag_DATUM_ID     = 'did' # Datum ID
+  tag_DATUM_BC     = 'bc'  # Bytes Count
+  tag_DATUM_BP     = 'bp'  # Bytes Passed
+  tag_DATE_TIME    = 't'   # Date and Time
+  tag_SRC_ADDR     = 'src' # Source Address
+  tag_DST_ADDR     = 'dst' # Destination Address
+  tag_ENC_DATUM    = 'ed'  # Encrypted Datum
+  tag_ENC_METHOD   = 'em'  # Encryption Method
+  tag_ENC_BASE64   = 'b64p'
+  #
+  # IRC-IoT Base Types
+  #
+  type_NUMERIC    = 10
+  type_FLOAT      = 11
+  type_STRING     = 12
+  type_TEXT       = 13
+  type_OBJECT     = 14  # Link to other objects
+  type_BINARY     = 15  # Binary data block
+  type_ARRAY      = 16
+  #
+  # IRC-IoT Errors
   #
   err_DEFRAG_INVALID_DID  = 103
   err_CONTENT_MISSMATCH   = 104
-  err_DEFRAG_DP_MISSING   = 105
-  err_DEFRAG_BP_MISSING   = 106
-  err_DEFRAG_DC_EXCEEDED  = 107
-  err_DEFRAG_BC_EXCEEDED  = 108
-  err_OVERLAP_MISSMATCH   = 109
+  err_DEFRAG_OP_MISSING   = 111
+  err_DEFRAG_DP_MISSING   = 112
+  err_DEFRAG_BP_MISSING   = 113
+  err_DEFRAG_OC_EXCEEDED  = 121
+  err_DEFRAG_DC_EXCEEDED  = 122
+  err_DEFRAG_BC_EXCEEDED  = 123
+  err_OVERLAP_MISSMATCH   = 131
   #
   pattern = "@"
   #
@@ -90,22 +123,25 @@ class PyIRCIoT(object):
   # 2 is CRC32 Check "c32"
   #
   pass 
+
+ def irciot_version(self):
+  return self.CONST.irciot_protocol_version
  
  def irciot_set_mtu_(self, my_mtu):
   if (my_mtu < 128):
      return
   self.message_mtu = my_mtu
- 
+  
  def is_irciot_datum_(self, in_datum, in_ot, in_src, in_dst):
   # Object Type filed must exists or inherits
-  if "ed" in in_datum:
-     if isinstance(in_datum['ed'], str):
+  if self.CONST.tag_ENC_DATUM in in_datum:
+     if isinstance(in_datum[self.CONST.tag_ENC_DATUM], str):
         return True
-  if not "ot" in in_datum:
+  if not self.CONST.tag_OBJECT_TYPE in in_datum:
      if (in_ot == None):
         return False
   else:
-     if not isinstance(in_datum['ot'], str):
+     if not isinstance(in_datum[self.CONST.tag_OBJECT_TYPE], str):
         return False
   # Fragmented message header:
   if "bc" in in_datum:    # Bytes Count must be int
@@ -117,18 +153,18 @@ class PyIRCIoT(object):
         if (in_datum['bp'] > in_datum['bc']):
            return False
   # Source address field must exists or inherits
-  if not "src" in in_datum:
+  if not self.CONST.tag_SRC_ADDR in in_datum:
      if (in_src == None):
         return False
   else:
-     if not isinstance(in_datum['src'], str):
+     if not isinstance(in_datum[self.CONST.tag_SRC_ADDR], str):
         return False
   # Destination address field must exits or ihnerits
-  if not "dst" in in_datum:
+  if not self.CONST.tag_DST_ADDR in in_datum:
      if (in_dst == None):
         return False
   else:
-     if not isinstance(in_datum['dst'], str):
+     if not isinstance(in_datum[self.CONST.tag_DST_ADDR], str):
         return False
   return True
   # End of is_irciot_datum_()
@@ -137,66 +173,69 @@ class PyIRCIoT(object):
   ''' Сhecks whether the text string is a IRC-IoT message or not '''
   
   def is_irciot_object_(self, in_object):
-    if not "oid" in in_object:   # IRC-IoT Object ID
+    if not self.CONST.tag_OBJECT_ID in in_object: # IRC-IoT Object ID
        return False
-    if (in_object['oid'] == ""):
+    if (in_object[self.CONST.tag_OBJECT_ID] == ""):
        return False
-    if not "ot" in in_object:    # Default Object Type of Datums
-       in_object['ot'] = None    # it will test all datums for 'ot'
-    if (in_object['ot'] == ""):
+    if not self.CONST.tag_OBJECT_TYPE in in_object:
+       in_object[self.CONST.tag_OBJECT_TYPE] = None
+       # it will test all datums for "object type"
+    if (in_object[self.CONST.tag_OBJECT_TYPE] == ""):
        return False
-    if not "d" in in_object:     # IRC-IoT Datum-set
+    if not self.CONST.tag_DATUM in in_object:
        return False
-    my_datums = in_object['d'] 
+    my_datums = in_object[self.CONST.tag_DATUM] 
     my_src = None
-    if "src" in in_object:
-       my_src = in_object['src']
+    if self.CONST.tag_SRC_ADDR in in_object:
+       my_src = in_object[self.CONST.tag_SRC_ADDR]
     my_dst = None
-    if "dst" in in_object:
-       my_dst = in_object['dst']
+    if self.CONST.tag_DST_ADDR in in_object:
+       my_dst = in_object[self.CONST.tag_DST_ADDR]
     # Fragmented message header:
-    if "dc" in in_object:    # Datums Count must be int
-       if not isinstance(in_object['dc'], int):
-          return False
-       if "dp" in in_object: # Datums Passed must be int
-          if not isinstance(in_datum['dp'], int):
-             return False
-          if (in_object['bp'] > in_object['bc']):
+    if self.CONST.tag_OBJECT_DC in in_object:
+       if not isinstance(in_object[self.CONST.tag_OBJECT_DC], int):
+          return False # Datums Count must be int
+       if self.CONST.tag_DATUM_BP in in_object:
+          if not isinstance(in_datum[self.CONST.tag_OBJECT_DP], int):
+             return False # Datums Passed must be int
+          if (in_object[self.CONST.tag_DATUM_BP] \
+            > in_object[self.CONST.tag_DATUM_BC]):
              return False
     # Go deeper
     if isinstance(my_datums, list):
        for my_datum in my_datums:
           if (not self.is_irciot_datum_(my_datum, \
-           in_object['ot'], my_src, my_dst)):
+           in_object[self.CONST.tag_OBJECT_TYPE], my_src, my_dst)):
              return False
        return True
     if isinstance(my_datums, dict):
        if not self.is_irciot_datum_(my_datums, \
-        in_object['ot'], my_src, my_dst):
+        in_object[self.CONST.tag_OBJECT_TYPE], my_src, my_dst):
           return False
     return True
     # End of is_irciot_object_()
 
   def is_irciot_container_(self, in_container):
-    if not "mid" in in_container:
+    if not self.CONST.tag_MESSAGE_ID in in_container:
        return False
-    if (in_container['mid'] == ""): # IRC-IoT Message ID
+    if (in_container[self.CONST.tag_MESSAGE_ID] == ""):
        return False
-    if "oc" in in_container:        # Objects Count must be int
-       if not isinstance(in_container['oc'], int):
+    if self.CONST.tag_MESSAGE_OC in in_container:
+       if not isinstance(in_container[self.CONST.tag_MESSAGE_OC], int):
+          return False # Objects Count must be int
+    else:
+       in_container[self.CONST.tag_MESSAGE_OC] = 1
+    if self.CONST.tag_MESSAGE_OP in in_container:
+       if not isinstance(in_container[self.CONST.tag_MESSAGE_OP], int):
+          return False # Objects Passed must be int
+       if (in_container[self.CONST.tag_MESSAGE_OP] \
+         > in_container[self.CONST.tag_MESSAGE_OC]):
           return False
     else:
-       in_container['oc'] = 1
-    if "op" in in_container:        # Objects Passed must be int
-       if not isinstance(in_container['op'], int):
-          return False
-       if (in_container['op'] > in_container['oc']):
-          return False
-    else:
-       in_container['op'] = 1
-    if not "o" in in_container:     # IRC-IoT Object must exists
-       return False
-    my_objects = in_container['o']
+       in_container[self.CONST.tag_MESSAGE_OP] = 1
+    if not self.CONST.tag_OBJECT in in_container:
+       return False # IRC-IoT Object must exists
+    my_objects = in_container[self.CONST.tag_OBJECT]
     if isinstance(my_objects, list):
       for my_object in my_objects:
          if (not is_irciot_object_(self, my_object)):
@@ -334,14 +373,18 @@ class PyIRCIoT(object):
           out_json = str(base64.b64decode(defrag_buffer))[2:-1]
           # Adding missing fields to the Datum from parent object
           my_datum = json.loads(out_json)
-          if ((not "ot" in my_datum) and (my_ot != None)):
-              my_datum['ot'] = my_ot
-          if ((not "dt" in my_datum) and (my_dt != None)):
-              my_datum['dt'] = my_dt
-          if ((not "src" in my_datum) and (my_src != None)):
-              my_datum['src'] = my_src
-          if ((not "dst" in my_datum) and (my_dst != None)):
-              my_datum['dst'] = my_dst
+          if ((not self.CONST.tag_OBJECT_TYPE in my_datum) \
+           and (my_ot != None)):
+              my_datum[self.CONST.tag_OBJECT_TYPE] = my_ot
+          if ((not self.CONST.tag_DATE_TIME in my_datum) \
+           and (my_dt != None)):
+              my_datum[self.CONST.tag_DATE_TIME] = my_dt
+          if ((not self.CONST.tag_SRC_ADDR in my_datum) \
+           and (my_src != None)):
+              my_datum[self.CONST.tag_SRC_ADDR] = my_src
+          if ((not self.CONST.tag_DST_ADDR in my_datum) \
+           and (my_dst != None)):
+              my_datum[self.CONST.tag_DST_ADDR] = my_dst
           return json.dumps(my_datum, separators=(',',':'))
        except:
           return ""
@@ -359,40 +402,40 @@ class PyIRCIoT(object):
   my_bc  = None
   my_bp  = None
   my_did = None
-  if not 'ed' in my_datum.keys():
+  if not self.CONST.tag_ENC_DATUM in my_datum.keys():
      return ""
-  if 'bc' in my_datum.keys():
-     my_bc = my_datum['bc']
-  if 'bp' in my_datum.keys():
-     my_bp = my_datum['bp']
-  if 'did' in my_datum.keys():
-     my_did = my_datum['did']
-  if not 'em' in my_datum.keys():
-     my_em = 'b64p'
+  if self.CONST.tag_DATUM_BC in my_datum.keys():
+     my_bc = my_datum[self.CONST.tag_DATUM_BC]
+  if self.CONST.tag_DATUM_BP in my_datum.keys():
+     my_bp = my_datum[self.CONST.tag_DATUM_BP]
+  if self.CONST.tag_DATUM_ID in my_datum.keys():
+     my_did = my_datum[self.CONST.tag_DATUM_ID]
+  if not self.CONST.tag_ENC_METHOD in my_datum.keys():
+     my_em = self.CONST.tag_ENC_BASE64
   else:
-     my_em = my_datum['em']
-  if (my_em == 'b64p'):
+     my_em = my_datum[self.CONST.tag_ENC_METHOD]
+  if (my_em == self.CONST.tag_ENC_BASE64):
      my_defrag_header = (my_dt, my_ot, my_src, my_dst, \
       my_dc, my_dp, my_bc, my_bp, my_did)
-     my_b64p = my_datum['ed']
+     my_b64p = my_datum[self.CONST.tag_ENC_DATUM]
      return self.irciot_defragmentation_(my_b64p, \
       my_defrag_header, orig_json)
   return ""
   # End of irciot_decrypt_datum_()
 
  def irciot_prepare_datum_(self, my_datum, my_header, orig_json):
-  if not 'ed' in my_datum.keys():
+  if not self.CONST.tag_ENC_DATUM in my_datum.keys():
      (my_dt, my_ot, my_src, my_dst, my_dc, my_dp) = my_header
-     if not 't' in my_datum.keys():
-        my_datum['t'] = my_dt
-     if not 'ot' in my_datum.keys():
-        my_datum['ot'] = my_ot
-     if not 'src' in my_datum.keys():
-        my_datum['src'] = my_src
-     if not 'dst' in my_datum.keys():
-        my_datum['dst'] = my_dst
-     if (my_datum['t'] == None):
-        del my_datum['t']
+     if not self.CONST.tag_DATE_TIME in my_datum.keys():
+        my_datum[self.CONST.tag_DATE_TIME] = my_dt
+     if not self.CONST.tag_OBJECT_TYPE in my_datum.keys():
+        my_datum[self.CONST.tag_OBJECT_TYPE] = my_ot
+     if not self.CONST.tag_SRC_ADDR in my_datum.keys():
+        my_datum[self.CONST.tag_SRC_ADDR] = my_src
+     if not self.CONST.tag_DST_ADDR in my_datum.keys():
+        my_datum[self.CONST.tag_DST_ADDR] = my_dst
+     if (my_datum[self.CONST.tag_DATE_TIME] == None):
+        del my_datum[self.CONST.tag_DATE_TIME]
   else:
      return self.irciot_decrypt_datum_(my_datum, my_header, orig_json)
   return json.dumps(my_datum, separators=(',',':'))
@@ -404,29 +447,29 @@ class PyIRCIoT(object):
   iot_dc  = None
   iot_dp  = None
   try:
-     iot_datums = my_object['d']
-     iot_ot = my_object['ot']
-     if 't' in my_object.keys():
-        iot_dt  = my_object['t']
-     if 'src' in my_object.keys():
-        iot_src = my_object['src']
-     if 'dst' in my_object.keys():
-        iot_dst = my_object['dst']
+     iot_datums = my_object[self.CONST.tag_DATUM]
+     iot_ot = my_object[self.CONST.tag_OBJECT_TYPE]
+     if self.CONST.tag_DATE_TIME in my_object.keys():
+        iot_dt  = my_object[self.CONST.tag_DATE_TIME]
+     if self.CONST.tag_SRC_ADDR in my_object.keys():
+        iot_src = my_object[self.CONST.tag_SRC_ADDR]
+     if self.CONST.tag_DST_ADDR in my_object.keys():
+        iot_dst = my_object[self.CONST.tag_DST_ADDR]
   except:
      return ""
   if "dc" in my_object:
-     if not isinstance(my_object['dc'], int):
+     if not isinstance(my_object[self.CONST.tag_OBJECT_DC], int):
         return ""
-     iot_dc = my_object['dc']
+     iot_dc = my_object[self.CONST.tag_OBJECT_DC]
   else:
-     my_object['dc'] = None
+     my_object[self.CONST.tag_OBJECT_DC] = None
      iot_dc = None
   if "dp" in my_object:
-     if not isinstance(my_object['dp'], int):
+     if not isinstance(my_object[self.CONST.tag_OBJECT_DP], int):
         return ""
-     iot_dp = my_object['dp']
+     iot_dp = my_object[self.CONST.tag_OBJECT_DP]
   else:
-     my_object['dp'] = None
+     my_object[self.CONST.tag_OBJECT_DP] = None
      iot_dp = None
   if isinstance(iot_datums, list):
      str_datums = ""
@@ -446,7 +489,7 @@ class PyIRCIoT(object):
 
  def irciot_deinencap_container_(self, my_container, orig_json):
   try:
-     iot_objects = my_container['o']
+     iot_objects = my_container[self.CONST.tag_OBJECT]
   except:
      return ""
   if isinstance(iot_objects, list):
@@ -506,13 +549,13 @@ class PyIRCIoT(object):
   # End of is_irciot_datumset_()
   
  def irciot_encap_datum_(self, in_datum, in_ot, in_src, in_dst):
-  if not "ed" in in_datum.keys():
-   if (in_ot == in_datum['ot']):
-      del in_datum['ot']
-   if (in_src == in_datum['src']):
-      del in_datum['src']
-   if (in_dst == in_datum['dst']):
-      del in_datum['dst']
+  if not self.CONST.tag_ENC_DATUM in in_datum.keys():
+   if (in_ot == in_datum[self.CONST.tag_OBJECT_TYPE]):
+      del in_datum[self.CONST.tag_OBJECT_TYPE]
+   if (in_src == in_datum[self.CONST.tag_SRC_ADDR]):
+      del in_datum[self.CONST.tag_SRC_ADDR]
+   if (in_dst == in_datum[self.CONST.tag_DST_ADDR]):
+      del in_datum[self.CONST.tag_DST_ADDR]
   return json.dumps(in_datum, separators=(',',':'))
   # End of irciot_encap_datum_()
  
@@ -533,18 +576,18 @@ class PyIRCIoT(object):
      my_dst_cnt = 0
      for my_datum in my_datums:
         if (my_datums_cnt == 0):
-           my_ot  = my_datum['ot']
+           my_ot  = my_datum[self.CONST.tag_OBJECT_TYPE]
            my_ot_cnt  = 1
-           my_src = my_datum['src']
+           my_src = my_datum[self.CONST.tag_SRC_ADDR]
            my_src_cnt = 1
-           my_dst = my_datum['dst']
+           my_dst = my_datum[self.CONST.tag_DST_ADDR]
            my_dst_cnt = 1
         else:
-           if (my_ot  == my_datum['ot']):
+           if (my_ot  == my_datum[self.CONST.tag_OBJECT_TYPE]):
               my_ot_cnt += 1
-           if (my_src == my_datum['src']):
+           if (my_src == my_datum[self.CONST.tag_SRC_ADDR]):
               my_src_cnt += 1
-           if (my_dst == my_datum['dst']):
+           if (my_dst == my_datum[self.CONST.tag_DST_ADDR]):
               my_dst_cnt += 1
         my_datums_cnt += 1
      my_datums_cnt = len(my_datums)
@@ -561,27 +604,32 @@ class PyIRCIoT(object):
           my_datum, my_ot, my_src, my_dst)
      if (my_datums_cnt > 1):
         my_irciot = "[" + my_irciot + "]"
-     my_irciot = '"d":' + my_irciot
+     my_irciot = '"' + self.CONST.tag_DATUM + '":' + my_irciot
   if isinstance(my_datums, dict):
-     if "ot" in my_datums:
-        my_ot  = my_datums['ot']
-        if "ed" in my_datums.keys():
-           del my_datums['ot']
-     if "src" in my_datums:
-         my_src = my_datums['src']
-     if "dst" in my_datums:
-         my_dst = my_datums['dst']
+     if self.CONST.tag_OBJECT_TYPE in my_datums:
+        my_ot  = my_datums[self.CONST.tag_OBJECT_TYPE]
+        if self.CONST.tag_ENC_DATUM in my_datums.keys():
+           del my_datums[self.CONST.tag_OBJECT_TYPE]
+     if self.CONST.tag_SRC_ADDR in my_datums:
+         my_src = my_datums[self.CONST.tag_SRC_ADDR]
+     if self.CONST.tag_DST_ADDR in my_datums:
+         my_dst = my_datums[self.CONST.tag_DST_ADDR]
      if (self.is_irciot_datum_(my_datums, my_ot, my_src, my_dst)):
-        my_irciot = '"d":' + self.irciot_encap_datum_( \
-         my_datums, my_ot, my_src, my_dst)
-  str_object = '"o":{"oid":"' + str(self.current_oid) + '",'
+        my_irciot = '"' + self.CONST.tag_DATUM + '":' \
+         + self.irciot_encap_datum_(my_datums, my_ot, my_src, my_dst)
+  str_object = '"' + self.CONST.tag_OBJECT \
+   + '":{"oid":"' + str(self.current_oid) + '",'
   if (my_ot  != None):
-     str_object += '"ot":"'  + my_ot  + '",'
+     str_object += '"' + self.CONST.tag_OBJECT_TYPE
+     str_object += '":"'  + my_ot  + '",'
   if (my_src != None):
-     str_object += '"src":"' + my_src + '",'
+     str_object += '"' + self.CONST.tag_SRC_ADDR
+     str_object += '":"' + my_src + '",'
   if (my_dst != None):
-     str_object += '"dst":"' + my_dst + '",'
-  str_container = '{"mid":"' + str(self.current_mid) + '",'
+     str_object += '"' + self.CONST.tag_DST_ADDR
+     str_object += '":"' + my_dst + '",'
+  str_container  = '{"' + self.CONST.tag_MESSAGE_ID
+  str_container += '":"' + str(self.current_mid) + '",'
   # + '"oc":1,"op":1,'  # Must be implemented later
   self.current_mid += 1 # Default mid method
   my_irciot = str_container + str_object + my_irciot + "}}"
@@ -595,37 +643,41 @@ class PyIRCIoT(object):
   big_ot = None
   if isinstance(my_bigdatum, dict):
      big_datum = my_bigdatum
-     big_ot = my_bigdatum['ot']
-     del my_datum['ot']
+     big_ot = my_bigdatum[self.CONST.tag_OBJECT_TYPE]
+     del my_datum[self.CONST.tag_OBJECT_TYPE]
   if isinstance(my_bigdatum, list):
      my_current = 0
      for my_datum in my_bigdatum:
         if (my_current == 0):
            big_datum = my_datum
-           big_ot = my_datum['ot']
-           del my_datum['ot']
+           big_ot = my_datum[self.CONST.tag_OBJECT_TYPE]
+           del my_datum[self.CONST.tag_OBJECT_TYPE]
         my_current += 1
   if (big_ot == None):
      return ("", 0)
-  str_big_datum = json.dumps(big_datum, separators=(',',':'))
-  b64_big_datum = base64.b64encode(bytes(str_big_datum, "utf-8"))
-  raw_big_datum = str(b64_big_datum)[2:-1]
+  str_big_datum  = json.dumps(big_datum, separators=(',',':'))
+  b64_big_datum  = base64.b64encode(bytes(str_big_datum, "utf-8"))
+  raw_big_datum  = str(b64_big_datum)[2:-1]
   my_bc = len(raw_big_datum)
-  out_big_datum = '{"ed":"' + raw_big_datum + '"}'
+  out_big_datum  = '{"' + self.CONST.tag_ENC_DATUM
+  out_big_datum += '":"' + raw_big_datum + '"}'
   my_irciot = self.irciot_encap_internal_(out_big_datum)
   self.current_mid = save_mid # mid rollback
   out_skip  = len(my_irciot)
-  out_head  = len(big_ot) + 8 #"ot":"",#
-  out_head += len(str(self.current_did)) + 9 #"did":"",#
+  out_head  = len(big_ot) 
+  out_head += len(self.CONST.tag_OBJECT_TYPE) + 6 #"":"",#
+  out_head += len(str(self.current_did))
+  out_head += len(self.CONST.tag_DATUM_ID) + 6 #"":"",#
   out_head += len(str(my_bc)) + 6 #"bc":,#
   out_head += len(str(my_part)) + 6 #"bp":,#
   out_skip += out_head - self.message_mtu
   out_big_datum = '{'
-  out_big_datum += '"ot":"' + big_ot + '",'
-  out_big_datum += '"did":"' + str(self.current_did) + '",'
-  out_big_datum += '"bc":' + str(my_bc) + ','
-  out_big_datum += '"bp":' + str(my_part) + ','
-  out_big_datum += '"ed":"'
+  out_big_datum += '"' + self.CONST.tag_OBJECT_TYPE + '":"' + big_ot
+  out_big_datum += '","' + self.CONST.tag_DATUM_ID
+  out_big_datum += '":"' + str(self.current_did)
+  out_big_datum += '","' + self.CONST.tag_DATUM_BC + '":' + str(my_bc)
+  out_big_datum += ',"' + self.CONST.tag_DATUM_BP + '":' + str(my_part)
+  out_big_datum += ',"' + self.CONST.tag_ENC_DATUM + '":"'
   my_okay = self.message_mtu - out_head - 48 # Must be calculated
   my_size = my_bc - my_part
   if (my_size > my_okay):
