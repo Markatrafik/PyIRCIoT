@@ -20,7 +20,7 @@ class PyIRCIoT(object):
   #
   irciot_protocol_version = '0.3.10'
   #
-  irciot_library_version  = '0.0.19'
+  irciot_library_version  = '0.0.21'
   #
   # IRC-IoT TAGs
   #
@@ -45,6 +45,7 @@ class PyIRCIoT(object):
   #
   # IRC-IoT Base Types
   #
+  type_UNDEFINED  =  0
   type_NUMERIC    = 10
   type_FLOAT      = 11
   type_STRING     = 12
@@ -52,6 +53,10 @@ class PyIRCIoT(object):
   type_OBJECT     = 14  # Link to other objects
   type_BINARY     = 15  # Binary data block
   type_ARRAY      = 16
+  #
+  b_LITTLE_ENDIAN = 0
+  b_BIG_ENDIAN    = 1
+  b_MIDDLE_ENDIAN = 2
   #
   # IRC-IoT Errors
   #
@@ -94,6 +99,15 @@ class PyIRCIoT(object):
   self.defrag_pool = []
   self.defrag_lock = False
   #
+  self.output_pool = []
+  self.output_pool = False
+  #
+  self.ldict       = []
+  self.ldict_lock  = False
+  #
+  self.ldict_types = []
+  self.ldict_types_lock = False
+  #
   self.mid_method  = 0
   self.oid_method  = 0
   self.did_method  = 0
@@ -124,19 +138,46 @@ class PyIRCIoT(object):
   #
   pass 
 
- def irciot_version(self):
+ def irciot_version_(self):
   return self.CONST.irciot_protocol_version
- 
+  
+ def irciot_get_object_by_id_(self, object_id):
+  return {}
+  
+ def irciot_delete_object_by_id_(self, object_id):
+  pass
+  
+ def irciot_get_objects_count_(self):
+  return 0
+
+ def irciot_ldict_delete_item_by_ot_(self, object_type):
+  pass
+  
+ def irciot_ldict_delete_item_by_id_(self, item_id):
+  pass
+
+ def irciot_ldict_delete_type_by_name_(self, type_name):
+  pass
+
+ def irciot_ldict_delete_type_by_id_(self, type_id):
+  pass
+  
+ def irciot_ldict_get_type_by_name_(self, type_name):
+  return {}
+  
+ def irciot_ldict_get_type_by_id_(self, type_id):
+  return {}
+
  def irciot_set_mtu_(self, my_mtu):
   if (my_mtu < 128):
      return
   self.message_mtu = my_mtu
   
  def is_irciot_datum_(self, in_datum, in_ot, in_src, in_dst):
-  # Object Type filed must exists or inherits
   if self.CONST.tag_ENC_DATUM in in_datum:
      if isinstance(in_datum[self.CONST.tag_ENC_DATUM], str):
-        return True
+        return True # Stub
+  # Object Type filed must exists or inherits
   if not self.CONST.tag_OBJECT_TYPE in in_datum:
      if (in_ot == None):
         return False
@@ -617,8 +658,9 @@ class PyIRCIoT(object):
      if (self.is_irciot_datum_(my_datums, my_ot, my_src, my_dst)):
         my_irciot = '"' + self.CONST.tag_DATUM + '":' \
          + self.irciot_encap_datum_(my_datums, my_ot, my_src, my_dst)
-  str_object = '"' + self.CONST.tag_OBJECT \
-   + '":{"oid":"' + str(self.current_oid) + '",'
+  str_object  = '"' + self.CONST.tag_OBJECT
+  str_object += '":{"' + self.CONST.tag_OBJECT_ID
+  str_object += '":"' + str(self.current_oid) + '",'
   if (my_ot  != None):
      str_object += '"' + self.CONST.tag_OBJECT_TYPE
      str_object += '":"'  + my_ot  + '",'
