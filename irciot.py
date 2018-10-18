@@ -22,7 +22,7 @@ class PyIRCIoT(object):
   #
   irciot_protocol_version = '0.3.10'
   #
-  irciot_library_version  = '0.0.23'
+  irciot_library_version  = '0.0.25'
   #
   # IRC-IoT TAGs
   #
@@ -121,8 +121,8 @@ class PyIRCIoT(object):
   self.oid_method  = 0
   self.did_method  = 0
   #
-  self.crypt_method = self.CONST.tag_ENC_BASE64
-  #self.crypt_method = self.CONST.tag_ENC_B64_ZLIB
+  # self.crypt_method = self.CONST.tag_ENC_BASE64
+  self.crypt_method = self.CONST.tag_ENC_B64_ZLIB
   #
   # 0 is autoincrement
   #
@@ -200,13 +200,14 @@ class PyIRCIoT(object):
      if not isinstance(in_datum[self.CONST.tag_OBJECT_TYPE], str):
         return False
   # Fragmented message header:
-  if "bc" in in_datum:    # Bytes Count must be int
-     if not isinstance(in_datum['bc'], int):
-        return False
-     if "bp" in in_datum: # Bytes Passed must be int
-        if not isinstance(in_datum['bp'], int):
-           return False
-        if (in_datum['bp'] > in_datum['bc']):
+  if self.CONST.tag_DATUM_BC in in_datum:
+     if not isinstance(in_datum[self.CONST.tag_DATUM_BC], int):
+        return False # Bytes Count must be int
+     if self.CONST.tag_DATUM_BP in in_datum:
+        if not isinstance(in_datum[self.CONST.tag_DATUM_BP], int):
+           return False # Bytes Passed must be int
+        if (in_datum[self.CONST.tag_DATUM_BP] \
+          > in_datum[self.CONST.tag_DATUM_BC]):
            return False
   # Source address field must exists or inherits
   if not self.CONST.tag_SRC_ADDR in in_datum:
@@ -531,14 +532,14 @@ class PyIRCIoT(object):
         iot_dst = my_object[self.CONST.tag_DST_ADDR]
   except:
      return ""
-  if "dc" in my_object:
+  if self.CONST.tag_OBJECT_DC in my_object:
      if not isinstance(my_object[self.CONST.tag_OBJECT_DC], int):
         return ""
      iot_dc = my_object[self.CONST.tag_OBJECT_DC]
   else:
      my_object[self.CONST.tag_OBJECT_DC] = None
      iot_dc = None
-  if "dp" in my_object:
+  if self.CONST.tag_OBJECT_DP in my_object:
      if not isinstance(my_object[self.CONST.tag_OBJECT_DP], int):
         return ""
      iot_dp = my_object[self.CONST.tag_OBJECT_DP]
@@ -749,8 +750,10 @@ class PyIRCIoT(object):
   out_head += len(self.CONST.tag_OBJECT_TYPE) + 6 #"":"",#
   out_head += len(str(self.current_did))
   out_head += len(self.CONST.tag_DATUM_ID) + 6 #"":"",#
-  out_head += len(str(my_bc)) + 6 #"bc":,#
-  out_head += len(str(my_part)) + 6 #"bp":,#
+  out_head += len(str(my_bc)) + 4 #"":,#
+  out_head += len(self.CONST.tag_DATUM_BC)
+  out_head += len(str(my_part)) + 4 #"":,#
+  out_head += len(self.CONST.tag_DATUM_BP)
   out_skip += out_head - self.message_mtu
   out_big_datum = '{'
   out_big_datum += '"' + self.CONST.tag_OBJECT_TYPE + '":"' + big_ot
