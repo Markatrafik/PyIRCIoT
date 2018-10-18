@@ -10,9 +10,11 @@
 import json
 import random
 import base64
+import zlib
 
 #from copy import deepcopy
 #from pprint import pprint
+#from Crypto.Cipher import AES
 
 class PyIRCIoT(object):
 
@@ -20,7 +22,7 @@ class PyIRCIoT(object):
   #
   irciot_protocol_version = '0.3.10'
   #
-  irciot_library_version  = '0.0.21'
+  irciot_library_version  = '0.0.23'
   #
   # IRC-IoT TAGs
   #
@@ -41,7 +43,12 @@ class PyIRCIoT(object):
   tag_DST_ADDR     = 'dst' # Destination Address
   tag_ENC_DATUM    = 'ed'  # Encrypted Datum
   tag_ENC_METHOD   = 'em'  # Encryption Method
+  #
   tag_ENC_BASE64   = 'b64p'
+  tag_ENC_B64_AES  = 'b64a'
+  tag_ENC_B64_ZLIB = 'b64z'
+  tag_ENC_BASE85   = 'b85p'
+  tag_ENC_BASE122  = 'b122'
   #
   # IRC-IoT Base Types
   #
@@ -69,6 +76,8 @@ class PyIRCIoT(object):
   err_DEFRAG_DC_EXCEEDED  = 122
   err_DEFRAG_BC_EXCEEDED  = 123
   err_OVERLAP_MISSMATCH   = 131
+  err_COMP_ZLIB_HEADER    = 301
+  err_COMP_ZLIB_INCOMP    = 303
   #
   pattern = "@"
   #
@@ -112,6 +121,9 @@ class PyIRCIoT(object):
   self.oid_method  = 0
   self.did_method  = 0
   #
+  self.crypt_method = self.CONST.tag_ENC_BASE64
+  #self.crypt_method = self.CONST.tag_ENC_B64_ZLIB
+  #
   # 0 is autoincrement
   #
   random.seed()
@@ -121,6 +133,9 @@ class PyIRCIoT(object):
      self.current_oid = random.randint(  1000,  9999)
   if self.did_method == 0:
      self.current_did = random.randint(   100,   999)
+  #
+  if (self.crypt_method == self.CONST.tag_ENC_B64_AES):
+     self.AES_iv = random.new().read( AES.block_size )
   #
   self.message_mtu = self.CONST.default_mtu
   #
@@ -306,13 +321,19 @@ class PyIRCIoT(object):
   return True
   # End of is_irciot_()
   
+ def AES_encrypt(raw_data, encrypion_key):
+  return ""
+  
+ def AES_decrypt(ecrypted_data, encryption_key):
+  return ""
+  
  def irciot_clear_defrag_chain_(self, my_did):
   try:
     if self.defrag_lock:
        return
     self.defrag_lock = True
     for my_item in self.defrag_pool:
-       (test_b64p, test_header, test_json) = my_item
+       (test_enc, test_header, test_json) = my_item
        (test_dt, test_ot, test_src, test_dst, \
         test_dc, test_dp, test_bc, test_bp, test_did) = test_header
        if (my_did == test_did):
@@ -321,7 +342,7 @@ class PyIRCIoT(object):
   except:
     self.defrag_lock = False
   
- def irciot_defragmentation_(self, my_b64p, my_header, orig_json):
+ def irciot_defragmentation_(self, my_enc, my_header, orig_json):
   (my_dt, my_ot, my_src, my_dst, \
    my_dc, my_dp, my_bc, my_bp, my_did) = my_header
   if ((my_dc == None) and (my_dp != None)) or \
@@ -338,7 +359,7 @@ class PyIRCIoT(object):
   defrag_array = []
   defrag_buffer = ""
   for my_item in self.defrag_pool: # IRC-IoT defragmentation loop
-    (test_b64p, test_header, test_json) = my_item
+    (test_enc, test_header, test_json) = my_item
     (test_dt, test_ot, test_src, test_dst, \
      test_dc, test_dp, test_bc, test_bp, test_did) = test_header
     if (test_json == orig_json):
@@ -351,7 +372,7 @@ class PyIRCIoT(object):
              (test_dst == my_dst)):
             if ((test_dc == my_dc) and (test_dp == my_dp) and \
                 (test_bp == my_bp) and (test_bc == my_bc)):
-               if (test_b64p == my_b64p):
+               if (test_enc == my_enc):
                   my_dup = True
                else:
                   my_err = self.CONST.err_DEFRAG_CONTENT_MISSMATCH
@@ -363,9 +384,9 @@ class PyIRCIoT(object):
                      my_err = self.CONST.err_DEFRAG_DP_MISSING
                      break
                   if (defrag_array == []):
-                     defrag_item = (my_dp, my_b64p)
+                     defrag_item = (my_dp, my_enc)
                      defrag_array.append(defrag_item)
-                  defrag_item = (test_dp, test_b64p)
+                  defrag_item = (test_dp, test_enc)
                   defrag_array.append(defrag_item)
                   if len(defrag_array) == my_dc:
                      my_ok = 1
@@ -381,11 +402,11 @@ class PyIRCIoT(object):
                   if (defrag_buffer == ""):
                      defrag_buffer += self.CONST.pattern * my_bc
                      defrag_buffer = defrag_buffer[:my_bp] + \
-                        my_b64p + defrag_buffer[my_bp + len(my_b64p):]
+                        my_enc + defrag_buffer[my_bp + len(my_enc):]
                   if (defrag_buffer != ""):
                      # here will be a comparison of overlapping buffer intervals
                      defrag_buffer = defrag_buffer[:test_bp] + \
-                        str(test_b64p) + defrag_buffer[test_bp + len(test_b64p):]
+                        str(test_enc) + defrag_buffer[test_bp + len(test_enc):]
                      if (defrag_buffer.count(self.CONST.pattern) == 0):
                         my_ok = 2
                      else:
@@ -396,12 +417,16 @@ class PyIRCIoT(object):
             my_err = self.CONST.err_DEFRAG_INVALID_DID
             break
   if (self.defrag_pool == []):
-    my_new = True
+    if (len(my_enc) == my_bc):
+       defrag_buffer = my_enc
+       my_ok = 2
+    else:
+       my_new = True
   if (my_err > 0):
     self.irciot_clear_defrag_chain_(my_did)
     return ""
   if my_new:
-    my_item = (my_b64p, my_header, orig_json)
+    my_item = (my_enc, my_header, orig_json)
     self.defrag_lock = True
     self.defrag_pool.append(my_item)
     self.defrag_lock = False
@@ -411,7 +436,16 @@ class PyIRCIoT(object):
     elif (my_ok == 2):
        self.irciot_clear_defrag_chain_(my_did)
        try:
-          out_json = str(base64.b64decode(defrag_buffer))[2:-1]
+          if (self.crypt_method == self.CONST.tag_ENC_BASE64):
+             out_json = str(base64.b64decode(defrag_buffer))[2:-1]
+          elif (self.crypt_method == self.CONST.tag_ENC_B64_AES):
+             return ""
+          elif (self.crypt_method == self.CONST.tag_ENC_B64_ZLIB):
+             out_zlib = base64.b64decode(defrag_buffer)
+             out_json = str(zlib.decompress(out_zlib))[2:-1]
+             del out_zlib
+          else:
+             return ""
           # Adding missing fields to the Datum from parent object
           my_datum = json.loads(out_json)
           if ((not self.CONST.tag_OBJECT_TYPE in my_datum) \
@@ -455,13 +489,12 @@ class PyIRCIoT(object):
      my_em = self.CONST.tag_ENC_BASE64
   else:
      my_em = my_datum[self.CONST.tag_ENC_METHOD]
-  if (my_em == self.CONST.tag_ENC_BASE64):
-     my_defrag_header = (my_dt, my_ot, my_src, my_dst, \
-      my_dc, my_dp, my_bc, my_bp, my_did)
-     my_b64p = my_datum[self.CONST.tag_ENC_DATUM]
-     return self.irciot_defragmentation_(my_b64p, \
-      my_defrag_header, orig_json)
-  return ""
+  my_defrag_header = (my_dt, my_ot, my_src, my_dst, \
+   my_dc, my_dp, my_bc, my_bp, my_did)
+  my_in = my_datum[self.CONST.tag_ENC_DATUM]
+  return self.irciot_defragmentation_(my_in, \
+     my_defrag_header, orig_json)
+  return my_dec
   # End of irciot_decrypt_datum_()
 
  def irciot_prepare_datum_(self, my_datum, my_header, orig_json):
@@ -698,8 +731,14 @@ class PyIRCIoT(object):
   if (big_ot == None):
      return ("", 0)
   str_big_datum  = json.dumps(big_datum, separators=(',',':'))
-  b64_big_datum  = base64.b64encode(bytes(str_big_datum, "utf-8"))
+  if (self.crypt_method == self.CONST.tag_ENC_B64_ZLIB):
+     bin_big_datum  = zlib.compress(bytes(str_big_datum, "utf-8"))
+     b64_big_datum  = base64.b64encode(bin_big_datum)
+     del bin_big_datum
+  else:
+     b64_big_datum  = base64.b64encode(bytes(str_big_datum, "utf-8"))
   raw_big_datum  = str(b64_big_datum)[2:-1]
+  del b64_big_datum
   my_bc = len(raw_big_datum)
   out_big_datum  = '{"' + self.CONST.tag_ENC_DATUM
   out_big_datum += '":"' + raw_big_datum + '"}'
