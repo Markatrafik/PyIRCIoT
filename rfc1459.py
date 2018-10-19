@@ -5,6 +5,7 @@
 ''
 '' Authors:
 ''  Alexey Y. Woronov <alexey@woronov.ru>
+'''
 
 import socket
 import select
@@ -22,6 +23,10 @@ import datetime
 class PyLayerIRC(object):
 
  class CONST(object):
+   #
+   irciot_protocol_version_compatible = '0.3.10'
+   #
+   irciot_library_version_compatible  = '0.0.27'
    #
    irc_first_wait = 30
    irc_micro_wait = 0.15
@@ -118,6 +123,8 @@ class PyLayerIRC(object):
    self.irc.close()
   
  def irc_reconnect_(self):
+   if not self.irc_run:
+     return
    self.irc_disconnect_()
    if (self.irc_debug):
      self.to_log_("Connection closed, reconnecting to IRC ... ")
