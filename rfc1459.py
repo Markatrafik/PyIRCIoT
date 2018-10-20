@@ -207,7 +207,7 @@ class PyLayerIRC(object):
    code_UNKNOWNMODE       = "472"
    code_INVITEONLYCHAN    = "473"
    code_BANNEDFROMCHAN    = "474"
-   cade_BADCHANNELKEY     = "475"
+   code_BADCHANNELKEY     = "475"
    code_BADCHANNELMASK    = "476"
    code_NOCHANMODES       = "477"
    code_BANLISTFULL       = "478"
@@ -220,9 +220,58 @@ class PyLayerIRC(object):
    code_UMODEUNKNOWNFLAG  = "501"
    code_USERSDONTMATCH    = "502"
    #
+   cmd_ADMIN      = "ADMIN"
+   cmd_AWAY       = "AWAY"
+   cmd_CTCP       = "CTCP"
+   cmd_CTCPREPLY  = "CTCPREPLY"
+   cmd_DCC_CON    = "DCC_CONNECT"
+   cmd_DCC_DISCON = "DCC_DISCONNECT"
+   cmd_DCC_MSG    = "DCCMSG"
+   cmd_DISCONNECT = "DISCONNECT"
+   cmd_ERROR      = "ERROR"
+   cmd_INFO       = "INFO"
+   cmd_INVITE     = "INVITE"
+   cmd_ISON       = "ISON"
+   cmd_JOIN       = "JOIN"
+   cmd_KICK       = "KICK"
+   cmd_KILL       = "KILL"
+   cmd_LINKS      = "LINKS"
+   cmd_LIST       = "LIST"
+   cmd_MODE       = "MODE"
+   cmd_NAMES      = "NAMES"
+   cmd_NICK       = "NICK"
+   cmd_NOTICE     = "NOTICE"
+   cmd_OPER       = "OPER"
+   cmd_PART       = "PART"
+   cmd_PASS       = "PASS"
+   cmd_PING       = "PING"
+   cmd_PONG       = "PONG"
+   cmd_PRIVMSG    = "PRIVMSG"
+   cmd_PRIVNOTICE = "PRIVNOTICE"
+   cmd_PUBMSG     = "PUBMSG"
+   cmd_PUBNOTICE  = "PUBNOTICE"
+   cmd_REHASH     = "REHASH"
+   cmd_RESTART    = "RESTART"
+   cmd_QUIT       = "QUIT"
+   cmd_SERVER     = "SERVER"
+   cmd_SQUIT      = "SQUIT"
+   cmd_STATS      = "STATS"
+   cmd_SUMMON     = "SUMMON"
+   cmd_TIME       = "TIME"
+   cmd_TOPIC      = "TOPIC"
+   cmd_TRACE      = "TRACE"
+   cmd_USER       = "USER"
+   cmd_USERS      = "USERS"
+   cmd_USERHOST   = "USERHOST"
+   cmd_VERSION    = "VERSION"
+   cmd_WALLOPS    = "WALLOPS"
+   cmd_WHOIS      = "WHOIS"
+   cmd_WHOWAS     = "WHOWAS"
+   cmd_WHO        = "WHO"
+   #
    def __setattr__(self, *_):
       pass
-
+      
  def __init__(self):
    #
    self.CONST = self.CONST()
@@ -245,6 +294,9 @@ class PyLayerIRC(object):
    self.irc_queue_lock[self.CONST.irc_queue_input]  = False
    self.irc_queue_lock[self.CONST.irc_queue_output] = False
    #
+   self.irc_commands = []
+   self.irc_codes    = []
+   #
    self.irc_task  = None
    self.irc_run   = False
    self.irc_debug = False
@@ -253,6 +305,7 @@ class PyLayerIRC(object):
    self.delta_time = 0
    #
    # End of __init__()
+   
 
  def start_IRC_(self):
    #
@@ -419,8 +472,8 @@ class PyLayerIRC(object):
   
  def irc_random_nick_(self, irc_nick):
    random.seed()
-   ret = self.irc_send_("NICK " + irc_nick + "%s" \
-    % random.randint(100, 999))
+   ret = self.irc_send_(self.CONST.cmd_NICK \
+    + " " + irc_nick + "%d" % random.randint(100, 999))
    return ret
   
  def irc_connect_(self, irc_server, irc_port):
@@ -451,9 +504,100 @@ class PyLayerIRC(object):
    self.irc_queue_lock[queue_id] = True
    self.irc_queue[queue_id].put((irc_message, irc_wait))
    self.irc_queue_lock[queue_id] = old_queue_lock
-   
- def irc_process_(self):
 
+ def func_nick_in_use_(self, in_args):
+   (in_string, in_ret, in_init, in_wait) = in_args
+   if (self.irc_random_nick_(self.irc_nick) == 1):
+      return (-1, 0, in_wait)
+   return (in_ret, in_init, in_wait)
+   
+ def func_not_reg_(self, in_args):
+   (in_string, in_ret, in_init, in_wait) = in_args
+   return (in_ret, 1, self.CONST.irc_default_wait)
+   
+ def func_banned_(self, in_args):
+   (in_string, in_ret, in_init, in_wait) = in_args
+   return (in_ret, 3, self.CONST.irc_default_wait)
+
+ def func_on_kick_(self, in_args):
+   (in_string, in_ret, in_init, in_wait) = in_args
+   return (in_ret, 3, self.CONST.irc_default_wait)         
+ 
+ def func_on_error_(self, in_args):
+   (in_string, in_ret, in_init, in_wait) = in_args
+   if (in_string.find("Closing ") or in_string.find(" timeout")):
+      return (-1, 0, in_wait)
+   return (in_ret, 1, self.CONST.irc_default_wait)
+   
+ def init_rfc1459_(self):
+   #
+   C = self.CONST
+   #
+   self.irc_codes = [ \
+    (C.code_NICKNAMEINUSE,    "NICKNAMEINUSE",    self.func_nick_in_use_), \
+    (C.code_NOTREGISTERED,    "NOTREGISTERED",    self.func_not_reg_), \
+    (C.code_BANNEDFROMCHAN,   "BANNEDFROMCHAN",   self.func_banned_), \
+    (C.code_NOSUCHNICK,       "NOSUCHNICK",       None), \
+    (C.code_NOSUCHSERVER,     "NOSUCHSERVER",     None), \
+    (C.code_NOSUCHCHANNEL,    "NOSUCHCHANNEL",    None), \
+    (C.code_CANNOTSENDTOCHAN, "CANNOTSENDTOCHAN", None), \
+    (C.code_TOOMANYCHANNELS,  "TOOMANYCHANNELS",  None), \
+    (C.code_WASNOSUCHNICK,    "WASNOSUCHNICK",    None), \
+    (C.code_TOOMANYTARGETS,   "TOOMANYTARGETS",   None), \
+    (C.code_NOORIGIN,         "NOORIGIN",         None), \
+    (C.code_NORECIPIENT,      "NORECIPIENT",      None), \
+    (C.code_NOTEXTTOSEND,     "NOTEXTTOSEND",     None), \
+    (C.code_NOOPLEVEL,        "NOOPLEVEL",        None), \
+    (C.code_WILDTOPLEVEL,     "WILDTOPLEVEL",     None), \
+    (C.code_UNKNOWNCOMMAND,   "UNKNOWNCOMMAND",   None), \
+    (C.code_NOMOTD,           "NOMOTD",           None), \
+    (C.code_NOADMININFO,      "NOADMININFO",      None), \
+    (C.code_FILEERROR,        "FILEERROR",        None), \
+    (C.code_NONICKNAMEGIVEN,  "NONICKNAMEGIVEN",  None), \
+    (C.code_ERRONEUSNICKNAME, "ERRONEUSNICKNAME", None), \
+    (C.code_NICKNAMEINUSE,    "NICKNAMEINUSE",    None), \
+    (C.code_NICKCOLLISION,    "NICKCOLLISION",    None), \
+    (C.code_UNAVAILRESOURCE,  "UNAVAILRESOURCE",  None), \
+    (C.code_USERNOTINCHANNEL, "USERNOTINCHANNEL", None), \
+    (C.code_NOTONCHANNEL,     "NOTONCHANNEL",     None), \
+    (C.code_NOLOGIN,          "NOLOGIN",          None), \
+    (C.code_SUMMONDISABLED,   "SUMMONDISABLED",   None), \
+    (C.code_USERSDISABLED,    "USERSDISABLED",    None), \
+    (C.code_NEEDMOREPARAMS,   "NEEDMOREPARAMS",   None), \
+    (C.code_USERSDONTMATCH,   "USERSDONTMATCH",   None), \
+    (C.code_ALREADYREGISTERED,"ALREADYREGISTERED",None), \
+    (C.code_PASSWDMISMATCH,   "PASSWDMISMATCH",   None), \
+    (C.code_YOUREBANNEDCREEP, "YOUREBANNEDCREEP", None), \
+    (C.code_YOUWILLBEBANNED,  "YOUWILLBEBANNED",  None), \
+    (C.code_KEYSET,           "KEYSET",           None), \
+    (C.code_CHANNELISFULL,    "CHANNELISFULL",    None), \
+    (C.code_UNKNOWNMODE,      "UNKNOWNMODE",      None), \
+    (C.code_INVITEONLYCHAN,   "INVITEONLYCHAN",   None), \
+    (C.code_BANNEDFROMCHAN,   "BANNEDFROMCHAN",   None), \
+    (C.code_BADCHANNELKEY,    "BADCHANNELKEY",    None), \
+    (C.code_BADCHANNELMASK,   "BADCHANNELMASK",   None), \
+    (C.code_NOCHANMODES,      "NOCHANMODES",      None), \
+    (C.code_BANLISTFULL,      "BANLISTFULL",      None), \
+    (C.code_NOPRIVILEGES,     "NOPRIVILEGES",     None), \
+    (C.code_CANTKILLSERVER,   "CANTKILLSERVER",   None), \
+    (C.code_RESTRICTED,       "RESTRICTED",       None), \
+    (C.code_UNIQOPPRIVSNEEDED,"UNIQOPPRIVSNEEDED",None), \
+    (C.code_NOOPERHOST,       "NOOPERHOST",       None), \
+    (C.code_NOSERVICEHOST,    "NOSERVICEHOST",    None), \
+    (C.code_UMODEUNKNOWNFLAG, "UMODEUNKNOWNFLAG", None) ]
+   #
+   self.irc_commands = [ \
+    (C.cmd_JOIN,    None), (C.cmd_KICK,       self.func_on_kick_), \
+    (C.cmd_PART,    None), (C.cmd_QUIT,       None), \
+    (C.cmd_MODE,    None), (C.cmd_ERROR,      self.func_on_error_), \
+    (C.cmd_INVITE,  None), (C.cmd_PONG,       None), \
+    (C.cmd_PRIVMSG, None), (C.cmd_PRIVNOTICE, None), \
+    (C.cmd_PUBMSG,  None), (C.cmd_PUBNOTICE,  None) ]
+ 
+ def irc_process_(self):
+ 
+   self.init_rfc1459_()
+   
    try:
      irc_init = 0
      irc_wait = self.CONST.irc_first_wait
@@ -481,27 +625,31 @@ class PyLayerIRC(object):
            self.irc_disconnect_()
            try:
              self.irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-           except:
+           except socket.error:
              to_log_("Cannot re-create socket for IRC")
            irc_init = 0
 
        elif (irc_init == 2):
-         if (self.irc_send_("USER " + self.irc_nick + " " \
-          + self.irc_host + " 1 :" + self.irc_info) == -1):
+         if (self.irc_send_(self.CONST.cmd_USER \
+          + " " + self.irc_nick + " " + self.irc_host \
+          + " 1 :" + self.irc_info) == -1):
            irc_init = 0
 
        elif (irc_init == 3):
-         if (self.irc_send_("NICK " + self.irc_nick) == -1):
+         if (self.irc_send_(self.CONST.cmd_NICK \
+          + " " + self.irc_nick) == -1):
            irc_init = 0
 
        elif (irc_init == 4):
          irc_wait = self.CONST.irc_default_wait
-         if (self.irc_send_("JOIN " + self.irc_channel) == -1):
+         if (self.irc_send_(self.CONST.cmd_JOIN \
+          + " " + self.irc_channel) == -1):
            irc_init = 0
            
        elif (irc_init == 5):
          irc_wait = self.CONST.irc_default_wait
-         if (self.irc_send_("JOIN " + self.irc_channel + "\r\n") == -1):
+         if (self.irc_send_(self.CONST.cmd_JOIN \
+          +" " + self.irc_channel + "\r\n") == -1):
            irc_init = 0
    
        if (irc_init > 0):
@@ -521,45 +669,37 @@ class PyLayerIRC(object):
        irc_prefix_len = len(irc_prefix)
    
        for irc_input_split in re.split(r'[\r\n]', irc_input_buffer):
-     
-         irc_input_command \
-          = irc_input_split[irc_prefix_len:irc_prefix_len + 10]
-     
-         if irc_input_split[:5] == "PING ":
+       
+         if irc_input_split[:5] == self.CONST.cmd_PING + " ":
            if (self.irc_pong_(irc_input_split) == -1):
              irc_ret = -1
              irc_init = 0
 
-         if (irc_input_command[:4] \
-              == self.CONST.code_NICKNAMEINUSE + " "):
-           if (self.irc_random_nick_(self.irc_nick) == 1):
-             irc_ret = -1
-             irc_init = 0
-       
-         if irc_input_split[:6] == "ERROR ":
-           irc_init = 1
-           irc_wait = self.CONST.irc_default_wait
-           if (irc_input_split.find("Closing ") \
-            or irc_input_split.find(" timeout")):
-             irc_ret = -1
-             irc_init = 0
+         try:
+           irc_input_cmd = irc_input_split.split(' ')[1]
+         except:
+           irc_input_cmd = ""
 
-         if (irc_input_command[:4] \
-              == self.CONST.code_NOTREGISTERED + " "):
-           irc_init = 1
-           irc_wait = self.CONST.irc_default_wait
+         if (irc_input_split[:irc_prefix_len] == irc_prefix):
+           # Parse codes only from valid server
+           for irc_cod_pack in self.irc_codes:
+             (irc_code, code_name, irc_function)  = irc_cod_pack
+             if (irc_function != None):
+                if (irc_input_cmd == irc_code):
+                  irc_args = (irc_input_split, \
+                   irc_ret, irc_init, irc_wait)
+                  (irc_ret, irc_init, irc_wait) = irc_function(irc_args)
 
-         if irc_input_split.find(" KICK ") != -1:
-           irc_init = 3
-           irc_wait = self.CONST.irc_default_wait
-         
-         if (irc_input_split[:4] \
-              == self.CONST.code_BANNEDFROMCHAN + " "):
-           irc_init = 3
-           irc_wait = self.CONST.irc_default_wait
- 
-         if (irc_input_split.find(" PRIVMSG ") != -1) \
-          or (irc_input_split == ""):
+         for irc_cmd_pack in self.irc_commands:
+           (irc_cmd, irc_function) = irc_cmd_pack
+           if (irc_function != None):
+              if (irc_input_cmd == irc_cmd):
+                irc_args = (irc_input_split, \
+                 irc_ret, irc_init, irc_wait)
+                (irc_ret, irc_init, irc_wait) = irc_function(irc_args)
+
+         if (irc_input_cmd == self.CONST.cmd_PRIVMSG \
+          or irc_input_split == ""):
 
            irc_name = ""
            irc_message = None
@@ -567,7 +707,8 @@ class PyLayerIRC(object):
            if (irc_input_split != ""):
              irc_name = irc_input_split.split('!',1)[0][1:]
              self.time_now = datetime.datetime.now()
-             irc_message = irc_input_split.split('PRIVMSG',1)[1].split(':',1)[1]
+             irc_message = irc_input_split.split( \
+              self.CONST.cmd_PRIVMSG,1)[1].split(':',1)[1]
              irc_message = irc_message.strip()
        
            if ((irc_message == None) and (irc_input_buffer == "")):
@@ -578,8 +719,8 @@ class PyLayerIRC(object):
              or (irc_name == self.irc_uplink_nick2)) \
             and (irc_init > 3) and (self.is_json_(irc_message))):
          
-             self.irc_add_to_queue_(self.CONST.irc_queue_input, irc_message, \
-              self.CONST.irc_default_wait)
+             self.irc_add_to_queue_(self.CONST.irc_queue_input, \
+              irc_message, self.CONST.irc_default_wait)
            
            irc_input_split = ""
 
@@ -589,7 +730,8 @@ class PyLayerIRC(object):
           (irc_message, irc_wait) \
            = self.irc_check_queue_(self.CONST.irc_queue_output)
           if (irc_message != ""):
-             self.irc_send_("PRIVMSG " + self.irc_channel + " :" + irc_message)
+             self.irc_send_(self.CONST.cmd_PRIVMSG + " " \
+               + self.irc_channel + " :" + irc_message)
           irc_message = ""    
       
    except socket.error:
