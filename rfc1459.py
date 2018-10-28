@@ -26,7 +26,7 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version_compatible = '0.3.10'
    #
-   irciot_library_version_compatible  = '0.0.28'
+   irciot_library_version_compatible  = '0.0.29'
    #
    # Bot specific constants
    #
@@ -50,7 +50,7 @@ class PyLayerIRC(object):
    #
    irc_buffer_size = 2048
    #
-   irc_modes = { "CLIENT", "SERVICE", "SERVER" }
+   irc_modes = [ "CLIENT", "SERVICE", "SERVER" ]
    #
    # According RFC 1459
    #
@@ -241,6 +241,7 @@ class PyLayerIRC(object):
    cmd_NAMES      = "NAMES"
    cmd_NICK       = "NICK"
    cmd_NOTICE     = "NOTICE"
+   cmd_NJOIN      = "NJOIN"
    cmd_OPER       = "OPER"
    cmd_PART       = "PART"
    cmd_PASS       = "PASS"
@@ -300,6 +301,7 @@ class PyLayerIRC(object):
    self.irc_task  = None
    self.irc_run   = False
    self.irc_debug = False
+   self.irc_mode  = self.CONST.irc_modes[0]
    #
    self.time_now   = datetime.datetime.now()
    self.delta_time = 0
@@ -504,6 +506,8 @@ class PyLayerIRC(object):
    self.irc_queue_lock[queue_id] = True
    self.irc_queue[queue_id].put((irc_message, irc_wait))
    self.irc_queue_lock[queue_id] = old_queue_lock
+   
+ # CLIENT Hooks:
 
  def func_nick_in_use_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
@@ -521,13 +525,35 @@ class PyLayerIRC(object):
 
  def func_on_kick_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
-   return (in_ret, 3, self.CONST.irc_default_wait)         
- 
+   return (in_ret, 3, self.CONST.irc_default_wait)
+   
+ def func_on_quit_(self, in_args):
+   (in_string, in_ret, in_init, in_wait) = in_args
+   return (in_ret, in_init, self.CONST.irc_default_wait)
+   
+ def func_on_nick_(self, in_args):
+   (in_string, in_ret, in_init, in_wait) = in_args
+   return (in_ret, in_init, self.CONST.irc_default_wait)
+
+ def func_on_join_(self, in_args):
+   (in_string, in_ret, in_init, in_wait) = in_args
+   return (in_ret, in_init, self.CONST.irc_default_wait)
+   
+ def func_on_part_(self, in_args):
+   (in_string, in_ret, in_init, in_wait) = in_args
+   return (in_ret, in_init, self.CONST.irc_default_wait)
+
  def func_on_error_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
    if (in_string.find("Closing ") or in_string.find(" timeout")):
       return (-1, 0, in_wait)
    return (in_ret, 1, self.CONST.irc_default_wait)
+   
+ # SERVICE Hooks:
+   
+ def func_on_srv_info_(self, in_args):
+   (in_string, in_ret, in_init, in_wait) = in_args 
+   return (in_ret, in_init, in_wait)
    
  def init_rfc1459_(self):
    #
@@ -586,13 +612,37 @@ class PyLayerIRC(object):
     (C.code_NOSERVICEHOST,    "NOSERVICEHOST",    None), \
     (C.code_UMODEUNKNOWNFLAG, "UMODEUNKNOWNFLAG", None) ]
    #
-   self.irc_commands = [ \
-    (C.cmd_JOIN,    None), (C.cmd_KICK,       self.func_on_kick_), \
-    (C.cmd_PART,    None), (C.cmd_QUIT,       None), \
-    (C.cmd_MODE,    None), (C.cmd_ERROR,      self.func_on_error_), \
-    (C.cmd_INVITE,  None), (C.cmd_PONG,       None), \
-    (C.cmd_PRIVMSG, None), (C.cmd_PRIVNOTICE, None), \
-    (C.cmd_PUBMSG,  None), (C.cmd_PUBNOTICE,  None) ]
+   if self.irc_mode == self.CONST.irc_modes[0]:
+     self.irc_commands = [ \
+      (C.cmd_PONG,    None), (C.cmd_KICK,  self.func_on_kick_), \
+      (C.cmd_INVITE,  None), (C.cmd_QUIT,  self.func_on_quit_), \
+      (C.cmd_MODE,    None), (C.cmd_ERROR, self.func_on_error_), \
+      (C.cmd_PRIVMSG, None), (C.cmd_NICK,  self.func_on_nick_), \
+      (C.cmd_NOTICE,  None), (C.cmd_JOIN,  self.func_on_join_), \
+      (C.cmd_KILL,    None), (C.cmd_PART,  self.func_on_part_) ]
+
+   else: # RFC 2813
+     self.irc_cmmands = [ \
+      (C.cmd_PASS,    None), (C.cmd_SERVER,     None), \
+      (C.cmd_NICK,    None), (C.cmd_QUIT,       None), \
+      (C.cmd_SQUIT,   None), (C.cmd_JOIN,       None), \
+      (C.cmd_NJOIN,   None), (C.cmd_MODE,       None), \
+      (C.cmd_LINKS,   None), (C.cmd_KILL,       None), \
+      (C.cmd_NAMES,   None), (C.cmd_INVITE,     None), \
+      (C.cmd_STATS,   None), (C.cmd_CONNECT,    None), \
+      (C.cmd_TRACE,   None), (C.cmd_ADMIN,      None), \
+      (C.cmd_WHO,     None), (C.cmd_INFO,       self.func_on_srv_info_), \
+      (C.cmd_WHOIS,   None), (C.cmd_WHOWAS,     None), \
+      (C.cmd_AWAY,    None), (C.cmd_RESTART,    None), \
+      (C.cmd_SUMMON,  None), (C.cmd_USERS,      None), \
+      (C.cmd_WALLOPS, None), (C.cmd_USERHOST,   None), \
+      (C.cmd_ISON,    None), (C.cmd_TOPIC,      None), \
+      (C.cmd_KICK,    None), (C.cmd_PONG,       None), \
+      (C.cmd_PART,    None), (C.cmd_ERROR,      None), \
+      (C.cmd_PRIVMSG, None), (C.cmd_PRIVNOTICE, None), \
+      (C.cmd_PUBMSG,  None), (C.cmd_PUBNOTICE,  None), \
+      (C.cmd_NOTICE,  None) ]
+                             
  
  def irc_process_(self):
  
