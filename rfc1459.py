@@ -27,7 +27,7 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version_compatible = '0.3.10'
    #
-   irciot_library_version_compatible  = '0.0.31'
+   irciot_library_version_compatible  = '0.0.33'
    #
    # Bot specific constants
    #
@@ -40,7 +40,6 @@ class PyLayerIRC(object):
    irc_default_nick = "MyBot"
    irc_default_info = "IRC-IoT Bot"
    #
-   # Will be replaced to server-list:
    irc_default_port = 6667
    irc_default_server = "irc-iot.nsk.ru"
    irc_default_password = None
@@ -50,9 +49,16 @@ class PyLayerIRC(object):
    irc_default_channel = "#myhome"
    irc_default_chankey = None
    #
-   # Will be replaced to user-list:
-   irc_default_uplink_nick = "iotBot"
-   irc_default_uplink_nick2 = "FaceBot"
+   # 0. Unique User ID
+   # 1. IRC User Mask
+   # 2. IRC Channel Name
+   # 3. Crypto Key
+   # 4. User Options
+   # 5. Last Message ID
+   #
+   irc_default_users = [ \
+    ( 1, "iotBot!*irc@irc-iot.nsk.ru",    "#myhome", None, None, None ), \
+    ( 2, "FaceBot!*irc@faceserv*.nsk.ru", "#myhome", None, None, None ) ]
    #
    irc_queue_input  = 0
    irc_queue_output = 1
@@ -289,16 +295,28 @@ class PyLayerIRC(object):
    self.CONST = self.CONST()
    #
    self.irc_host = socket.gethostname()
+   #
    self.irc_nick = self.CONST.irc_default_nick
    self.irc_info = self.CONST.irc_default_info
-   self.irc_port = self.CONST.irc_default_port
+   #
    self.irc_server = self.CONST.irc_default_server
+   self.irc_port = self.CONST.irc_default_port
+   self.irc_password = self.CONST.irc_default_password
+   self.irc_ssl = self.CONST.irc_default_ssl
+   self.irc_status = 0
+   self.irc_last = None
+   #
+   self.irc_servers = [ ( \
+    self.irc_server, self.irc_port, \
+    self.irc_password, self.irc_ssl, 0, None ) ]
+   #
    self.irc_channel = self.CONST.irc_default_channel
    self.irc_chankey = self.CONST.irc_default_chankey
    #
-   # Will be replaced to user-list:
-   self.irc_uplink_nick = self.CONST.irc_default_uplink_nick
-   self.irc_uplink_nick2 = self.CONST.irc_default_uplink_nick2
+   self.irc_channels = [ ( \
+    self.irc_channel, self.irc_chankey ) ]
+   #
+   self.irc_users = self.CONST.irc_default_users
    #
    self.irc_queue = [0, 0]
    self.irc_queue[self.CONST.irc_queue_input]  = Queue(maxsize=0)
@@ -310,13 +328,11 @@ class PyLayerIRC(object):
    #
    self.irc_commands = []
    self.irc_codes    = []
-   self.irc_password = self.CONST.irc_default_password
    #
    self.irc_task  = None
    self.irc_run   = False
    self.irc_mode  = self.CONST.irc_modes[0]
    self.irc_debug = self.CONST.irc_default_debug
-   self.irc_ssl   = self.CONST.irc_default_ssl
    #
    self.time_now   = datetime.datetime.now()
    self.delta_time = 0
@@ -361,6 +377,14 @@ class PyLayerIRC(object):
    irc_regexp = re.compile(str_mask, re.IGNORECASE)
    return irc_regexp.match(irc_channel)
    
+ def irc_compare_channels_(self, ref_channel, cmp_channel):
+   if not self.is_irc_channel_(ref_channel):
+     return False
+   if not self.is_irc_channel_(cmp_channel):
+     return False
+   return (self.irc_tolower_(ref_channel) \
+        == self.irc_tolower_(cmp_channel))
+   
  def irc_check_mask_(self, irc_from, irc_mask):
    str_from = self.irc_tolower_(irc_from)
    str_mask = self.irc_tolower_(irc_mask).replace("\\", "\\\\")
@@ -398,8 +422,19 @@ class PyLayerIRC(object):
  def irc_trace_get_user_struct_(self, position):
    return {}
   
- def irc_trace_check_all_users_masks_(self, irc_from, irciot_parameters):
+ def irc_trace_check_all_users_masks_(self, irc_from, \
+  irc_channel, irciot_parameters = None):
    return True
+   
+ def irc_cfg_check_user_(self, irc_from, \
+  irc_channel, irciot_parameters = None):
+   for my_user in self.irc_users:
+     ( my_uid, my_mask, my_chan, my_crypt, my_opt, my_mid ) = my_user
+     if ((irc_channel == "*") or \
+      (self.irc_compare_channels_(irc_channel, my_chan))):
+       if self.irc_check_mask_(self, irc_from, my_mask):
+         return True
+   return False
    
  def is_json_(self, test_message):
    try:
@@ -492,11 +527,19 @@ class PyLayerIRC(object):
    ret = self.irc_send_(self.CONST.cmd_NICK \
     + " " + irc_nick + "%d" % random.randint(100, 999))
    return ret
+   
+ def irc_socket_(self):
+   try:
+     irc_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+     if self.irc_ssl:
+       irc_socket = ssl.wrap_socket(irc_socket)
+   except socket.error:
+     to_log_("Cannot create socket for IRC")
+     return None
+   return irc_socket
   
  def irc_connect_(self, irc_server, irc_port):
    self.irc.connect((irc_server, irc_port))
-   if self.irc_ssl:
-     irc = irc.wrap_socket(irc)
    # self.irc.setblocking(False)
    
  def irc_check_queue_(self, queue_id):
@@ -670,17 +713,20 @@ class PyLayerIRC(object):
      irc_wait = self.CONST.irc_first_wait
      irc_input_buffer = ""
      irc_ret = 0
+     
      self.delta_time = 0
 
      # app.run(host='0.0.0.0', port=50000, debug=True)
      # must be FIXed for Unprivileged user
 
-     try:     
-       self.irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-     except:
-       to_log_("Cannot create socket for IRC")
+     self.irc = self.irc_socket_()
 
      while (self.irc_run):
+     
+       if not self.irc:
+         sleep(self.CONST.irc_first_wait)
+         self.irc = self.irc_socket_()
+         irc_init = 0
 
        if (irc_init < 6):
          irc_init += 1
@@ -690,10 +736,7 @@ class PyLayerIRC(object):
            self.irc_connect_(self.irc_server, self.irc_port)
          except socket.error:
            self.irc_disconnect_()
-           try:
-             self.irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-           except socket.error:
-             to_log_("Cannot re-create socket for IRC")
+           self.irc = self.irc_socket_()
            irc_init = 0
 
        elif (irc_init == 2):
@@ -735,7 +778,7 @@ class PyLayerIRC(object):
          self.irc_reconnect_()
          irc_input_buffer = ""
          irc_init = 0
-         self.irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+         self.irc = self.irc_socket_()
     
        irc_prefix = ":" + self.irc_server + " "
        irc_prefix_len = len(irc_prefix)
@@ -774,10 +817,12 @@ class PyLayerIRC(object):
           or irc_input_split == ""):
 
            irc_name = ""
+           irc_mask = "*!*@*"
            irc_message = None
         
            if (irc_input_split != ""):
-             irc_name = irc_input_split.split('!',1)[0][1:]
+             irc_mask = irc_input_split.split(' ',1)[0][1:]
+             irc_nick = irc_mask.split('!',1)[0]
              self.time_now = datetime.datetime.now()
              irc_message = irc_input_split.split( \
               self.CONST.cmd_PRIVMSG,1)[1].split(':',1)[1]
@@ -787,8 +832,7 @@ class PyLayerIRC(object):
              self.time_now = datetime.datetime.now()
              irc_message = ""
 
-           if (((irc_name == self.irc_uplink_nick) \
-             or (irc_name == self.irc_uplink_nick2)) \
+           if ((self.irc_cfg_check_user_(irc_mask, self.irc_channel)) \
             and (irc_init > 3) and (self.is_json_(irc_message))):
          
              self.irc_add_to_queue_(self.CONST.irc_queue_input, \
