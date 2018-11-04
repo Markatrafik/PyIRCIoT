@@ -13,6 +13,7 @@ import json
 import random
 import re
 import threading
+import ssl
 from queue import Queue
 from time import sleep
 
@@ -26,7 +27,7 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version_compatible = '0.3.10'
    #
-   irciot_library_version_compatible  = '0.0.29'
+   irciot_library_version_compatible  = '0.0.31'
    #
    # Bot specific constants
    #
@@ -34,12 +35,22 @@ class PyLayerIRC(object):
    irc_micro_wait = 0.15
    irc_default_wait = 30
    #
-   irc_default_port = 6667
-   irc_default_server = "irc-iot.nsk.ru"
+   irc_default_debug = False
+   #
    irc_default_nick = "MyBot"
    irc_default_info = "IRC-IoT Bot"
+   #
+   # Will be replaced to server-list:
+   irc_default_port = 6667
+   irc_default_server = "irc-iot.nsk.ru"
+   irc_default_password = None
+   irc_default_ssl = False
+   #
+   # Will be replaced to channel-list:
    irc_default_channel = "#myhome"
-   # Temporal:
+   irc_default_chankey = None
+   #
+   # Will be replaced to user-list:
    irc_default_uplink_nick = "iotBot"
    irc_default_uplink_nick2 = "FaceBot"
    #
@@ -283,7 +294,9 @@ class PyLayerIRC(object):
    self.irc_port = self.CONST.irc_default_port
    self.irc_server = self.CONST.irc_default_server
    self.irc_channel = self.CONST.irc_default_channel
-   # Temporal:
+   self.irc_chankey = self.CONST.irc_default_chankey
+   #
+   # Will be replaced to user-list:
    self.irc_uplink_nick = self.CONST.irc_default_uplink_nick
    self.irc_uplink_nick2 = self.CONST.irc_default_uplink_nick2
    #
@@ -297,11 +310,13 @@ class PyLayerIRC(object):
    #
    self.irc_commands = []
    self.irc_codes    = []
+   self.irc_password = self.CONST.irc_default_password
    #
    self.irc_task  = None
    self.irc_run   = False
-   self.irc_debug = False
    self.irc_mode  = self.CONST.irc_modes[0]
+   self.irc_debug = self.CONST.irc_default_debug
+   self.irc_ssl   = self.CONST.irc_default_ssl
    #
    self.time_now   = datetime.datetime.now()
    self.delta_time = 0
@@ -480,6 +495,8 @@ class PyLayerIRC(object):
   
  def irc_connect_(self, irc_server, irc_port):
    self.irc.connect((irc_server, irc_port))
+   if self.irc_ssl:
+     irc = irc.wrap_socket(irc)
    # self.irc.setblocking(False)
    
  def irc_check_queue_(self, queue_id):
@@ -636,12 +653,12 @@ class PyLayerIRC(object):
       (C.cmd_AWAY,    None), (C.cmd_RESTART,    None), \
       (C.cmd_SUMMON,  None), (C.cmd_USERS,      None), \
       (C.cmd_WALLOPS, None), (C.cmd_USERHOST,   None), \
-      (C.cmd_ISON,    None), (C.cmd_TOPIC,      None), \
-      (C.cmd_KICK,    None), (C.cmd_PONG,       None), \
-      (C.cmd_PART,    None), (C.cmd_ERROR,      None), \
-      (C.cmd_PRIVMSG, None), (C.cmd_PRIVNOTICE, None), \
+      (C.cmd_TOPIC,   None), (C.cmd_KICK,       None), \
+      (C.cmd_PONG,    None), (C.cmd_PART,       None), \
+      (C.cmd_ERROR,   None), (C.cmd_PRIVMSG,    None), \
       (C.cmd_PUBMSG,  None), (C.cmd_PUBNOTICE,  None), \
-      (C.cmd_NOTICE,  None) ]
+      (C.cmd_NOTICE,  None), (C.cmd_PRIVNOTICE, None), \
+      (C.cmd_ISON,    None) ]
                              
  
  def irc_process_(self):
@@ -680,6 +697,9 @@ class PyLayerIRC(object):
            irc_init = 0
 
        elif (irc_init == 2):
+         if self.irc_password:
+           self.irc_send_(self.CONST.cmd_PASS \
+            + " " + self.irc_password)
          if (self.irc_send_(self.CONST.cmd_USER \
           + " " + self.irc_nick + " " + self.irc_host \
           + " 1 :" + self.irc_info) == -1):
@@ -693,13 +713,15 @@ class PyLayerIRC(object):
        elif (irc_init == 4):
          irc_wait = self.CONST.irc_default_wait
          if (self.irc_send_(self.CONST.cmd_JOIN \
-          + " " + self.irc_channel) == -1):
+          + " " + self.irc_channel + str(" " \
+          + self.irc_chankey if self.irc_chankey else "")) == -1):
            irc_init = 0
            
        elif (irc_init == 5):
          irc_wait = self.CONST.irc_default_wait
          if (self.irc_send_(self.CONST.cmd_JOIN \
-          +" " + self.irc_channel + "\r\n") == -1):
+          + " " + self.irc_channel + "%s\r\n" % str(" " \
+          + self.irc_chankey if self.irc_chankey else "")) == -1):
            irc_init = 0
    
        if (irc_init > 0):
