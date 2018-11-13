@@ -20,9 +20,9 @@ class PyIRCIoT(object):
 
  class CONST(object):
   #
-  irciot_protocol_version = '0.3.10'
+  irciot_protocol_version = '0.3.11'
   #
-  irciot_library_version  = '0.0.33'
+  irciot_library_version  = '0.0.35'
   #
   # IRC-IoT TAGs
   #

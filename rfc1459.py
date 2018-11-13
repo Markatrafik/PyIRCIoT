@@ -25,9 +25,9 @@ class PyLayerIRC(object):
 
  class CONST(object):
    #
-   irciot_protocol_version_compatible = '0.3.10'
+   irciot_protocol_version_compatible = '0.3.11'
    #
-   irciot_library_version_compatible  = '0.0.33'
+   irciot_library_version_compatible  = '0.0.35'
    #
    # Bot specific constants
    #
@@ -816,7 +816,7 @@ class PyLayerIRC(object):
          if (irc_input_cmd == self.CONST.cmd_PRIVMSG \
           or irc_input_split == ""):
 
-           irc_name = ""
+           irc_nick = ""
            irc_mask = "*!*@*"
            irc_message = None
         
