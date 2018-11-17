@@ -22,7 +22,7 @@ class PyIRCIoT(object):
   #
   irciot_protocol_version = '0.3.11'
   #
-  irciot_library_version  = '0.0.35'
+  irciot_library_version  = '0.0.37'
   #
   # IRC-IoT TAGs
   #
@@ -339,6 +339,7 @@ class PyIRCIoT(object):
         test_dc, test_dp, test_bc, test_bp, test_did) = test_header
        if (my_did == test_did):
           self.defrag_pool.remove(my_item)
+          break
     self.defrag_lock = False
   except:
     self.defrag_lock = False
