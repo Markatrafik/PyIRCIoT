@@ -27,7 +27,7 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version_compatible = '0.3.11'
    #
-   irciot_library_version_compatible  = '0.0.37'
+   irciot_library_version_compatible  = '0.0.38'
    #
    # Bot specific constants
    #
@@ -81,6 +81,8 @@ class PyLayerIRC(object):
    irc_translation = "".maketrans( \
      irc_ascii_uppercase + "[]\\^",
      irc_ascii_lowercase + "{}|~")
+   #
+   irc_max_nick_length    = 15
    #
    code_WELCOME           = "001"
    code_YOURHOST          = "002"
@@ -208,6 +210,7 @@ class PyLayerIRC(object):
    code_NICKNAMEINUSE     = "433"
    code_NICKCOLLISION     = "436"
    code_UNAVAILRESOURCE   = "437"
+   code_NICKCHANGETOOFAST = "438"
    code_USERNOTINCHANNEL  = "441"
    code_NOTONCHANNEL      = "442"
    code_NOLOGIN           = "444"
@@ -299,6 +302,8 @@ class PyLayerIRC(object):
    self.irc_nick = self.CONST.irc_default_nick
    self.irc_info = self.CONST.irc_default_info
    #
+   self.irc_nick_length = self.CONST.irc_max_nick_length
+   #
    self.irc_server = self.CONST.irc_default_server
    self.irc_port = self.CONST.irc_default_port
    self.irc_password = self.CONST.irc_default_password
@@ -312,9 +317,11 @@ class PyLayerIRC(object):
    #
    self.irc_channel = self.CONST.irc_default_channel
    self.irc_chankey = self.CONST.irc_default_chankey
+   self.join_retry  = 0
    #
+   # ( irc channel, irc channel key, join retry count )
    self.irc_channels = [ ( \
-    self.irc_channel, self.irc_chankey ) ]
+    self.irc_channel, self.irc_chankey, 0 ) ]
    #
    self.irc_users = self.CONST.irc_default_users
    self.irc_nicks = []
@@ -586,8 +593,13 @@ class PyLayerIRC(object):
   
  def irc_random_nick_(self, irc_nick):
    random.seed()
-   ret = self.irc_send_(self.CONST.cmd_NICK \
-    + " " + irc_nick + "%d" % random.randint(100, 999))
+   irc_nick += "%d" % random.randint(0, 999)
+   if (self.join_retry > 2):
+       nick_length = random.randint(1, self.irc_nick_length)
+       irc_nick = ''.join( \
+        random.choice(self.CONST.irc_nick_chars) \
+        for i in range(nick_length))
+   ret = self.irc_send_(self.CONST.cmd_NICK + " " + irc_nick)
    return ret
    
  def irc_socket_(self):
@@ -643,6 +655,9 @@ class PyLayerIRC(object):
    
  def func_banned_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
+   if (self.join_retry > 1):
+      if (self.irc_random_nick_(self.irc_nick) == 1):
+         return (-1, 0, in_wait)      
    return (in_ret, 3, self.CONST.irc_default_wait)
 
  def func_on_kick_(self, in_args):
@@ -656,6 +671,12 @@ class PyLayerIRC(object):
  def func_on_nick_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
    return (in_ret, in_init, self.CONST.irc_default_wait)
+   
+ def func_fast_nick_(self, in_args):
+   (in_string, in_ret, in_init, in_wait) = in_args
+   # ... will be calculated from warning, not RFC 1459 ...
+   in_wait = 3
+   return (in_ret, in_init, in_wait)
 
  def func_on_join_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
@@ -687,6 +708,7 @@ class PyLayerIRC(object):
     (C.code_NICKNAMEINUSE,    "NICKNAMEINUSE",    self.func_nick_in_use_), \
     (C.code_NOTREGISTERED,    "NOTREGISTERED",    self.func_not_reg_), \
     (C.code_BANNEDFROMCHAN,   "BANNEDFROMCHAN",   self.func_banned_), \
+    (C.code_NICKCHANGETOOFAST,"NICKCHANGETOOFAST",self.func_fast_nick_), \
     (C.code_NOSUCHNICK,       "NOSUCHNICK",       None), \
     (C.code_NOSUCHSERVER,     "NOSUCHSERVER",     None), \
     (C.code_NOSUCHCHANNEL,    "NOSUCHCHANNEL",    None), \
@@ -813,12 +835,14 @@ class PyLayerIRC(object):
            irc_init = 0
 
        elif (irc_init == 3):
+         self.join_retry = 0
          if (self.irc_send_(self.CONST.cmd_NICK \
           + " " + self.irc_nick) == -1):
            irc_init = 0
 
        elif (irc_init == 4):
          irc_wait = self.CONST.irc_default_wait
+         self.join_retry += 1
          if (self.irc_send_(self.CONST.cmd_JOIN \
           + " " + self.irc_channel + str(" " \
           + self.irc_chankey if self.irc_chankey else "")) == -1):
@@ -826,6 +850,7 @@ class PyLayerIRC(object):
            
        elif (irc_init == 5):
          irc_wait = self.CONST.irc_default_wait
+         self.join_retry += 1
          if (self.irc_send_(self.CONST.cmd_JOIN \
           + " " + self.irc_channel + "%s\r\n" % str(" " \
           + self.irc_chankey if self.irc_chankey else "")) == -1):
@@ -834,7 +859,9 @@ class PyLayerIRC(object):
        if (irc_init > 0):
          (irc_ret, irc_input_buffer, self.delta_time) \
           = self.irc_recv_(irc_wait)
+
        irc_wait = self.CONST.irc_default_wait
+
        if (self.delta_time > 0):
          irc_wait = self.delta_time
     

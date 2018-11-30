@@ -22,7 +22,7 @@ class PyIRCIoT(object):
   #
   irciot_protocol_version = '0.3.11'
   #
-  irciot_library_version  = '0.0.37'
+  irciot_library_version  = '0.0.38'
   #
   # IRC-IoT TAGs
   #
