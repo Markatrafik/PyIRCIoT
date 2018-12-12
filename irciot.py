@@ -15,51 +15,59 @@ import zlib
 #from copy import deepcopy
 #from pprint import pprint
 #from Crypto.Cipher import AES
+#from twofish import Twofish
 
 class PyIRCIoT(object):
 
  class CONST(object):
   #
-  irciot_protocol_version = '0.3.11'
+  irciot_protocol_version = '0.3.15'
   #
-  irciot_library_version  = '0.0.38'
+  irciot_library_version  = '0.0.39'
   #
   # IRC-IoT TAGs
   #
-  tag_MESSAGE_ID   = 'mid' # Message ID
-  tag_MESSAGE_OC   = 'oc'  # Objects Count
-  tag_MESSAGE_OP   = 'op'  # Objects Passed
-  tag_OBJECT       = 'o'   # Object Tag
-  tag_OBJECT_ID    = 'oid' # Object ID
-  tag_OBJECT_TYPE  = 'ot'  # Object Type
-  tag_OBJECT_DC    = 'dc'  # Datums Count
-  tag_OBJECT_DP    = 'dp'  # Datums Passed
-  tag_DATUM        = 'd'   # Datum Tag
-  tag_DATUM_ID     = 'did' # Datum ID
-  tag_DATUM_BC     = 'bc'  # Bytes Count
-  tag_DATUM_BP     = 'bp'  # Bytes Passed
-  tag_DATE_TIME    = 't'   # Date and Time
-  tag_SRC_ADDR     = 'src' # Source Address
-  tag_DST_ADDR     = 'dst' # Destination Address
-  tag_ENC_DATUM    = 'ed'  # Encrypted Datum
-  tag_ENC_METHOD   = 'em'  # Encryption Method
+  tag_MESSAGE_ID  = 'mid' # Message ID
+  tag_MESSAGE_OC  = 'oc'  # Objects Count
+  tag_MESSAGE_OP  = 'op'  # Objects Passed
+  tag_OBJECT      = 'o'   # Object Tag
+  tag_OBJECT_ID   = 'oid' # Object ID
+  tag_OBJECT_TYPE = 'ot'  # Object Type
+  tag_OBJECT_DC   = 'dc'  # Datums Count
+  tag_OBJECT_DP   = 'dp'  # Datums Passed
+  tag_DATUM       = 'd'   # Datum Tag
+  tag_DATUM_ID    = 'did' # Datum ID
+  tag_DATUM_BC    = 'bc'  # Bytes Count
+  tag_DATUM_BP    = 'bp'  # Bytes Passed
+  tag_DATE_TIME   = 't'   # Date and Time
+  tag_SRC_ADDR    = 'src' # Source Address
+  tag_DST_ADDR    = 'dst' # Destination Address
+  tag_ENC_DATUM   = 'ed'  # Encrypted Datum
+  tag_ENC_METHOD  = 'em'  # Encryption Method
   #
-  tag_ENC_BASE64   = 'b64p'
-  tag_ENC_B64_AES  = 'b64a'
-  tag_ENC_B64_ZLIB = 'b64z'
-  tag_ENC_BASE85   = 'b85p'
-  tag_ENC_BASE122  = 'b122'
+  tag_ENC_BASE64    = 'b64p'
+  tag_ENC_BASE85    = 'b85p'
+  tag_ENC_BASE122   = 'b122'
+  #
+  tag_ENC_B64_2FISH = 'b64f'
+  tag_ENC_B64_AES   = 'b64a'
+  #
+  tag_ENC_B64_ZLIB  = 'b64z'
+  tag_ENC_B64_BZIP2 = 'b64b'
+  #
+  #tag_ENC_default   = tag_ENC_BASE64
+  tag_ENC_default   = tag_ENC_B64_ZLIB
   #
   # IRC-IoT Base Types
   #
-  type_UNDEFINED  =  0
-  type_NUMERIC    = 10
-  type_FLOAT      = 11
-  type_STRING     = 12
-  type_TEXT       = 13
-  type_OBJECT     = 14  # Link to other objects
-  type_BINARY     = 15  # Binary data block
-  type_ARRAY      = 16
+  type_UNDEFINED =  0
+  type_NUMERIC   = 10
+  type_FLOAT     = 11
+  type_STRING    = 12
+  type_TEXT      = 13
+  type_OBJECT    = 14  # Link to other objects
+  type_BINARY    = 15  # Binary data block
+  type_ARRAY     = 16
   #
   b_LITTLE_ENDIAN = 0
   b_BIG_ENDIAN    = 1
@@ -121,8 +129,7 @@ class PyIRCIoT(object):
   self.oid_method  = 0
   self.did_method  = 0
   #
-  # self.crypt_method = self.CONST.tag_ENC_BASE64
-  self.crypt_method = self.CONST.tag_ENC_B64_ZLIB
+  self.crypt_method = self.CONST.tag_ENC_default
   #
   # 0 is autoincrement
   #
@@ -136,6 +143,8 @@ class PyIRCIoT(object):
   #
   if (self.crypt_method == self.CONST.tag_ENC_B64_AES):
      self.AES_iv = random.new().read( AES.block_size )
+  if (self.crypt_method == self.CONST.tag_ENC_B64_2FISH):
+     pass
   #
   self.message_mtu = self.CONST.default_mtu
   #
