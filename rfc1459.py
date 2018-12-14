@@ -27,7 +27,7 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version_compatible = '0.3.15'
    #
-   irciot_library_version_compatible  = '0.0.39'
+   irciot_library_version_compatible  = '0.0.43'
    #
    # Bot specific constants
    #
@@ -483,7 +483,7 @@ class PyLayerIRC(object):
      ( my_uid, my_mask, my_chan, my_crypt, my_opt, my_mid ) = my_user
      if ((irc_channel == "*") or \
       (self.irc_compare_channels_(irc_channel, my_chan))):
-       if self.irc_check_mask_(self, irc_from, my_mask):
+       if self.irc_check_mask_(irc_from, my_mask):
          return True
    return False
    

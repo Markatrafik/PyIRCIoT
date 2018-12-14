@@ -23,7 +23,7 @@ class PyIRCIoT(object):
   #
   irciot_protocol_version = '0.3.15'
   #
-  irciot_library_version  = '0.0.39'
+  irciot_library_version  = '0.0.43'
   #
   # IRC-IoT TAGs
   #
@@ -782,6 +782,23 @@ class PyIRCIoT(object):
     return (my_irciot, 0)
   return (my_irciot, len(raw_big_datum) + my_part - out_skip)
   # End of irciot_encap_bigdatum_()
+
+ def irciot_encap_all_(self, my_datumset):
+  result = []
+  if (isinstance(my_datumset, dict)):
+    my_datumset = [my_datumset]
+  my_datumset = json.dumps(my_datumset, separators=(',',':'))
+  json_text, my_skip, my_part \
+   = self.irciot_encap_(my_datumset, 0, 0)
+  if (json_text != ""):
+    result.append(json_text)
+  while ((my_skip > 0) or (my_part > 0)):
+    json_text, my_skip, my_part \
+     = self.irciot_encap_(my_datumset, my_skip, my_part)
+    if (json_text != ""):
+      result.append(json_text)
+  return result
+  # End of irciot_encap_all_()
 
  def irciot_encap_(self, my_datumset, my_skip, my_part):
   ''' Public part of encapsulator with per-datum fragmentation '''
