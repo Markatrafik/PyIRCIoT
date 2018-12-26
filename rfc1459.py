@@ -27,7 +27,7 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version_compatible = '0.3.15'
    #
-   irciot_library_version_compatible  = '0.0.43'
+   irciot_library_version_compatible  = '0.0.45'
    #
    # Bot specific constants
    #
@@ -381,6 +381,8 @@ class PyLayerIRC(object):
    return irc_input.translate(self.CONST.irc_translation)
    
  def is_irc_nick_(self, irc_nick):
+   if not isinstance(irc_nick, str):
+     return False
    str_mask = "^[" + self.CONST.irc_ascii_letters \
     + "_\^\[\]\{\}][" + self.CONST.irc_ascii_letters \
     + self.CONST.irc_ascii_digits + "-_\^\[\]\{\}]{1,12}$"
@@ -388,6 +390,8 @@ class PyLayerIRC(object):
    return irc_regexp.match(irc_nick)
    
  def is_irc_channel_(self, irc_channel):
+   if not isinstance(irc_channel, str):
+     return False
    str_mask = "^#[" + self.CONST.irc_ascii_letters \
     + self.CONST.irc_ascii_digits + "-_\^\[\]\{\}]{1,24}$"
    irc_regexp = re.compile(str_mask, re.IGNORECASE)
@@ -419,61 +423,67 @@ class PyLayerIRC(object):
    irc_regexp = re.compile(str_mask, re.IGNORECASE)
    return irc_regexp.match(str_from)
  
- def irc_trace_add_nick_(self, irc_nick, irc_mask, irc_user, irc_info):
+ def irc_track_add_nick_(self, irc_nick, irc_mask, irc_user, irc_info):
    if not self.is_irc_nick_(irc_nick):
      return
-   pass
+   my_struct = self.irc_track_get_nick_struct_by_nick_(irc_nick)
+   if my_struct == None:
+     self.irc_nicks.append((irc_nick, irc_mask))
+   else:
+     self.irc_track_update_nick_(irc_nick, irc_mask, irc_user, irc_info)
    
- def irc_trace_add_user_(self, irc_mask, irc_chan, irciot_parameters):
+ def irc_track_add_user_(self, irc_mask, irc_chan, irciot_parameters):
    if not self.is_irc_channel_(irc_chan):
      return
    pass
    
- def irc_trace_update_nick_(self, irc_nick, irc_mask, irc_user, irc_info):
+ def irc_track_update_nick_(self, irc_nick, irc_mask, irc_user, irc_info):
    if not self.is_irc_nick_(irc_nick):
      return
-   pass
+   for my_index, my_struct in enumirate(self.irc_nicks):
+     (my_nick, irc_mask) = my_struct
+     # comparing masks here ...
+     if (self.irc_compare_nicks_(my_nick, irc_nick)):
+       self.irc_nicks[my_index] = (irc_nick, irc_mask)
+       break
    
- def irc_trace_clear_nicks_(self):
+ def irc_track_clear_nicks_(self):
    self.irc_nicks = []
    
- def irc_trace_clear_users_(self):
+ def irc_track_clear_users_(self):
    self.irc_users = []
 
- def irc_trace_delete_nick_(self, irc_nick):
+ def irc_track_delete_nick_(self, irc_nick):
    if not self.is_irc_nick_(irc_nick):
      return
    for my_struct in self.irc_nicks:
-     (my_nick) = my_struct
-     if (my_nick == irc_nick):
+     (my_nick, irc_mask) = my_struct
+     if (self.irc_compare_nicks_(my_nick, irc_nick)):
        self.irc_nicks.remove(my_struct)
        break
      
- def irc_trace_get_nick_struct_(self, position):
-   if (position < 0):
-     return None
-   i = 0
-   for my_struct in self.irc_nicks:
-     if (i == position):
-       return my_struct
-     i += 1
-   return None
+ def irc_track_get_nick_struct_(self, position):
+   try:
+     my_struct = self.irc_nicks[position]
+   except:
+     my_struct = None
+   return my_struct
 
- def irc_trace_get_nick_struct_by_nick_(self, irc_nick):
+ def irc_track_get_nick_struct_by_nick_(self, irc_nick):
    for my_struct in self.irc_nicks:
      (my_nick) = my_struct
      if self.irc_compare_nicks_(my_nick, irc_nick):
        return my_struct
    return None
    
- def irc_trace_get_user_mask_(self, position):
+ def irc_track_get_user_mask_(self, position):
    return "test!test@test.test"
 
- def irc_trace_get_user_struct_(self, position):
+ def irc_track_get_user_struct_(self, position):
    user_struct = {}
    return user_struct
   
- def irc_trace_check_all_users_masks_(self, irc_from, \
+ def irc_track_check_all_users_masks_(self, irc_from, \
   irc_channel, irciot_parameters = None):
    return True
    
@@ -486,6 +496,8 @@ class PyLayerIRC(object):
        if self.irc_check_mask_(irc_from, my_mask):
          return True
    return False
+  #
+  # End of irc_cfg_check_user_()
    
  def is_json_(self, test_message):
    try:
@@ -499,11 +511,13 @@ class PyLayerIRC(object):
      self.irc.shutdown()
    except:
      pass
-   self.irc_trace_clear_nicks_()
+   self.irc_track_clear_nicks_()
    try:
      self.irc.close()
    except:
      pass
+   #
+   # End of irc_disconnect_()
   
  def irc_reconnect_(self):
    if not self.irc_run:
@@ -634,6 +648,8 @@ class PyLayerIRC(object):
    except:
      pass
    return ("", self.CONST.irc_default_wait)
+   #
+   # End of irc_check_queue_()
 
  def irc_add_to_queue_(self, queue_id, irc_message, irc_wait):
    old_queue_lock = self.irc_queue_lock[queue_id]
@@ -681,7 +697,7 @@ class PyLayerIRC(object):
  def func_on_join_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
    (irc_nick, irc_mask) = self.irc_extract_nick_mask_(in_string)
-   # ...
+   self.irc_track_add_nick_(irc_nick, irc_mask, None, None)
    return (in_ret, in_init, self.CONST.irc_default_wait)
    
  def func_on_part_(self, in_args):
@@ -920,7 +936,7 @@ class PyLayerIRC(object):
            if ((irc_message == None) and (irc_input_buffer == "")):
              self.time_now = datetime.datetime.now()
              irc_message = ""
-
+             
            if ((self.irc_cfg_check_user_(irc_mask, self.irc_channel)) \
             and (irc_init > 3) and (self.is_json_(irc_message))):
          
