@@ -27,7 +27,7 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version_compatible = '0.3.15'
    #
-   irciot_library_version_compatible  = '0.0.45'
+   irciot_library_version_compatible  = '0.0.47'
    #
    # Bot specific constants
    #
@@ -427,10 +427,12 @@ class PyLayerIRC(object):
    if not self.is_irc_nick_(irc_nick):
      return
    my_struct = self.irc_track_get_nick_struct_by_nick_(irc_nick)
-   if my_struct == None:
-     self.irc_nicks.append((irc_nick, irc_mask))
+   if (my_struct == None):
+     self.irc_nicks.append((irc_nick, irc_mask, irc_user, irc_info))
    else:
      self.irc_track_update_nick_(irc_nick, irc_mask, irc_user, irc_info)
+   #
+   # End of irc_track_add_nick_()
    
  def irc_track_add_user_(self, irc_mask, irc_chan, irciot_parameters):
    if not self.is_irc_channel_(irc_chan):
@@ -440,12 +442,20 @@ class PyLayerIRC(object):
  def irc_track_update_nick_(self, irc_nick, irc_mask, irc_user, irc_info):
    if not self.is_irc_nick_(irc_nick):
      return
-   for my_index, my_struct in enumirate(self.irc_nicks):
-     (my_nick, irc_mask) = my_struct
-     # comparing masks here ...
+   for my_index, my_struct in enumerate(self.irc_nicks):
+     (my_nick, my_mask, my_user, my_info) = my_struct
+     # comparing of the masks will be here ...
      if (self.irc_compare_nicks_(my_nick, irc_nick)):
-       self.irc_nicks[my_index] = (irc_nick, irc_mask)
+       if irc_mask:
+         my_mask = irc_mask
+       if irc_user:
+         my_user = irc_user
+       if irc_info:
+         my_info = irc_info
+       self.irc_nicks[my_index] = (irc_nick, my_mask, my_user, my_info)
        break
+   #
+   # End of irc_track_update_nick_()
    
  def irc_track_clear_nicks_(self):
    self.irc_nicks = []
@@ -457,7 +467,7 @@ class PyLayerIRC(object):
    if not self.is_irc_nick_(irc_nick):
      return
    for my_struct in self.irc_nicks:
-     (my_nick, irc_mask) = my_struct
+     (my_nick, my_mask, my_user, my_info) = my_struct
      if (self.irc_compare_nicks_(my_nick, irc_nick)):
        self.irc_nicks.remove(my_struct)
        break
@@ -471,7 +481,7 @@ class PyLayerIRC(object):
 
  def irc_track_get_nick_struct_by_nick_(self, irc_nick):
    for my_struct in self.irc_nicks:
-     (my_nick) = my_struct
+     (my_nick, my_mask, my_user, my_info) = my_struct
      if self.irc_compare_nicks_(my_nick, irc_nick):
        return my_struct
    return None
@@ -682,6 +692,8 @@ class PyLayerIRC(object):
    
  def func_on_quit_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
+   (irc_nick, irc_mask) = self.irc_extract_nick_mask_(in_string)
+   self.irc_track_delete_nick_(irc_nick)
    return (in_ret, in_init, self.CONST.irc_default_wait)
    
  def func_on_nick_(self, in_args):
@@ -694,6 +706,20 @@ class PyLayerIRC(object):
    in_wait = 3
    return (in_ret, in_init, in_wait)
 
+ def func_chan_nicks_(self, in_args):
+   (in_string, in_ret, in_init, in_wait) = in_args
+   try:
+     irc_array = in_string.split(":")
+     if (irc_array[0] == ""):
+       nick_array = irc_array[2].split(" ")
+       for my_nick in nick_array:
+         if (my_nick[0] == '@'):
+           my_nick = my_nick[1:]
+         self.irc_track_add_nick_(my_nick, None, None, None)
+   except:
+     return (in_ret, in_init, in_wait)
+   return (in_ret, in_init, self.CONST.irc_default_wait)
+
  def func_on_join_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
    (irc_nick, irc_mask) = self.irc_extract_nick_mask_(in_string)
@@ -702,6 +728,8 @@ class PyLayerIRC(object):
    
  def func_on_part_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
+   (irc_nick, irc_mask) = self.irc_extract_nick_mask_(in_string)
+   self.irc_track_delete_nick_(irc_nick)
    return (in_ret, in_init, self.CONST.irc_default_wait)
 
  def func_on_error_(self, in_args):
@@ -725,6 +753,7 @@ class PyLayerIRC(object):
     (C.code_NOTREGISTERED,    "NOTREGISTERED",    self.func_not_reg_), \
     (C.code_BANNEDFROMCHAN,   "BANNEDFROMCHAN",   self.func_banned_), \
     (C.code_NICKCHANGETOOFAST,"NICKCHANGETOOFAST",self.func_fast_nick_), \
+    (C.code_NAMREPLY,         "NAMREPLY",         self.func_chan_nicks_), \
     (C.code_NOSUCHNICK,       "NOSUCHNICK",       None), \
     (C.code_NOSUCHSERVER,     "NOSUCHSERVER",     None), \
     (C.code_NOSUCHCHANNEL,    "NOSUCHCHANNEL",    None), \
