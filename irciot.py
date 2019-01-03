@@ -288,38 +288,88 @@ class PyIRCIoT(object):
   #
   # End of irciot_crypto_decrypt_datum_()
 
- def irciot_get_object_by_id_(self, object_id):
-  return {}
+ def irciot_get_object_by_id_(self, in_object_id):
+  if not isinstance(in_object_id, int):
+    return None
+  #
+  return None
 
- def irciot_delete_object_by_id_(self, object_id):
-  pass
-
- def irciot_get_objects_count_(self):
-  return 0
-
- def irciot_ldict_delete_item_by_ot_(self, object_type):
+ def irciot_delete_object_by_id_(self, in_object_id):
+  if not isinstance(in_object_id, int):
+    return
+  #
   pass
   
- def irciot_ldict_delete_item_by_id_(self, item_id):
+ def irciot_get_objects_count_(self):
+  return 0
+  
+ def irciot_ldict_create_item_(self, in_ldict_item):
+  try:
+    (my_id, my_ot) = in_ldict_item
+  except:
+    return
+  #
   pass
 
- def irciot_ldict_delete_type_by_name_(self, type_name):
+ def irciot_ldict_delete_items_by_ot_(self, in_object_type):
+  if not isinstance(in_object_type, str):
+    return
+  #  
   pass
 
- def irciot_ldict_delete_type_by_id_(self, type_id):
+ def irciot_ldict_delete_item_by_id_(self, in_item_id):
+  if not isinstance(in_item_id, int):
+    return
+  #
   pass
 
- def irciot_ldict_get_type_by_name_(self, type_name):
-  return {}
+ def irciot_ldict_create_type_(self, in_ldict_type):
+  try:
+    (my_type_id, my_type_name) = in_ldict_type
+  except:
+    return
+  if self.irciot_ldict_get_type_by_name(my_type_name):
+    return
+  #
+  pass
 
- def irciot_ldict_get_type_by_id_(self, type_id):
-  return {}
+ def irciot_ldict_delete_type_by_name_(self, in_type_name):
+  if not isinstance(in_type_name, str):
+    return
+  #
+  pass
 
- def irciot_set_mtu_(self, my_mtu):
+ def irciot_ldict_delete_type_by_id_(self, in_type_id):
+  if not isinstance(in_type_id, int):
+    return
+  #
+  pass
+  
+ def irciot_ldict_get_type_by_name_(self, in_type_name):
+  if not isinstance(in_type_name, str):
+    return
+  for ldict_type in self.ldict_types:
+    (my_type_id, my_type_name) = ldict_type
+    if my_type_name == in_type_name:
+      return ldict_type
+  return None
+
+ def irciot_ldict_get_type_by_id_(self, in_type_id):
+  if not isinstance(in_type_id, int):
+    return
+  for ldict_type in self.ldict_types:
+    (my_type_id, my_type_name) = ldict_type
+    if my_type_id == in_type_id:
+      return ldict_type 
+  return None
+
+ def irciot_set_mtu_(self, in_mtu):
+  if not isinstance(in_mtu, int):
+    return
   if (my_mtu < 128):
-     return
-  self.message_mtu = my_mtu
-
+    return
+  self.message_mtu = in_mtu
+  
  def is_irciot_datum_(self, in_datum, in_ot, in_src, in_dst):
   if self.CONST.tag_ENC_DATUM in in_datum:
      if isinstance(in_datum[self.CONST.tag_ENC_DATUM], str):
@@ -460,10 +510,10 @@ class PyIRCIoT(object):
 
  def AES_encrypt(raw_data, encrypion_key):
   return ""
-
+  
  def AES_decrypt(ecrypted_data, encryption_key):
   return ""
-
+  
  def irciot_clear_defrag_chain_(self, my_did):
   try:
     if self.defrag_lock:
@@ -652,7 +702,7 @@ class PyIRCIoT(object):
   else:
      return self.irciot_decrypt_datum_(my_datum, my_header, orig_json)
   return json.dumps(my_datum, separators=(',',':'))
-  
+
  def irciot_deinencap_object_(self, my_object, orig_json):
   iot_dt  = None
   iot_src = None
@@ -725,7 +775,7 @@ class PyIRCIoT(object):
   return ""
   #
   # End of irciot_deinencap_container_()
-
+ 
  def irciot_deinencap_(self, my_json):
   ''' First/simple implementation of IRC-IoT "datum" deinencapsulator '''
   try:
@@ -763,7 +813,7 @@ class PyIRCIoT(object):
      return True
   return False
   # End of is_irciot_datumset_()
-
+  
  def irciot_encap_datum_(self, in_datum, in_ot, in_src, in_dst):
   if not self.CONST.tag_ENC_DATUM in in_datum.keys():
    if (in_ot == in_datum[self.CONST.tag_OBJECT_TYPE]):
