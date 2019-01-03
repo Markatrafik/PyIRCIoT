@@ -628,15 +628,23 @@ class PyLayerIRC(object):
    except:
      return None
 
- def irc_whois_nick_(self, irc_nick):
-   if not self.is_irc_nick_(irc_nick):
+ def irc_whois_nick_(self, in_nick):
+   if not self.is_irc_nick_(in_nick):
      return -1
-   ret = self.irc_send_(self.CONST.cmd_WHOIS + " " + irc_nick)
+   ret = self.irc_send_(self.CONST.cmd_WHOIS + " " + in_nick)
+   return ret
+   
+ def irc_who_channel_(self, in_channel):
+   if not self.is_irc_channel_(in_channel):
+     return -1
+   ret = self.irc_send_(self.CONST.cmd_WHO + " " + in_channel)
    return ret
 
- def irc_random_nick_(self, irc_nick):
+ def irc_random_nick_(self, in_nick):
+   if not self.is_irc_nick_(in_nick):
+     return -1
    random.seed()
-   irc_nick += "%d" % random.randint(0, 999)
+   irc_nick = in_nick + "%d" % random.randint(0, 999)
    if (self.join_retry > 2):
        nick_length = random.randint(1, self.irc_nick_length)
        irc_nick = ''.join( \
@@ -644,6 +652,8 @@ class PyLayerIRC(object):
         for i in range(nick_length))
    ret = self.irc_send_(self.CONST.cmd_NICK + " " + irc_nick)
    return ret
+   #
+   # End of irc_random_nick_()
 
  def irc_socket_(self):
    try:
@@ -691,7 +701,7 @@ class PyLayerIRC(object):
  def func_nick_in_use_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
    if (self.irc_random_nick_(self.irc_nick) == 1):
-      return (-1, 0, in_wait)
+     return (-1, 0, in_wait)
    return (in_ret, in_init, in_wait)
 
  def func_not_reg_(self, in_args):
@@ -701,8 +711,8 @@ class PyLayerIRC(object):
  def func_banned_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
    if (self.join_retry > 1):
-      if (self.irc_random_nick_(self.irc_nick) == 1):
-         return (-1, 0, in_wait)
+     if (self.irc_random_nick_(self.irc_nick) == 1):
+        return (-1, 0, in_wait)
    return (in_ret, 3, self.CONST.irc_default_wait)
 
  def func_on_kick_(self, in_args):
@@ -742,6 +752,35 @@ class PyLayerIRC(object):
    except:
      return (in_ret, in_init, in_wait)
    return (in_ret, in_init, self.CONST.irc_default_wait)
+   #
+   # End of func_chan_nicks_()
+   
+ def func_end_nicks_(self, in_args):
+   (in_string, in_ret, in_init, in_wait) = in_args
+   try:
+     my_array = in_string.split(" ")
+     in_ret = self.irc_who_channel_(my_array[3])
+   except:
+     return (in_ret, in_init, in_wait)     
+   return (in_ret, in_init, self.CONST.irc_default_wait)
+
+ def func_who_user_(self, in_args):
+   (in_string, in_ret, in_init, in_wait) = in_args
+   try:
+     my_array = in_string.split(":")
+     if (my_array[0] == ""):
+       my_info = my_array[2][2:]
+       my_array = my_array[1].split(" ")
+       my_nick = my_array[7]
+       my_user = my_array[4]
+       my_host = my_array[5]
+       my_mask = my_nick + "!" + my_user + "@" + my_host
+       self.irc_track_update_nick_(my_nick, my_mask, None, my_info)
+   except:
+     return (in_ret, in_init, in_wait)
+   return (in_ret, in_init, self.CONST.irc_default_wait)
+   #
+   # End of func_who_user_()
 
  def func_whois_user_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
@@ -758,6 +797,8 @@ class PyLayerIRC(object):
    except:
      return (in_ret, in_init, in_wait)
    return (in_ret, in_init, self.CONST.irc_default_wait - 1)
+   #
+   # End of func_whois_user_()
 
  def func_on_join_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
@@ -794,6 +835,8 @@ class PyLayerIRC(object):
     (C.code_NICKCHANGETOOFAST,"NICKCHANGETOOFAST",self.func_fast_nick_), \
     (C.code_NAMREPLY,         "NAMREPLY",         self.func_chan_nicks_), \
     (C.code_WHOISUSER,        "WHOISUSER",        self.func_whois_user_), \
+    (C.code_ENDOFNAMES,       "ENDOFNAMES",       self.func_end_nicks_), \
+    (C.code_WHOREPLY,         "WHOREPLY",         self.func_who_user_), \
     (C.code_NOSUCHNICK,       "NOSUCHNICK",       None), \
     (C.code_NOSUCHSERVER,     "NOSUCHSERVER",     None), \
     (C.code_NOSUCHCHANNEL,    "NOSUCHCHANNEL",    None), \
