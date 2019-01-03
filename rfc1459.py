@@ -445,11 +445,11 @@ class PyLayerIRC(object):
      (my_nick, my_mask, my_user, my_info) = my_struct
      # comparing of the masks will be here ...
      if (self.irc_compare_nicks_(my_nick, irc_nick)):
-       if irc_mask:
+       if not irc_mask == None:
          my_mask = irc_mask
-       if irc_user:
+       if not irc_user == None:
          my_user = irc_user
-       if irc_info:
+       if not irc_info == None:
          my_info = irc_info
        self.irc_nicks[my_index] = (irc_nick, my_mask, my_user, my_info)
        break
@@ -484,6 +484,20 @@ class PyLayerIRC(object):
      if self.irc_compare_nicks_(my_nick, irc_nick):
        return my_struct
    return None
+
+ def irc_track_clarify_nicks_(self):
+   for my_struct in self.irc_nicks:
+     (my_nick, my_mask, my_user, my_info) = my_struct
+     if ((my_mask == None) or (my_info == None)):
+       self.irc_whois_nick_(my_nick)
+       if my_mask == None:
+         my_mask = ""
+       if my_info == None:
+         my_info = ""
+       self.irc_track_update_nick_(my_nick, my_mask, my_user, my_info)
+       break
+   #
+   # End of irc_track_clarify_nicks_()
 
  def irc_track_get_user_mask_(self, position):
    return "test!test@test.test"
@@ -541,7 +555,7 @@ class PyLayerIRC(object):
  def irc_send_(self, irc_out):
    try:
      if (irc_out == ""):
-       return
+       return -1
      if (self.irc_debug):
        self.to_log_("Sending to IRC: [" + irc_out + "]")
      self.irc.send(bytes(irc_out + "\n", "UTF-8"))
@@ -613,6 +627,12 @@ class PyLayerIRC(object):
      return irc_msg.strip()
    except:
      return None
+
+ def irc_whois_nick_(self, irc_nick):
+   if not self.is_irc_nick_(irc_nick):
+     return -1
+   ret = self.irc_send_(self.CONST.cmd_WHOIS + " " + irc_nick)
+   return ret
 
  def irc_random_nick_(self, irc_nick):
    random.seed()
@@ -688,6 +708,10 @@ class PyLayerIRC(object):
  def func_on_kick_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
    return (in_ret, 3, self.CONST.irc_default_wait)
+   
+ def func_on_kill_(self, in_args):
+   (in_string, in_ret, in_init, in_wait) = in_args
+   return (in_ret, in_init, self.CONST.irc_default_wait)
 
  def func_on_quit_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
@@ -708,16 +732,32 @@ class PyLayerIRC(object):
  def func_chan_nicks_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
    try:
-     irc_array = in_string.split(":")
-     if (irc_array[0] == ""):
-       nick_array = irc_array[2].split(" ")
-       for my_nick in nick_array:
+     my_array = in_string.split(":")
+     if (my_array[0] == ""):
+       my_array = my_array[2].split(" ")
+       for my_nick in my_array:
          if (my_nick[0] == '@'):
            my_nick = my_nick[1:]
          self.irc_track_add_nick_(my_nick, None, None, None)
    except:
      return (in_ret, in_init, in_wait)
    return (in_ret, in_init, self.CONST.irc_default_wait)
+
+ def func_whois_user_(self, in_args):
+   (in_string, in_ret, in_init, in_wait) = in_args
+   try:
+     my_array = in_string.split(":")
+     if (my_array[0] == ""):
+       my_info = my_array[2]
+       my_array = my_array[1].split(" ")
+       my_nick = my_array[3]
+       my_user = my_array[4]
+       my_host = my_array[5]
+       my_mask = my_nick + "!" + my_user + "@" + my_host
+       self.irc_track_update_nick_(my_nick, my_mask, None, my_info)
+   except:
+     return (in_ret, in_init, in_wait)
+   return (in_ret, in_init, self.CONST.irc_default_wait - 1)
 
  def func_on_join_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
@@ -753,6 +793,7 @@ class PyLayerIRC(object):
     (C.code_BANNEDFROMCHAN,   "BANNEDFROMCHAN",   self.func_banned_), \
     (C.code_NICKCHANGETOOFAST,"NICKCHANGETOOFAST",self.func_fast_nick_), \
     (C.code_NAMREPLY,         "NAMREPLY",         self.func_chan_nicks_), \
+    (C.code_WHOISUSER,        "WHOISUSER",        self.func_whois_user_), \
     (C.code_NOSUCHNICK,       "NOSUCHNICK",       None), \
     (C.code_NOSUCHSERVER,     "NOSUCHSERVER",     None), \
     (C.code_NOSUCHCHANNEL,    "NOSUCHCHANNEL",    None), \
@@ -804,12 +845,18 @@ class PyLayerIRC(object):
    #
    if self.irc_mode == self.CONST.irc_modes[0]:
      self.irc_commands = [ \
-      (C.cmd_PONG,    None), (C.cmd_KICK,  self.func_on_kick_), \
-      (C.cmd_INVITE,  None), (C.cmd_QUIT,  self.func_on_quit_), \
-      (C.cmd_MODE,    None), (C.cmd_ERROR, self.func_on_error_), \
-      (C.cmd_PRIVMSG, None), (C.cmd_NICK,  self.func_on_nick_), \
-      (C.cmd_NOTICE,  None), (C.cmd_JOIN,  self.func_on_join_), \
-      (C.cmd_KILL,    None), (C.cmd_PART,  self.func_on_part_) ]
+      (C.cmd_INVITE,  None), \
+      (C.cmd_JOIN,    self.func_on_join_), \
+      (C.cmd_KICK,    self.func_on_kick_), \
+      (C.cmd_KILL,    self.func_on_kill_), \
+      (C.cmd_MODE,    None), \
+      (C.cmd_NICK,    self.func_on_nick_), \
+      (C.cmd_NOTICE,  None), \
+      (C.cmd_PART,    self.func_on_part_), \
+      (C.cmd_PONG,    None), \
+      (C.cmd_PRIVMSG, None), \
+      (C.cmd_QUIT,    self.func_on_quit_), \
+      (C.cmd_ERROR,   self.func_on_error_) ]
 
    else: # RFC 2813
      self.irc_cmmands = [ \
@@ -907,6 +954,9 @@ class PyLayerIRC(object):
 
        if (self.delta_time > 0):
          irc_wait = self.delta_time
+       else:
+         if (irc_init == 6):
+            self.irc_track_clarify_nicks_()
 
        if (irc_ret == -1):
          self.irc_reconnect_()
@@ -923,6 +973,8 @@ class PyLayerIRC(object):
            if (self.irc_pong_(irc_input_split) == -1):
              irc_ret = -1
              irc_init = 0
+           else:
+             self.irc_track_clarify_nicks_()
 
          try:
            irc_input_cmd = irc_input_split.split(' ')[1]
@@ -965,7 +1017,7 @@ class PyLayerIRC(object):
              irc_message = ""
 
            if ((self.irc_cfg_check_user_(irc_mask, self.irc_channel)) \
-            and (irc_init > 3) and (self.is_json_(irc_message))):
+             and (irc_init > 3) and (self.is_json_(irc_message))):
 
              self.irc_add_to_queue_(self.CONST.irc_queue_input, \
               irc_message, self.CONST.irc_default_wait)
