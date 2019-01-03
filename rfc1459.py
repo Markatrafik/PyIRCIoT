@@ -25,9 +25,9 @@ class PyLayerIRC(object):
 
  class CONST(object):
    #
-   irciot_protocol_version_compatible = '0.3.15'
+   irciot_protocol_version_compatible = '0.3.17'
    #
-   irciot_library_version_compatible  = '0.0.47'
+   irciot_library_version_compatible  = '0.0.48'
    #
    # Bot specific constants
    #
@@ -292,7 +292,7 @@ class PyLayerIRC(object):
    #
    def __setattr__(self, *_):
       pass
-      
+
  def __init__(self):
    #
    self.CONST = self.CONST()
@@ -346,7 +346,6 @@ class PyLayerIRC(object):
    self.delta_time = 0
    #
    # End of __init__()
-   
 
  def start_IRC_(self):
    #
@@ -355,7 +354,7 @@ class PyLayerIRC(object):
    self.irc_task.start()
    #
    # End of start_IRC_()
-   
+
  def stop_IRC_(self):
    #
    self.irc_run = False
@@ -368,18 +367,18 @@ class PyLayerIRC(object):
      pass
    #
    # End of stop_IRC_()
-   
+
  def __del__(self):
    self.stop_IRC_()
-   
+
  def to_log_(self, msg):
    if not self.irc_debug:
      return
    print(msg)
-   
+
  def irc_tolower_(self, irc_input):
    return irc_input.translate(self.CONST.irc_translation)
-   
+
  def is_irc_nick_(self, irc_nick):
    if not isinstance(irc_nick, str):
      return False
@@ -388,7 +387,7 @@ class PyLayerIRC(object):
     + self.CONST.irc_ascii_digits + "-_\^\[\]\{\}]{1,12}$"
    irc_regexp = re.compile(str_mask, re.IGNORECASE)
    return irc_regexp.match(irc_nick)
-   
+
  def is_irc_channel_(self, irc_channel):
    if not isinstance(irc_channel, str):
      return False
@@ -396,7 +395,7 @@ class PyLayerIRC(object):
     + self.CONST.irc_ascii_digits + "-_\^\[\]\{\}]{1,24}$"
    irc_regexp = re.compile(str_mask, re.IGNORECASE)
    return irc_regexp.match(irc_channel)
-   
+
  def irc_compare_channels_(self, ref_channel, cmp_channel):
    if not self.is_irc_channel_(ref_channel):
      return False
@@ -404,7 +403,7 @@ class PyLayerIRC(object):
      return False
    return (self.irc_tolower_(ref_channel) \
         == self.irc_tolower_(cmp_channel))
-        
+
  def irc_compare_nicks_(self, ref_nick, cmp_nick):
    if not self.is_irc_nick_(ref_nick):
      return False
@@ -412,7 +411,7 @@ class PyLayerIRC(object):
      return False
    return (self.irc_tolower_(ref_nick) \
         == self.irc_tolower_(cmp_nick))
-   
+
  def irc_check_mask_(self, irc_from, irc_mask):
    str_from = self.irc_tolower_(irc_from)
    str_mask = self.irc_tolower_(irc_mask).replace("\\", "\\\\")
@@ -422,7 +421,7 @@ class PyLayerIRC(object):
    str_mask = str_mask.replace("*", ".*")
    irc_regexp = re.compile(str_mask, re.IGNORECASE)
    return irc_regexp.match(str_from)
- 
+
  def irc_track_add_nick_(self, irc_nick, irc_mask, irc_user, irc_info):
    if not self.is_irc_nick_(irc_nick):
      return
@@ -433,12 +432,12 @@ class PyLayerIRC(object):
      self.irc_track_update_nick_(irc_nick, irc_mask, irc_user, irc_info)
    #
    # End of irc_track_add_nick_()
-   
+
  def irc_track_add_user_(self, irc_mask, irc_chan, irciot_parameters):
    if not self.is_irc_channel_(irc_chan):
      return
    pass
-   
+
  def irc_track_update_nick_(self, irc_nick, irc_mask, irc_user, irc_info):
    if not self.is_irc_nick_(irc_nick):
      return
@@ -456,10 +455,10 @@ class PyLayerIRC(object):
        break
    #
    # End of irc_track_update_nick_()
-   
+
  def irc_track_clear_nicks_(self):
    self.irc_nicks = []
-   
+
  def irc_track_clear_users_(self):
    self.irc_users = []
 
@@ -471,7 +470,7 @@ class PyLayerIRC(object):
      if (self.irc_compare_nicks_(my_nick, irc_nick)):
        self.irc_nicks.remove(my_struct)
        break
-     
+
  def irc_track_get_nick_struct_(self, position):
    try:
      my_struct = self.irc_nicks[position]
@@ -485,18 +484,18 @@ class PyLayerIRC(object):
      if self.irc_compare_nicks_(my_nick, irc_nick):
        return my_struct
    return None
-   
+
  def irc_track_get_user_mask_(self, position):
    return "test!test@test.test"
 
  def irc_track_get_user_struct_(self, position):
    user_struct = {}
    return user_struct
-  
+
  def irc_track_check_all_users_masks_(self, irc_from, \
   irc_channel, irciot_parameters = None):
    return True
-   
+
  def irc_cfg_check_user_(self, irc_from, \
   irc_channel, irciot_parameters = None):
    for my_user in self.irc_users:
@@ -508,7 +507,7 @@ class PyLayerIRC(object):
    return False
   #
   # End of irc_cfg_check_user_()
-   
+
  def is_json_(self, test_message):
    try:
      json_object = json.loads(test_message)
@@ -528,14 +527,14 @@ class PyLayerIRC(object):
      pass
    #
    # End of irc_disconnect_()
-  
+
  def irc_reconnect_(self):
    if not self.irc_run:
      return
    self.irc_disconnect_()
    self.to_log_("Connection closed, reconnecting to IRC ... ")
    sleep(self.CONST.irc_first_wait)
-   
+
  def irc_td2ms_(self, td):
    return td.days * 86400 + td.seconds + td.microseconds / 1000000
 
@@ -557,7 +556,7 @@ class PyLayerIRC(object):
      return -1
    #
    # End of irc_send_()
-   
+
  def irc_recv_(self, recv_timeout):
    try:
      time_in_recv = datetime.datetime.now()
@@ -593,11 +592,11 @@ class PyLayerIRC(object):
    irc_string = irc_input.split(":")
    ret = self.irc_send_("PONG %s\r\n" % irc_string[1])
    return ret
-   
+
  def irc_quit_(self):
    ret = self.irc_send_("QUIT :Bye!\r\n")
    return ret
-   
+
  def irc_extract_nick_mask_(self, irc_string):
    try:
      irc_mask = irc_string.split(' ', 1)[0][1:]
@@ -606,7 +605,7 @@ class PyLayerIRC(object):
      irc_mask = "!@"
      irc_nick = ""
    return (irc_nick, irc_mask)
-   
+
  def irc_extract_message_(self, irc_string):
    try:
      irc_msg = irc_string.split( \
@@ -614,7 +613,7 @@ class PyLayerIRC(object):
      return irc_msg.strip()
    except:
      return None
-  
+
  def irc_random_nick_(self, irc_nick):
    random.seed()
    irc_nick += "%d" % random.randint(0, 999)
@@ -625,7 +624,7 @@ class PyLayerIRC(object):
         for i in range(nick_length))
    ret = self.irc_send_(self.CONST.cmd_NICK + " " + irc_nick)
    return ret
-   
+
  def irc_socket_(self):
    try:
      irc_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -635,11 +634,11 @@ class PyLayerIRC(object):
      to_log_("Cannot create socket for IRC")
      return None
    return irc_socket
-  
+
  def irc_connect_(self, irc_server, irc_port):
    self.irc.connect((irc_server, irc_port))
    # self.irc.setblocking(False)
-   
+
  def irc_check_queue_(self, queue_id):
    old_queue_lock = self.irc_queue_lock[queue_id]
    if not old_queue_lock:
@@ -666,7 +665,7 @@ class PyLayerIRC(object):
    self.irc_queue_lock[queue_id] = True
    self.irc_queue[queue_id].put((irc_message, irc_wait))
    self.irc_queue_lock[queue_id] = old_queue_lock
-   
+
  # CLIENT Hooks:
 
  def func_nick_in_use_(self, in_args):
@@ -674,32 +673,32 @@ class PyLayerIRC(object):
    if (self.irc_random_nick_(self.irc_nick) == 1):
       return (-1, 0, in_wait)
    return (in_ret, in_init, in_wait)
-   
+
  def func_not_reg_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
    return (in_ret, 1, self.CONST.irc_default_wait)
-   
+
  def func_banned_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
    if (self.join_retry > 1):
       if (self.irc_random_nick_(self.irc_nick) == 1):
-         return (-1, 0, in_wait)      
+         return (-1, 0, in_wait)
    return (in_ret, 3, self.CONST.irc_default_wait)
 
  def func_on_kick_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
    return (in_ret, 3, self.CONST.irc_default_wait)
-   
+
  def func_on_quit_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
    (irc_nick, irc_mask) = self.irc_extract_nick_mask_(in_string)
    self.irc_track_delete_nick_(irc_nick)
    return (in_ret, in_init, self.CONST.irc_default_wait)
-   
+
  def func_on_nick_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
    return (in_ret, in_init, self.CONST.irc_default_wait)
-   
+
  def func_fast_nick_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
    # ... will be calculated from warning, not RFC 1459 ...
@@ -725,7 +724,7 @@ class PyLayerIRC(object):
    (irc_nick, irc_mask) = self.irc_extract_nick_mask_(in_string)
    self.irc_track_add_nick_(irc_nick, irc_mask, None, None)
    return (in_ret, in_init, self.CONST.irc_default_wait)
-   
+
  def func_on_part_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
    (irc_nick, irc_mask) = self.irc_extract_nick_mask_(in_string)
@@ -737,13 +736,13 @@ class PyLayerIRC(object):
    if (in_string.find("Closing ") or in_string.find(" timeout")):
       return (-1, 0, in_wait)
    return (in_ret, 1, self.CONST.irc_default_wait)
-   
+
  # SERVICE Hooks:
-   
+
  def func_on_srv_info_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args 
    return (in_ret, in_init, in_wait)
-   
+
  def init_rfc1459_(self):
    #
    C = self.CONST
@@ -833,18 +832,17 @@ class PyLayerIRC(object):
       (C.cmd_PUBMSG,  None), (C.cmd_PUBNOTICE,  None), \
       (C.cmd_NOTICE,  None), (C.cmd_PRIVNOTICE, None), \
       (C.cmd_ISON,    None) ]
-                             
- 
+
  def irc_process_(self):
- 
+
    self.init_rfc1459_()
-   
+
    try:
      irc_init = 0
      irc_wait = self.CONST.irc_first_wait
      irc_input_buffer = ""
      irc_ret = 0
-     
+
      self.delta_time = 0
 
      # app.run(host='0.0.0.0', port=50000, debug=True)
@@ -861,7 +859,7 @@ class PyLayerIRC(object):
 
        if (irc_init < 6):
          irc_init += 1
-     
+
        if (irc_init == 1):
          try:
            self.irc_connect_(self.irc_server, self.irc_port)
@@ -892,7 +890,7 @@ class PyLayerIRC(object):
           + " " + self.irc_channel + str(" " \
           + self.irc_chankey if self.irc_chankey else "")) == -1):
            irc_init = 0
-           
+
        elif (irc_init == 5):
          irc_wait = self.CONST.irc_default_wait
          self.join_retry += 1
@@ -900,7 +898,7 @@ class PyLayerIRC(object):
           + " " + self.irc_channel + "%s\r\n" % str(" " \
           + self.irc_chankey if self.irc_chankey else "")) == -1):
            irc_init = 0
-   
+
        if (irc_init > 0):
          (irc_ret, irc_input_buffer, self.delta_time) \
           = self.irc_recv_(irc_wait)
@@ -909,18 +907,18 @@ class PyLayerIRC(object):
 
        if (self.delta_time > 0):
          irc_wait = self.delta_time
-    
+
        if (irc_ret == -1):
          self.irc_reconnect_()
          irc_input_buffer = ""
          irc_init = 0
          self.irc = self.irc_socket_()
-    
+
        irc_prefix = ":" + self.irc_server + " "
        irc_prefix_len = len(irc_prefix)
-   
+
        for irc_input_split in re.split(r'[\r\n]', irc_input_buffer):
-       
+
          if irc_input_split[:5] == self.CONST.cmd_PING + " ":
            if (self.irc_pong_(irc_input_split) == -1):
              irc_ret = -1
@@ -955,27 +953,27 @@ class PyLayerIRC(object):
            irc_nick = ""
            irc_mask = "!@"
            irc_message = None
-        
+
            if (irc_input_split != ""):
              (irc_nick, irc_mask) \
               = self.irc_extract_nick_mask_(irc_input_split)
              self.time_now = datetime.datetime.now()
              irc_message = self.irc_extract_message_(irc_input_split)
-       
+
            if ((irc_message == None) and (irc_input_buffer == "")):
              self.time_now = datetime.datetime.now()
              irc_message = ""
-             
+
            if ((self.irc_cfg_check_user_(irc_mask, self.irc_channel)) \
             and (irc_init > 3) and (self.is_json_(irc_message))):
-         
+
              self.irc_add_to_queue_(self.CONST.irc_queue_input, \
               irc_message, self.CONST.irc_default_wait)
            
            irc_input_split = ""
 
          irc_input_buff = ""
-       
+
        if (irc_init > 5):
           (irc_message, irc_wait) \
            = self.irc_check_queue_(self.CONST.irc_queue_output)
@@ -983,7 +981,7 @@ class PyLayerIRC(object):
              self.irc_send_(self.CONST.cmd_PRIVMSG + " " \
                + self.irc_channel + " :" + irc_message)
           irc_message = ""    
-      
+
    except socket.error:
      self.irc_disconnect()
      irc_init = 0

@@ -7,23 +7,45 @@
 ''  Alexey Y. Woronov <alexey@woronov.ru>
 '''
 
+# Those Global options override default behavior and memory usage
+#
+CAN_debug_library  = False
+CAN_mid_blockchain = False # Creating a chain of cryptographic signatures
+CAN_encrypt_datum  = False # Ability to encrypt and decrypt of Datums
+CAN_compress_datum = True  # Ability to compress and decompress Datums
+#
+DO_always_encrypt  = False # Alwasy encrypt Datums in IRC-IoT messages
+
 import json
 import random
 import base64
-import zlib
+
+if CAN_debug_library:
+  from pprint import pprint
+if CAN_compress_datum:
+  import zlib
+if CAN_mid_blockchain:
+  pass
+if CAN_encrypt_datum:
+  from Crypto.PublicKey import RSA
+if CAN_encrypt_datum or CAN_mid_blockchain:
+  import hashlib
 
 #from copy import deepcopy
-#from pprint import pprint
+#from Crypto import Random
+#from Crypto.Signature import PKCS1_v1_5
 #from Crypto.Cipher import AES
+#from Crypto.Cipher import PKCS1_OAEP
+#from Crypto.Hash import SHA
 #from twofish import Twofish
 
 class PyIRCIoT(object):
 
  class CONST(object):
   #
-  irciot_protocol_version = '0.3.15'
+  irciot_protocol_version = '0.3.17'
   #
-  irciot_library_version  = '0.0.47'
+  irciot_library_version  = '0.0.48'
   #
   # IRC-IoT TAGs
   #
@@ -49,14 +71,17 @@ class PyIRCIoT(object):
   tag_ENC_BASE85    = 'b85p'
   tag_ENC_BASE122   = 'b122'
   #
+  tag_ENC_B64_RSA   = 'b64r'
   tag_ENC_B64_2FISH = 'b64f'
   tag_ENC_B64_AES   = 'b64a'
   #
   tag_ENC_B64_ZLIB  = 'b64z'
   tag_ENC_B64_BZIP2 = 'b64b'
   #
-  #tag_ENC_default   = tag_ENC_BASE64
-  tag_ENC_default   = tag_ENC_B64_ZLIB
+  if CAN_compress_datum:
+    tag_ENC_default = tag_ENC_B64_ZLIB
+  else:
+    tag_ENC_default = tag_ENC_BASE64  
   #
   # IRC-IoT Base Types
   #
@@ -101,7 +126,7 @@ class PyIRCIoT(object):
   #
   def __setattr__(self, *_):
       pass
- 
+
  def __init__(self):
   #
   self.CONST = self.CONST()
@@ -129,7 +154,10 @@ class PyIRCIoT(object):
   self.oid_method  = 0
   self.did_method  = 0
   #
-  self.crypt_method = self.CONST.tag_ENC_default
+  if CAN_encrypt_datum:
+    self.crypt_method = self.CONST.tag_ENC_default
+  else:
+    self.crypt_method = None
   #
   # 0 is autoincrement
   #
@@ -142,9 +170,13 @@ class PyIRCIoT(object):
      self.current_did = random.randint(   100,   999)
   #
   if (self.crypt_method == self.CONST.tag_ENC_B64_AES):
-     self.AES_iv = random.new().read( AES.block_size )
+     self.crypto_AES_BLOCK_SIZE = AES.block_size
+     self.crypto_AES_iv = self.irciot_crypto_hash_(None, \
+     self.crypto_AES_BLOCK_SIZE )
   if (self.crypt_method == self.CONST.tag_ENC_B64_2FISH):
      pass
+  if (self.crypt_method == self.CONST.tag_ENC_B64_RSA):
+     self.crypto_RSA_KEY_SIZE = 2048
   #
   self.message_mtu = self.CONST.default_mtu
   #
@@ -160,17 +192,108 @@ class PyIRCIoT(object):
   # 1 is CRC16 Check "c16"
   # 2 is CRC32 Check "c32"
   #
-  pass 
+  # End of PyIRCIoT.__init__()
 
  def irciot_version_(self):
   return self.CONST.irciot_protocol_version
-  
+
+ def irciot_crypto_hash_(self, in_password, hash_size):
+  if in_password == None or in_password == "":
+    return random.new().read( hash_size )
+  if not isinstance(in_password, str):
+    return None
+  crypto_hash = None
+  if hash_size == 20:
+    crypto_hash = hashlib.sha1(my_password).digest()
+  if hash_size == 28:
+    crypto_hash = hashlib.sha224(my_password).digest()
+  if hash_size == 32:
+    crypto_hash = hashlib.sha256(my_password).digest()
+  return crypto_hash
+  #
+  # End of irciot_crypto_hash_()
+
+ def irciot_blockchain_generate_keys_(self):
+  #
+  blockchain_public_key = None
+  blockchain_private_key = None
+  #
+  return (blockchain_public_key, blockchain_private_key)
+  #
+  # End of irciot_blockchain_generate_keys_()
+
+ def irciot_blockchain_place_key_to_repo_(self):
+  pass
+  #
+  # End of irciot_blockchain_place_key_to_repo_()
+
+ def irciot_blockchain_request_foreign_key_(self):
+  pass
+  #
+  # End of irciot_blockchain_request_foreign_key_()
+
+ def irciot_blockchain_update_foreign_key_(self):
+  pass
+  #
+  # End of irciot_blockchain_update_foreign_key_()
+
+ def irciot_blockchain_sign_message_(self):
+  pass
+  #
+  # End of irciot_blockchian_sign_message_()
+
+ def irciot_blockchain_verify_message_(self):
+  pass
+  #
+  # End of irciot_blockchain_verify_message_()
+
+ def irciot_crypto_generate_keys_(self):
+  #
+  crypto_public_key = None
+  crypto_private_key = None
+  if (self.crypt_method == self.CONST.tag_ENC_B64_RSA):
+    crypto_private_key = RSA.generate(self.CONST.crypto_RSA_KEY_SIZE)
+    crypto_public_key = crypto_private_key.publickey()
+  if (self.crypt_method == self.CONST.tag_ENC_B64_AES):
+    pass
+  if (self.crypt_method == self.CONST.tag_ENC_B64_2FISH):
+    pass
+  #
+  return (crypto_public_key, crypto_private_key)
+  #
+  # End of irciot_crypto_generate_keys_()
+
+ def irciot_crypto_place_key_to_repo_(self):
+  pass
+  #
+  # End of irciot_crypto_place_key_to_repo_()
+
+ def irciot_crypto_request_foreign_key_(self):
+  pass
+  #
+  # End of irciot_crypto_request_foreign_key_()
+
+ def irciot_crypto_update_foreign_key_(self):
+  pass
+  #
+  # End of irciot_crypto_update_foreign_key_()
+
+ def irciot_crypto_encrypt_datum_(self):
+  pass
+  #
+  # End of irciot_crypto_encrypt_datum_()
+
+ def irciot_crypto_decrypt_datum_(self):
+  pass
+  #
+  # End of irciot_crypto_decrypt_datum_()
+
  def irciot_get_object_by_id_(self, object_id):
   return {}
-  
+
  def irciot_delete_object_by_id_(self, object_id):
   pass
-  
+
  def irciot_get_objects_count_(self):
   return 0
 
@@ -185,10 +308,10 @@ class PyIRCIoT(object):
 
  def irciot_ldict_delete_type_by_id_(self, type_id):
   pass
-  
+
  def irciot_ldict_get_type_by_name_(self, type_name):
   return {}
-  
+
  def irciot_ldict_get_type_by_id_(self, type_id):
   return {}
 
@@ -196,7 +319,7 @@ class PyIRCIoT(object):
   if (my_mtu < 128):
      return
   self.message_mtu = my_mtu
-  
+
  def is_irciot_datum_(self, in_datum, in_ot, in_src, in_dst):
   if self.CONST.tag_ENC_DATUM in in_datum:
      if isinstance(in_datum[self.CONST.tag_ENC_DATUM], str):
@@ -233,6 +356,7 @@ class PyIRCIoT(object):
      if not isinstance(in_datum[self.CONST.tag_DST_ADDR], str):
         return False
   return True
+  #
   # End of is_irciot_datum_()
 
  def is_irciot_(self, my_json):
@@ -279,6 +403,7 @@ class PyIRCIoT(object):
         in_object[self.CONST.tag_OBJECT_TYPE], my_src, my_dst):
           return False
     return True
+    #
     # End of is_irciot_object_()
 
   def is_irciot_container_(self, in_container):
@@ -312,6 +437,7 @@ class PyIRCIoT(object):
          return False
       return True
     return False
+    #
     # End of is_irciot_container_()
 
   # Begin of is_irciot_()
@@ -329,14 +455,15 @@ class PyIRCIoT(object):
      if not is_irciot_container_(self, irciot_message):
         return False
   return True
+  #
   # End of is_irciot_()
-  
+
  def AES_encrypt(raw_data, encrypion_key):
   return ""
-  
+
  def AES_decrypt(ecrypted_data, encryption_key):
   return ""
-  
+
  def irciot_clear_defrag_chain_(self, my_did):
   try:
     if self.defrag_lock:
@@ -352,7 +479,7 @@ class PyIRCIoT(object):
     self.defrag_lock = False
   except:
     self.defrag_lock = False
-  
+
  def irciot_defragmentation_(self, my_enc, my_header, orig_json):
   (my_dt, my_ot, my_src, my_dst, \
    my_dc, my_dp, my_bc, my_bp, my_did) = my_header
@@ -506,6 +633,7 @@ class PyIRCIoT(object):
   return self.irciot_defragmentation_(my_in, \
      my_defrag_header, orig_json)
   return my_dec
+  #
   # End of irciot_decrypt_datum_()
 
  def irciot_prepare_datum_(self, my_datum, my_header, orig_json):
@@ -570,6 +698,7 @@ class PyIRCIoT(object):
      return self.irciot_prepare_datum_(iot_datums, \
       (iot_dt, iot_ot, iot_src, iot_dst, iot_dc, iot_dp), orig_json)
   return ""
+  #
   # End of irciot_deinencap_object_()
 
  def irciot_deinencap_container_(self, my_container, orig_json):
@@ -594,8 +723,9 @@ class PyIRCIoT(object):
        str_datums = "[" + str_datums + "]"
     return str_datums
   return ""
+  #
   # End of irciot_deinencap_container_()
- 
+
  def irciot_deinencap_(self, my_json):
   ''' First/simple implementation of IRC-IoT "datum" deinencapsulator '''
   try:
@@ -614,8 +744,9 @@ class PyIRCIoT(object):
   if isinstance(iot_containers, dict):
     return self.irciot_deinencap_container_(iot_containers, my_json)
   return ""
+  #
   # End of irciot_deinencap_container_()
- 
+
  def is_irciot_datumset_(self, my_json):
   try:
      my_datums = json.loads(my_json)
@@ -632,7 +763,7 @@ class PyIRCIoT(object):
      return True
   return False
   # End of is_irciot_datumset_()
-  
+
  def irciot_encap_datum_(self, in_datum, in_ot, in_src, in_dst):
   if not self.CONST.tag_ENC_DATUM in in_datum.keys():
    if (in_ot == in_datum[self.CONST.tag_OBJECT_TYPE]):
@@ -642,8 +773,9 @@ class PyIRCIoT(object):
    if (in_dst == in_datum[self.CONST.tag_DST_ADDR]):
       del in_datum[self.CONST.tag_DST_ADDR]
   return json.dumps(in_datum, separators=(',',':'))
+  #
   # End of irciot_encap_datum_()
- 
+
  def irciot_encap_internal_(self, my_datumset):
   ''' First/simple implementation of IRC-IoT "datum" set encapsulator '''
   try:
@@ -720,8 +852,9 @@ class PyIRCIoT(object):
   self.current_mid += 1 # Default mid method
   my_irciot = str_container + str_object + my_irciot + "}}"
   return my_irciot
+  #
   # End of irciot_encap_internal_()
-  
+
  def irciot_encap_bigdatum_(self, my_bigdatum, my_part):
   ''' Hidden part of encapsulator creates mutlipart datum '''
   save_mid  = self.current_mid
@@ -781,6 +914,7 @@ class PyIRCIoT(object):
   if (my_size < my_okay):
     return (my_irciot, 0)
   return (my_irciot, len(raw_big_datum) + my_part - out_skip)
+  #
   # End of irciot_encap_bigdatum_()
 
  def irciot_encap_all_(self, my_datumset):
@@ -798,6 +932,7 @@ class PyIRCIoT(object):
     if (json_text != ""):
       result.append(json_text)
   return result
+  #
   # End of irciot_encap_all_()
 
  def irciot_encap_(self, my_datumset, my_skip, my_part):
@@ -868,5 +1003,6 @@ class PyIRCIoT(object):
     my_skip = 0
     my_datums_skip = 0
   return my_irciot, my_skip + my_datums_skip, my_datums_part
+  #
   # End of irciot_encap_()
 
