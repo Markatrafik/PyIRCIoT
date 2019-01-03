@@ -157,7 +157,7 @@ class PyIRCIoT(object):
   if CAN_encrypt_datum:
     self.crypt_method = self.CONST.tag_ENC_default
   else:
-    self.crypt_method = None
+    self.crypt_method = self.CONST.tag_ENC_BASE64
   #
   # 0 is autoincrement
   #

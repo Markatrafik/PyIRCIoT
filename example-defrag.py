@@ -37,7 +37,7 @@ def main():
    print("output IRC-IoT: @%s@len=%d@\n" % (json_text, len(json_text)))
    msg_text = irciot.irciot_deinencap_(json_text)
    if (msg_text != ""):
-     print("output datumset: @%s@\n" % msg_text)
+     print("output datumset: @\033[44;1m%s\0m@\n" % msg_text)
    print("input it to self\n")
    while ((skip_param > 0) or (part_param > 0)):
      json_text, skip_param, part_param \
@@ -46,7 +46,7 @@ def main():
      msg_text = irciot.irciot_deinencap_(json_text)
      print("input it to self\n")
      if (msg_text != ""):
-       print("output datumset: @%s@\n" % msg_text)
+       print("output datumset: @\033[44;1m%s\033[0m@\n" % msg_text)
    
 main()
 
