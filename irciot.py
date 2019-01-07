@@ -14,7 +14,7 @@ CAN_mid_blockchain = False # Creating a chain of cryptographic signatures
 CAN_encrypt_datum  = False # Ability to encrypt and decrypt of Datums
 CAN_compress_datum = True  # Ability to compress and decompress Datums
 #
-DO_always_encrypt  = False # Alwasy encrypt Datums in IRC-IoT messages
+DO_always_encrypt  = False # Always encrypt Datums in IRC-IoT messages
 
 import json
 import random
@@ -25,27 +25,24 @@ if CAN_debug_library:
 if CAN_compress_datum:
   import zlib
 if CAN_mid_blockchain:
-  pass
-if CAN_encrypt_datum:
-  from Crypto.PublicKey import RSA
+  import nacl.signing # Simple IRC-IoT blockchain signing by ED25519
 if CAN_encrypt_datum or CAN_mid_blockchain:
   import hashlib
-
-#from copy import deepcopy
+  from Crypto.PublicKey import RSA
+  from Crypto.Hash import SHA as SHA1
+  from Crypto.Signature import PKCS1_v1_5
 #from Crypto import Random
-#from Crypto.Signature import PKCS1_v1_5
 #from Crypto.Cipher import AES
 #from Crypto.Cipher import PKCS1_OAEP
-#from Crypto.Hash import SHA
 #from twofish import Twofish
 
 class PyIRCIoT(object):
 
  class CONST(object):
   #
-  irciot_protocol_version = '0.3.17'
+  irciot_protocol_version = '0.3.18'
   #
-  irciot_library_version  = '0.0.48'
+  irciot_library_version  = '0.0.51'
   #
   # IRC-IoT TAGs
   #
@@ -78,10 +75,18 @@ class PyIRCIoT(object):
   tag_ENC_B64_ZLIB  = 'b64z'
   tag_ENC_B64_BZIP2 = 'b64b'
   #
+  tag_mid_ED25519   = 'ed'
+  tag_mid_RSA1024   = 'rA'
+  #
   if CAN_compress_datum:
     tag_ENC_default = tag_ENC_B64_ZLIB
   else:
-    tag_ENC_default = tag_ENC_BASE64  
+    tag_ENC_default = tag_ENC_BASE64
+  #
+  if CAN_mid_blockchain:
+    tag_mid_default = tag_mid_ED25519
+  else:
+    tag_mid_default = ""
   #
   # IRC-IoT Base Types
   #
@@ -150,7 +155,7 @@ class PyIRCIoT(object):
   self.ldict_types = []
   self.ldict_types_lock = False
   #
-  self.mid_method  = 0
+  self.mid_method  = self.CONST.tag_mid_default
   self.oid_method  = 0
   self.did_method  = 0
   #
@@ -162,7 +167,7 @@ class PyIRCIoT(object):
   # 0 is autoincrement
   #
   random.seed()
-  if self.mid_method == 0:
+  if self.mid_method == "":
      self.current_mid = random.randint( 10000, 99999)
   if self.oid_method == 0:
      self.current_oid = random.randint(  1000,  9999)
@@ -171,7 +176,7 @@ class PyIRCIoT(object):
   #
   if (self.crypt_method == self.CONST.tag_ENC_B64_AES):
      self.crypto_AES_BLOCK_SIZE = AES.block_size
-     self.crypto_AES_iv = self.irciot_crypto_hash_(None, \
+     self.crypto_AES_iv = self.irciot_crypto_hasher_(None, \
      self.crypto_AES_BLOCK_SIZE )
   if (self.crypt_method == self.CONST.tag_ENC_B64_2FISH):
      pass
@@ -197,28 +202,53 @@ class PyIRCIoT(object):
  def irciot_version_(self):
   return self.CONST.irciot_protocol_version
 
- def irciot_crypto_hash_(self, in_password, hash_size):
+ def irciot_crypto_hasher_(self, in_password, hash_size):
   if in_password == None or in_password == "":
     return random.new().read( hash_size )
   if not isinstance(in_password, str):
     return None
   crypto_hash = None
+  my_password = in_password.encode('utf-8')
   if hash_size == 20:
     crypto_hash = hashlib.sha1(my_password).digest()
   if hash_size == 28:
     crypto_hash = hashlib.sha224(my_password).digest()
   if hash_size == 32:
     crypto_hash = hashlib.sha256(my_password).digest()
+  if hash_size == 48:
+    crypto_hash = hashlib.sha384(my_password).digest()
+  if hash_size == 64:
+    crypto_hash = hashlib.sha512(my_password).digest()
   return crypto_hash
   #
-  # End of irciot_crypto_hash_()
+  # End of irciot_crypto_hasher_()
+
+ def irciot_crypto_hash_to_str_(self, in_hash):
+  if in_hash == None:
+    return ""
+  try:
+    my_string = str(base64.b64encode(in_hash))[2:-1]
+    while (my_string[-1] == "="):
+      my_string = my_string[:-1]
+    return my_string
+  except:
+    return ""
+  #
+  # Endof irciot_crypto_hash_to_str_()
 
  def irciot_blockchain_generate_keys_(self):
-  #
-  blockchain_public_key = None
-  blockchain_private_key = None
-  #
-  return (blockchain_public_key, blockchain_private_key)
+  my_private_key = None
+  my_public_key = None
+  try:
+    if self.mid_method == self.CONST.tag_mid_ED25519:
+      my_private_key = nacl.signing.SigningKey.generate()
+      my_public_key = my_private_key.verify_key
+    if self.mid_method == self.CONST.tag_mid_RSA1024:
+      my_private_key = RSA.generate(1024)
+      my_public_key = my_private_key.publickey()
+  except:
+    pass
+  return (my_public_key, my_private_key)
   #
   # End of irciot_blockchain_generate_keys_()
 
@@ -236,8 +266,25 @@ class PyIRCIoT(object):
   pass
   #
   # End of irciot_blockchain_update_foreign_key_()
+  
+ def irciot_blockchain_sign_string_(self, in_string, private_key):
+  try:
+    my_string = in_string.encode('utf-8')
+    if self.mid_method == self.CONST.tag_mid_ED25519:
+      my_signed = private_key.sign(my_string)
+      my_sign = my_signed[:-len(my_string)]
+    if self.mid_method == self.CONST.tag_mid_RSA1024:
+      my_pkcs = PKCS1_v1_5.new(private_key)
+      my_hash = SHA1.new(my_string)
+      my_sign = my_pkcs.sign(my_hash)
+    my_string = self.irciot_crypto_hash_to_str_(my_sign)
+  except:
+    my_siring = None
+  return my_string
+  #
+  # End of irciot_blockchain_sign_string_()
 
- def irciot_blockchain_sign_message_(self):
+ def irciot_blockchain_sign_message_(self, in_string):
   pass
   #
   # End of irciot_blockchian_sign_message_()
@@ -366,7 +413,7 @@ class PyIRCIoT(object):
  def irciot_set_mtu_(self, in_mtu):
   if not isinstance(in_mtu, int):
     return
-  if (my_mtu < 128):
+  if (in_mtu < 128):
     return
   self.message_mtu = in_mtu
   
@@ -899,7 +946,10 @@ class PyIRCIoT(object):
   str_container  = '{"' + self.CONST.tag_MESSAGE_ID
   str_container += '":"' + str(self.current_mid) + '",'
   # + '"oc":1,"op":1,'  # Must be implemented later
-  self.current_mid += 1 # Default mid method
+  if self.mid_method == "":
+    self.current_mid += 1 # Default mid method
+  else:
+    return ""
   my_irciot = str_container + str_object + my_irciot + "}}"
   return my_irciot
   #
