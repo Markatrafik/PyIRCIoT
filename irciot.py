@@ -42,7 +42,7 @@ class PyIRCIoT(object):
   #
   irciot_protocol_version = '0.3.18'
   #
-  irciot_library_version  = '0.0.51'
+  irciot_library_version  = '0.0.53'
   #
   # IRC-IoT TAGs
   #
@@ -167,8 +167,20 @@ class PyIRCIoT(object):
   # 0 is autoincrement
   #
   random.seed()
+  #
+  self.blockchain_private_key = None
+  self.blockchain_public_key = None
+  #
   if self.mid_method == "":
      self.current_mid = random.randint( 10000, 99999)
+  elif self.mid_method == self.CONST.tag_mid_ED25519 \
+    or self.mid_method == self.CONST.tag_mid_RSA1024:
+     (self.blockchain_private_key, \
+      self.blockchain_public_key) \
+       = self.irciot_blockchain_generate_keys_()
+     self.current_mid \
+       = self.irciot_blockchain_sign_string_( \
+         str(self.current_mid), self.blockchain_private_key)
   if self.oid_method == 0:
      self.current_oid = random.randint(  1000,  9999)
   if self.did_method == 0:
@@ -248,7 +260,7 @@ class PyIRCIoT(object):
       my_public_key = my_private_key.publickey()
   except:
     pass
-  return (my_public_key, my_private_key)
+  return (my_private_key, my_public_key)
   #
   # End of irciot_blockchain_generate_keys_()
 
@@ -277,18 +289,14 @@ class PyIRCIoT(object):
       my_pkcs = PKCS1_v1_5.new(private_key)
       my_hash = SHA1.new(my_string)
       my_sign = my_pkcs.sign(my_hash)
-    my_string = self.irciot_crypto_hash_to_str_(my_sign)
+    my_string = str(self.mid_method)
+    my_string += self.irciot_crypto_hash_to_str_(my_sign)
   except:
     my_siring = None
   return my_string
   #
   # End of irciot_blockchain_sign_string_()
-
- def irciot_blockchain_sign_message_(self, in_string):
-  pass
-  #
-  # End of irciot_blockchian_sign_message_()
-
+  
  def irciot_blockchain_verify_message_(self):
   pass
   #
@@ -943,14 +951,24 @@ class PyIRCIoT(object):
   if (my_dst != None):
      str_object += '"' + self.CONST.tag_DST_ADDR
      str_object += '":"' + my_dst + '",'
-  str_container  = '{"' + self.CONST.tag_MESSAGE_ID
-  str_container += '":"' + str(self.current_mid) + '",'
+  save_mid = self.current_mid
+  str_container = '{"' + self.CONST.tag_MESSAGE_ID + '":"'
+  str_for_sign  = str_container + str(save_mid)
+  str_for_sign += '",' + str_object + my_irciot + "}}"
+  if self.mid_method == "":
+    pass
+  elif self.mid_method == self.CONST.tag_mid_ED25519 \
+    or self.mid_method == self.CONST.tag_mid_RSA1024:
+    sign_hash = self.irciot_blockchain_sign_string_( \
+      str_for_sign, self.blockchain_private_key)
+    if sign_hash == None:
+      return ""
+    self.current_mid = sign_hash
+  str_container += str(self.current_mid) + '",'
+  my_irciot = str_container + str_object + my_irciot + "}}"
   # + '"oc":1,"op":1,'  # Must be implemented later
   if self.mid_method == "":
     self.current_mid += 1 # Default mid method
-  else:
-    return ""
-  my_irciot = str_container + str_object + my_irciot + "}}"
   return my_irciot
   #
   # End of irciot_encap_internal_()
@@ -989,7 +1007,8 @@ class PyIRCIoT(object):
   my_irciot = self.irciot_encap_internal_(out_big_datum)
   self.current_mid = save_mid # mid rollback
   out_skip  = len(my_irciot)
-  out_head  = len(big_ot) 
+  out_head  = len(big_ot)
+  out_head += len(str(self.current_mid))
   out_head += len(self.CONST.tag_OBJECT_TYPE) + 6 #"":"",#
   out_head += len(str(self.current_did))
   out_head += len(self.CONST.tag_DATUM_ID) + 6 #"":"",#
@@ -1005,7 +1024,7 @@ class PyIRCIoT(object):
   out_big_datum += '","' + self.CONST.tag_DATUM_BC + '":' + str(my_bc)
   out_big_datum += ',"' + self.CONST.tag_DATUM_BP + '":' + str(my_part)
   out_big_datum += ',"' + self.CONST.tag_ENC_DATUM + '":"'
-  my_okay = self.message_mtu - out_head - 48 # Must be calculated
+  my_okay = self.message_mtu - out_head - 43 # Must be calculated
   my_size = my_bc - my_part
   if (my_size > my_okay):
      my_size = my_okay
