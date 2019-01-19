@@ -10,9 +10,11 @@ import fcntl
 import select
 #import subprocess
 
-from irciot import PyIRCIoT
-
-from rfc1459 import PyLayerIRC
+try: # need for development
+ from irciot import PyIRCIoT
+ from rfc1459 import PyLayerIRC
+except:
+ import PyIRCIoT
 
 def main():
 

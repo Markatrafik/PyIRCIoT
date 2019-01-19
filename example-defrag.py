@@ -1,6 +1,9 @@
 #!/usr/bin/python3.5
 
-from irciot import PyIRCIoT
+try: # need for development
+  from irciot import PyIRCIoT
+except:
+  import PyIRCIoT
 
 def main():
 

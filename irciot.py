@@ -11,10 +11,10 @@
 #
 CAN_debug_library  = False
 CAN_mid_blockchain = False # Creating a chain of cryptographic signatures
-CAN_encrypt_datum  = False # Ability to encrypt and decrypt of Datums
-CAN_compress_datum = True  # Ability to compress and decompress Datums
+CAN_encrypt_datum  = False # Ability to encrypt and decrypt of "Datums"
+CAN_compress_datum = True  # Ability to compress and decompress "Datums"
 #
-DO_always_encrypt  = False # Always encrypt Datums in IRC-IoT messages
+DO_always_encrypt  = False # Always encrypt "Datums" in IRC-IoT messages
 
 import json
 import random
@@ -42,7 +42,7 @@ class PyIRCIoT(object):
   #
   irciot_protocol_version = '0.3.18'
   #
-  irciot_library_version  = '0.0.53'
+  irciot_library_version  = '0.0.55'
   #
   # IRC-IoT TAGs
   #
@@ -689,7 +689,7 @@ class PyIRCIoT(object):
              del out_zlib
           else:
              return ""
-          # Adding missing fields to the Datum from parent object
+          # Adding missing fields to the "Datum" from parent object
           my_datum = json.loads(out_json)
           if ((not self.CONST.tag_OBJECT_TYPE in my_datum) \
            and (my_ot != None)):
@@ -713,6 +713,7 @@ class PyIRCIoT(object):
   if my_dup:
     return ""
   return ""
+  #
   # End of irciot_defragmentation_()
 
  def irciot_decrypt_datum_(self, my_datum, my_header, orig_json):
@@ -832,7 +833,7 @@ class PyIRCIoT(object):
   # End of irciot_deinencap_container_()
  
  def irciot_deinencap_(self, my_json):
-  ''' First/simple implementation of IRC-IoT "datum" deinencapsulator '''
+  ''' First/simple implementation of IRC-IoT "Datum" deinencapsulator '''
   try:
      iot_containers = json.loads(my_json)
   except ValueError:
@@ -882,7 +883,7 @@ class PyIRCIoT(object):
   # End of irciot_encap_datum_()
 
  def irciot_encap_internal_(self, my_datumset):
-  ''' First/simple implementation of IRC-IoT "datum" set encapsulator '''
+  ''' First/simple implementation of IRC-IoT "Datum" set encapsulator '''
   try:
      my_datums = json.loads(my_datumset)
   except ValueError:
@@ -974,7 +975,7 @@ class PyIRCIoT(object):
   # End of irciot_encap_internal_()
 
  def irciot_encap_bigdatum_(self, my_bigdatum, my_part):
-  ''' Hidden part of encapsulator creates mutlipart datum '''
+  ''' Hidden part of encapsulator creates mutlipart "Datum" '''
   save_mid  = self.current_mid
   big_datum = {}
   big_ot = None
@@ -1104,13 +1105,13 @@ class PyIRCIoT(object):
                    my_skip_out = 0
                 return my_irciot, my_skip_out, 0
               my_datums_skip -= 1
-           one_datum = 1 # Multidatum, but current datum is too large
+           one_datum = 1 # Multidatum, but current "Datum" is too large
         else:
-           one_datum = 1 # One datum in list, and it is too large
+           one_datum = 1 # One "Datum" in list, and it is too large
      if isinstance(my_datums, dict):
-        one_datum = 1    # One large datum without list
+        one_datum = 1    # One large "Datum" without list
      if (one_datum == 1):
-        self.current_mid = save_mid # mid rollback
+        self.current_mid = save_mid # Message ID rollback
         (my_irciot, my_datums_part) \
          = self.irciot_encap_bigdatum_(my_datums, my_part)
         if (my_datums_part == 0):
