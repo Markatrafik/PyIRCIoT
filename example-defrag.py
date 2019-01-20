@@ -1,4 +1,4 @@
-#!/usr/bin/python3.5
+#!/usr/bin/python3
 
 try: # need for development
   from irciot import PyIRCIoT

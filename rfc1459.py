@@ -27,7 +27,7 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version_compatible = '0.3.18'
    #
-   irciot_library_version_compatible  = '0.0.55'
+   irciot_library_version_compatible  = '0.0.57'
    #
    # Bot specific constants
    #
@@ -39,6 +39,7 @@ class PyLayerIRC(object):
    #
    irc_default_nick = "MyBot"
    irc_default_info = "IRC-IoT Bot"
+   irc_default_quit = "Bye!"
    #
    irc_default_port = 6667
    irc_default_server = "irc-iot.nsk.ru"
@@ -301,6 +302,7 @@ class PyLayerIRC(object):
    #
    self.irc_nick = self.CONST.irc_default_nick
    self.irc_info = self.CONST.irc_default_info
+   self.irc_quit = self.CONST.irc_default_quit
    #
    self.irc_nick_length = self.CONST.irc_max_nick_length
    #
@@ -522,9 +524,9 @@ class PyLayerIRC(object):
   #
   # End of irc_cfg_check_user_()
 
- def is_json_(self, test_message):
+ def is_json_(self, in_message):
    try:
-     json_object = json.loads(test_message)
+     json_object = json.loads(in_message)
    except ValueError:
      return False
    return True
@@ -608,21 +610,21 @@ class PyLayerIRC(object):
    return ret
 
  def irc_quit_(self):
-   ret = self.irc_send_("QUIT :Bye!\r\n")
+   ret = self.irc_send_("QUIT :%s\r\n" % self.irc_quit)
    return ret
 
- def irc_extract_nick_mask_(self, irc_string):
+ def irc_extract_nick_mask_(self, in_string):
    try:
-     irc_mask = irc_string.split(' ', 1)[0][1:]
+     irc_mask = in_string.split(' ', 1)[0][1:]
      irc_nick = irc_mask.split('!', 1)[0]
    except:
      irc_mask = "!@"
      irc_nick = ""
    return (irc_nick, irc_mask)
 
- def irc_extract_message_(self, irc_string):
+ def irc_extract_message_(self, in_string):
    try:
-     irc_msg = irc_string.split( \
+     irc_msg = in_string.split( \
       self.CONST.cmd_PRIVMSG, 1)[1].split(':', 1)[1]
      return irc_msg.strip()
    except:
