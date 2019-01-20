@@ -11,10 +11,11 @@ import select
 #import subprocess
 
 try: # need for development
- from irciot import PyIRCIoT
- from rfc1459 import PyLayerIRC
+  from irciot import PyLayerIRCIoT
+  from rfc1459 import PyLayerIRC
 except:
- import PyIRCIoT
+  from PyIRCIoT.irciot import PyLayerIRCIoT
+  from PyIRCIoT.rfc1459 import PyLayerIRC
 
 def main():
 
@@ -31,7 +32,7 @@ def main():
   #  if (sys.argv[1] != 'background'):
   #   return  
  
-  irciot = PyIRCIoT()
+  irciot = PyLayerIRCIoT()
   
   ircbot = PyLayerIRC()
   

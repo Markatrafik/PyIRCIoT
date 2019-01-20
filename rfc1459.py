@@ -27,7 +27,7 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version_compatible = '0.3.18'
    #
-   irciot_library_version_compatible  = '0.0.57'
+   irciot_library_version_compatible  = '0.0.58'
    #
    # Bot specific constants
    #

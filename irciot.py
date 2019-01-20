@@ -1,5 +1,5 @@
 '''
-'' PyIRCIoT
+'' PyIRCIoT (PyLayerIRCIoT class)
 ''
 '' Copyright (c) 2018 Alexey Y. Woronov
 ''
@@ -37,13 +37,13 @@ if CAN_encrypt_datum:
 #from Crypto.Cipher import PKCS1_OAEP
 #from twofish import Twofish
 
-class PyIRCIoT(object):
+class PyLayerIRCIoT(object):
 
  class CONST(object):
   #
   irciot_protocol_version = '0.3.18'
   #
-  irciot_library_version  = '0.0.57'
+  irciot_library_version  = '0.0.58'
   #
   # IRC-IoT TAGs
   #
@@ -210,7 +210,7 @@ class PyIRCIoT(object):
   # 1 is CRC16 Check "c16"
   # 2 is CRC32 Check "c32"
   #
-  # End of PyIRCIoT.__init__()
+  # End of PyLayerIRCIoT.__init__()
 
  def irciot_version_(self):
   return self.CONST.irciot_protocol_version

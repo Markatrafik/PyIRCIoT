@@ -1,13 +1,13 @@
 #!/usr/bin/python3
 
 try: # need for development
-  from irciot import PyIRCIoT
+  from irciot import PyLayerIRCIoT
 except:
-  import PyIRCIoT
+  from PyIRCIoT.irciot import PyLayerIRCIoT
 
 def main():
 
- irciot = PyIRCIoT()
+ irciot = PyLayerIRCIoT()
 
  datumset_text  = '[{"bigval":"long-long-value-xxxxxxxxxxxxxxxxxxxxxxxxxxx'
  datumset_text += 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'

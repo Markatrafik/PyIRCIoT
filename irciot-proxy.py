@@ -5,10 +5,10 @@ import os
 import pickle
 import json
 
-try: # Need for development
-  from irciot import PyIRCIoT
+try: # need for development
+  from irciot import PyLayerIRCIoT
 except:
-  import PyIRCIoT
+  from PyIRCIoT.irciot import PyLayerIRCIoT
 
 def main():
 
@@ -31,7 +31,7 @@ def main():
        input_json = sys.argv[2]
        save_file = sys.argv[3]
        
-    irciot = PyIRCIoT()
+    irciot = PyLayerIRCIoT()
 
     if os.path.isfile(save_file):
       save_fd = open(save_file, 'r')
