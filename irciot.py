@@ -43,7 +43,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.18'
   #
-  irciot_library_version  = '0.0.58'
+  irciot_library_version  = '0.0.59'
   #
   # IRC-IoT TAGs
   #

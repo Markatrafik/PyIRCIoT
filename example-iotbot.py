@@ -22,7 +22,7 @@ def main():
   # if (len(sys.argv) == 1): 
   #  print("Starting iotBot...")
   #  independent_process = subprocess.Popen(
-  #   ['python3.5', os.path.expanduser(sys.argv[0]), 'background']
+  #   ['python3', os.path.expanduser(sys.argv[0]), 'background']
   #  )
   #  return
    
