@@ -334,7 +334,7 @@ class PyLayerIRC(object):
    #
    self.irc_proxies = []
    if not self.irc_proxy == None:
-   self.irc_proxies = [ ( \
+     self.irc_proxies = [ ( \
      self.irc_proxy_server, self.irc_proxy_port, \
      self.irc_proxy_password, 0, None ) ]
    #
@@ -463,7 +463,7 @@ class PyLayerIRC(object):
    in_opt = None
    in_mid = None
    if not irciot_parameters == None:
-     (in_key in_opt, in_mid) = irciot_parameters
+     (in_key, in_opt, in_mid) = irciot_parameters
    pass
    #
    # End of irc_track_add_user_()
@@ -553,7 +553,7 @@ class PyLayerIRC(object):
    in_opt = None
    in_mid = None
    if not irciot_parameters == None:
-     (in_key in_opt, in_mid) = irciot_parameters   
+     (in_key, in_opt, in_mid) = irciot_parameters   
    for my_user in self.irc_users:
      ( my_uid, my_mask, my_chan, my_crypt, my_opt, my_mid ) = my_user
      if ((in_channel == "*") or \
