@@ -41,9 +41,9 @@ class PyLayerIRCIoT(object):
 
  class CONST(object):
   #
-  irciot_protocol_version = '0.3.18'
+  irciot_protocol_version = '0.3.19'
   #
-  irciot_library_version  = '0.0.59'
+  irciot_library_version  = '0.0.61'
   #
   # IRC-IoT TAGs
   #
@@ -265,12 +265,12 @@ class PyLayerIRCIoT(object):
   #
   # End of irciot_blockchain_generate_keys_()
 
- def irciot_blockchain_place_key_to_repo_(self):
+ def irciot_blockchain_place_key_to_repo_(self, in_public_key):
   pass
   #
   # End of irciot_blockchain_place_key_to_repo_()
 
- def irciot_blockchain_request_foreign_key_(self):
+ def irciot_blockchain_request_foreign_key_(self, in_irciot_user):
   pass
   #
   # End of irciot_blockchain_request_foreign_key_()
@@ -280,14 +280,14 @@ class PyLayerIRCIoT(object):
   #
   # End of irciot_blockchain_update_foreign_key_()
   
- def irciot_blockchain_sign_string_(self, in_string, private_key):
+ def irciot_blockchain_sign_string_(self, in_string, in_private_key):
   try:
     my_string = in_string.encode('utf-8')
     if self.mid_method == self.CONST.tag_mid_ED25519:
-      my_signed = private_key.sign(my_string)
+      my_signed = in_private_key.sign(my_string)
       my_sign = my_signed[:-len(my_string)]
     if self.mid_method == self.CONST.tag_mid_RSA1024:
-      my_pkcs = PKCS1_v1_5.new(private_key)
+      my_pkcs = PKCS1_v1_5.new(in_private_key)
       my_hash = SHA1.new(my_string)
       my_sign = my_pkcs.sign(my_hash)
     my_string = str(self.mid_method)
@@ -327,12 +327,12 @@ class PyLayerIRCIoT(object):
   #
   # End of irciot_crypto_generate_keys_()
 
- def irciot_crypto_place_key_to_repo_(self):
+ def irciot_crypto_place_key_to_repo_(self, in_public_key):
   pass
   #
   # End of irciot_crypto_place_key_to_repo_()
 
- def irciot_crypto_request_foreign_key_(self):
+ def irciot_crypto_request_foreign_key_(self, in_irciot_user):
   pass
   #
   # End of irciot_crypto_request_foreign_key_()

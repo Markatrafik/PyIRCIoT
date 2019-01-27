@@ -25,9 +25,9 @@ class PyLayerIRC(object):
 
  class CONST(object):
    #
-   irciot_protocol_version_compatible = '0.3.18'
+   irciot_protocol_version_compatible = '0.3.19'
    #
-   irciot_library_version_compatible  = '0.0.59'
+   irciot_library_version_compatible  = '0.0.61'
    #
    # Bot specific constants
    #
@@ -320,7 +320,7 @@ class PyLayerIRC(object):
    self.irc_ssl = self.CONST.irc_default_ssl
    #
    self.irc_proxy = None
-   if not self.CONST.irc_default_proxy == None:
+   if self.CONST.irc_default_proxy != None:
      self.irc_proxy_server = self.CONST.irc_default_proxy_server
      self.irc_proxy_port = self.CONST.irc_default_proxy_port
      self.irc_proxy_password = self.CONST.irc_default_proxy_password
@@ -333,7 +333,7 @@ class PyLayerIRC(object):
      self.irc_password, self.irc_ssl, 0, None ) ]
    #
    self.irc_proxies = []
-   if not self.irc_proxy == None:
+   if self.irc_proxy != None:
      self.irc_proxies = [ ( \
      self.irc_proxy_server, self.irc_proxy_port, \
      self.irc_proxy_password, 0, None ) ]
@@ -462,7 +462,7 @@ class PyLayerIRC(object):
    in_key = None
    in_opt = None
    in_mid = None
-   if not irciot_parameters == None:
+   if irciot_parameters != None:
      (in_key, in_opt, in_mid) = irciot_parameters
    pass
    #
@@ -475,11 +475,11 @@ class PyLayerIRC(object):
      (my_nick, my_mask, my_user, my_info) = my_struct
      # comparing of the masks will be here ...
      if (self.irc_compare_nicks_(my_nick, in_nick)):
-       if not in_mask == None:
+       if in_mask != None:
          my_mask = in_mask
-       if not in_user == None:
+       if in_user != None:
          my_user = irc_in
-       if not in_info == None:
+       if in_info != None:
          my_info = in_info
        self.irc_nicks[my_index] = (in_nick, my_mask, my_user, my_info)
        break
@@ -543,7 +543,7 @@ class PyLayerIRC(object):
    in_key = None
    in_opt = None
    in_mid = None
-   if not irciot_parameters == None:
+   if irciot_parameters != None:
      (in_key in_opt, in_mid) = irciot_parameters
    return True
 
@@ -552,7 +552,7 @@ class PyLayerIRC(object):
    in_key = None
    in_opt = None
    in_mid = None
-   if not irciot_parameters == None:
+   if irciot_parameters != None:
      (in_key, in_opt, in_mid) = irciot_parameters   
    for my_user in self.irc_users:
      ( my_uid, my_mask, my_chan, my_crypt, my_opt, my_mid ) = my_user
