@@ -27,7 +27,7 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version_compatible = '0.3.19'
    #
-   irciot_library_version_compatible  = '0.0.61'
+   irciot_library_version_compatible  = '0.0.63'
    #
    # Bot specific constants
    #
@@ -544,7 +544,7 @@ class PyLayerIRC(object):
    in_opt = None
    in_mid = None
    if irciot_parameters != None:
-     (in_key in_opt, in_mid) = irciot_parameters
+     (in_key, in_opt, in_mid) = irciot_parameters
    return True
 
  def irc_cfg_check_user_(self, in_from, in_channel, \
