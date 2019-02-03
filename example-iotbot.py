@@ -86,5 +86,6 @@ def main():
   del ircbot
   sys.exit()
     
-main()
+if __name__ == '__main__':
+  main()
 

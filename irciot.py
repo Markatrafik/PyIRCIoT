@@ -15,6 +15,7 @@ CAN_encrypt_datum  = False # Ability to encrypt and decrypt of "Datums"
 CAN_compress_datum = True  # Ability to compress and decompress "Datums"
 #
 DO_always_encrypt  = False # Always encrypt "Datums" in IRC-IoT messages
+DO_auto_blockchain = False # Automatic loading of necessary modules
 
 import json
 import random
@@ -43,7 +44,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.21'
   #
-  irciot_library_version  = '0.0.65'
+  irciot_library_version  = '0.0.67'
   #
   # IRC-IoT TAGs
   #
@@ -162,6 +163,10 @@ class PyLayerIRCIoT(object):
   #
   if CAN_encrypt_datum:
     self.crypt_method = self.CONST.tag_ENC_default
+    self.crypt_HASH = hashlib
+    self.crypt_RSA  = RSA
+    self.crypt_SHA1 = SHA1
+    self.crypt_PKCS = PKCS1_v1_5
   else:
     self.crypt_method = self.CONST.tag_ENC_BASE64
   #
@@ -177,7 +182,13 @@ class PyLayerIRCIoT(object):
      self.current_mid = random.randint( 10000, 99999)
   elif self.mid_method == self.CONST.tag_mid_ED25519 \
     or self.mid_method == self.CONST.tag_mid_RSA1024:
-     self.blockchain_signing = nacl.signing
+     self.crypt_RSA  = RSA
+     self.crypt_SHA1 = SHA1
+     self.crypt_PKCS = PKCS1_v1_5
+     if self.mid_method == self.CONST.tag_mid_ED25519:
+       self.blockchain_signing = nacl.signing
+     else:
+       self.blockchain_signing = Crypto.Signature
      (self.blockchain_private_key, self.blockchain_public_key) \
        = self.irciot_blockchain_generate_keys_()
      self.current_mid \
@@ -217,15 +228,26 @@ class PyLayerIRCIoT(object):
   return self.CONST.irciot_protocol_version
   
  def irciot_enable_blockchain_(self, in_mid_method):
-  if in_mid_method != self.CONST.tag_mid_ED25519 and \
-     in_mid_method != self.CONST.tag_mid_RSA1024:
+  if CAN_mid_blockchain == True:
     return
-  if self.blockchain_signing == None:
+  if in_mid_method == self.CONST.tag_mid_ED25519:
     import importlib
-    self.blockchain_signing = importlib.import_module('nacl.signing')
+    self.blockchain_signing \
+      = importlib.import_module('nacl.signing')
+  elif in_mid_method == self.CONST.tag_mid_RSA1024:
+    import importlib
+    if not (CAN_encrypt_datum or CAN_mid_blockchain):
+      self.crypt_HASH \
+        = importlib.import_module('hashlib')
+      self.crypt_RSA \
+        = importlib.import_module('Crypto.PublicKey.RSA')
+      self.crypt_PKCS \
+        = importlib.import_module('Crypto.Signature.PKCS1_v1_5')
+      self.crypt_SHA1 \
+        = importlib.import_module('Crypto.Hash.SHA')
   self.mid_method = in_mid_method
   (self.blockchain_private_key, self.blockchain_public_key) \
-    = self.irciot_blockchain_generate_keys_()
+    = self.irciot_blockchain_generate_keys_()  
   self.current_mid \
     = self.irciot_blockchain_sign_string_( \
       str(self.current_mid), self.blockchain_private_key)
@@ -237,24 +259,25 @@ class PyLayerIRCIoT(object):
   self.current_mid = random.randint( 10000, 99999)
   self.blockchain_signing = None
 
- def irciot_crypto_hasher_(self, in_password, hash_size):
-  if in_password == None or in_password == "":
-    return random.new().read( hash_size )
+ def irciot_crypto_hasher_(self, in_password, in_hash_size):
+  if in_password == None or in_password == "" or \
+   not (CAN_encrypt_datum or mid_method != ""):
+    return random.new().read( in_hash_size )
   if not isinstance(in_password, str):
     return None
-  crypto_hash = None
+  my_hash = None
   my_password = in_password.encode('utf-8')
-  if hash_size == 20:
-    crypto_hash = hashlib.sha1(my_password).digest()
-  if hash_size == 28:
-    crypto_hash = hashlib.sha224(my_password).digest()
-  if hash_size == 32:
-    crypto_hash = hashlib.sha256(my_password).digest()
-  if hash_size == 48:
-    crypto_hash = hashlib.sha384(my_password).digest()
-  if hash_size == 64:
-    crypto_hash = hashlib.sha512(my_password).digest()
-  return crypto_hash
+  if in_hash_size == 20:
+    my_hash = self.crypt_HASH.sha1(my_password).digest()
+  if in_hash_size == 28:
+    my_hash = self.crypt_HASH.sha224(my_password).digest()
+  if in_hash_size == 32:
+    my_hash = self.crypt_HASH.sha256(my_password).digest()
+  if in_hash_size == 48:
+    my_hash = self.crypt_HASH.sha384(my_password).digest()
+  if in_hash_size == 64:
+    my_hash = self.crypt_HASH.sha512(my_password).digest()
+  return my_hash
   #
   # End of irciot_crypto_hasher_()
 
@@ -269,7 +292,26 @@ class PyLayerIRCIoT(object):
   except:
     return ""
   #
-  # Endof irciot_crypto_hash_to_str_()
+  # End of irciot_crypto_hash_to_str_()
+  
+ def irciot_crypto_str_to_hash_(self, in_string):
+  if not isinstance(in_string, str):
+    return None
+  if (len(in_string) < 6):
+    return None
+  try:
+    my_method = in_string[:2]
+    my_hash   = in_string[2:]
+    my_count  = 4 - (len(my_hash) % 4)
+    if my_count > 0:
+      for my_idx in range(my_count):
+        my_hash += '='
+    my_hash = base64.b64decode(my_hash)
+  except:
+    return None
+  return (my_method, my_hash)
+  #
+  # End of irciot_crypto_str_to_hash_()
 
  def irciot_blockchain_generate_keys_(self):
   my_private_key = None
@@ -279,7 +321,7 @@ class PyLayerIRCIoT(object):
       my_private_key = self.blockchain_signing.SigningKey.generate()
       my_public_key = my_private_key.verify_key
     if self.mid_method == self.CONST.tag_mid_RSA1024:
-      my_private_key = RSA.generate(1024)
+      my_private_key = self.crypt_RSA.generate(1024)
       my_public_key = my_private_key.publickey()
   except:
     pass
@@ -303,32 +345,81 @@ class PyLayerIRCIoT(object):
   # End of irciot_blockchain_update_foreign_key_()
   
  def irciot_blockchain_sign_string_(self, in_string, in_private_key):
-# try:
+  try:
     my_string = in_string.encode('utf-8')
     if self.mid_method == self.CONST.tag_mid_ED25519:
       my_signed = in_private_key.sign(my_string)
       my_sign = my_signed[:-len(my_string)]
     elif self.mid_method == self.CONST.tag_mid_RSA1024:
-      my_pkcs = PKCS1_v1_5.new(in_private_key)
-      my_hash = SHA1.new(my_string)
+      my_hash = self.crypt_SHA1.new(my_string)
+      my_pkcs = self.crypt_PKCS.new(in_private_key)
       my_sign = my_pkcs.sign(my_hash)
+      del my_hash
     else:
       return ""
     my_string = str(self.mid_method)
     my_string += self.irciot_crypto_hash_to_str_(my_sign)
-# except:
-#   my_siring = None
-    return my_string
+  except:
+    my_siring = None
+  return my_string
   #
   # End of irciot_blockchain_sign_string_()
+  
+ def irciot_blockchain_save_defaults_(self):
+  return (self.mid_method, \
+   self.blockchain_private_key, \
+   self.blockchain_public_key)
+  
+ def irciot_blockchain_restore_defaults_(self, in_defaults):
+  (self.mid_method, \
+   self.blockchain_private_key, \
+   self.blockchain_public_key) = in_defaults
  
- def irciot_blockchain_verify_hash_(self, in_hash):
-  return True
+ def irciot_blockchain_verify_string_(self, \
+   in_string, in_sign, in_public_key):
+  if not isinstance(in_string, str):
+    return False
+  if not isinstance(in_sign, str):
+    return False
+  my_pair = self.irciot_crypto_str_to_hash_(in_sign)
+  if my_pair == None:
+    return False
+  (my_method, my_sign) = my_pair
+  my_string_bin = bytes(in_string, 'utf-8')
+  my_save = self.irciot_blockchain_save_defaults_()
+  my_result = False
+  if my_method == self.CONST.tag_mid_ED25519:
+    self.mid_method = my_method
+    if DO_auto_blockchain:
+      if self.blockchain_signing == None:
+        self.irciot_enable_blockchain_(my_method)
+    try:
+      in_public_key.verify(my_string_bin, my_sign)
+      my_result = True
+    except:
+      pass
+  elif my_method == self.CONST.tag_mid_RSA1024:
+    self.mid_method = my_method
+    if DO_auto_blockchain:
+      if self.crypt_SHA1 == None or self.crypt_PKCS == None:
+        self.irciot_enable_blockchain_(my_method)
+    try:
+      my_hash = self.crypt_SHA1.new(my_string_bin)
+      my_pkcs = self.crypt_PKCS.new(in_public_key)
+      if my_pkcs.verify(my_hash, my_sign):
+        my_result = True
+    except:
+      pass
+  self.irciot_blockchain_restore_defaults_(my_save)
+  return my_result
   #
   # End of irciot_blockchain_verify_string_()
   
- def irciot_blockchain_verify_message_(self):
-  pass
+ def irciot_blockchain_verify_message_(self, \
+   in_new_message, in_old_message):
+  my_result = True
+  #
+  return my_result
   #
   # End of irciot_blockchain_verify_message_()
 
