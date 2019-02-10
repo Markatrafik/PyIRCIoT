@@ -27,7 +27,7 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version_compatible = '0.3.21'
    #
-   irciot_library_version_compatible  = '0.0.67'
+   irciot_library_version_compatible  = '0.0.68'
    #
    # Bot specific constants
    #
@@ -64,7 +64,8 @@ class PyLayerIRC(object):
    #
    irc_default_users = [ \
     ( 1, "iotBot!*irc@irc-iot.nsk.ru",    "#myhome", None, None, None ), \
-    ( 2, "FaceBot!*irc@faceserv*.nsk.ru", "#myhome", None, None, None ) ]
+    ( 2, "FaceBot!*irc@faceserv*.nsk.ru", "#myhome", None, None, None ), \
+    ( 3, "noobot!*bot@irc-iot.nsk.ru",    "#myhome", None, None, None ) ]
    #
    irc_queue_input  = 0
    irc_queue_output = 1
@@ -1005,8 +1006,9 @@ class PyLayerIRC(object):
            self.irc_send_(self.CONST.cmd_PASS \
             + " " + self.irc_password)
          if (self.irc_send_(self.CONST.cmd_USER \
-          + " " + self.irc_nick + " " + self.irc_host \
-          + " 1 :" + self.irc_info) == -1):
+          + " " + self.irc_tolower_(self.irc_nick) \
+          + " " + self.irc_host + " 1 :" \
+          + self.irc_info) == -1):
            irc_init = 0
 
        elif (irc_init == 3):
@@ -1114,6 +1116,7 @@ class PyLayerIRC(object):
        if (irc_init > 5):
           (irc_message, irc_wait) \
            = self.irc_check_queue_(self.CONST.irc_queue_output)
+          irc_message = str(irc_message)
           if (irc_message != ""):
              self.irc_send_(self.CONST.cmd_PRIVMSG + " " \
                + self.irc_channel + " :" + irc_message)

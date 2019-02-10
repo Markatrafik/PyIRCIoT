@@ -44,7 +44,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.21'
   #
-  irciot_library_version  = '0.0.67'
+  irciot_library_version  = '0.0.68'
   #
   # IRC-IoT TAGs
   #
@@ -161,6 +161,12 @@ class PyLayerIRCIoT(object):
   self.oid_method  = 0
   self.did_method  = 0
   #
+  self.crypt_HASH = None
+  self.crypt_RSA  = None
+  self.crypt_SHA1 = None
+  self.crypt_PKCS = None
+  self.crypt_NACL = None
+  #
   if CAN_encrypt_datum:
     self.crypt_method = self.CONST.tag_ENC_default
     self.crypt_HASH = hashlib
@@ -176,7 +182,6 @@ class PyLayerIRCIoT(object):
   #
   self.blockchain_private_key = None
   self.blockchain_public_key = None
-  self.blockchain_signing = None
   #
   if self.mid_method == "":
      self.current_mid = random.randint( 10000, 99999)
@@ -186,9 +191,7 @@ class PyLayerIRCIoT(object):
      self.crypt_SHA1 = SHA1
      self.crypt_PKCS = PKCS1_v1_5
      if self.mid_method == self.CONST.tag_mid_ED25519:
-       self.blockchain_signing = nacl.signing
-     else:
-       self.blockchain_signing = Crypto.Signature
+       self.crypt_NACL = nacl.signing
      (self.blockchain_private_key, self.blockchain_public_key) \
        = self.irciot_blockchain_generate_keys_()
      self.current_mid \
@@ -232,7 +235,7 @@ class PyLayerIRCIoT(object):
     return
   if in_mid_method == self.CONST.tag_mid_ED25519:
     import importlib
-    self.blockchain_signing \
+    self.crypt_NACL \
       = importlib.import_module('nacl.signing')
   elif in_mid_method == self.CONST.tag_mid_RSA1024:
     import importlib
@@ -257,7 +260,6 @@ class PyLayerIRCIoT(object):
  def irciot_disable_blockchain_(self):
   self.mid_method = ""
   self.current_mid = random.randint( 10000, 99999)
-  self.blockchain_signing = None
 
  def irciot_crypto_hasher_(self, in_password, in_hash_size):
   if in_password == None or in_password == "" or \
@@ -314,17 +316,17 @@ class PyLayerIRCIoT(object):
   # End of irciot_crypto_str_to_hash_()
 
  def irciot_blockchain_generate_keys_(self):
-  my_private_key = None
-  my_public_key = None
   try:
     if self.mid_method == self.CONST.tag_mid_ED25519:
-      my_private_key = self.blockchain_signing.SigningKey.generate()
+      my_private_key \
+        = self.crypt_NACL.SigningKey.generate()
       my_public_key = my_private_key.verify_key
     if self.mid_method == self.CONST.tag_mid_RSA1024:
       my_private_key = self.crypt_RSA.generate(1024)
       my_public_key = my_private_key.publickey()
   except:
-    pass
+    my_private_key = None
+    my_public_key = None
   return (my_private_key, my_public_key)
   #
   # End of irciot_blockchain_generate_keys_()
@@ -391,7 +393,7 @@ class PyLayerIRCIoT(object):
   if my_method == self.CONST.tag_mid_ED25519:
     self.mid_method = my_method
     if DO_auto_blockchain:
-      if self.blockchain_signing == None:
+      if self.crypt_NACL == None:
         self.irciot_enable_blockchain_(my_method)
     try:
       in_public_key.verify(my_string_bin, my_sign)
@@ -401,7 +403,8 @@ class PyLayerIRCIoT(object):
   elif my_method == self.CONST.tag_mid_RSA1024:
     self.mid_method = my_method
     if DO_auto_blockchain:
-      if self.crypt_SHA1 == None or self.crypt_PKCS == None:
+      if self.crypt_SHA1 == None \
+      or self.crypt_PKCS == None:
         self.irciot_enable_blockchain_(my_method)
     try:
       my_hash = self.crypt_SHA1.new(my_string_bin)
