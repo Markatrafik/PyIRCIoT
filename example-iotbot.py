@@ -36,6 +36,8 @@ def main():
   
   ircbot = PyLayerIRC()
   
+  irciot.irc_pointer = ircbot.irc_handler
+  
   ircbot.irc_server  = "irc.undernet.org"
 
   # Warning: Please, run your own IRC server

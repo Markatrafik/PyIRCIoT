@@ -20,6 +20,7 @@ DO_auto_blockchain = False # Automatic loading of necessary modules
 import json
 import random
 import base64
+import datetime
 
 if CAN_debug_library:
   from pprint import pprint
@@ -44,7 +45,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.21'
   #
-  irciot_library_version  = '0.0.68'
+  irciot_library_version  = '0.0.69'
   #
   # IRC-IoT TAGs
   #
@@ -65,6 +66,7 @@ class PyLayerIRCIoT(object):
   tag_DST_ADDR    = 'dst' # Destination Address
   tag_ENC_DATUM   = 'ed'  # Encrypted Datum
   tag_ENC_METHOD  = 'em'  # Encryption Method
+  tag_BCH_PUBKEY  = 'pk'  # Blockchain Public Key
   #
   tag_ENC_BASE64    = 'b64p'
   tag_ENC_BASE85    = 'b85p'
@@ -89,6 +91,13 @@ class PyLayerIRCIoT(object):
     tag_mid_default = tag_mid_ED25519
   else:
     tag_mid_default = ""
+  #
+  # The Object Types, will be replaced
+  # by IRC-IoT "Dictionaries" mechanism
+  #
+  ot_BCH_INFO    = "bchnfo"  # Blockchain Information
+  ot_BCH_REQUEST = "bchreq"  # Blockchain Request
+  ot_BCH_ACK     = "bchack"  # Blockchain Acknowledgment
   #
   # IRC-IoT Base Types
   #
@@ -116,6 +125,7 @@ class PyLayerIRCIoT(object):
   err_DEFRAG_DC_EXCEEDED  = 122
   err_DEFRAG_BC_EXCEEDED  = 123
   err_OVERLAP_MISSMATCH   = 131
+  err_BASE64_DECODING     = 251
   err_COMP_ZLIB_HEADER    = 301
   err_COMP_ZLIB_INCOMP    = 303
   #
@@ -226,6 +236,44 @@ class PyLayerIRCIoT(object):
   # 2 is CRC32 Check "c32"
   #
   # End of PyLayerIRCIoT.__init__()
+  
+ def irc_pointer (self, in_message):
+  # Warning: interface may be changed
+  return False
+  
+ def irciot_error_(self, in_error_code, in_mid):
+  my_error_message = ""
+  if in_error_code == self.CONST.err_BASE64_DECODING:
+    return
+  elif in_error_code == self.CONST.err_DEFRAG_INVALID_DID:
+    return
+  elif in_error_code == self.CONST.err_CONTENT_MISSMATCH:
+    return
+  elif in_error_code == self.CONST.err_DEFRAG_OP_MISSING:
+    return
+  elif in_error_code == self.CONST.err_DEFRAG_DP_MISSING:
+    return
+  elif in_error_code == self.CONST.err_DEFRAG_BP_MISSING:
+    return
+  elif in_error_code == self.CONST.err_DEFRAG_OC_EXCEEDED:
+    return
+  elif in_error_code == self.CONST.err_DEFRAG_DC_EXCEEDED:
+    return
+  elif in_error_code == self.CONST.err_DEFRAG_BC_EXCEEDED:
+    return
+  elif in_error_code == self.CONST.err_OVERLAP_MISSMATCH:
+    return
+  elif in_error_code == self.CONST.err_COMP_ZLIB_HEADER:
+    return
+  elif in_error_code == self.CONST.err_COMP_ZLIB_INCOMP:
+    return
+  else:
+    return
+  if not self.irc_pointer (my_error_message):
+    # Handler not inserted
+    pass
+  #
+  # End of irciot_error_()
 
  def irciot_version_(self):
   return self.CONST.irciot_protocol_version
@@ -300,6 +348,7 @@ class PyLayerIRCIoT(object):
   if not isinstance(in_string, str):
     return None
   if (len(in_string) < 6):
+    self.irciot_error_(self.CONST.err_BASE64_DECODING, 0)
     return None
   try:
     my_method = in_string[:2]
@@ -310,6 +359,7 @@ class PyLayerIRCIoT(object):
         my_hash += '='
     my_hash = base64.b64decode(my_hash)
   except:
+    self.irciot_error_(self.CONST.err_BASE64_DECODING, 0)
     return None
   return (my_method, my_hash)
   #
@@ -330,11 +380,44 @@ class PyLayerIRCIoT(object):
   return (my_private_key, my_public_key)
   #
   # End of irciot_blockchain_generate_keys_()
+  
+ def irciot_get_current_datetime_(self):
+  return datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+ 
+ def irciot_blockchain_key_to_message_(self, in_public_key):
+  if not isinstance(in_public_key, str):
+    return ""
+  my_datum = { }
+  my_ot  = self.CONST.ot_BCH_INFO
+  my_datum[self.CONST.tag_OBJECT_TYPE] = my_ot
+  my_datum[self.CONST.tag_BCH_PUBKEY] = in_public_key
+  my_datum[self.CONST.tag_DATE_TIME] \
+    = self.irciot_get_current_datetime_()
+  my_message = self.irciot_encap_datum_(self, \
+    my_datum, my_ot, "", "")
+  return my_message
+  #
+  # End of irciot_blockchain_key_to_message_()
+
+ def irciot_blockchain_key_publication_(self, in_public_key):
+  if not isinstance(in_public_key, str):
+    return  
+  my_msg = self.irciot_blockchain_key_to_message_(in_public_key)
+  if my_msg == "":
+    return
+  if not self.irc_pointer (my_msg):
+    # Handler not inserted
+    pass
+  #
+  # End of irciot_blockchain_key_to_message_()
 
  def irciot_blockchain_place_key_to_repo_(self, in_public_key):
-  pass
+  if not isinstance(in_public_key, str):
+    return
   #
   # End of irciot_blockchain_place_key_to_repo_()
+  
+
 
  def irciot_blockchain_request_foreign_key_(self, in_irciot_user):
   pass
@@ -807,17 +890,29 @@ class PyLayerIRCIoT(object):
        pass
     elif (my_ok == 2):
        self.irciot_clear_defrag_chain_(my_did)
+       if (self.crypt_method == self.CONST.tag_ENC_BASE64):
+          try:
+            out_json = str(base64.b64decode(defrag_buffer))[2:-1]
+          except:
+            self.irciot_error_(self.CONST.err_BASE64_DECODING, 0)
+            return ""
+       elif (self.crypt_method == self.CONST.tag_ENC_B64_AES):
+          return ""
+       elif (self.crypt_method == self.CONST.tag_ENC_B64_ZLIB):
+          try:
+            out_zlib = base64.b64decode(defrag_buffer)
+          except:
+            self.irciot_error_(self.CONST.err_BASE64_DECODING, 0)
+            return ""
+          try:
+            out_json = str(zlib.decompress(out_zlib))[2:-1]
+          except:
+            self.irciot_error_(self.CONST.err_COMP_ZLIB_INCOMP, 0)
+            return ""
+          del out_zlib
+       else:
+          return ""
        try:
-          if (self.crypt_method == self.CONST.tag_ENC_BASE64):
-             out_json = str(base64.b64decode(defrag_buffer))[2:-1]
-          elif (self.crypt_method == self.CONST.tag_ENC_B64_AES):
-             return ""
-          elif (self.crypt_method == self.CONST.tag_ENC_B64_ZLIB):
-             out_zlib = base64.b64decode(defrag_buffer)
-             out_json = str(zlib.decompress(out_zlib))[2:-1]
-             del out_zlib
-          else:
-             return ""
           # Adding missing fields to the "Datum" from parent object
           my_datum = json.loads(out_json)
           if ((not self.CONST.tag_OBJECT_TYPE in my_datum) \

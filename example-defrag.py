@@ -51,5 +51,6 @@ def main():
      if (msg_text != ""):
        print("output datumset: @\033[1;36;44m%s\033[0m@\n" % msg_text)
    
-main()
+if __name__ == '__main__':
+  main()
 

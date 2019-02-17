@@ -27,7 +27,7 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version_compatible = '0.3.21'
    #
-   irciot_library_version_compatible  = '0.0.68'
+   irciot_library_version_compatible  = '0.0.69'
    #
    # Bot specific constants
    #
@@ -399,6 +399,13 @@ class PyLayerIRC(object):
    if not self.irc_debug:
      return
    print(msg)
+   
+ def irc_handler (self, in_message):
+   # Warning: interface may be changed
+   self.irc_add_to_queue_( \
+     self.CONST.irc_queue_output, in_message, \
+     self.CONST.irc_micro_wait) 
+   return True
 
  def irc_tolower_(self, in_input):
    return in_input.translate(self.CONST.irc_translation)
