@@ -37,6 +37,7 @@ def main():
   ircbot = PyLayerIRC()
   
   irciot.irc_pointer = ircbot.irc_handler
+  irciot.user_pointer = ircbot.user_pointer
   
   ircbot.irc_server  = "irc.undernet.org"
 
@@ -48,6 +49,8 @@ def main():
   ircbot.irc_debug   = True
 
   ircbot.start_IRC_()
+  
+  # irciot.irciot_enable_blockchain_(irciot.CONST.tag_mid_ED25519)
   
   print("Starting IRC, press any key to exit", "\r")
   

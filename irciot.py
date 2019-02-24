@@ -46,7 +46,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.21'
   #
-  irciot_library_version  = '0.0.71'
+  irciot_library_version  = '0.0.73'
   #
   # IRC-IoT TAGs
   #
@@ -98,9 +98,16 @@ class PyLayerIRCIoT(object):
   # The Object Types, will be replaced
   # by IRC-IoT "Dictionaries" mechanism
   #
-  ot_BCH_INFO    = "bchnfo"  # Blockchain Information
-  ot_BCH_REQUEST = "bchreq"  # Blockchain Request
-  ot_BCH_ACK     = "bchack"  # Blockchain Acknowledgment
+  ot_BCH_INFO    = "bchnfo" # Blockchain Information
+  ot_BCH_REQUEST = "bchreq" # Blockchain Request
+  ot_BCH_ACK     = "bchack" # Blockchain Acknowledgment
+  #
+  api_GET_LMID = 101 # Get last Message ID
+  api_SET_LMID = 102 # Set last Message ID
+  api_GET_EKEY = 301 # Get Encryption Key
+  api_SET_EKEY = 302 # Set Encryption Key
+  api_GET_BKEY = 501 # Get Blockchain Key
+  api_SET_BKEY = 501 # Set Blockchain Key
   #
   # IRC-IoT Base Types
   #
@@ -246,11 +253,15 @@ class PyLayerIRCIoT(object):
   # 2 is CRC32 Check "c32"
   #
   # End of PyLayerIRCIoT.__init__()
-  
+
  def irc_pointer (self, in_compatibility, in_message):
-  # Warning: interface may be changed
+  # Warning: interface may be changed while developing
   return False
-  
+
+ def user_pointer (self, in_comatibility, in_action, in_userid, in_params):
+  # Warning: method parameters and API may be changed while developing
+  retrun (False, None)
+
  def irciot_error_(self, in_error_code, in_mid):
   my_message = ""
   my_datum = { }
@@ -295,7 +306,7 @@ class PyLayerIRCIoT(object):
   
  def irciot_library_version_(self):
   return self.CONST.irciot_library_version
-  
+
  def irciot_enable_blockchain_(self, in_mid_method):
   if CAN_mid_blockchain == True:
     return
@@ -325,7 +336,7 @@ class PyLayerIRCIoT(object):
   self.blockchain_key_published = 0
   #
   # End of irciot_enable_blockchain_()
-     
+
  def irciot_disable_blockchain_(self):
   self.mid_method = ""
   self.blockchain_key_published = self.CONST.BCHT
@@ -365,7 +376,7 @@ class PyLayerIRCIoT(object):
     return ""
   #
   # End of irciot_crypto_hash_to_str_()
-  
+
  def irciot_crypto_str_to_hash_(self, in_string):
   if not isinstance(in_string, str):
     return None
@@ -480,7 +491,7 @@ class PyLayerIRCIoT(object):
   pass
   #
   # End of irciot_blockchain_update_foreign_key_()
-  
+
  def irciot_blockchain_sign_string_(self, in_string, in_private_key):
   try:
     my_string = in_string.encode('utf-8')
@@ -501,17 +512,17 @@ class PyLayerIRCIoT(object):
   return my_string
   #
   # End of irciot_blockchain_sign_string_()
-  
+
  def irciot_blockchain_save_defaults_(self):
   return (self.mid_method, \
    self.blockchain_private_key, \
    self.blockchain_public_key)
-  
+
  def irciot_blockchain_restore_defaults_(self, in_defaults):
   (self.mid_method, \
    self.blockchain_private_key, \
    self.blockchain_public_key) = in_defaults
- 
+
  def irciot_blockchain_verify_string_(self, \
    in_string, in_sign, in_public_key):
   if not isinstance(in_string, str):
@@ -553,7 +564,7 @@ class PyLayerIRCIoT(object):
   return my_result
   #
   # End of irciot_blockchain_verify_string_()
-  
+
  def irciot_blockchain_verify_message_(self, \
    in_new_message, in_old_message):
   my_result = True
@@ -623,10 +634,10 @@ class PyLayerIRCIoT(object):
     return
   #
   pass
-  
+
  def irciot_get_objects_count_(self):
   return 0
-  
+
  def irciot_ldict_create_item_(self, in_ldict_item):
   try:
     (my_id, my_ot) = in_ldict_item
@@ -668,7 +679,7 @@ class PyLayerIRCIoT(object):
     return
   #
   pass
-  
+
  def irciot_ldict_get_type_by_name_(self, in_type_name):
   if not isinstance(in_type_name, str):
     return
@@ -697,7 +708,7 @@ class PyLayerIRCIoT(object):
   if (in_mtu < 128):
     return
   self.message_mtu = in_mtu
-  
+
  def is_irciot_datum_(self, in_datum, in_ot, in_src, in_dst):
   if self.CONST.tag_ENC_DATUM in in_datum:
      if isinstance(in_datum[self.CONST.tag_ENC_DATUM], str):
@@ -836,7 +847,7 @@ class PyLayerIRCIoT(object):
   return True
   #
   # End of is_irciot_()
-  
+
  def irciot_clear_defrag_chain_(self, in_did):
   try:
     if self.defrag_lock:
@@ -1115,7 +1126,7 @@ class PyLayerIRCIoT(object):
   return ""
   #
   # End of irciot_deinencap_container_()
- 
+
  def irciot_deinencap_(self, in_json):
   ''' First/simple implementation of IRC-IoT "Datum" deinencapsulator '''
   self.irciot_blockchain_check_publication_()
@@ -1155,7 +1166,7 @@ class PyLayerIRCIoT(object):
   return False
   #
   # End of is_irciot_datumset_()
-  
+
  def irciot_encap_datum_(self, in_datum, in_ot, in_src, in_dst):
   if not self.CONST.tag_ENC_DATUM in in_datum.keys():
    if (in_ot == in_datum[self.CONST.tag_OBJECT_TYPE]):

@@ -27,7 +27,7 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version = '0.3.21'
    #
-   irciot_library_version  = '0.0.71'
+   irciot_library_version  = '0.0.73'
    #
    # Bot specific constants
    #
@@ -58,14 +58,25 @@ class PyLayerIRC(object):
    # 0. Unique User ID
    # 1. IRC User Mask
    # 2. IRC Channel Name
-   # 3. Blockchain Key
-   # 4. User Options
-   # 5. Last Message ID
+   # 3. User Options
+   # 4. Encryption Key
+   # 5. Blockchain Key
+   # 6. Last Message ID
    #
    irc_default_users = [ \
-    ( 1, "iotBot!*irc@irc-iot.nsk.ru",    "#myhome", None, None, None ), \
-    ( 2, "FaceBot!*irc@faceserv*.nsk.ru", "#myhome", None, None, None ), \
-    ( 3, "noobot!*bot@irc-iot.nsk.ru",    "#myhome", None, None, None ) ]
+    ( 1, "iotBot!*irc@irc-iot.nsk.ru", \
+      "#myhome", None, None, None, None ), \
+    ( 2, "FaceBot!*irc@faceserv*.nsk.ru",
+      "#myhome", None, None, None, None ), \
+    ( 3, "noobot!*bot@irc-iot.nsk.ru",
+      "#myhome", None, None, None, None ) ]
+   #
+   api_GET_LMID = 101 # Get last Message ID
+   api_SET_LMID = 102 # Set last Message ID
+   api_GET_EKEY = 301 # Get Encryption Key
+   api_SET_EKEY = 302 # Set Encryption Key
+   api_GET_BKEY = 501 # Get Blockchain key
+   api_SET_BKEY = 502 # Set Blockchain Key
    #
    irc_queue_input  = 0
    irc_queue_output = 1
@@ -399,13 +410,13 @@ class PyLayerIRC(object):
    if not self.irc_debug:
      return
    print(msg)
-   
+
  def irciot_protocol_version_(self):
    return self.CONST.irciot_protocol_version
-   
+
  def irciot_library_version_(self):
    return self.CONST.irciot_library_version
-   
+
  def irc_handler (self, in_compatibility, in_message):
    # Warning: interface may be changed
    (in_protocol, in_library) = in_compatibility
@@ -416,6 +427,31 @@ class PyLayerIRC(object):
      self.CONST.irc_queue_output, in_message, \
      self.CONST.irc_micro_wait) 
    return True
+
+ def user_handler (self, in_compatibility, in_action, in_userid, in_params):
+   # Warning: interface may be changed
+   (in_protocol, in_library) = in_compatibility
+   if not self.irciot_protocol_version_() == in_protocol \
+    or not self.irciot_library_version_() == in_library \
+    or not isinstance(in_action, int) \
+    or not isinstance(in_userid, int) \
+    or not isinstance(in_params, str):
+     return (False, None)
+   if   in_action == self.CONST.api_GET_LMID:
+     pass
+   elif in_action == self.CONST.api_SET_LMID:
+     pass
+   elif in_action == self.CONST.api_GET_EKEY:
+     pass
+   elif in_action == self.CONST.api_SET_EKEY:
+     pass
+   elif in_action == self.CONST.api_GET_BKEY:
+     pass
+   elif in_action == self.CONST.api_GET_BKEY:
+     pass
+   return (False, None)
+   #
+   # End of user_handler_()
 
  def irc_tolower_(self, in_input):
    return in_input.translate(self.CONST.irc_translation)
@@ -477,12 +513,12 @@ class PyLayerIRC(object):
  def irc_track_add_user_(self, in_mask, in_chan, irciot_parameters):
    if not self.is_irc_channel_(in_chan):
      return
-   in_key = None
-   in_opt = None
-   in_mid = None
+   in_opt  = None
+   in_ekey = None
+   in_bkey = None
+   in_mid  = None
    if irciot_parameters != None:
-     (in_key, in_opt, in_mid) = irciot_parameters
-   pass
+     (in_opt, in_ekey, in_bkey, in_mid) = irciot_parameters
    #
    # End of irc_track_add_user_()
 
@@ -558,29 +594,32 @@ class PyLayerIRC(object):
 
  def irc_track_check_all_users_masks_(self, in_from, in_channel, \
    irciot_parameters = None):
-   in_key = None
-   in_opt = None
-   in_mid = None
+   in_opt  = None
+   in_ekey = None
+   in_bkey = None
+   in_mid  = None
    if irciot_parameters != None:
-     (in_key, in_opt, in_mid) = irciot_parameters
+     (in_opt, in_ekey, in_bkey, in_mid) = irciot_parameters
    return True
 
  def irc_cfg_check_user_(self, in_from, in_channel, \
    irciot_parameters = None):
-   in_key = None
-   in_opt = None
-   in_mid = None
+   in_opt  = None
+   in_ekey = None
+   in_bkey = None
+   in_mid  = None
    if irciot_parameters != None:
-     (in_key, in_opt, in_mid) = irciot_parameters   
+     ( in_opt, in_ekey, in_bkey, in_mid ) = irciot_parameters   
    for my_user in self.irc_users:
-     ( my_uid, my_mask, my_chan, my_crypt, my_opt, my_mid ) = my_user
+     ( my_uid, my_mask, my_chan, \
+       my_opt, my_ekey, my_bkey, my_mid ) = my_user
      if ((in_channel == "*") or \
       (self.irc_compare_channels_(in_channel, my_chan))):
        if self.irc_check_mask_(in_from, my_mask):
          return True
    return False
-  #
-  # End of irc_cfg_check_user_()
+   #
+   # End of irc_cfg_check_user_()
 
  def is_json_(self, in_message):
    try:
@@ -984,9 +1023,9 @@ class PyLayerIRC(object):
       (C.cmd_ISON,    None) ]
 
  def irc_process_(self):
-
+   #
    self.init_rfc1459_()
-
+   #
    try:
      irc_init = 0
      irc_wait = self.CONST.irc_first_wait
