@@ -27,7 +27,7 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version = '0.3.21'
    #
-   irciot_library_version  = '0.0.75'
+   irciot_library_version  = '0.0.77'
    #
    # Bot specific constants
    #
@@ -71,12 +71,18 @@ class PyLayerIRC(object):
     ( 3, "noobot!*bot@irc-iot.nsk.ru",
       "#myhome", None, None, None, None ) ]
    #
+   irc_default_talk_with_strangers = False
+   irc_first_temporal_vuid = 1000
+   #
    api_GET_LMID = 101 # Get last Message ID
    api_SET_LMID = 102 # Set last Message ID
    api_GET_EKEY = 301 # Get Encryption Key
    api_SET_EKEY = 302 # Set Encryption Key
    api_GET_BKEY = 501 # Get Blockchain key
    api_SET_BKEY = 502 # Set Blockchain Key
+   #
+   api_vuid_cfg = "c" # VUID prefix for users from config
+   api_vuid_tmp = "t" # VUID prefix for temporal users
    #
    irc_queue_input  = 0
    irc_queue_output = 1
@@ -361,6 +367,11 @@ class PyLayerIRC(object):
    self.irc_users = self.CONST.irc_default_users
    self.irc_nicks = []
    #
+   self.irc_talk_with_strangers = \
+     self.CONST.irc_default_talk_with_strangers
+   self.irc_last_temporal_vuid = \
+     self.CONST.irc_first_temporal_vuid
+   #
    self.irc_queue = [0, 0]
    self.irc_queue[self.CONST.irc_queue_input]  = Queue(maxsize=0)
    self.irc_queue[self.CONST.irc_queue_output] = Queue(maxsize=0)
@@ -423,31 +434,46 @@ class PyLayerIRC(object):
    if not self.irciot_protocol_version_() == in_protocol \
     or not self.irciot_library_version_() == in_library:
      return False
+   my_vuid = "%s0" % self.CONST.api_vuid_cfg
    self.irc_add_to_queue_( \
      self.CONST.irc_queue_output, in_message, \
-     self.CONST.irc_micro_wait) 
+     self.CONST.irc_micro_wait, my_vuid)
    return True
 
- def user_handler (self, in_compatibility, in_action, in_userid, in_params):
+ def user_handler (self, in_compatibility, in_action, in_vuid, in_params):
    # Warning: interface may be changed
    (in_protocol, in_library) = in_compatibility
    if not self.irciot_protocol_version_() == in_protocol \
     or not self.irciot_library_version_() == in_library \
     or not isinstance(in_action, int) \
-    or not isinstance(in_userid, int) \
+    or not isinstance(in_vuid, str) \
     or not isinstance(in_params, str):
+     return (False, None)
+   my_vt = None # VUID Type
+   my_re = re.search("%s(\d+)" \
+     % self.CONST.api_vuid_cfg, in_vuid)
+   if my_re:
+     my_vt = self.CONST.api_vuid_cfg
+     my_id = my_re.group(1)
+   my_re = re.search("%s(\d+)" \
+     % self.CONST.api_vuid_tmp, in_vuid)
+   if my_re:
+     my_vt = self.CONST.api_vuid_tmp
+     my_id = my_re.group(1)
+   if my_vt == None:
      return (False, None)
    if   in_action == self.CONST.api_GET_LMID:
      pass
    elif in_action == self.CONST.api_SET_LMID:
      pass
    elif in_action == self.CONST.api_GET_EKEY:
-     pass
+     if my_vt == self.CONST.api_vuid_cfg:
+       pass
    elif in_action == self.CONST.api_SET_EKEY:
      pass
    elif in_action == self.CONST.api_GET_BKEY:
      pass
-   elif in_action == self.CONST.api_GET_BKEY:
+   elif in_action == self.CONST.api_SET_BKEY:
      pass
    return (False, None)
    #
@@ -499,14 +525,14 @@ class PyLayerIRC(object):
    irc_regexp = re.compile(str_mask, re.IGNORECASE)
    return irc_regexp.match(str_from)
 
- def irc_track_add_nick_(self, in_nick, in_mask, in_user, in_info):
+ def irc_track_add_nick_(self, in_nick, in_mask, in_vuid, in_info):
    if not self.is_irc_nick_(in_nick):
      return
    my_struct = self.irc_track_get_nick_struct_by_nick_(in_nick)
    if (my_struct == None):
-     self.irc_nicks.append((in_nick, in_mask, in_user, in_info))
+     self.irc_nicks.append((in_nick, in_mask, in_vuid, in_info))
    else:
-     self.irc_track_update_nick_(in_nick, in_mask, in_user, in_info)
+     self.irc_track_update_nick_(in_nick, in_mask, in_vuid, in_info)
    #
    # End of irc_track_add_nick_()
 
@@ -522,20 +548,22 @@ class PyLayerIRC(object):
    #
    # End of irc_track_add_user_()
 
- def irc_track_update_nick_(self, in_nick, in_mask, in_user, in_info):
+ def irc_track_update_nick_(self, in_nick, in_mask, in_vuid, in_info):
    if not self.is_irc_nick_(in_nick):
      return
    for my_index, my_struct in enumerate(self.irc_nicks):
-     (my_nick, my_mask, my_user, my_info) = my_struct
+     (my_nick, my_mask, my_vuid, my_info) = my_struct
      # comparing of the masks will be here ...
      if (self.irc_compare_nicks_(my_nick, in_nick)):
        if in_mask != None:
          my_mask = in_mask
-       if in_user != None:
-         my_user = irc_in
+         if in_vuid == None:
+           my_vuid = self.irc_get_vuid_by_mask_(my_mask, self.irc_channel)
+       if in_vuid != None:
+         my_vuid = in_vuid
        if in_info != None:
          my_info = in_info
-       self.irc_nicks[my_index] = (in_nick, my_mask, my_user, my_info)
+       self.irc_nicks[my_index] = (in_nick, my_mask, my_vuid, my_info)
        break
    #
    # End of irc_track_update_nick_()
@@ -550,7 +578,7 @@ class PyLayerIRC(object):
    if not self.is_irc_nick_(in_nick):
      return
    for my_struct in self.irc_nicks:
-     (my_nick, my_mask, my_user, my_info) = my_struct
+     (my_nick, my_mask, my_vuid, my_info) = my_struct
      if (self.irc_compare_nicks_(my_nick, in_nick)):
        self.irc_nicks.remove(my_struct)
        break
@@ -566,21 +594,21 @@ class PyLayerIRC(object):
    if not self.is_irc_nick_(in_nick):
      return None
    for my_struct in self.irc_nicks:
-     (my_nick, my_mask, my_user, my_info) = my_struct
+     (my_nick, my_mask, my_vuid, my_info) = my_struct
      if self.irc_compare_nicks_(my_nick, in_nick):
        return my_struct
    return None
 
  def irc_track_clarify_nicks_(self):
    for my_struct in self.irc_nicks:
-     (my_nick, my_mask, my_user, my_info) = my_struct
+     (my_nick, my_mask, my_vuid, my_info) = my_struct
      if ((my_mask == None) or (my_info == None)):
        self.irc_whois_nick_(my_nick)
        if my_mask == None:
          my_mask = ""
        if my_info == None:
          my_info = ""
-       self.irc_track_update_nick_(my_nick, my_mask, my_user, my_info)
+       self.irc_track_update_nick_(my_nick, my_mask, my_vuid, my_info)
        break
    #
    # End of irc_track_clarify_nicks_()
@@ -594,6 +622,8 @@ class PyLayerIRC(object):
 
  def irc_track_check_all_users_masks_(self, in_from, in_channel, \
    irciot_parameters = None):
+   if not self.is_irc_channel_(in_channel):
+     return False
    in_opt  = None
    in_ekey = None
    in_bkey = None
@@ -604,6 +634,8 @@ class PyLayerIRC(object):
 
  def irc_cfg_check_user_(self, in_from, in_channel, \
    irciot_parameters = None):
+   if not self.is_irc_channel_(in_channel):
+     return None
    in_opt  = None
    in_ekey = None
    in_bkey = None
@@ -616,10 +648,37 @@ class PyLayerIRC(object):
      if ((in_channel == "*") or \
       (self.irc_compare_channels_(in_channel, my_chan))):
        if self.irc_check_mask_(in_from, my_mask):
-         return True
-   return False
+         return "%s%d" % (self.CONST.api_vuid_cfg, my_uid)
+   return None
    #
    # End of irc_cfg_check_user_()
+   
+ def irc_get_unique_temporal_vuid_(self, in_mask):
+   max_id = self.irc_last_temporal_vuid
+   for my_nick_struct in self.irc_nicks:
+     (my_nick, my_mask, my_vuid, my_info) = my_nick_struct
+     if not isinstance(my_vuid, str):
+       continue
+     my_re = re.search("%s(\d+)" \
+       % self.CONST.api_vuid_tmp, my_vuid)
+     if my_re:
+       if my_mask == in_mask:
+         return my_vuid
+       my_id = my_re.group(1)
+     my_id = int(my_id)
+     if (my_id > max_id):
+       max_id = my_id
+   tmp_id = random.randint(max_id, max_id + 100)
+   self.irc_last_temporal_vuid = tmp_id
+   return "%s%d" % (self.CONST.api_vuid_tmp, tmp_id)
+   
+ def irc_get_vuid_by_mask_(self, in_mask, in_channel):
+   if not self.is_irc_channel_(in_channel):
+     return None
+   my_vuid = self.irc_cfg_check_user_(in_mask, in_channel)
+   if (my_vuid == None and self.irc_talk_with_strangers):
+     my_vuid = self.irc_get_unique_temporal_vuid_(in_mask)
+   return my_vuid
 
  def is_json_(self, in_message):
    if not isinstance(in_message, str):
@@ -876,7 +935,8 @@ class PyLayerIRC(object):
        my_user = my_array[4]
        my_host = my_array[5]
        my_mask = my_nick + "!" + my_user + "@" + my_host
-       self.irc_track_update_nick_(my_nick, my_mask, None, my_info)
+       my_vuid = self.irc_get_vuid_by_mask_(my_mask, self.irc_channel)
+       self.irc_track_update_nick_(my_nick, my_mask, my_vuid, my_info)
    except:
      return (in_ret, in_init, in_wait)
    return (in_ret, in_init, self.CONST.irc_default_wait)
@@ -894,7 +954,8 @@ class PyLayerIRC(object):
        my_user = my_array[4]
        my_host = my_array[5]
        my_mask = my_nick + "!" + my_user + "@" + my_host
-       self.irc_track_update_nick_(my_nick, my_mask, None, my_info)
+       my_vuid = self.irc_get_vuid_by_mask_(my_mask, self.irc_channel)
+       self.irc_track_update_nick_(my_nick, my_mask, my_vuid, my_info)
    except:
      return (in_ret, in_init, in_wait)
    return (in_ret, in_init, self.CONST.irc_default_wait - 1)
@@ -904,7 +965,8 @@ class PyLayerIRC(object):
  def func_on_join_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
    (irc_nick, irc_mask) = self.irc_extract_nick_mask_(in_string)
-   self.irc_track_add_nick_(irc_nick, irc_mask, None, None)
+   my_vuid = self.irc_get_vuid_by_mask_(irc_mask, self.irc_channel)
+   self.irc_track_add_nick_(irc_nick, irc_mask, my_vuid, None)
    return (in_ret, in_init, self.CONST.irc_default_wait)
 
  def func_on_part_(self, in_args):
@@ -1033,7 +1095,7 @@ class PyLayerIRC(object):
      irc_wait = self.CONST.irc_first_wait
      irc_input_buffer = ""
      irc_ret = 0
-     irc_vuid = 0
+     irc_vuid = "%s0" % self.CONST.api_vuid_cfg
 
      self.delta_time = 0
 
@@ -1162,10 +1224,10 @@ class PyLayerIRC(object):
              self.time_now = datetime.datetime.now()
              irc_message = ""
 
-           irc_vuid = 0
+           irc_vuid = self.irc_get_vuid_by_mask_(irc_mask, self.irc_channel)
 
-           if ((self.irc_cfg_check_user_(irc_mask, self.irc_channel)) \
-             and (irc_init > 3) and (self.is_json_(irc_message))):
+           if ((irc_vuid != None) and (irc_init > 3) \
+             and (self.is_json_(irc_message))):
 
              self.irc_add_to_queue_(self.CONST.irc_queue_input, \
               irc_message, self.CONST.irc_default_wait, irc_vuid)

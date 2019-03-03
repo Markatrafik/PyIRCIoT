@@ -46,7 +46,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.21'
   #
-  irciot_library_version  = '0.0.75'
+  irciot_library_version  = '0.0.77'
   #
   # IRC-IoT TAGs
   #
@@ -108,6 +108,9 @@ class PyLayerIRCIoT(object):
   api_SET_EKEY = 302 # Set Encryption Key
   api_GET_BKEY = 501 # Get Blockchain Key
   api_SET_BKEY = 502 # Set Blockchain Key
+  #
+  api_vuid_cfg = "c" # VUID prefix for users from config
+  api_vuid_tmp = "t" # VUID prefix for temporal users 
   #
   # IRC-IoT Base Types
   #
@@ -258,7 +261,7 @@ class PyLayerIRCIoT(object):
   # Warning: interface may be changed while developing
   return False
 
- def user_pointer (self, in_comatibility, in_action, in_vuid, in_params):
+ def user_pointer (self, in_compatibility, in_action, in_vuid, in_params):
   # Warning: method parameters and API may be changed while developing
   retrun (False, None)
 
@@ -292,9 +295,7 @@ class PyLayerIRCIoT(object):
   else:
     return
   my_message = json.dumps(my_datum, separators=(',',':'))
-  my_compat = ( \
-    self.irciot_protocol_version_(), \
-    self.irciot_library_version_())
+  my_compat = self.irciot_compatibility_()
   if not self.irc_pointer (my_compat, my_message):
     # Handler not inserted
     self.output_pull.append(my_message)
@@ -306,6 +307,11 @@ class PyLayerIRCIoT(object):
   
  def irciot_library_version_(self):
   return self.CONST.irciot_library_version
+  
+ def irciot_compatibility_(self):
+  return ( \
+    self.CONST.irciot_protocol_version, \
+    self.CONST.irciot_library_version)
 
  def irciot_enable_blockchain_(self, in_mid_method):
   if CAN_mid_blockchain == True:
@@ -447,9 +453,7 @@ class PyLayerIRCIoT(object):
     my_key_string.decode('utf-8'))
   if my_msgs == []:
     return
-  my_compat = ( \
-    self.irciot_protocol_version_(), \
-    self.irciot_library_version_())
+  my_compat = self.irciot_compatibility_()
   for my_msg in my_msgs:
     if not self.irc_pointer (my_compat, my_msg):
       # Handler not inserted
@@ -481,14 +485,22 @@ class PyLayerIRCIoT(object):
   #
   # End of irciot_blockchain_place_key_to_repo_()
 
- def irciot_blockchain_request_foreign_key_(self, in_irciot_user):
-  pass
+ def irciot_blockchain_request_foreign_key_(self, in_vuid):
+  my_compat = self.irciot_compatibility_()
+  my_params = None 
+  self.user_pointer (in_compat, self.CONST.api_GET_BKEY, \
+    in_vuid, my_params)
+  
+  
   #
   # End of irciot_blockchain_request_foreign_key_()
 
- def irciot_blockchain_update_foreign_key_(self, \
-   in_irciot_user, in_public_key):
-  pass
+ def irciot_blockchain_update_foreign_key_(self, in_vuid, \
+   in_public_key):
+  my_compat = self.irciot_compatibility_()
+  my_params = None
+  self.user_pointer (in_compat, self.CONST.api_SET_BKEY, \
+    in_vuid, my_params)
   #
   # End of irciot_blockchain_update_foreign_key_()
 
@@ -602,7 +614,7 @@ class PyLayerIRCIoT(object):
   #
   # End of irciot_crypto_place_key_to_repo_()
 
- def irciot_crypto_request_foreign_key_(self, in_irciot_user):
+ def irciot_crypto_request_foreign_key_(self, in_vuid):
   pass
   #
   # End of irciot_crypto_request_foreign_key_()
