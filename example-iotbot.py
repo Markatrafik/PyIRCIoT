@@ -65,7 +65,7 @@ def main():
   try: 
    while (ircbot.irc_run):
   
-    (irc_message, irc_wait) \
+    (irc_message, irc_wait, irc_vuid) \
       = ircbot.irc_check_queue_(ircbot.CONST.irc_queue_input)
       
     if (irc_message != ""):

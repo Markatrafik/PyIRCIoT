@@ -46,7 +46,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.21'
   #
-  irciot_library_version  = '0.0.73'
+  irciot_library_version  = '0.0.75'
   #
   # IRC-IoT TAGs
   #
@@ -107,7 +107,7 @@ class PyLayerIRCIoT(object):
   api_GET_EKEY = 301 # Get Encryption Key
   api_SET_EKEY = 302 # Set Encryption Key
   api_GET_BKEY = 501 # Get Blockchain Key
-  api_SET_BKEY = 501 # Set Blockchain Key
+  api_SET_BKEY = 502 # Set Blockchain Key
   #
   # IRC-IoT Base Types
   #
@@ -258,7 +258,7 @@ class PyLayerIRCIoT(object):
   # Warning: interface may be changed while developing
   return False
 
- def user_pointer (self, in_comatibility, in_action, in_userid, in_params):
+ def user_pointer (self, in_comatibility, in_action, in_vuid, in_params):
   # Warning: method parameters and API may be changed while developing
   retrun (False, None)
 

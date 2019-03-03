@@ -1,0 +1,8 @@
+
+2019-03-02 09:28 GMT+7 PyIRCIoT 0.0.75 Alexey Y. Woronov <alexey@woronov.ru>
+	* An additional field VUID (Virtual User ID) has been added to the
+	interaction Queues with PyLayerIRC. Please note that you need to make
+	changes to your IRC-IoT robots.
+
+
+

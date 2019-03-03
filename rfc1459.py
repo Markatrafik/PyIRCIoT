@@ -27,7 +27,7 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version = '0.3.21'
    #
-   irciot_library_version  = '0.0.73'
+   irciot_library_version  = '0.0.75'
    #
    # Bot specific constants
    #
@@ -622,6 +622,8 @@ class PyLayerIRC(object):
    # End of irc_cfg_check_user_()
 
  def is_json_(self, in_message):
+   if not isinstance(in_message, str):
+     return False
    try:
      json_object = json.loads(in_message)
    except ValueError:
@@ -774,9 +776,9 @@ class PyLayerIRC(object):
      check_queue = self.irc_queue[queue_id]
      self.irc_queue_lock[queue_id] = True
      if not check_queue.empty():
-       (irc_message, irc_wait) = check_queue.get()
+       (irc_message, irc_wait, irc_vuid) = check_queue.get()
        self.irc_queue_lock[queue_id] = old_queue_lock
-       return (irc_message, irc_wait)
+       return (irc_message, irc_wait, irc_vuid)
      else:
        if old_queue_lock:
           check_queue.task_done()
@@ -785,14 +787,14 @@ class PyLayerIRC(object):
      sleep(self.CONST.irc_micro_wait)
    except:
      pass
-   return ("", self.CONST.irc_default_wait)
+   return ("", self.CONST.irc_default_wait, 0)
    #
    # End of irc_check_queue_()
 
- def irc_add_to_queue_(self, in_queue_id, in_message, in_wait):
+ def irc_add_to_queue_(self, in_queue_id, in_message, in_wait, in_vuid):
    old_queue_lock = self.irc_queue_lock[in_queue_id]
    self.irc_queue_lock[in_queue_id] = True
-   self.irc_queue[in_queue_id].put((in_message, in_wait))
+   self.irc_queue[in_queue_id].put((in_message, in_wait, in_vuid))
    self.irc_queue_lock[in_queue_id] = old_queue_lock
 
  # CLIENT Hooks:
@@ -1031,6 +1033,7 @@ class PyLayerIRC(object):
      irc_wait = self.CONST.irc_first_wait
      irc_input_buffer = ""
      irc_ret = 0
+     irc_vuid = 0
 
      self.delta_time = 0
 
@@ -1159,18 +1162,20 @@ class PyLayerIRC(object):
              self.time_now = datetime.datetime.now()
              irc_message = ""
 
+           irc_vuid = 0
+
            if ((self.irc_cfg_check_user_(irc_mask, self.irc_channel)) \
              and (irc_init > 3) and (self.is_json_(irc_message))):
 
              self.irc_add_to_queue_(self.CONST.irc_queue_input, \
-              irc_message, self.CONST.irc_default_wait)
-           
+              irc_message, self.CONST.irc_default_wait, irc_vuid)
+
            irc_input_split = ""
 
          irc_input_buff = ""
 
        if (irc_init > 5):
-          (irc_message, irc_wait) \
+          (irc_message, irc_wait, irc_vuid) \
            = self.irc_check_queue_(self.CONST.irc_queue_output)
           irc_message = str(irc_message)
           if (irc_message != ""):
