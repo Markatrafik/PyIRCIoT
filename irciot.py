@@ -46,7 +46,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.21'
   #
-  irciot_library_version  = '0.0.77'
+  irciot_library_version  = '0.0.79'
   #
   # IRC-IoT TAGs
   #
@@ -110,7 +110,7 @@ class PyLayerIRCIoT(object):
   api_SET_BKEY = 502 # Set Blockchain Key
   #
   api_vuid_cfg = "c" # VUID prefix for users from config
-  api_vuid_tmp = "t" # VUID prefix for temporal users 
+  api_vuid_tmp = "t" # VUID prefix for temporal users
   #
   # IRC-IoT Base Types
   #
@@ -307,7 +307,7 @@ class PyLayerIRCIoT(object):
   
  def irciot_library_version_(self):
   return self.CONST.irciot_library_version
-  
+
  def irciot_compatibility_(self):
   return ( \
     self.CONST.irciot_protocol_version, \
@@ -486,25 +486,43 @@ class PyLayerIRCIoT(object):
   # End of irciot_blockchain_place_key_to_repo_()
 
  def irciot_blockchain_request_foreign_key_(self, in_vuid):
+  if not isinstance(in_vuid, str):
+    return
   my_compat = self.irciot_compatibility_()
-  my_params = None 
-  self.user_pointer (in_compat, self.CONST.api_GET_BKEY, \
-    in_vuid, my_params)
-  
-  
+  my_params = None
+  my_result = self.user_pointer (in_compat, \
+    self.CONST.api_GET_BKEY, in_vuid, my_params)
+  try:
+    (my_status, my_answer) = my_result
+  except:
+    return
+  if not my_status:
+    return
+  if my_answer == None:
+    pass
   #
   # End of irciot_blockchain_request_foreign_key_()
 
  def irciot_blockchain_update_foreign_key_(self, in_vuid, \
    in_public_key):
+  if not isinstance(in_vuid, str):
+    return
   my_compat = self.irciot_compatibility_()
-  my_params = None
-  self.user_pointer (in_compat, self.CONST.api_SET_BKEY, \
-    in_vuid, my_params)
+  my_params = in_public_key
+  my_result = self.user_pointer (my_compat, \
+    self.CONST.api_SET_BKEY, in_vuid, my_params)
+  try:
+    (my_status, my_answer) = my_result
+  except:
+    return
+  if not my_status:
+    return
   #
   # End of irciot_blockchain_update_foreign_key_()
 
  def irciot_blockchain_sign_string_(self, in_string, in_private_key):
+  if not isinstance(in_string, str):
+    return ""
   try:
     my_string = in_string.encode('utf-8')
     if self.mid_method == self.CONST.tag_mid_ED25519:
@@ -1066,7 +1084,40 @@ class PyLayerIRCIoT(object):
   #
   # End of irciot_prepare_datum_()
 
- def irciot_deinencap_object_(self, in_object, orig_json):
+ def irciot_check_datum_(self, in_datum, in_vuid = None, in_ot = None):
+  if not isinstance(in_vuid, str):
+    return
+  if not isinstance(in_datum, dict):
+    return
+  my_check = [ \
+    self.CONST.tag_DATUM_ID, \
+    self.CONST.tag_DATE_TIME ]
+  for in_key in my_check:
+    if not in_key in in_datum.keys():
+      return
+  if in_ot == self.CONST.ot_BCH_INFO:
+    if not self.CONST.tag_BCH_METHOD in in_datum.keys():
+      return
+    if not self.CONST.tag_BCH_PUBKEY in in_datum.keys():
+      return
+    if in_datum[self.CONST.tag_BCH_METHOD] != self.mid_method:
+      return
+      # Storing the key only for current blockchain signing method
+      # it is necessary to make dynamic loading
+    my_public_key = in_datum[self.CONST.tag_BCH_PUBKEY]
+    if not isinstance(my_public_key, str):
+      return
+    self.irciot_blockchain_update_foreign_key_( \
+      in_vuid, my_public_key)
+  elif in_ot == self.CONST.ot_BCH_REQUEST:
+    pass
+  elif in_ot == self.CONST.ot_BCH_ACK:
+    pass
+  #
+  # End of irciot_check_datum_()
+
+ def irciot_deinencap_object_(self, in_object, orig_json, \
+  in_vuid = None):
   iot_dt  = None
   iot_src = None
   iot_dst = None
@@ -1100,21 +1151,26 @@ class PyLayerIRCIoT(object):
   if isinstance(iot_datums, list):
      str_datums = ""
      for iot_datum in iot_datums:
-        str_datum = self.irciot_prepare_datum_(iot_datum, \
+       if in_vuid != None:
+         self.irciot_check_datum_(iot_datum, in_vuid, iot_ot)
+       str_datum = self.irciot_prepare_datum_(iot_datum, \
          (iot_dt, iot_ot, iot_src, iot_dst, iot_dc, iot_dp), orig_json)
-        if (str_datum != ""):
-           if (str_datums != ""):
-              str_datums += ","
-           str_datums += str_datum
+       if (str_datum != ""):
+         if (str_datums != ""):
+           str_datums += ","
+         str_datums += str_datum
      return str_datums
   if isinstance(iot_datums, dict):
+     if in_vuid != None:
+       self.irciot_check_datum_(iot_datums, in_vuid, iot_ot)
      return self.irciot_prepare_datum_(iot_datums, \
       (iot_dt, iot_ot, iot_src, iot_dst, iot_dc, iot_dp), orig_json)
   return ""
   #
   # End of irciot_deinencap_object_()
 
- def irciot_deinencap_container_(self, in_container, orig_json):
+ def irciot_deinencap_container_(self, in_container, orig_json, \
+   in_vuid = None):
   try:
      iot_objects = in_container[self.CONST.tag_OBJECT]
   except:
@@ -1122,7 +1178,8 @@ class PyLayerIRCIoT(object):
   if isinstance(iot_objects, list):
     str_datums = ""
     for iot_object in iot_objects:
-       str_datum = self.irciot_deinencap_object_(iot_object, orig_json)
+       str_datum = self.irciot_deinencap_object_(iot_object, \
+         orig_json, in_vuid)
        if (str_datum != ""):
           if (str_datums != ""):
              str_datums += ","
@@ -1131,7 +1188,8 @@ class PyLayerIRCIoT(object):
     #   str_datums = "[" + str_datums + "]"
     return str_datums
   if isinstance(iot_objects, dict):
-    return self.irciot_deinencap_object_(iot_objects, orig_json)
+    return self.irciot_deinencap_object_(iot_objects, \
+      orig_json, in_vuid)
     if (str_datums != ""):
        str_datums = "[" + str_datums + "]"
     return str_datums
@@ -1139,7 +1197,7 @@ class PyLayerIRCIoT(object):
   #
   # End of irciot_deinencap_container_()
 
- def irciot_deinencap_(self, in_json):
+ def irciot_deinencap_(self, in_json, in_vuid = None):
   ''' First/simple implementation of IRC-IoT "Datum" deinencapsulator '''
   self.irciot_blockchain_check_publication_()
   try:
@@ -1149,14 +1207,16 @@ class PyLayerIRCIoT(object):
   if isinstance(iot_containers, list):
     str_datums = "["
     for iot_container in iot_containers:
-       str_datum = self.irciot_deinencap_container_(iot_container, in_json)
+       str_datum = self.irciot_deinencap_container_(iot_container, \
+         in_json, in_vuid)
        if (str_datum != ""):
           if (str_datums != "["):
              str_datums += ","
           str_datums += str_datum
     return str_datums + "]"
   if isinstance(iot_containers, dict):
-    return self.irciot_deinencap_container_(iot_containers, in_json)
+    return self.irciot_deinencap_container_(iot_containers, \
+      in_json, in_vuid)
   return ""
   #
   # End of irciot_deinencap_container_()

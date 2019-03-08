@@ -37,7 +37,7 @@ def main():
   ircbot = PyLayerIRC()
   
   irciot.irc_pointer = ircbot.irc_handler
-  irciot.user_pointer = ircbot.user_pointer
+  irciot.user_pointer = ircbot.user_handler
   
   ircbot.irc_server  = "irc.undernet.org"
 
@@ -47,6 +47,7 @@ def main():
   ircbot.irc_port    = 6667
   ircbot.irc_channel = "#Berdsk"
   ircbot.irc_debug   = True
+  # ircbot.irc_talk_with_strangers = True
 
   ircbot.start_IRC_()
   
@@ -61,6 +62,8 @@ def main():
   termios.tcsetattr(stdin_fd, termios.TCSANOW, new_attr)
   old_flag = fcntl.fcntl(stdin_fd, fcntl.F_GETFL)
   fcntl.fcntl(stdin_fd, fcntl.F_SETFL, old_flag | os.O_NONBLOCK)
+  
+  irc_vuid = "c0" # Bot itself
  
   try: 
    while (ircbot.irc_run):
@@ -71,7 +74,7 @@ def main():
     if (irc_message != ""):
       
        if (irciot.is_irciot_(irc_message)):
-          irc_json = irciot.irciot_deinencap_(irc_message)
+          irc_json = irciot.irciot_deinencap_(irc_message, irc_vuid)
           if (irc_json != ""):
              print("Datumset: [" + str(irc_json) + "]", "\r")
              sys.stdout.flush()

@@ -4,5 +4,15 @@
 	interaction Queues with PyLayerIRC. Please note that you need to make
 	changes to your IRC-IoT robots.
 
-
+2019-03-08 09:03 GMT+7 PyIRCIoT 0.0.79 Alexey Y. Woronov <alexey@woronov.ru>
+	* Since version 0.0.79 for all PyLayerIRCIoT methods with the name
+	beginning with irciot_deinencap*_ a new optional argument is added:
+	in_vuid (Virtual User ID). Also, added maintenance of a database of
+	Virtual Users at the level of the IRC protocol. The database is
+	consist	of two parts: Preconfigured users, and previously unknown
+	users appeared on IRC. To work with unknown users, you must set the
+	key irc_talk_with_stranges to True. The processing of service IRC-IoT
+	messages with the object type "bchnfo" (Blockchain Informational msg.)
+	and the addition of cryptographic keys from this message to the Virtual
+	Users database has been added.
 
