@@ -27,7 +27,7 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version = '0.3.21'
    #
-   irciot_library_version  = '0.0.79'
+   irciot_library_version  = '0.0.80'
    #
    # Bot specific constants
    #
@@ -456,6 +456,12 @@ class PyLayerIRC(object):
    if my_re:
      my_vt = self.CONST.api_vuid_cfg
      my_id = my_re.group(1)
+     if my_vt == None:
+       return (False, None)
+       my_user = self.irc_cfg_get_user_by_vuid_(in_vuid)
+       if my_user != None:
+         ( my_uid, my_mask, my_chan, my_opt, \
+           my_ekey, my_bkey, my_lmid ) = my_user
    else:
      my_re = re.search("%s(\d+)" \
        % self.CONST.api_vuid_tmp, in_vuid)
@@ -464,13 +470,14 @@ class PyLayerIRC(object):
        my_id = my_re.group(1)
      if my_vt == None:
        return (False, None)
-     my_anon = self.irc_get_anons_(in_vuid)
+     my_anon = self.irc_track_get_anons_by_vuid_(in_vuid)
      if my_anon != None:
        ( an_id, an_mask, an_chan, an_opt, \
          an_ekey, an_bkey, an_lmid ) = my_anon
    if   in_action == self.CONST.api_GET_LMID:
      if my_vt == self.CONST.api_vuid_cfg:
-       pass
+       if my_user != None:
+         return (True, my_lmid)
      if my_vt == self.CONST.api_vuid_tmp:
        if my_anon != None:
          return (True, an_lmid)
@@ -478,11 +485,12 @@ class PyLayerIRC(object):
      if my_vt == self.CONST.api_vuid_cfg:
        pass
      if my_vt == self.CONST.api_vuid_tmp:
-       self.irc_update_anons_(in_vuid, \
+       self.irc_track_update_anons_by_vuid_(in_vuid, \
          None, None, None, None, None, in_params)
    elif in_action == self.CONST.api_GET_BKEY:
      if my_vt == self.CONST.api_vuid_cfg:
-       pass
+       if my_user != None:
+         return (True, my_bkey)
      if my_vt == self.CONST.api_vuid_tmp:
        if my_anon != None:
          return (True, an_bkey)
@@ -490,11 +498,12 @@ class PyLayerIRC(object):
      if my_vt == self.CONST.api_vuid_cfg:
        pass
      if my_vt == self.CONST.api_vuid_tmp:
-       self.irc_update_anons_(in_vuid, \
+       self.irc_track_update_anons_by_vuid_(in_vuid, \
          None, None, None, None, in_params, None)
    elif in_action == self.CONST.api_GET_EKEY:
      if my_vt == self.CONST.api_vuid_cfg:
-       pass
+       if my_user != None:
+         return (True, my_ekey)
      if my_vt == self.CONST.api_vuid_tmp:
        if my_anon != None:
          return (True, an_ekey)
@@ -502,7 +511,7 @@ class PyLayerIRC(object):
      if my_vt == self.CONST.api_vuid_cfg:
        pass
      if my_vt == self.CONST.api_vuid_tmp:
-       self.irc_update_anons_(in_vuid, \
+       self.irc_track_update_anons_by_vuid_(in_vuid, \
          None, None, None, in_params, None, None)
    return (False, None)
    #
@@ -554,7 +563,7 @@ class PyLayerIRC(object):
    irc_regexp = re.compile(str_mask, re.IGNORECASE)
    return irc_regexp.match(str_from)
 
- def irc_cleanup_anons_(self):
+ def irc_track_cleanup_anons_(self):
    for my_anon in self.irc_anons:
      ( an_id, an_mask, an_chan, an_opt, \
        an_ekey, an_bkey, an_lmid ) = my_anon
@@ -567,9 +576,9 @@ class PyLayerIRC(object):
      if not an_ok:
        self.irc_anons.remove(my_anon)
    #
-   # End of irc_cleanup_anons_()
+   # End of irc_track_cleanup_anons_()
 
- def irc_update_anons_(self, in_vuid, \
+ def irc_track_update_anons_by_vuid_(self, in_vuid, \
   in_mask, in_chan, in_opt, in_ekey, in_bkey, in_lmid):
    if not isinstance(in_vuid, str):
      return
@@ -605,9 +614,9 @@ class PyLayerIRC(object):
      self.irc_anons.append( ( my_id, in_mask, \
       in_chan, in_opt, in_ekey, in_bkey, in_lmid ) )
    #
-   # End of irc_update_anons_()
+   # End of irc_track_update_anons_by_vuid_()
 
- def irc_get_anons_(self, in_vuid):
+ def irc_track_get_anons_by_vuid_(self, in_vuid):
    if not isinstance(in_vuid, str):
      return None
    my_re = re.search("%s(\d+)" \
@@ -623,7 +632,7 @@ class PyLayerIRC(object):
        return my_anon
    return None
    #
-   # End of irc_get_anons_()
+   # End of irc_track_get_anons_by_vuid_()
 
  def irc_track_add_nick_(self, in_nick, in_mask, in_vuid, in_info):
    if not self.is_irc_nick_(in_nick):
@@ -653,17 +662,17 @@ class PyLayerIRC(object):
          my_info = in_info
        self.irc_nicks[my_index] = (in_nick, my_mask, my_vuid, my_info)
        if self.irc_talk_with_strangers:
-         self.irc_update_anons_(my_vuid, \
+         self.irc_track_update_anons_by_vuid_(my_vuid, \
           my_mask, self.irc_channel, None, None, None, None)
        break
    #
    # End of irc_track_update_nick_()
 
+ def irc_track_clear_anons_(self):
+   self.irc_anons = []
+
  def irc_track_clear_nicks_(self):
    self.irc_nicks = []
-
- def irc_track_clear_users_(self):
-   self.irc_users = []
 
  def irc_track_delete_nick_(self, in_nick):
    if not self.is_irc_nick_(in_nick):
@@ -673,8 +682,10 @@ class PyLayerIRC(object):
      if (self.irc_compare_nicks_(my_nick, in_nick)):
        self.irc_nicks.remove(my_struct)
        if self.irc_talk_with_strangers:
-         self.irc_cleanup_anons_()
+         self.irc_track_cleanup_anons_()
        break
+   #
+   # End of irc_track_delete_nick_()
 
  def irc_track_get_nick_struct_(self, in_position):
    try:
@@ -706,12 +717,49 @@ class PyLayerIRC(object):
    #
    # End of irc_track_clarify_nicks_()
 
- def irc_track_get_user_mask_(self, in_position):
-   return "test!test@test.test"
+ def irc_cfg_get_user_mask_(self, in_position):
+   if not isinstance(in_position, int):
+     return None
+   try:
+     my_user = self.irc_users[ in_position ]
+     ( my_id, my_mask, my_chan, my_opt, \
+       my_ekey, my_bkey, my_lmid ) = my_user
+     return my_mask
+   except:
+     return None
+   return None
+   #
+   # End of irc_cfg_get_user_mask_()
 
- def irc_track_get_user_struct_(self, in_position):
-   user_struct = {}
-   return user_struct
+ def irc_cfg_get_user_struct_(self, in_position):
+   if not isinstance(in_position, int):
+     return None
+   try:
+     my_struct = self.irc_users[ in_position ]
+     return my_struct
+   except:
+     return None
+   return None
+   #
+   # End of irc_cfg_get_user_struct_()
+
+ def irc_cfg_get_user_struct_by_vuid_(self, in_vuid):
+   if not isinstance(in_vuid, str):
+     return None
+   my_re = re.search("%s(\d+)" \
+     % self.CONST.api_vuid_cfg, in_vuid)
+   if my_re:
+     my_id = my_re.group(1)
+   else:
+     return None
+   for my_user in self.irc_users:
+     ( user_id, my_mask, my_chan, my_opt, \
+       my_ekey, my_bkey, my_lmid ) = my_user
+     if my_id == user_id:
+       return my_user
+   return None
+   #
+   # End of irc_cfg_get_user_strcut_by_vuid_()
 
  def irc_cfg_check_user_(self, in_from, in_channel, \
    irciot_parameters = None):
@@ -776,6 +824,7 @@ class PyLayerIRC(object):
    except:
      pass
    self.irc_track_clear_nicks_()
+   self.irc_track_clear_anons_()
    try:
      self.irc.close()
    except:
@@ -1318,7 +1367,7 @@ class PyLayerIRC(object):
            if ((irc_vuid != None) and (irc_init > 3) \
              and (self.is_json_(irc_message))):
              if self.irc_talk_with_strangers:
-               self.irc_update_anons_(irc_vuid, \
+               self.irc_track_update_anons_by_vuid_(irc_vuid, \
                 irc_mask, self.irc_channel, None, None, None, None)
              self.irc_add_to_queue_(self.CONST.irc_queue_input, \
               irc_message, self.CONST.irc_default_wait, irc_vuid)

@@ -46,7 +46,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.21'
   #
-  irciot_library_version  = '0.0.79'
+  irciot_library_version  = '0.0.80'
   #
   # IRC-IoT TAGs
   #
@@ -212,6 +212,7 @@ class PyLayerIRCIoT(object):
   self.blockchain_public_key = None
   self.blockchain_key_published = 0
   #
+  
   if self.mid_method == "":
      self.current_mid = random.randint( 10000, 99999)
   elif self.mid_method == self.CONST.tag_mid_ED25519 \
@@ -313,16 +314,22 @@ class PyLayerIRCIoT(object):
     self.CONST.irciot_protocol_version, \
     self.CONST.irciot_library_version)
 
- def irciot_enable_blockchain_(self, in_mid_method):
-  if CAN_mid_blockchain == True:
-    return
+ def irciot_load_blockchain_methods_(self, in_mid_method):
   if in_mid_method == self.CONST.tag_mid_ED25519:
+    if self.crypt_NACS != None and \
+       self.crypt_NACE != None:
+       return
     import importlib
     self.crypt_NACS \
       = importlib.import_module('nacl.signing')
     self.crypt_NACE \
       = importlib.import_module('nacl.encoding')
   elif in_mid_method == self.CONST.tag_mid_RSA1024:
+    if self.crypt_HASH != None and \
+       self.crypt_RSA  != None and \
+       self.crypt_PKCS != None and \
+       self.crypt_SHA1 != None:
+       return
     import importlib
     if not (CAN_encrypt_datum or CAN_mid_blockchain):
       self.crypt_HASH \
@@ -333,6 +340,13 @@ class PyLayerIRCIoT(object):
         = importlib.import_module('Crypto.Signature.PKCS1_v1_5')
       self.crypt_SHA1 \
         = importlib.import_module('Crypto.Hash.SHA')
+  #
+  # End of irciot_load_blockchian_methods_()
+
+ def irciot_enable_blockchain_(self, in_mid_method):
+  if CAN_mid_blockchain == True:
+    return
+  self.irciot_load_blockchain_methods_(in_mid_method)
   self.mid_method = in_mid_method
   (self.blockchain_private_key, self.blockchain_public_key) \
     = self.irciot_blockchain_generate_keys_()
@@ -422,6 +436,21 @@ class PyLayerIRCIoT(object):
   
  def irciot_get_current_datetime_(self):
   return datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+
+ def irciot_blockchain_request_to_messages_(self, in_vuid):
+  if not isinstance(in_key_string, str):
+    return []
+  my_datum = {}
+  my_ot = self.CONST.ot_BCH_REQUEST
+  my_datum[self.CONST.tag_OBJECT_TYPE] = my_ot
+  my_datum[self.CONST.tag_DATUM_ID] = random.randint(100, 999)
+  # incomplete
+  my_datum[self.CONST.tag_DATE_TIME] \
+    = self.irciot_get_current_datetime_()
+  my_messages = self.irciot_encap_all_(my_datum)
+  return my_messages
+  #
+  # End of irciot_blockchain_request_to_message_()
  
  def irciot_blockchain_key_to_messages_(self, in_key_string):
   if not isinstance(in_key_string, str):
@@ -440,7 +469,7 @@ class PyLayerIRCIoT(object):
   return my_messages
   #
   # End of irciot_blockchain_key_to_message_()
-
+  
  def irciot_blockchain_key_publication_(self, in_public_key):
   if self.mid_method == self.CONST.tag_mid_ED25519:
     my_key_string = in_public_key.encode( \
@@ -488,6 +517,12 @@ class PyLayerIRCIoT(object):
  def irciot_blockchain_request_foreign_key_(self, in_vuid):
   if not isinstance(in_vuid, str):
     return
+  #
+  # End of irciot_blockchain_request_foreign_key_()
+
+ def irciot_blockchain_get_foreign_key_(self, in_vuid):
+  if not isinstance(in_vuid, str):
+    return None
   my_compat = self.irciot_compatibility_()
   my_params = None
   my_result = self.user_pointer (in_compat, \
@@ -495,13 +530,16 @@ class PyLayerIRCIoT(object):
   try:
     (my_status, my_answer) = my_result
   except:
-    return
+    return None
   if not my_status:
-    return
+    return None
   if my_answer == None:
-    pass
+    self.irciot_blockchain_request_foreign_key_(in_vuid)
+  else:
+    return my_answer
+  return None
   #
-  # End of irciot_blockchain_request_foreign_key_()
+  # End of irciot_blockchain_get_foreign_key_()
 
  def irciot_blockchain_update_foreign_key_(self, in_vuid, \
    in_public_key):
@@ -569,9 +607,7 @@ class PyLayerIRCIoT(object):
   if my_method == self.CONST.tag_mid_ED25519:
     self.mid_method = my_method
     if DO_auto_blockchain:
-      if self.crypt_NACS == None \
-      or self.crypt_NACE == None:
-        self.irciot_enable_blockchain_(my_method)
+      self.irciot_load_blockchain_methods_(my_method)
     try:
       in_public_key.verify(my_string_bin, my_sign)
       my_result = True
@@ -580,9 +616,7 @@ class PyLayerIRCIoT(object):
   elif my_method == self.CONST.tag_mid_RSA1024:
     self.mid_method = my_method
     if DO_auto_blockchain:
-      if self.crypt_SHA1 == None \
-      or self.crypt_PKCS == None:
-        self.irciot_enable_blockchain_(my_method)
+      self.irciot_load_blockchain_methods_(my_method)
     try:
       my_hash = self.crypt_SHA1.new(my_string_bin)
       my_pkcs = self.crypt_PKCS.new(in_public_key)
@@ -633,12 +667,46 @@ class PyLayerIRCIoT(object):
   # End of irciot_crypto_place_key_to_repo_()
 
  def irciot_crypto_request_foreign_key_(self, in_vuid):
-  pass
+  if not isinstance(in_vuid, str):
+    return
   #
   # End of irciot_crypto_request_foreign_key_()
+  
+ def irciot_crypto_get_foreign_key_(self, in_vuid):
+  if not isinstance(in_vuid, str):
+    return None
+  my_compat = self.irciot_compatibility_()
+  my_params = None
+  my_result = self.user_pointer (in_compat, \
+    self.CONST.api_GET_EKEY, in_vuid, my_params)
+  try:
+    (my_status, my_answer) = my_result
+  except:
+    return None
+  if not my_status:
+    return None
+  if my_answer == None:
+    self.irciot_crypto_request_foreign_key_(in_vuid)
+  else:
+    return my_answer
+  return None
+  #
+  # End of irciot_crypto_get_foreign_key_()
 
- def irciot_crypto_update_foreign_key_(self):
-  pass
+ def irciot_crypto_update_foreign_key_(self, in_vuid, \
+   in_public_key):
+  if not isinstance(in_vuid, str):
+    return
+  my_compat = self.irciot_compatibility_()
+  my_params = in_public_key
+  my_result = self.user_pointer (my_compat, \
+    self.CONST.api_SET_EKEY, in_vuid, my_params)
+  try:
+    (my_status, my_answer) = my_result
+  except:
+    return
+  if not my_status:
+    return
   #
   # End of irciot_crypto_update_foreign_key_()
   
@@ -1100,10 +1168,9 @@ class PyLayerIRCIoT(object):
       return
     if not self.CONST.tag_BCH_PUBKEY in in_datum.keys():
       return
-    if in_datum[self.CONST.tag_BCH_METHOD] != self.mid_method:
-      return
-      # Storing the key only for current blockchain signing method
-      # it is necessary to make dynamic loading
+    my_method = in_datum[self.CONST.tag_BCH_METHOD]
+    if my_method != self.mid_method and DO_auto_blockchain:
+      self.irciot_load_blockchain_methods_(my_method)
     my_public_key = in_datum[self.CONST.tag_BCH_PUBKEY]
     if not isinstance(my_public_key, str):
       return
