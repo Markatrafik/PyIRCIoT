@@ -46,7 +46,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.21'
   #
-  irciot_library_version  = '0.0.80'
+  irciot_library_version  = '0.0.81'
   #
   # IRC-IoT TAGs
   #
@@ -212,7 +212,6 @@ class PyLayerIRCIoT(object):
   self.blockchain_public_key = None
   self.blockchain_key_published = 0
   #
-  
   if self.mid_method == "":
      self.current_mid = random.randint( 10000, 99999)
   elif self.mid_method == self.CONST.tag_mid_ED25519 \
@@ -438,13 +437,16 @@ class PyLayerIRCIoT(object):
   return datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
 
  def irciot_blockchain_request_to_messages_(self, in_vuid):
-  if not isinstance(in_key_string, str):
+  if not isinstance(in_vuid, str):
     return []
   my_datum = {}
   my_ot = self.CONST.ot_BCH_REQUEST
   my_datum[self.CONST.tag_OBJECT_TYPE] = my_ot
   my_datum[self.CONST.tag_DATUM_ID] = random.randint(100, 999)
-  # incomplete
+  # Incomplete code
+  my_datum[self.CONST.tag_SRC_ADDR] = ""
+  my_datum[self.CONST.tag_DST_ADDR] = ""
+  # Copy destination address from last message source address?!
   my_datum[self.CONST.tag_DATE_TIME] \
     = self.irciot_get_current_datetime_()
   my_messages = self.irciot_encap_all_(my_datum)
@@ -517,6 +519,17 @@ class PyLayerIRCIoT(object):
  def irciot_blockchain_request_foreign_key_(self, in_vuid):
   if not isinstance(in_vuid, str):
     return
+  # IRC-IoT messages of this type should be sent directly
+  # to the user using private sending, but now they are passed
+  # to the common message flow and appear in the channel
+  my_msgs = self.irciot_blockchain_request_to_messages_(in_vuid)
+  if my_msgs == []:
+    return
+  my_compat = self.irciot_compatibility_()
+  for my_msg in my_msgs:
+    if not self.irc_pointer (my_compat, my_msg):
+      # Handler not inserted
+      self.output_pool.append(my_msg)
   #
   # End of irciot_blockchain_request_foreign_key_()
 
@@ -525,21 +538,57 @@ class PyLayerIRCIoT(object):
     return None
   my_compat = self.irciot_compatibility_()
   my_params = None
-  my_result = self.user_pointer (in_compat, \
+  my_result = self.user_pointer (my_compat, \
     self.CONST.api_GET_BKEY, in_vuid, my_params)
   try:
     (my_status, my_answer) = my_result
   except:
     return None
   if not my_status:
+    if my_answer == None:
+      self.irciot_blockchain_request_foreign_key_(in_vuid)
     return None
-  if my_answer == None:
-    self.irciot_blockchain_request_foreign_key_(in_vuid)
-  else:
+  if isinstance(my_answer, str):
     return my_answer
   return None
   #
   # End of irciot_blockchain_get_foreign_key_()
+
+ def irciot_blockchain_get_last_mid_(self, in_vuid):
+  if not isinstance(in_vuid, str):
+    return None
+  my_compat = self.irciot_compatibility_()
+  my_params = None
+  my_result = self.user_pointer (my_compat, \
+    self.CONST.api_GET_LMID, in_vuid, my_params)
+  try:
+    (my_status, my_answer) = my_result
+  except:
+    return None
+  if not my_status:
+    return None
+  if isinstance(my_answer, str):
+    return my_answer
+  return None
+  #
+  # End of irciot_blockchain_get_last_mid_()
+
+ def irciot_blockchain_update_last_mid_(self, in_vuid, \
+   in_message_id):
+  if not isinstance(in_vuid, str):
+    return
+  my_compat = self.irciot_compatibility_()
+  my_params = in_message_id
+  self.user_pointer (my_compat, \
+    self.CONST.api_SET_LMID, in_vuid, my_params)
+  try:
+    (my_status, my_answer) = my_result
+  except:
+    return
+  if not my_status:
+    return
+  #
+  # End of irciot_blockchain_update_last_mid_()
 
  def irciot_blockchain_update_foreign_key_(self, in_vuid, \
    in_public_key):
@@ -628,14 +677,6 @@ class PyLayerIRCIoT(object):
   return my_result
   #
   # End of irciot_blockchain_verify_string_()
-
- def irciot_blockchain_verify_message_(self, \
-   in_new_message, in_old_message):
-  my_result = True
-  #
-  return my_result
-  #
-  # End of irciot_blockchain_verify_message_()
 
  def irciot_crypto_AES_encrypt_(self, in_raw_data, in_encrypion_key):
   my_AES = AES.new(in_encryption_key, AES.MODE_CBC, self.crypto_AES_iv)
@@ -1177,6 +1218,8 @@ class PyLayerIRCIoT(object):
     self.irciot_blockchain_update_foreign_key_( \
       in_vuid, my_public_key)
   elif in_ot == self.CONST.ot_BCH_REQUEST:
+    # preparing answer to blockchain public key request
+    # will be here
     pass
   elif in_ot == self.CONST.ot_BCH_ACK:
     pass
@@ -1236,12 +1279,72 @@ class PyLayerIRCIoT(object):
   #
   # End of irciot_deinencap_object_()
 
- def irciot_deinencap_container_(self, in_container, orig_json, \
-   in_vuid = None):
+ def irciot_check_container_(self, in_container, \
+   orig_json = None, in_vuid = None):
+  if not isinstance(orig_json, str):
+    return False
+  if not isinstance(in_container, dict):
+    return False
+  if self.integrity_check:
+    # Lite optional checks will be here
+    pass
+  if in_vuid == None:
+    # or not CAN_mid_blockchain?
+    return True
+  try:
+    my_mid = in_container[self.CONST.tag_MESSAGE_ID]
+  except:
+    return False
+  if len(my_mid) < 2:
+    self.irciot_blockchain_update_last_mid_(in_vuid, my_mid)
+    return True
+  my_mid_method = my_mid[:2]
+  if my_mid_method != self.CONST.tag_mid_ED25519 and \
+     my_mid_method != self.CONST.tag_mid_RSA1024:
+    self.irciot_blockchain_update_last_mid_(in_vuid, my_mid)
+    return True
+  my_bkey = self.irciot_blockchain_get_foreign_key_(in_vuid)
+  if my_bkey == None:
+    # We trust the message signed by the blockchain without
+    # any verification if we do not yet have a public key.
+    # It is useful in order to accept a key for this user.
+    return True
+  if my_mid_method == self.CONST.tag_mid_ED25519:
+    try:
+      # For performance optimization the public key may be
+      # moved to Virtual User Database instead of string form
+      my_verify_key = self.crypt_NACS.VerifyKey(my_bkey, \
+        encoder = self.crypt_NACE.HexEncoder )
+    except: # Incorrect Public Key
+      return False
+  elif my_mid_method == self.CONST.tag_mid_RSA1024:
+    # Not implemented yet
+    return False
+  my_oldmid = self.irciot_blockchain_get_last_mid_(in_vuid)
+  if my_oldmid == None:
+    self.irciot_blockchain_update_last_mid_(in_vuid, my_mid)
+    return True
+  my_message = orig_json.replace( \
+    '"' + self.CONST.tag_MESSAGE_ID + '":"' + my_mid + '"', \
+    '"' + self.CONST.tag_MESSAGE_ID + '":"' + my_oldmid + '"')
+  my_result = self.irciot_blockchain_verify_string_( \
+    my_message, my_mid, my_verify_key)
+  if my_result:
+    # print("\033[1;45m BLOCKCHAIN VERIFICATION OK \033[0m")
+    self.irciot_blockchain_update_last_mid_(in_vuid, my_mid)
+  return my_result
+  #
+  # End of irciot_check_container_()
+
+ def irciot_deinencap_container_(self, in_container, \
+   orig_json = None, in_vuid = None):
   try:
      iot_objects = in_container[self.CONST.tag_OBJECT]
   except:
      return ""
+  if not self.irciot_check_container_(in_container, \
+   orig_json, in_vuid):
+    return ""
   if isinstance(iot_objects, list):
     str_datums = ""
     for iot_object in iot_objects:
@@ -1276,6 +1379,9 @@ class PyLayerIRCIoT(object):
     for iot_container in iot_containers:
        str_datum = self.irciot_deinencap_container_(iot_container, \
          in_json, in_vuid)
+       # To check the blockchain id of each message, it is necessary
+       # to cut the messages into separate substrings, exactly as they
+       # came in, but not reassemble it by json.loads() and dumps()
        if (str_datum != ""):
           if (str_datums != "["):
              str_datums += ","

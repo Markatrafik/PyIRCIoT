@@ -27,7 +27,7 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version = '0.3.21'
    #
-   irciot_library_version  = '0.0.80'
+   irciot_library_version  = '0.0.81'
    #
    # Bot specific constants
    #
@@ -87,9 +87,11 @@ class PyLayerIRC(object):
    irc_queue_input  = 0
    irc_queue_output = 1
    #
+   irc_recon_steps  = 8
+   #
    irc_input_buffer = ""
    #
-   irc_buffer_size = 2048
+   irc_buffer_size  = 2048
    #
    irc_modes = [ "CLIENT", "SERVICE", "SERVER" ]
    #
@@ -344,6 +346,7 @@ class PyLayerIRC(object):
      self.irc_proxy_password = self.CONST.irc_default_proxy_password
    #
    self.irc_status = 0
+   self.irc_recon = 1
    self.irc_last = None
    #
    self.irc_servers = [ ( \
@@ -448,7 +451,7 @@ class PyLayerIRC(object):
     or not self.irciot_library_version_() == in_library \
     or not isinstance(in_action, int) \
     or not isinstance(in_vuid, str) \
-    or not isinstance(in_params, str):
+    or not (isinstance(in_params, str) or in_params == None):
      return (False, None)
    my_vt = None # VUID Type
    my_re = re.search("%s(\d+)" \
@@ -611,6 +614,12 @@ class PyLayerIRC(object):
        self.irc_anons[my_index] = my_anon
        break
    if not my_ok:
+     for my_anon in self.irc_anons:
+       ( an_id, my_mask, my_tmp, my_tmp, \
+         my_tmp, my_tmp, my_tmp ) = my_anon
+       if my_mask == in_mask:
+         my_ok = True
+   if not my_ok:
      self.irc_anons.append( ( my_id, in_mask, \
       in_chan, in_opt, in_ekey, in_bkey, in_lmid ) )
    #
@@ -633,6 +642,17 @@ class PyLayerIRC(object):
    return None
    #
    # End of irc_track_get_anons_by_vuid_()
+
+ def irc_track_fast_nick_(self, in_nick, in_mask):
+   my_ok = True
+   for my_struct in self.irc_nicks:
+     (my_nick, my_tmp, my_tmp, my_tmp) = my_struct
+     if my_nick == in_nick:
+       my_ok = False
+   if my_ok:
+     self.irc_track_add_nick_(in_nick, in_mask, None, None)
+   #
+   # End of irc_track_fast_nick_()
 
  def irc_track_add_nick_(self, in_nick, in_mask, in_vuid, in_info):
    if not self.is_irc_nick_(in_nick):
@@ -784,6 +804,8 @@ class PyLayerIRC(object):
 
  def irc_get_unique_temporal_vuid_(self, in_mask):
    max_id = self.irc_last_temporal_vuid
+   tmp_id = random.randint(max_id + 1, max_id + 100)
+   my_id = max_id
    for my_nick_struct in self.irc_nicks:
      (my_nick, my_mask, my_vuid, my_info) = my_nick_struct
      if not isinstance(my_vuid, str):
@@ -797,7 +819,6 @@ class PyLayerIRC(object):
      my_id = int(my_id)
      if (my_id > max_id):
        max_id = my_id
-   tmp_id = random.randint(max_id, max_id + 100)
    self.irc_last_temporal_vuid = tmp_id
    return "%s%d" % (self.CONST.api_vuid_tmp, tmp_id)
 
@@ -836,8 +857,12 @@ class PyLayerIRC(object):
    if not self.irc_run:
      return
    self.irc_disconnect_()
-   self.to_log_("Connection closed, reconnecting to IRC ... ")
-   sleep(self.CONST.irc_first_wait)
+   self.to_log_("Connection closed, " \
+    + "reconnecting to IRC (try: %d) ... " % self.irc_recon)
+   sleep(self.CONST.irc_first_wait * self.irc_recon)
+   self.irc_recon += 1
+   if self.irc_recon > self.CONST.irc_recon_steps:
+     self.irc_recon = 1
 
  def irc_td2ms_(self, td):
    return td.days * 86400 + td.seconds + td.microseconds / 1000000
@@ -900,6 +925,13 @@ class PyLayerIRC(object):
  def irc_quit_(self):
    ret = self.irc_send_("QUIT :%s\r\n" % self.irc_quit)
    return ret
+   
+ def irc_extract_single_(self, in_string):
+   try:
+     irc_single = in_string.split()[3]
+   except:
+     return None
+   return irc_single
 
  def irc_extract_nick_mask_(self, in_string):
    try:
@@ -1021,8 +1053,8 @@ class PyLayerIRC(object):
 
  def func_no_such_nick_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
-   # (irc_nick, irc_mask) = self.irc_extract_nick_mask_(in_string)
-   # self.irc_track_delete_nick_(irc_nick)
+   irc_nick = self.irc_extract_single_(in_string)
+   self.irc_track_delete_nick_(irc_nick)
    return (in_ret, in_init, self.CONST.irc_default_wait)
 
  def func_on_nick_(self, in_args):
@@ -1353,7 +1385,9 @@ class PyLayerIRC(object):
 
            if (irc_input_split != ""):
              (irc_nick, irc_mask) \
-              = self.irc_extract_nick_mask_(irc_input_split)
+               = self.irc_extract_nick_mask_(irc_input_split)
+             self.irc_track_fast_nick_(irc_nick, irc_mask)
+
              self.time_now = datetime.datetime.now()
              irc_message = self.irc_extract_message_(irc_input_split)
 
