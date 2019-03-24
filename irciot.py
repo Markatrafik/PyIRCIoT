@@ -46,7 +46,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.21'
   #
-  irciot_library_version  = '0.0.81'
+  irciot_library_version  = '0.0.83'
   #
   # IRC-IoT TAGs
   #
@@ -127,6 +127,43 @@ class PyLayerIRCIoT(object):
   b_BIG_ENDIAN    = 1
   b_MIDDLE_ENDIAN = 2
   #
+  ldict_VERSION     = "irciot_protocol"
+  #
+  ldict_ITEMS_TABLE = "items"
+  ldict_TYPES_TABLE = "types"
+  ldict_SECTS_TABLE = "sections"
+  #
+  ldict_ITEMS_ID      = "item_id"
+  ldict_ITEMS_OT      = "item_ot"
+  ldict_ITEMS_PARENT  = "parent_item_id"
+  ldict_ITEMS_TYPEID  = "type_id"
+  ldict_ITEMS_TYPEPR  = "type_parameters"
+  ldict_ITEMS_DEFVAL  = "default_value"
+  ldict_ITEMS_CHILD   = "child_object_id"
+  ldict_ITEMS_METHOD  = "method"
+  ldict_ITEMS_LANG    = "method_language"
+  ldict_ITEMS_SECTS   = "sections"
+  #
+  ldict_TYPES_ID      = "type_id"
+  ldict_TYPES_NAME    = "type_name"
+  ldict_TYPES_TYPE    = "type_of_type"
+  ldict_TYPES_ARR     = "is_it_array"
+  ldict_TYPES_DYNSIZE = "is_variable_dynamically_sized"
+  ldict_TYPES_DYNARR  = "is_array_dynamically_sized"
+  ldict_TYPES_ARRSIZE = "size_of_array"
+  ldict_TYPES_SIZE    = "size"
+  ldict_TYPES_MIN     = "interval_minimum"
+  ldict_TYPES_MAX     = "interval_maximum"
+  ldict_TYPES_PRECESS = "precession"
+  ldict_TYPES_ENDIAN  = "endianness"
+  ldict_TYPES_ENCODE  = "encoding"
+  #
+  ldict_SECTS_ID      = "section_id"
+  ldict_SECTS_ITEMS   = "items_ids"
+  ldict_SECTS_CHECKS  = "checking_values"
+  idict_SECTS_METHOD  = "method"
+  idict_SECTS_LANG    = "method_language"
+  #
   # IRC-IoT Errors
   #
   err_DEFRAG_INVALID_DID  = 103
@@ -179,10 +216,9 @@ class PyLayerIRCIoT(object):
   self.output_lock = False
   #
   self.ldict       = []
-  self.ldict_lock  = False
-  #
   self.ldict_types = []
-  self.ldict_types_lock = False
+  self.ldict_sections = []
+  self.ldict_lock  = False
   #
   self.mid_method  = self.CONST.tag_mid_default
   self.oid_method  = 0
@@ -304,7 +340,7 @@ class PyLayerIRCIoT(object):
 
  def irciot_protocol_version_(self):
   return self.CONST.irciot_protocol_version
-  
+
  def irciot_library_version_(self):
   return self.CONST.irciot_library_version
 
@@ -432,7 +468,7 @@ class PyLayerIRCIoT(object):
   return (my_private_key, my_public_key)
   #
   # End of irciot_blockchain_generate_keys_()
-  
+
  def irciot_get_current_datetime_(self):
   return datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
 
@@ -453,7 +489,7 @@ class PyLayerIRCIoT(object):
   return my_messages
   #
   # End of irciot_blockchain_request_to_message_()
- 
+
  def irciot_blockchain_key_to_messages_(self, in_key_string):
   if not isinstance(in_key_string, str):
     return []
@@ -471,7 +507,7 @@ class PyLayerIRCIoT(object):
   return my_messages
   #
   # End of irciot_blockchain_key_to_message_()
-  
+
  def irciot_blockchain_key_publication_(self, in_public_key):
   if self.mid_method == self.CONST.tag_mid_ED25519:
     my_key_string = in_public_key.encode( \
@@ -681,7 +717,7 @@ class PyLayerIRCIoT(object):
  def irciot_crypto_AES_encrypt_(self, in_raw_data, in_encrypion_key):
   my_AES = AES.new(in_encryption_key, AES.MODE_CBC, self.crypto_AES_iv)
   return my_AES.encrypt(in_raw_data)
-  
+
  def irciot_crypto_AES_decrypt_(self, in_encrypted_data, in_encryption_key):
   my_AES = AES.new(in_encryption_key, AES.MODE_CBC, self.crypto_AES_iv)
   return my_AES.decrypt(in_encrypted_data)
@@ -712,7 +748,7 @@ class PyLayerIRCIoT(object):
     return
   #
   # End of irciot_crypto_request_foreign_key_()
-  
+
  def irciot_crypto_get_foreign_key_(self, in_vuid):
   if not isinstance(in_vuid, str):
     return None
@@ -750,7 +786,7 @@ class PyLayerIRCIoT(object):
     return
   #
   # End of irciot_crypto_update_foreign_key_()
-  
+
  def irciot_crypto_encrypt_datum_(self):
   pass
   #
@@ -779,11 +815,28 @@ class PyLayerIRCIoT(object):
 
  def irciot_ldict_create_item_(self, in_ldict_item):
   try:
-    (my_id, my_ot) = in_ldict_item
+   ( my_id, my_ot, my_parent_id, my_type_id, my_type_param, \
+     my_default, my_child_obj_id, my_method, my_method_lang, \
+     my_sections ) = in_ldict_item
   except:
+    return
+  my_item = {}
+  my_item.update({self.CONST.ldict_ITEMS_ID : my_id })
+  my_item.update({self.CONST.ldict_ITEMS_OT : my_ot })
+  my_item.update({self.CONST.ldict_ITEMS_PARENT : my_parent_id })
+  my_item.update({self.CONST.ldict_ITEMS_TYPE_ID : my_type_id })
+  my_item.update({self.CONST.ldict_ITEMS_TYPE_PR : my_type_param })
+  my_item.update({self.CONST.ldict_ITEMS_DEF_VAL : my_default })
+  my_item.update({self.CONST.ldict_ITEMS_CHILD : my_child_obj_id })
+  my_item.update({self.CONST.ldict_ITEMS_METHOD : my_method })
+  my_item.update({self.CONST.ldict_ITEMS_LANG : my_method_lang })
+  my_item.update({self.CONST.ldict_ITEMS_SECTS : my_sections })
+  if not irciot_ldict_check_item_(my_item):
     return
   #
   pass
+  #
+  # End of ldict
 
  def irciot_ldict_delete_items_by_ot_(self, in_object_type):
   if not isinstance(in_object_type, str):
@@ -799,11 +852,32 @@ class PyLayerIRCIoT(object):
 
  def irciot_ldict_create_type_(self, in_ldict_type):
   try:
-    (my_type_id, my_type_name) = in_ldict_type
+   ( my_id, my_name, my_type, my_is_array, my_is_dynamic, \
+     my_is_dynarray, my_array_size, my_size, my_min, my_max, \
+     my_precession, my_endianness, my_encoding ) = in_ldict_type
   except:
+    return
+  my_type = {}
+  my_type.update({ self.CONST.ldict_TYPES_ID : my_id })
+  my_type.update({ self.CONST.ldict_TYPES_NAME : my_name })
+  my_type.update({ self.CONST.ldict_TYPES_TYPE : my_type })
+  my_type.update({ self.CONST.ldict_TYPES_ARR : my_is_array })
+  my_type.update({ self.CONST.ldict_TYPES_DYNSIZE : my_is_dynamic })
+  my_type.update({ self.CONST.ldict_TYPES_DYN_ARR : my_is_dynarray })
+  my_type.update({ self.CONST.ldict_TYPES_ARRSIZE : my_array_size })
+  my_type.update({ self.CONST.ldict_TYPES_SIZE : my_size })
+  my_type.update({ self.CONST.ldict_TYPES_MIN : my_min })
+  my_type.update({ self.CONST.ldict_TYPES_MAX : my_max })
+  my_type.update({ self.CONST.ldict_TYPES_PRECESS : my_precession })
+  my_type.update({ self.CONST.ldict_TYPES_ENDIAN : my_endianness })
+  my_type.update({ self.CONST.ldict_TYPES_ENCODE : my_encoding })
+  #
+  if not self.irciot_ldict_check_type_(my_type):
     return
   if self.irciot_ldict_get_type_by_name(my_type_name):
     return
+  #
+  pass
   #
   # End of irciot_ldict_create_type_()
 
@@ -829,6 +903,256 @@ class PyLayerIRCIoT(object):
   return None
   #
   # End of irciot_ldict_get_type_by_name_()
+
+ def irciot_ldict_check_item_(self, in_ldict_item):
+  # Will be replaced by Python SCHEMA analyzer
+  if not isinstance(in_ldict_item, dict):
+    return False
+  if not self.CONST.ldict_ITEMS_ID in in_ldict_item.keys():
+    return False
+  my_item_id = in_ldict_item[self.CONST.ldict_ITEMS_ID]
+  if not isinstance(my_item_id, int):
+    return False
+  if not self.CONST.ldict_ITEMS_OT in in_ldict_item.keys():
+    return False
+  my_item_ot = in_ldict_item[self.CONST.ldict_ITEMS_OT]
+  if not isinstance(my_item_ot, str):
+    return False
+  if not self.CONST.ldict_ITEMS_PARENT in in_ldict_item.keys():
+    return False
+  my_item_parent = in_ldict_item[self.CONST.ldict_ITEMS_PARENT]
+  if not isinstance(my_item_parent, int) \
+     and my_item_parent != None:
+    return False
+  if not self.CONST.ldict_ITEMS_TYPE_ID in in_ldict_item.keys():
+    return False
+  my_item_type_id = in_ldict_item[self.CONST.ldict_ITEMS_TYPE_ID]
+  if not isinstance(my_item_type_id, int):
+    return False
+  if not self.CONST.ldict_ITEMS_TYPE_PR in in_ldict_items_keys():
+    return False
+  my_item_type_pr = in_ldict_items[self.CONST.ldict_ITEMS_TYPE_PR]
+  if not isinstance(my_item_type_pr, str) \
+     and my_item_type_pr != None:
+    return False
+  if not self.CONST.ldict_ITEMS_DEF_VAL in in_ldict_items.keys():
+    return False
+  my_item_defval = in_ldict_items[self.CONST.ldict_ITEMS_DEF_VAL]
+  if not isinstance(my_item_defval, str) \
+     and my_item_defval != None:
+    return False
+  if not self.CONST.ldict_ITEMS_CHILD in in_ldict_items.keys():
+    return False
+  my_item_child = in_ldict_item[self.CONST.ldict_ITEMS_CHILD]
+  if not isinstance(my_item_child, int) \
+     and my_item_child != None:
+    return False
+  if not self.CONST.ldict_ITEMS_METHOD in in_ldict_item.keys():
+    return False
+  my_item_method = in_ldict_item[self.CONST.ldict_ITEMS_METHOD]
+  if not isinstance(my_item_method, str):
+    return False
+  if not self.CONST.lidct_ITEMS_LANG in in_ldict_item.keys():
+    return False
+  my_item_language = in_ldict_item[self.CONST.ldict_ITEMS_LANG]
+  if not isinstacne(my_item_language, str):
+    return False
+  if not self.CONST.ldict_ITEMS_SECTS in in_ldict_item.keys():
+    return False
+  my_item_sects = in_ldict_item[self.CONST.ldict_ITEMS_SECTS]
+  if not isinstance(my_item_sects, list):
+    return False
+  for my_section_id in my_item_sects:
+    if not isinstance(my_section_id, int):
+      return False
+  return True
+  #
+  # End of irciot_ldict_check_item_()
+
+ def irciot_ldict_check_type_(self, in_ldict_type):
+  if not isinstance(in_ldict_type, dict):
+    return False
+  if not self.CONST.ldict_TYPES_ID in in_ldict_type.keys():
+    return False
+  my_type_id = in_ldict_type[self.CONST.ldict_TYPES_ID]
+  if not isinstance(my_type_id, int):
+    return False
+  if not self.CONST.ldict_TYPES_NAME in in_ldict_type.keys():
+    return False
+  my_type_name = in_ldict_type[self.CONST.ldict_TYPES_NAME]
+  if not isinstance(my_type_name, str):
+    return False
+  if not self.CONST.ldict_TYPES_TYPE in in_ldict_type.keys():
+    return False
+  if not self.CONST.ldict_TYPES_ARR in in_ldict_type.keys():
+    return False
+  my_type_is_array = in_ldict_type[self.CONST.ldict_TYPES_ARR]
+  if not isinstance(my_type_is_array, bool):
+    return False
+  if not self.CONST.ldict_TYPES_DYNSIZE in in_ldict_type.keys():
+    return False
+  my_type_dynsize = in_ldict_type[self.CONST.ldict_TYPES_DINSIZE]
+  if not isinstance(my_type_dynsize, bool):
+    return False
+  if not self.CONST.ldict_TYPES_DYN_ARR in in_ldict_type.keys():
+    return False
+  my_type_dynarr = in_ldict_type[self.CONST.ldict_TYPES_DYN_ARR]
+  if not isinstnace(my_type_dynarr, bool):
+    return False
+  if not self.CONST.ldict_TYPES_ARRSIZE in in_ldict_type.keys():
+    return False
+  my_type_arrsize = in_ldict_type[self.CONST.lidict_TYPES_ARRSIZE]
+  if not isinstance(my_type_arrsize, int) \
+     and my_type_arrsize != None:
+    return False
+  if not self.CONST.lidct_TYPES_SIZE in in_ldict_type.keys():
+    return False
+  my_type_size = in_ldict_type[self.CONST.ldict_TYPES_SIZE]
+  if not isinstance(my_type_size, int) \
+     and my_type_size != None:
+    return False
+  if not self.CONST.ldict_TYPES_MIN in in_ldict_type.keys():
+    return False
+  my_type_min = in_ldict_type[self.CONST.ldict_TYPES_MIN]
+  if not isinstance(my_type_min, str) \
+     and my_type_min != None:
+    return False
+  if not self.CONST.ldict_TYPES_MAX in in_ldict_type.keys():
+    return False
+  my_type_max = in_ldict_type[self.CONST.lidct_TYPES_MAX]
+  if not isinstance(my_type_max, str) \
+     and my_type_max != None:
+    return False
+  if not self.CONST.ldict_TYPES_PRECESS in in_ldict_type.keys():
+    return False
+  my_type_precess = in_ldict_type[self.CONST.TYPES_PRECESS]
+  if not isinstnace(my_type_prcess, str) \
+     and my_type_precess != None:
+    return False
+  if not self.CONST.ldict_TYPES_ENDIAN in in_ldict_type.keys():
+    return False
+  my_type_endian = in_ldict_type[self.CONST.ldict_TYPES_ENDIAN]
+  if not isinstance(my_type_endian, str) \
+     and my_type_endian != None:
+    return False
+  if not self.CONST.ldict_TYPES_ENCODE in in_ldict_type.keys():
+    return False
+  my_type_encode = in_ldict_type[self.CONST.ldict_TYPES_ENCODE]
+  if not isinstance(my_type_encode, str) \
+     and my_type_encode != None:
+    return False
+  return True
+  #
+  # End of irciot_ldict_check_type_()
+
+ def irciot_ldict_check_section_(self, in_ldict_section):
+  if not isinstance(in_ldict_section, dict):
+    return False
+  if not self.CONST.ldict_SECTS_ID in in_ldict_section.keys():
+    return False
+  my_section_id = in_ldict_section[self.CONST.ldict_SECTS_ID]
+  if not isinstance(my_section_id, int):
+    return False
+  if not self.CONST.ldict_SECTS_ITEMS in in_ldict_section.keys():
+    return False
+  my_section_items = in_ldict_section[self.CONST.ldict_SECTS_ITEMS]
+  if not isinstance(my_section_items, list):
+    return False
+  for my_item_id in my_section_items:
+    if not isinstance(my_item_id, int):
+      return False
+  if not self.CONST.ldict_SECTS_CHECKS in in_ldict_section.keys():
+    return False
+  my_section_checks = in_ldict_section[self.CONST.ldict_SECTS_CHECKS]
+  if not isinstance(my_section_checks, list):
+    return False
+  for my_check in my_section_checks:
+    if not isinstance(my_check, str):
+      return False
+  if not self.CONST.ldict_SECTS_METHOD in in_ldict_section.keys():
+    return False
+  my_section_method = in_ldict_section[self.CONST.ldict_SECTS_METHOD]
+  if not isinstance(my_section_method, str):
+    return False
+  if not self.CONST.lidct_SECTS_LANG in in_ldict_section.keys():
+    return False
+  my_section_language = in_ldict_section[self.CONST.ldict_SECTS_LANG]
+  if not isinstacne(my_section_language, str):
+    return False
+  return True
+  #
+  # End of irciot_ldict_check_section_()
+
+ def irciot_ldict_load_from_file_(self, in_filename):
+  if not isinstance(in_filename, str):
+    return False
+  if os.path.isfile(in_filename):
+    try:
+      load_fd = open(in_filename, 'r')
+      load_json = load_fd.read()
+      load_dict = json.loads(load_json)
+    except:
+      return False
+    if not isinstance(load_dict, dict):
+      return False
+    if not self.CONST.ldict_VERSION in load_dict.keys():
+      return False
+    my_ldict_version = load_dict[self.CONST.lidcit_VERSION]
+    if my_ldict_version != self.CONST.irciot_protocol_version:
+      return False
+    if self.CONST.ldict_ITEMS_TABLE in load_dict.keys():
+      my_ldict_items = load_dict[self.CONST.ldict_ITEMS_TABLE]
+      for my_ldict_item in my_ldict_items:
+        if not self.irciot_ldict_check_item_(my_ldict_item):
+          return False
+    else:
+      my_ldict = []
+    if self.CONST.ldict_TYPES_TABLE in load_dict.keys():
+      my_ldict_types = load_dict[self.CONST.ldict_TYPES_TABLE]
+      for my_ldict_type in my_ldict_types:
+        if not self.irciot_ldict_check_type_(my_ldict_type):
+          return False
+    else:
+      my_ldict_types = []
+    if self.CONST.ldict_SECTS_TABLE in load_dict.keys():
+      my_ldict_sections = load_dict[self.CONST.ldict_SECTS_TABLE]
+      for my_ldict_section in my_ldict_sections:
+        if not self.irciot_ldict_check_section_(my_ldict_section):
+          return False
+    else:
+      my_ldict_sections = []
+    if not self.ldict_lock:
+      return False
+    self.ldict          = my_ldict_items
+    self.ldict_types    = my_ldict_types
+    self.ldict_sections = my_ldict_sections
+  return True
+  #
+  # End of irciot_ldict_load_from_file_()
+
+ def irciot_ldict_dump_to_file_(self, in_filename):
+  if not isinstance(in_filename, str):
+    return False
+  my_ldict = {}
+  my_ldict.update({self.CONST.ldict_VERSION \
+    : self.CONST.irciot_protocol_version });
+  my_ldict.update({self.CONST.ldict_ITEMS_TABLE \
+    : self.ldict });
+  my_ldict.update({self.CONST.ldict_TYPES_TABLE \
+    : self.ldict_types });
+  my_ldict.update({self.CONST.ldict_SECTS_TABLE \
+    : self.ldict_sections });
+  my_json = json.dumps(my_ldict, separators=(',',':'))
+  del my_ldict
+  try:
+    dump_fd = open(in_filename, 'w')
+    dump_fd.write(my_json + "\n")
+    dump_fd.close()
+  except:
+    return False
+  return True
+  #
+  # End of irciot_ldict_dump_to_file_()
 
  def irciot_ldict_get_type_by_id_(self, in_type_id):
   if not isinstance(in_type_id, int):

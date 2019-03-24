@@ -25,36 +25,36 @@ def main():
   #   ['python3', os.path.expanduser(sys.argv[0]), 'background']
   #  )
   #  return
-   
+
   # sys.stdout = open('./iotBot.log', 'w+')
   
   # if (len(sys.argv) > 1):
   #  if (sys.argv[1] != 'background'):
   #   return  
- 
+
   irciot = PyLayerIRCIoT()
-  
+
   ircbot = PyLayerIRC()
-  
+
   irciot.irc_pointer = ircbot.irc_handler
   irciot.user_pointer = ircbot.user_handler
-  
+
   ircbot.irc_server  = "irc.undernet.org"
 
   # Warning: Please, run your own IRC server
   # don't use public networks for testing!!!
-  
+
   ircbot.irc_port    = 6667
   ircbot.irc_channel = "#Berdsk"
   ircbot.irc_debug   = True
   # ircbot.irc_talk_with_strangers = True
 
   ircbot.start_IRC_()
-  
+
   # irciot.irciot_enable_blockchain_(irciot.CONST.tag_mid_ED25519)
-  
+
   print("Starting IRC, press any key to exit", "\r")
-  
+
   stdin_fd = sys.stdin.fileno()
   old_term = termios.tcgetattr(stdin_fd)
   new_attr = old_term[:]
@@ -62,17 +62,17 @@ def main():
   termios.tcsetattr(stdin_fd, termios.TCSANOW, new_attr)
   old_flag = fcntl.fcntl(stdin_fd, fcntl.F_GETFL)
   fcntl.fcntl(stdin_fd, fcntl.F_SETFL, old_flag | os.O_NONBLOCK)
-  
+
   irc_vuid = "c0" # Bot itself
- 
-  try: 
+
+  try:
    while (ircbot.irc_run):
-  
+
     (irc_message, irc_wait, irc_vuid) \
       = ircbot.irc_check_queue_(ircbot.CONST.irc_queue_input)
-      
+
     if (irc_message != ""):
-      
+
        if (irciot.is_irciot_(irc_message)):
           irc_json = irciot.irciot_deinencap_(irc_message, irc_vuid)
           if (irc_json != ""):
@@ -93,7 +93,7 @@ def main():
   print("Stopping IRC, please wait for exit")
   del ircbot
   sys.exit()
-    
+
 if __name__ == '__main__':
   main()
 

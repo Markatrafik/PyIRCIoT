@@ -27,7 +27,7 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version = '0.3.21'
    #
-   irciot_library_version  = '0.0.81'
+   irciot_library_version  = '0.0.83'
    #
    # Bot specific constants
    #
@@ -1082,7 +1082,7 @@ class PyLayerIRC(object):
    return (in_ret, in_init, self.CONST.irc_default_wait)
    #
    # End of func_chan_nicks_()
-   
+
  def func_end_nicks_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
    try:
