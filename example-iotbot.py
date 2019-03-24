@@ -38,6 +38,7 @@ def main():
 
   irciot.irc_pointer = ircbot.irc_handler
   irciot.user_pointer = ircbot.user_handler
+  irciot.ldict_file = "./ldict.json"
 
   ircbot.irc_server  = "irc.undernet.org"
 
