@@ -1,7 +1,7 @@
 '''
 '' PyIRCIoT (PyLayerIRCIoT class)
 ''
-'' Copyright (c) 2018 Alexey Y. Woronov
+'' Copyright (c) 2018, 2019 Alexey Y. Woronov
 ''
 '' Authors:
 ''  Alexey Y. Woronov <alexey@woronov.ru>
@@ -47,7 +47,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.23'
   #
-  irciot_library_version  = '0.0.88'
+  irciot_library_version  = '0.0.89'
   #
   # IRC-IoT TAGs
   #
@@ -72,19 +72,25 @@ class PyLayerIRCIoT(object):
   tag_BCH_METHOD  = 'bm'  # Blockchain Method
   tag_BCH_PUBKEY  = 'bk'  # Blockchain Public Key
   #
+  tag_ENC_BASE32    = 'b32p'
   tag_ENC_BASE64    = 'b64p'
   tag_ENC_BASE85    = 'b85p'
   tag_ENC_BASE122   = 'b122'
   #
   tag_ENC_B64_RSA   = 'b64r'
+  tag_ENC_B85_RSA   = 'b85r'
   tag_ENC_B64Z_RSA  = 'b64Z'
-  # ^ Base64 + Zlib + RSA(keysize)
+  tag_ENC_B85Z_RSA  = 'b85Z'
   tag_ENC_B64_2FISH = 'b64f'
   tag_ENC_B64_AES   = 'b64a'
+  tag_ENC_B85_AES   = 'b85a'
+  tag_ENC_B64Z_AES  = 'b64A'
+  tag_ENC_B85Z_AES  = 'b85A'
   #
   tag_ENC_B64_ZLIB  = 'b64z'
   tag_ENC_B85_ZLIB  = 'b85z'
   tag_ENC_B64_BZIP2 = 'b64b'
+  tag_ENC_B85_BZIP2 = 'b85b'
   #
   tag_mid_ED25519   = 'ed'
   tag_mid_RSA1024   = 'rA'
@@ -116,6 +122,15 @@ class PyLayerIRCIoT(object):
   crypt_ASYMMETRIC    = 5
   #
   crypto_RSA_KEY_SIZE = 2048
+  #
+  base_BASE32  = 32
+  base_BASE64  = 64
+  base_BASE85  = 85
+  base_BASE122 = 122
+  #
+  compress_NONE  = 0
+  compress_ZLIB  = 3
+  compress_BZIP2 = 102
   #
   # The Object Types, will be replaced
   # by IRC-IoT "Dictionaries" mechanism
@@ -202,10 +217,11 @@ class PyLayerIRCIoT(object):
   err_DEFRAG_BC_EXCEEDED  = 123
   err_OVERLAP_MISSMATCH   = 131
   err_BASE64_DECODING     = 251
+  err_BASE85_DECODING     = 253
   err_COMP_ZLIB_HEADER    = 301
   err_COMP_ZLIB_INCOMP    = 303
   #
-  pattern = "@"
+  pattern = chr(0) # or "@", chr(255)
   #
   default_mtu = 450
   #
@@ -264,15 +280,14 @@ class PyLayerIRCIoT(object):
   self.crypt_NACE = None
   #
   if CAN_encrypt_datum:
-    self.crypt_method = self.CONST.tag_ENC_default
     self.crypt_HASH = hashlib
     self.crypt_RSA  = RSA
     self.crypt_SHA1 = SHA1
     self.crypt_AES  = AES
     self.crypt_FISH = Twofish
     self.crypt_PKCS = PKCS1_v1_5
-  else:
-    self.crypt_method = self.CONST.tag_ENC_BASE64
+  #
+  self.crypt_method = self.CONST.tag_ENC_default
   #
   # 0 is autoincrement
   #
@@ -336,6 +351,8 @@ class PyLayerIRCIoT(object):
   my_datum = { }
   if in_error_code == self.CONST.err_BASE64_DECODING:
     return
+  elif in_error_code == self.CONST.err_BASE85_DECODING:
+    return
   elif in_error_code == self.CONST.err_DEFRAG_INVALID_DID:
     return
   elif in_error_code == self.CONST.err_CONTENT_MISSMATCH:
@@ -355,8 +372,10 @@ class PyLayerIRCIoT(object):
   elif in_error_code == self.CONST.err_OVERLAP_MISSMATCH:
     return
   elif in_error_code == self.CONST.err_COMP_ZLIB_HEADER:
+    # my_datum.update({ "error" : "zlib_header" })
     return
   elif in_error_code == self.CONST.err_COMP_ZLIB_INCOMP:
+    # my_datum.update({ "error" : "zlib_incomplete" })
     return
   else:
     return
@@ -380,13 +399,17 @@ class PyLayerIRCIoT(object):
     self.CONST.irciot_library_version)
 
  def irciot_init_encryption_method_(self, in_crypt_method):
-  if (in_crypt_method == self.CONST.tag_ENC_B64_AES):
+  if in_crypt_method in [ \
+    self.CONST.tag_ENC_B64_AES, \
+    self.CONST.tag_ENC_B64Z_AES ]:
     self.crypto_AES_BLOCK_SIZE = self.crypt_AES.block_size
     self.crypto_AES_iv = self.irciot_crypto_hasher_(None, \
     self.crypto_AES_BLOCK_SIZE )
   if (in_crypt_method == self.CONST.tag_ENC_B64_2FISH):
     pass
-  if (in_crypt_method == self.CONST.tag_ENC_B64_RSA):
+  if in_crypt_method in [ \
+    self.CONST.tag_ENC_B64_RSA, \
+    self.CONST.tag_ENC_B64Z_RSA ]:
     self.crypto_RSA_KEY_SIZE = self.CONST.crypto_RSA_KEY_SIZE
   (self.encryption_private_key, \
    self.encryption_public_key) \
@@ -398,8 +421,9 @@ class PyLayerIRCIoT(object):
   # End of irciot_init_encryption_method_()
 
  def irciot_init_blockchain_method_(self, in_mid_method):
-  if in_mid_method != self.CONST.tag_mid_ED25519 and \
-     in_mid_method != self.CONST.tag_mid_RSA1024:
+  if not in_mid_method in [ \
+    self.CONST.tag_mid_ED25519, \
+    self.CONST.tag_mid_RSA1024 ]:
     return
   (self.blockchain_private_key, \
    self.blockchain_public_key) \
@@ -448,7 +472,9 @@ class PyLayerIRCIoT(object):
   # End of irciot_load_blockchian_methods_()
 
  def irciot_load_encryption_methods_(self, in_crypt_method):
-  if (self.crypt_method == self.CONST.tag_ENC_B64_AES):
+  if self.crypt_method in [ \
+     self.CONST.tag_ENC_B64_AES, \
+     self.CONST.tag_ENC_B64Z_AES ]:
     if self.crypt_AES != None:
       return False
     self.crypt_AES = self.import_(self.crypt_AES, \
@@ -458,7 +484,9 @@ class PyLayerIRCIoT(object):
       return False
     self.crypt_FISH = self.import_(self.crypt_FISH, \
       'twofish.Twofish')
-  if (self.crypt_method == self.CONST.tag_ENC_B64_RSA):
+  if self.crypt_method in [ \
+     self.CONST.tag_ENC_B64_RSA, \
+     self.CONST.tag_ENC_B64Z_RSA ]:
     if self.crypt_RSA != None:
       return False
     self.crypt_RSA = self.import_(self.crypt_RSA, \
@@ -665,11 +693,15 @@ class PyLayerIRCIoT(object):
 
  def irciot_encryption_key_publication_(self, in_public_key):
   my_key_string = ""
-  if (self.crypt_method == self.CONST.tag_ENC_B64_AES):
+  if self.crypt_method in [ \
+     self.CONST.tag_ENC_B64_AES, \
+     self.CONST.tag_ENC_B64Z_AES ]:
     return
   elif (self.crypt_method == self.CONST.tag_ENC_B64_2FISH):
     return
-  elif (self.crypt_method == self.CONST.tag_ENC_B64_RSA):
+  elif self.crypt_method in [ \
+     self.CONST.tag_ENC_B64_RSA, \
+     self.CONST.tag_ENC_B64Z_RSA ]:
     return
   else:
     return
@@ -703,11 +735,20 @@ class PyLayerIRCIoT(object):
   #
   # End of irciot_blockchain_check_publication_()
 
+ def irciot_encryption_check_publication_(self):
+  pass
+
  def irciot_blockchain_place_key_to_repo_(self, in_public_key):
   if in_public_key == None:
     return
   #
   # End of irciot_blockchain_place_key_to_repo_()
+
+ def irciot_encryption_place_key_to_repo_(self, in_public_key):
+  if in_public_key == None:
+    return
+  #
+  # End of irciot_encryption_place_key_to_repo_()
 
  def irciot_blockchain_request_foreign_key_(self, in_vuid):
   if not isinstance(in_vuid, str):
@@ -725,6 +766,20 @@ class PyLayerIRCIoT(object):
       self.output_pool.append(my_msg)
   #
   # End of irciot_blockchain_request_foreign_key_()
+
+ def irciot_encryption_request_foreign_key_(self, in_vuid):
+  if not isinstance(in_vuid, str):
+    return
+  my_msgs = self.irciot_encryption_request_to_messages_(in_vuid)
+  if my_msgs == []:
+    return
+  my_compat = self.irciot_compatibility_()
+  for my_msg in my_msgs:
+    if not self.irc_pointer (my_compat, my_msg):
+      # Handler not inserted
+      self.output_pool.append(my_msg)
+  #
+  # End of irciot_encryption_request_foreign_key_()
 
  def irciot_blockchain_get_foreign_key_(self, in_vuid):
   if not isinstance(in_vuid, str):
@@ -919,25 +974,78 @@ class PyLayerIRCIoT(object):
   #
   # End of irciot_blockchain_verify_string_()
 
- def irciot_crypto_get_model_(self):
+ def irciot_crypto_get_base_(self, in_crypt_method):
+  my_base = None
+  if in_crypt_method in [ \
+     self.CONST.tag_ENC_BASE32 ]:
+    my_base = self.CONST.base_BASE32
+  if in_crypt_method in [ \
+     self.CONST.tag_ENC_BASE64, \
+     self.CONST.tag_ENC_B64_AES, \
+     self.CONST.tag_ENC_B64Z_AES, \
+     self.CONST.tag_ENC_B64_ZLIB, \
+     self.CONST.tag_ENC_B64_RSA, \
+     self.CONST.tag_ENC_B64Z_RSA, \
+     self.CONST.tag_ENC_B64_2FISH ]:
+    my_base = self.CONST.base_BASE64
+  if in_crypt_method in [ \
+     self.CONST.tag_ENC_BASE85, \
+     self.CONST.tag_ENC_B85_ZLIB ]:
+    my_base = self.CONST.base_BASE85
+  if in_crypt_method in [ \
+     self.CONST.tag_ENC_BASE122 ]:
+    my_base = self.CONST.base_BASE122
+  return my_base
+  #
+  # End of irciot_crypto_get_base_()
+
+ def irciot_crypto_get_compress_(self, in_crypt_method):
+  my_compress = None
+  if in_crypt_method in [ \
+     self.CONST.tag_ENC_BASE32, \
+     self.CONST.tag_ENC_BASE64, \
+     self.CONST.tag_ENC_BASE85, \
+     self.CONST.tag_ENC_BASE122 ]:
+    my_compress = self.CONST.compress_NONE
+  elif in_crypt_method in [  \
+     self.CONST.tag_ENC_B64_ZLIB, \
+     self.CONST.tag_ENC_B85_ZLIB, \
+     self.CONST.tag_ENC_B64Z_RSA, \
+     self.CONST.tag_ENC_B85Z_RSA, \
+     self.CONST.tag_ENC_B64Z_AES, \
+     self.CONST.tag_ENC_B85Z_AES ]:
+    my_compress = self.CONST.compress_ZLIB
+  elif in_crypt_method in [ \
+     self.tag_ENC_B64_BZIP2, \
+     self.tag_ENC_B85_BZIP2 ]:
+    my_compress = self.CONST.compress_BZIP2
+  return my_compress
+  #
+  # End of irciot_crypto_get_compress_()
+
+ def irciot_crypto_get_model_(self, in_crypt_method):
   my_model = None
-  if self.crypt_method == self.CONST.tag_ENC_BASE64 \
-  or self.crypt_method == self.CONST.tag_ENC_BASE85 \
-  or self.crypt_method == self.CONST.tag_ENC_BASE122 \
-  or self.crypt_method == self.CONST.tag_ENC_B64_ZLIB \
-  or self.crypt_method == self.CONST.tag_ENC_B85_ZLIB \
-  or self.crypt_method == self.CONST.tag_ENC_B64_BZIP2:
+  if in_crypt_method in [ \
+     self.CONST.tag_ENC_BASE64, \
+     self.CONST.tag_ENC_BASE85, \
+     self.CONST.tag_ENC_BASE122, \
+     self.CONST.tag_ENC_B64_ZLIB, \
+     self.CONST.tag_ENC_B85_ZLIB, \
+     self.CONST.tag_ENC_B64_BZIP2 ]:
     my_model = self.CONST.crypt_NO_ENCRYPTION
-  if self.crypt_method == self.CONST.tag_ENC_B64_RSA \
-  or self.crypt_method == self.CONST.tag_ENC_B64Z_RSA:
+  if in_crypt_method in [ \
+     self.CONST.tag_ENC_B64_RSA, \
+     self.CONST.tag_ENC_B64Z_RSA ]:
     my_model = self.CONST.crypt_ASYMMETRIC
-  if self.crypt_method == self.CONST.tag_ENC_2FISH \
-  or self.crypt_method == self.CONST.tag_ENC_AES:
+  if in_crypt_method in [ \
+     self.CONST.tag_ENC_B64_2FISH, \
+     self.CONST.tag_ENC_B64_AES, \
+     self.CONST.tag_ENC_B64Z_AES ]:
     my_model = self.CONST.crypt_PRIVATE_KEY
   return my_model
   #
   # End of irciot_crypto_get_model_()
-
+  
  def irciot_crypto_AES_encrypt_(self, in_raw_data, in_secret_key):
   if self.crypt_AES == None:
     return None
@@ -965,13 +1073,20 @@ class PyLayerIRCIoT(object):
   return my_2fish.decrypt(in_encrypted_data).decode()
 
  def irciot_encryption_generate_keys_(self, in_crypt_method):
+  if self.irciot_crypto_get_model_(in_crypt_method) \
+    == self.CONST.crypt_NO_ENCRYPTION:
+    return (None, None)
   crypto_public_key = None
   crypto_private_key = None
-  if (in_crypt_method == self.CONST.tag_ENC_B64_RSA):
+  if in_crypt_method in [ \
+   self.CONST.tag_ENC_B64_RSA, \
+   self.CONST.tag_ENC_B64Z_RSA ]:
     crypto_private_key \
       = self.crypt_RSA.generate(self.crypto_RSA_KEY_SIZE)
     crypto_public_key = crypto_private_key.publickey()
-  if (in_crypt_method == self.CONST.tag_ENC_B64_AES):
+  if in_crypt_method in [ \
+   self.CONST.tag_ENC_B64_AES, \
+   self.CONST.tag_ENC_B64Z_AES ]:
     pass
   if (in_crypt_method == self.CONST.tag_ENC_B64_2FISH):
     pass
@@ -1747,26 +1862,66 @@ class PyLayerIRCIoT(object):
        pass
     elif (my_ok == 2):
        self.irciot_clear_defrag_chain_(my_did)
-       if (self.crypt_method == self.CONST.tag_ENC_BASE64):
+       my_base = self.irciot_crypto_get_base_(self.crypt_method)
+       if (my_base == self.CONST.base_BASE64):
           try:
-            out_json = str(base64.b64decode(defrag_buffer))[2:-1]
+            out_base = base64.b64decode(defrag_buffer)
           except:
             self.irciot_error_(self.CONST.err_BASE64_DECODING, 0)
             return ""
+       elif (my_base == self.CONST.base_BASE85):
+          try:
+            out_base = base64.b85decode(defrag_buffer)
+          except:
+            self.irciot_error_(self.CONST.err_BASE85_DECODING, 0)
+            return ""
+       elif (my_base == self.CONST.base_BASE32):
+          try:
+            out_base = base64.b32decode(defrag_buffer)
+          except:
+            return ""
+       else:
+          out_base = bytes(defrag_buffer, 'utf-8')
+       if self.crypt_method in [ \
+          self.CONST.tag_ENC_B64_RSA, self.CONST.tag_ENC_B64Z_RSA ]:
+          pass
+       if self.crypt_method in [ \
+          self.CONST.tag_ENC_B64_AES, self.CONST.tag_ENC_B64Z_AES ]:
+          pass
+       my_compress = self.irciot_crypto_get_compress_( \
+          self.crypt_method)
+       if my_compress == self.CONST.compress_ZLIB:
+          try:
+            out_compress = str(zlib.decompress(out_base))
+            del out_base
+          except zlib.error as zlib_error:
+            # print("\033[1;35m" + str(zlib_error) + "\033[0m")
+            if zlib_error.args[0].startswith("Error -3 "):
+              self.irciot_error_(self.CONST.err_COMP_ZLIB_HEADER, 0)
+            else:
+              self.irciot_error_(self.CONST.err_COMP_ZLIB_INCOMP, 0)
+            del zlib_error
+            return ""
+       if (self.crypt_method == self.CONST.tag_ENC_BASE64 \
+        or self.crypt_method == self.CONST.tag_ENC_BASE85):
+          out_json = out_base[2:-1]
+          del out_base
        elif (self.crypt_method == self.CONST.tag_ENC_B64_AES):
+          del out_base
           return ""
-       elif (self.crypt_method == self.CONST.tag_ENC_B64_ZLIB):
-          try:
-            out_zlib = base64.b64decode(defrag_buffer)
-          except:
-            self.irciot_error_(self.CONST.err_BASE64_DECODING, 0)
-            return ""
-          try:
-            out_json = str(zlib.decompress(out_zlib))[2:-1]
-          except:
-            self.irciot_error_(self.CONST.err_COMP_ZLIB_INCOMP, 0)
-            return ""
-          del out_zlib
+       elif (self.crypt_method == self.CONST.tag_ENC_B64Z_AES):
+          del out_compress
+          return ""
+       elif (self.crypt_method == self.CONST.tag_ENC_B64_ZLIB \
+          or self.crypt_method == self.CONST.tag_ENC_B85_ZLIB):
+          out_json = out_compress[2:-1]
+          del out_compress
+       elif (self.crypt_method == self.CONST.tag_ENC_B64_RSA):
+          del out_base
+          return ""
+       elif (self.crypt_method == self.CONST.tag_ENC_B64Z_RSA):
+          del out_compress
+          return ""
        else:
           return ""
        try:
@@ -2151,8 +2306,9 @@ class PyLayerIRCIoT(object):
     if not isinstance(self.current_mid, int):
       self.current_mid = random.randint( 10000, 99999)
     self.current_mid += 1
-  elif self.mid_method == self.CONST.tag_mid_ED25519 \
-    or self.mid_method == self.CONST.tag_mid_RSA1024:
+  elif self.mid_method in [ \
+       self.CONST.tag_mid_ED25519, \
+       self.CONST.tag_mid_RSA1024 ]:
     sign_hash = self.irciot_blockchain_sign_string_( \
       str_for_sign, self.blockchain_private_key)
     if sign_hash == None:
@@ -2185,14 +2341,32 @@ class PyLayerIRCIoT(object):
   if (big_ot == None):
      return ("", 0)
   str_big_datum  = json.dumps(big_datum, separators=(',',':'))
-  if (self.crypt_method == self.CONST.tag_ENC_B64_ZLIB):
+  my_base = self.irciot_crypto_get_base_(self.crypt_method)
+  my_compress = self.irciot_crypto_get_base_(self.crypt_method)
+  if self.crypt_method in [ \
+     self.CONST.tag_ENC_B64_ZLIB, \
+     self.CONST.tag_ENC_B85_ZLIB, \
+     self.CONST.tag_ENC_B64Z_RSA, \
+     self.CONST.tag_ENC_B85Z_RSA ]:
      bin_big_datum  = zlib.compress(bytes(str_big_datum, "utf-8"))
-     b64_big_datum  = base64.b64encode(bin_big_datum)
+     if self.crypt_method in [ \
+       self.CONST.tag_ENC_B64Z_RSA, \
+       self.CONST.tag_ENC_B85Z_RSA, ]:
+       pass
+     if my_base == self.CONST.base_BASE64:
+       base_big_datum = base64.b64encode(bin_big_datum)
+     elif my_base == self.CONST.base_BASE85:
+       base_big_datum = base64.b85encode(bin_big_datum)
      del bin_big_datum
   else:
-     b64_big_datum  = base64.b64encode(bytes(str_big_datum, "utf-8"))
-  raw_big_datum  = str(b64_big_datum)[2:-1]
-  del b64_big_datum
+     bin_big_datum = bytes(str_big_datum, "utf-8")
+     if my_base == self.CONST.base_BASE64:
+       base_big_datum = base64.b64encode(bin_big_datum)
+     elif my_base == self.CONST.base_BASE85:
+       base_big_datum = base64.b85encode(bin_big_datum)
+     del bin_big_datum
+  raw_big_datum  = str(base_big_datum)[2:-1]
+  del base_big_datum
   my_bc = len(raw_big_datum)
   out_big_datum  = '{"' + self.CONST.tag_ENC_DATUM
   out_big_datum += '":"' + raw_big_datum + '"}'
