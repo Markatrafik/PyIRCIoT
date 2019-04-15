@@ -27,7 +27,7 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version = '0.3.23'
    #
-   irciot_library_version  = '0.0.89'
+   irciot_library_version  = '0.0.91'
    #
    # Bot specific constants
    #
@@ -59,8 +59,8 @@ class PyLayerIRC(object):
    # 1. IRC User Mask
    # 2. IRC Channel Name
    # 3. User Options
-   # 4. Encryption Key
-   # 5. Blockchain Key
+   # 4. Encryption Private or Secret Key
+   # 5. Blockchain Private Key
    # 6. Last Message ID
    #
    irc_default_users = [ \
@@ -873,7 +873,7 @@ class PyLayerIRC(object):
        return -1
      if (self.irc_debug):
        self.to_log_("Sending to IRC: [" + irc_out + "]")
-     self.irc.send(bytes(irc_out + "\n", "UTF-8"))
+     self.irc.send(bytes(irc_out + "\n", 'utf-8'))
      sleep(self.CONST.irc_micro_wait)
      irc_out = ""
      return 0
@@ -901,7 +901,7 @@ class PyLayerIRC(object):
        delta_time = 0
      if ready[0]:
        irc_input \
-        = self.irc.recv(self.CONST.irc_buffer_size).decode("UTF-8")
+        = self.irc.recv(self.CONST.irc_buffer_size).decode('utf-8')
        irc_input = irc_input.strip("\n")
        irc_input = irc_input.strip("\r")
        if (irc_input != ""):
