@@ -42,7 +42,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.23'
   #
-  irciot_library_version  = '0.0.91'
+  irciot_library_version  = '0.0.93'
   #
   # IRC-IoT TAGs
   #
@@ -543,8 +543,9 @@ class PyLayerIRCIoT(object):
 
  def irciot_crypto_hasher_(self, in_password, in_hash_size):
   if in_password == None or in_password == "" or \
-   not (CAN_encrypt_datum or mid_method != ""):
-    return random.new().read( in_hash_size )
+   not (CAN_encrypt_datum or self.mid_method != ""):
+    return ''.join(chr(random.randint(0,255)) \
+      for my_chr in range(in_hash_size))
   if not isinstance(in_password, str):
     return None
   my_hash = None
@@ -1997,7 +1998,7 @@ class PyLayerIRCIoT(object):
             break
   if (self.defrag_pool == []):
     if (len(in_enc) == my_bc):
-       defrag_buffer = my_enc
+       defrag_buffer = in_enc
        my_ok = 2
     else:
        my_new = True
@@ -2586,6 +2587,8 @@ class PyLayerIRCIoT(object):
  def irciot_encap_(self, in_datumset, my_skip, my_part):
   ''' Public part of encapsulator with per-"Datum" fragmentation '''
   self.irciot_blockchain_check_publication_()
+  #my_encrypt = CAN_encrypt_datum and DO_always_encrypt
+  my_encrypt = False
   my_datums_set  = in_datumset
   my_datums_skip = 0
   my_datums_part = 0
@@ -2605,7 +2608,7 @@ class PyLayerIRCIoT(object):
      del my_datums_obj
      del my_datums_cnt
   my_irciot = self.irciot_encap_internal_(my_datums_set)
-  if (len(my_irciot) > self.message_mtu):
+  if (len(my_irciot) > self.message_mtu) or my_encrypt:
      if (my_skip == 0):
         self.current_mid = save_mid # mid rollback
      my_datums = json.loads(my_datums_set)
@@ -2639,6 +2642,8 @@ class PyLayerIRCIoT(object):
            one_datum = 1 # One "Datum" in list, and it is too large
      if isinstance(my_datums, dict):
         one_datum = 1    # One large "Datum" without list
+     if my_encrypt:
+        one_datum = 1
      if (one_datum == 1):
         self.current_mid = save_mid # Message ID rollback
         (my_irciot, my_datums_part) \
@@ -2651,6 +2656,8 @@ class PyLayerIRCIoT(object):
   if (my_skip + my_datums_skip >= my_total):
     my_skip = 0
     my_datums_skip = 0
+    if CAN_encrypt_datum and my_datums_part == 0:
+      self.crypt_cache = None
   return my_irciot, my_skip + my_datums_skip, my_datums_part
   #
   # End of irciot_encap_()

@@ -27,13 +27,13 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version = '0.3.23'
    #
-   irciot_library_version  = '0.0.91'
+   irciot_library_version  = '0.0.93'
    #
    # Bot specific constants
    #
-   irc_first_wait = 30
+   irc_first_wait = 28
    irc_micro_wait = 0.15
-   irc_default_wait = 30
+   irc_default_wait = 28
    #
    irc_default_debug = False
    #
