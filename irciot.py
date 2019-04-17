@@ -42,7 +42,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.23'
   #
-  irciot_library_version  = '0.0.93'
+  irciot_library_version  = '0.0.95'
   #
   # IRC-IoT TAGs
   #
@@ -298,12 +298,12 @@ class PyLayerIRCIoT(object):
   self.crypt_NACE = None
   #
   self.crypt_method = self.CONST.tag_ENC_default
-  #
   self.crypt_algo \
+    = self.irciot_crypto_get_algorithm_(self.crypt_method)
+  self.crypt_model \
     = self.irciot_crypto_get_algorithm_(self.crypt_method)
   #
   if CAN_encrypt_datum:
-    self.crypt_HASH = hashlib
     self.crypt_SHA1 = SHA1
     self.crypt_PKCS = PKCS1_v1_5
     if self.crypt_algo != None:
@@ -494,7 +494,9 @@ class PyLayerIRCIoT(object):
  def irciot_load_encryption_methods_(self, in_crypt_method):
   my_algo = self.irciot_crypto_get_algorithm_(in_crypt_method)
   if my_algo == self.CONST.crypto_RSA:
-    if self.crypt_RSA != None and self.crypt_RSA != None:
+    if self.crypt_RSA  != None and \
+       self.crypt_OAEP != None and \
+       self.crypt_HASH != None:
       return False
     if self.crypt_RSA == None:
       self.crypt_RSA = self.import_(self.crypt_RSA, \
@@ -502,6 +504,9 @@ class PyLayerIRCIoT(object):
     if self.crypt_OAEP == None:
       self.crypt_OAEP = self.import_(self.crypt_OAEP, \
         'Crypto.Cipher.PKCS1_OAEP')
+    if self.crypt_HASH == None:
+      self.crypt_HASH = self.import_(self.crypt_HASH, \
+        'hashlib')
   elif my_algo == self.CONST.crypto_AES:
     if self.crypt_AES != None:
       return False
@@ -511,7 +516,7 @@ class PyLayerIRCIoT(object):
     if self.crypt_FISH != None:
       return False
     self.crypt_FISH = self.import_(self.crypt_FISH, \
-      'twofish.Twofish')
+      'twofish')
   self.irciot_init_encryption_method_(in_crypt_method)
   return True
   #
@@ -530,6 +535,12 @@ class PyLayerIRCIoT(object):
     return
   self.irciot_load_encryption_methods_(in_crypt_method)
   self.crypt_method = in_crypt_method
+  self.crypt_model \
+    = self.irciot_crypto_get_model_(in_crypt_method)
+  self.crypt_algo \
+    = self.irciot_crypto_get_algorithm_(in_crypt_method)
+  if self.crypt_algo == self.CONST.crypt_ASYMMETRIC:
+    self.blockchain_key_published = 0
   #
   # End of irciot_enable_encryption_()
 
@@ -543,9 +554,14 @@ class PyLayerIRCIoT(object):
 
  def irciot_crypto_hasher_(self, in_password, in_hash_size):
   if in_password == None or in_password == "" or \
-   not (CAN_encrypt_datum or self.mid_method != ""):
-    return ''.join(chr(random.randint(0,255)) \
-      for my_chr in range(in_hash_size))
+   not (self.crypt_model != self.CONST.crypt_NO_ENCRYPTION \
+     or self.mid_method != ""):
+    my_RHASH = ""
+    my_ASCII = ''.join([chr(my_idx) \
+      for my_idx in range(0, 127)])
+    for my_i in range(0, in_hash_size):
+      my_RHASH += random.choice(my_ASCII)
+    return my_RHASH
   if not isinstance(in_password, str):
     return None
   my_hash = None
@@ -1068,6 +1084,8 @@ class PyLayerIRCIoT(object):
      self.CONST.tag_ENC_B85_2FISH ]:
     my_algorithm = self.CONST.crypto_2FISH
   return my_algorithm
+  #
+  # End of irciot_crypto_get_algorithm_()
 
  def irciot_crypto_get_model_(self, in_crypt_method):
   my_model = None
@@ -1099,11 +1117,32 @@ class PyLayerIRCIoT(object):
       self.irciot_load_encryption_methods_(self.CONST.tag_ENC_B64_AES)
     else:
       return None
+  my_encrypted = bytes()
+  my_size   = len(in_raw_data)
+  my_chunk  = 16
+  my_offset = 0
+  my_loop   = True
   try:
+    my_KEY = str(in_secret_key, 'utf-8')
     my_AES = self.crypt_AES.new(in_secret_key, \
       self.crypt_AES.MODE_CBC, self.crypto_AES_iv)
-    my_encrypted = my_AES.encrypt(in_raw_data)
+    while my_loop:
+      my_block = in_raw_data[my_offset:my_offset + my_chunk]
+      my_bsize = len(my_block) % 16
+      my_rest = 16 - my_bsize
+      if my_rest < 16:
+        my_addon = self.irciot_crypto_hasher_(None, my_rest)
+        my_block += bytes(my_addon, 'utf-8')
+        my_loop = False
+      my_encrypted += my_AES.encrypt(my_block)
+      my_offset += my_chunk
+      if my_offset > my_size:
+        my_loop = False
+    my_encrypted += bytes(self.crypto_AES_iv, 'utf-8')
+    my_encrypted += my_rest.to_bytes(1, 'little')
   except:
+    return None
+  if my_encrypted == bytes():
     return None
   return my_encrypted
   #
@@ -1115,10 +1154,29 @@ class PyLayerIRCIoT(object):
       self.irciot_load_encryption_methods_(self.CONST.tag_ENC_B64_AES)
     else:
       return None
+  my_decrypted = bytes()
+  my_chunk  = 16
+  my_loop   = True
   try:
-    my_AES = self.crypt_AES.new(in_secret_key, \
-      self.crypt_AES.MODE_CBC, self.crypto_AES_iv)
-    my_decrypted = my_AES.decrypt(in_encrypted_data)
+    my_KEY   = str(in_secret_key, 'utf-8')
+    my_size  = len(in_encrypted_data)-my_chunk-1
+    if my_size - my_chunk < 0:
+      return None
+    my_AES_iv = in_encrypted_data[my_size:my_size+my_chunk]
+    my_offset = my_size + my_chunk
+    my_rawcut = in_encrypted_data[my_offset:my_offset+1]
+    my_cut = int.from_bytes(my_rawcut, byteorder='little')
+    my_AES = self.crypt_AES.new(my_KEY, \
+      self.crypt_AES.MODE_CBC, my_AES_iv)
+    my_offset = 0
+    while my_loop:
+      my_block = in_encrypted_data[my_offset:my_offset + my_chunk]
+      my_decrypted += my_AES.decrypt(my_block)
+      my_offset += my_chunk
+      if my_offset >= my_size:
+        break
+    if my_cut < my_chunk:
+      my_decrypted = my_decrypted[:-my_cut]
   except:
     return None
   return my_decrypted
@@ -1132,7 +1190,8 @@ class PyLayerIRCIoT(object):
     else:
       return None
   try:
-    my_2fish = self.crypt_FISH(in_secret_key)
+    in_secret_key = bytes(in_secret_key, 'utf-8')
+    my_2fish = self.crypt_FISH.Twofish(in_secret_key)
     my_encrypted = my_2fish.encrypt(in_raw_data)
   except:
     return None
@@ -1240,7 +1299,8 @@ class PyLayerIRCIoT(object):
       = self.crypt_RSA.generate(self.crypto_RSA_KEY_SIZE)
     crypto_public_key = crypto_private_key.publickey()
   elif my_algo == self.CONST.crypto_AES:
-    pass
+    crypto_private_key \
+      = self.irciot_crypto_hasher_(None, 32).encode()
   elif my_algo == self.CONST.crypto_2FISH:
     pass
   #
@@ -2060,6 +2120,8 @@ class PyLayerIRCIoT(object):
               self.irciot_error_(self.CONST.err_COMP_ZLIB_INCOMP, 0)
             del zlib_error
             return ""
+          #except:
+          #  return ""
           out_json = out_compress[2:-1]
           del out_compress
        elif my_compress == self.CONST.compress_BZIP2:
@@ -2504,6 +2566,8 @@ class PyLayerIRCIoT(object):
        pass
      if my_base == self.CONST.base_BASE64:
        base_big_datum = base64.b64encode(bin_big_datum)
+       while (base_big_datum[-1] == "="):
+         base_big_datum = base_big_datum[:-1]
      elif my_base == self.CONST.base_BASE85:
        base_big_datum = base64.b85encode(bin_big_datum)
      elif my_base == self.CONST.base_BASE32:
