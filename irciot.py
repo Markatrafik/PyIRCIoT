@@ -24,6 +24,8 @@ import random
 import base64
 import datetime
 
+from ctypes import c_ushort
+
 if CAN_debug_library:
   from pprint import pprint
 if CAN_encrypt_datum or CAN_mid_blockchain:
@@ -36,7 +38,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.25'
   #
-  irciot_library_version  = '0.0.99'
+  irciot_library_version  = '0.0.100'
   #
   # IRC-IoT TAGs
   #
@@ -61,32 +63,48 @@ class PyLayerIRCIoT(object):
   tag_BCH_METHOD  = 'bm'  # Blockchain Method
   tag_BCH_PUBKEY  = 'bk'  # Blockchain Public Key
   #
+  # Container Integrity Checks:
+  #
+  tag_CHK_CRC16   = 'c1'
+  tag_CHK_CRC32   = 'c2'
+  #
+  # Only Basecoding methods:
+  #
   tag_ENC_BASE32    = 'b32p'
   tag_ENC_BASE64    = 'b64p'
   tag_ENC_BASE85    = 'b85p'
   tag_ENC_BASE122   = 'b122'
   #
-  tag_ENC_B64_RSA   = 'b64r'
-  tag_ENC_B85_RSA   = 'b85r'
-  tag_ENC_B64Z_RSA  = 'b64Z'
-  tag_ENC_B85Z_RSA  = 'b85Z'
-  tag_ENC_B64_2FISH = 'b64f'
-  tag_ENC_B85_2FISH = 'b85f'
-  tag_ENC_B64Z_2FISH = 'b64F'
-  tag_ENC_B85Z_2FISH = 'b85F'
-  tag_ENC_B64_AES   = 'b64a'
-  tag_ENC_B85_AES   = 'b85a'
-  tag_ENC_B64Z_AES  = 'b64A'
-  tag_ENC_B85Z_AES  = 'b85A'
-  tag_ENC_B64_USER  = 'b64u'
-  tag_ENC_B85_USER  = 'b85u'
-  tag_ENC_B64Z_USER = 'b64U'
-  tag_ENC_B85Z_USER = 'b85U'
+  # Basecoding + Compression:
   #
   tag_ENC_B64_ZLIB  = 'b64z'
   tag_ENC_B85_ZLIB  = 'b85z'
   tag_ENC_B64_BZIP2 = 'b64b'
   tag_ENC_B85_BZIP2 = 'b85b'
+  #
+  # Basecoding + Encryption:
+  #
+  tag_ENC_B64_RSA   = 'b64r'
+  tag_ENC_B85_RSA   = 'b85r'
+  tag_ENC_B64_2FISH = 'b64f'
+  tag_ENC_B85_2FISH = 'b85f'
+  tag_ENC_B64_AES   = 'b64a'
+  tag_ENC_B85_AES   = 'b85a'
+  tag_ENC_B64_USER  = 'b64u'
+  tag_ENC_B85_USER  = 'b85u'
+  #
+  # Basecoding + Encryption + Compression:
+  #
+  tag_ENC_B64Z_RSA  = 'b64Z'
+  tag_ENC_B85Z_RSA  = 'b85Z'
+  tag_ENC_B64Z_AES  = 'b64A'
+  tag_ENC_B85Z_AES  = 'b85A'
+  tag_ENC_B64Z_2FISH = 'b64F'
+  tag_ENC_B85Z_2FISH = 'b85F'
+  tag_ENC_B64Z_USER = 'b64U'
+  tag_ENC_B85Z_USER = 'b85U'
+  #
+  # Blockchain signing methods:
   #
   tag_mid_ED25519   = 'ed' # RFC 8032
   tag_mid_RSA1024   = 'rA'
@@ -96,6 +114,8 @@ class PyLayerIRCIoT(object):
   #
   mid_ED25519_hash_length = 88
   mid_RSA1024_hash_length = 173
+  #
+  # Coditional defaults:
   #
   if CAN_compress_datum:
     if CAN_encrypt_datum:
@@ -277,6 +297,8 @@ class PyLayerIRCIoT(object):
   mod_USERSIGN  = 'irciot-usersign'
   mod_USERCRYPT = 'irciot-usercrypt'
   #
+  crc16_start = 0xA001
+  #
   def __setattr__(self, *_):
       pass
 
@@ -385,8 +407,10 @@ class PyLayerIRCIoT(object):
   self.integrity_check = 0
   #
   # 0 is No Integrity Check
-  # 1 is CRC16 Check "c16"
-  # 2 is CRC32 Check "c32"
+  # 1 is CRC16 Check "c1": +12 bytes
+  # 2 is CRC32 Check "c2": +14 bytes
+  #
+  self.crc16_table = []
   #
   # End of PyLayerIRCIoT.__init__()
 
@@ -465,6 +489,52 @@ class PyLayerIRCIoT(object):
   return ( \
     self.CONST.irciot_protocol_version, \
     self.CONST.irciot_library_version)
+
+ def irciot_crc16_init_(self):
+  for my_idx1 in range(0, 256):
+    my_crc = c_ushort(my_idx1).value
+    for my_idx2 in range(0, 8):
+      my_tab = c_ushort(my_crc >> 1).value
+      if (my_crc & 0x0001):
+        my_crc = my_tab ^ self.CONST.crc16_start
+      else:
+        my_crc = my_tab
+      self.crc16_table.append(hex(my_crc))
+  #
+  # End of irciot_crc16_init_()
+
+ def irciot_crc16_(self, in_data):
+  if not isinstance(in_data, bytes):
+     return None
+  try:
+     my_crc = 0x0000
+     for my_ch in in_data:
+       my_rot = c_ushort(my_crc >> 8).value
+       my_idx = ((my_crc ^ my_ch) & 0x00ff)
+       my_tab = self.crc16_table[my_idx]
+       my_crc = my_rot ^ int(my_tab, 0)
+     my_crc = my_crc.to_bytes(2,'little')
+     return "%2.2x%2.2x" \
+       % (my_crc[1], my_crc[0])
+  except:
+     return None
+  #
+  # End of irciot_crc16_()
+
+ def irciot_crc32_(self, in_data):
+  if not isinstance(in_data, bytes):
+     return None
+  try:
+     my_crc = self.crypt_ZLIB.crc32(in_data)
+     my_crc = my_crc.to_bytes(4,'little')
+     my_out = ""
+     for my_idx in range(4):
+       my_out += "%2.2x" % in_data[my_idx]
+     return my_out
+  except:
+     return None
+  #
+  # End of irciot_crc32_()
 
  def irciot_init_encryption_method_(self, in_crypt_method):
   my_algo = self.irciot_crypto_get_algorithm_(in_crypt_method)
@@ -2468,7 +2538,12 @@ class PyLayerIRCIoT(object):
     return False
   if self.integrity_check:
     # Lite optional checks will be here
-    pass
+    if self.CONST.tag_CHK_CRC16 in in_container.keys():
+      pass
+    elif self.CONST.tag_CHK_CRC32 in in_container_keys():
+      pass
+    else:
+      return False
   if in_vuid == None:
     # or not CAN_mid_blockchain?
     return True
