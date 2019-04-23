@@ -37,7 +37,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.25'
   #
-  irciot_library_version  = '0.0.101'
+  irciot_library_version  = '0.0.103'
   #
   # IRC-IoT TAGs
   #
@@ -57,6 +57,12 @@ class PyLayerIRCIoT(object):
   tag_SRC_ADDR    = 'src' # Source Address
   tag_DST_ADDR    = 'dst' # Destination Address
   tag_ENC_DATUM   = 'ed'  # Encrypted Datum
+  #
+  # Special TAGs, not reserved for "Object" level
+  # Will be replaced by "Dictionaries" mechanism:
+  #
+  tag_ERROR_CODE  = 'ec'  # Error code
+  tag_DESCRIPTION = 'dsc' # Description (e.g. error)
   tag_ENC_METHOD  = 'em'  # Encryption Method
   tag_ENC_PUBKEY  = 'ek'  # Encryption Public Key
   tag_BCH_METHOD  = 'bm'  # Blockchain Method
@@ -186,6 +192,8 @@ class PyLayerIRCIoT(object):
   ot_ENC_REQUEST = "encreq" # Encryption Request
   ot_ENC_ACK     = "encack" # Encryption Acknowledgment
   #
+  ot_ERROR       = "err"    # General errors
+  #
   api_GET_LMID = 101 # Get last Message ID
   api_SET_LMID = 102 # Set last Message ID
   api_GET_EKEY = 301 # Get Encryption Key
@@ -260,6 +268,7 @@ class PyLayerIRCIoT(object):
   err_DEFRAG_BC_EXCEEDED  = 123
   err_OVERLAP_MISSMATCH   = 131
   err_BASE64_DECODING     = 251
+  err_BASE32_DECODING     = 252
   err_BASE85_DECODING     = 253
   err_COMP_ZLIB_HEADER    = 301
   err_COMP_ZLIB_INCOMP    = 303
@@ -271,6 +280,30 @@ class PyLayerIRCIoT(object):
   err_LOAD_2FISH_MODULE   = 733
   err_LOAD_USER_SIGN      = 755
   err_LOAD_USER_CRYPT     = 777
+  #
+  err_DESCRIPTIONS = {
+   err_BASE64_DECODING    : "BASE64 decoding",
+   err_BASE85_DECODING    : "BASE85 decoding",
+   err_BASE32_DECODING    : "BASE32 decoding",
+   err_DEFRAG_INVALID_DID : "Invalid 'dp' when defragmenting",
+   err_CONTENT_MISSMATCH  : "Content missmatch",
+   err_DEFRAG_OP_MISSING  : "No tag 'op' when defragmenting",
+   err_DEFRAG_DP_MISSING  : "No tag 'dp' when defragmenting",
+   err_DEFRAG_BP_MISSING  : "No tag 'bp' when defragmenting",
+   err_DEFRAG_OC_EXCEEDED : "Exceeded 'oc' field value",
+   err_DEFRAG_DC_EXCEEDED : "Exceeded 'dc' field value",
+   err_DEFRAG_BC_EXCEEDED : "Exceeded 'bc' field value",
+   err_OVERLAP_MISSMATCH  : "Overlapping fragments missmatch",
+   err_COMP_ZLIB_HEADER   : "Invalid Zlib header",
+   err_COMP_ZLIB_INCOMP   : "Zlib incomplete block",
+   err_LOAD_ZLIB_MODULE   : "Loading Zlib module",
+   err_LOAD_BZIP2_MODULE  : "Loading BZIP2 module",
+   err_LOAD_RSA_MODULE    : "Loading RSA module",
+   err_LOAD_AES_MODULE    : "Loading AES module",
+   err_LOAD_2FISH_MODULE  : "Loading Twofish module",
+   err_LOAD_USER_SIGN     : "Loading UserSign module",
+   err_LOAD_USER_CRYPT    : "Loading UserCrypt module"
+  }
   #
   pattern = chr(0) # or "@", chr(255)
   #
@@ -423,54 +456,25 @@ class PyLayerIRCIoT(object):
   retrun (False, None)
 
  def irciot_error_(self, in_error_code, in_mid):
+  # Warning: This version of error handler is made for
+  # testing and does not comply with the specification
   my_message = ""
-  my_datum = { }
-  if in_error_code == self.CONST.err_BASE64_DECODING:
-    return
-  elif in_error_code == self.CONST.err_BASE85_DECODING:
-    return
-  elif in_error_code == self.CONST.err_BASE32_DECODING:
-    return
-  elif in_error_code == self.CONST.err_DEFRAG_INVALID_DID:
-    return
-  elif in_error_code == self.CONST.err_CONTENT_MISSMATCH:
-    return
-  elif in_error_code == self.CONST.err_DEFRAG_OP_MISSING:
-    return
-  elif in_error_code == self.CONST.err_DEFRAG_DP_MISSING:
-    return
-  elif in_error_code == self.CONST.err_DEFRAG_BP_MISSING:
-    return
-  elif in_error_code == self.CONST.err_DEFRAG_OC_EXCEEDED:
-    return
-  elif in_error_code == self.CONST.err_DEFRAG_DC_EXCEEDED:
-    return
-  elif in_error_code == self.CONST.err_DEFRAG_BC_EXCEEDED:
-    return
-  elif in_error_code == self.CONST.err_OVERLAP_MISSMATCH:
-    return
-  elif in_error_code == self.CONST.err_COMP_ZLIB_HEADER:
-    # my_datum.update({ "error" : "zlib_header" })
-    return
-  elif in_error_code == self.CONST.err_COMP_ZLIB_INCOMP:
-    # my_datum.update({ "error" : "zlib_incomplete" })
-    return
-  elif in_error_code == self.CONST.err_LOAD_ZLIB_MODULE:
-    return
-  elif in_error_code == self.CONST.err_LOAD_BZIP2_MODULE:
-    return
-  elif in_error_code == self.CONST.err_LOAD_RSA_MODULE:
-    return
-  elif in_error_code == self.CONST.err_LOAD_AES_MODULE:
-    return
-  elif in_error_code == self.CONST.err_LOAD_2FISH_MODULE:
-    return
-  elif in_error_code == self.CONST.err_LOAD_USER_SIGN:
-    return
-  elif in_error_code == self.CONST.err_LOAD_USER_CRYPT:
-    return
+  my_datum = {}
+  if in_error_code in self.CONST.err_DESCRIPTIONS.keys():
+    my_descr = self.CONST.err_DESCRIPTIONS[in_error_code]
+    my_datum.update({ self.CONST.tag_DESCRIPTION : my_descr })
   else:
     return
+  my_datum[self.CONST.tag_OBJECT_TYPE] = self.CONST.ot_ERROR
+  my_datum[self.CONST.tag_ERROR_CODE]  = in_error_code
+  my_datum[self.CONST.tag_DATUM_ID] = random.randint(100, 999)
+  # Incomplete code
+  my_datum[self.CONST.tag_SRC_ADDR] = ""
+  my_datum[self.CONST.tag_DST_ADDR] = ""
+  # The dstination-address must be taken from
+  # the source-address of the message that caused the problem
+  my_datum[self.CONST.tag_DATE_TIME] \
+    = self.irciot_get_current_datetime_()
   my_message = json.dumps(my_datum, separators=(',',':'))
   my_compat = self.irciot_compatibility_()
   if not self.irc_pointer (my_compat, my_message):
@@ -726,7 +730,9 @@ class PyLayerIRCIoT(object):
   self.encryption_key_published = self.CONST.ENCT
 
  def irciot_crypto_hasher_(self, in_password, in_hash_size):
-  if in_password == None or in_password == "" or \
+  if not isinstance(in_hash_size, int):
+    return None
+  if in_password in [ None, "" ] or \
    not (self.crypt_model != self.CONST.crypt_NO_ENCRYPTION \
      or self.mid_method != ""):
     my_RHASH = ""
@@ -758,7 +764,10 @@ class PyLayerIRCIoT(object):
   # End of irciot_crypto_hasher_()
 
  def irciot_crypto_hash_to_str_(self, in_hash):
-  if in_hash == None:
+  my_hash = in_hash
+  if isinstance(in_hash, str):
+    my_hash = bytes(in_hash, 'utf-8')
+  if not isinstance(my_hash, bytes):
     return ""
   try:
     my_string = str(base64.b64encode(in_hash))[2:-1]
@@ -864,13 +873,13 @@ class PyLayerIRCIoT(object):
   my_messages = self.irciot_encap_all_(my_datum)
   return my_messages
   #
-  # End of irciot_blockchain_key_to_message_()
+  # End of irciot_blockchain_key_to_messages_()
 
  def irciot_encryption_key_to_messages_(self, in_key_string):
   if not isinstance(in_key_string, str):
     return []
   my_datum = {}
-  my_ot = self.CONST.ot_BCH_INFO
+  my_ot = self.CONST.ot_ENC_INFO
   my_datum[self.CONST.tag_OBJECT_TYPE] = my_ot
   my_datum[self.CONST.tag_DATUM_ID] = random.randint(100, 999)
   my_datum[self.CONST.tag_ENC_METHOD] = self.crypt_method
@@ -879,10 +888,14 @@ class PyLayerIRCIoT(object):
   my_datum[self.CONST.tag_DST_ADDR] = ""
   my_datum[self.CONST.tag_DATE_TIME] \
     = self.irciot_get_current_datetime_()
+  save_crypt_method = self.crypt_method
+  self.crypt_method \
+    = self.irciot_crypto_wo_encryption_(self.crypt_method)
   my_messages = self.irciot_encap_all_(my_datum)
+  self.crypt_method = save_crypt_method
   return my_messages
   #
-  # End of irciot_encryption_key_to_message_()
+  # End of irciot_encryption_key_to_messages_()
 
  def irciot_blockchain_key_publication_(self, in_public_key):
   if self.mid_method == self.CONST.tag_mid_ED25519:
@@ -897,7 +910,7 @@ class PyLayerIRCIoT(object):
   else:
     return
   my_msgs = self.irciot_blockchain_key_to_messages_( \
-    my_key_string.decode('utf-8'))
+    my_key_string)
   if my_msgs == []:
     return
   my_compat = self.irciot_compatibility_()
@@ -910,13 +923,15 @@ class PyLayerIRCIoT(object):
 
  def irciot_encryption_key_publication_(self, in_public_key):
   my_key_string = ""
-  my_algo = self.irciot_crypto_get_algorithm_(self.crypt_method)
-  if my_algo == self.CONST.crypto_RSA:
-    my_key_string = self.irciot_crypto_hash_to_str_(in_public_key)
+  if self.crypt_algo == self.CONST.crypto_RSA:
+    if not isinstance(in_public_key, object):
+      return
+    my_key_bytes = in_public_key.exportKey(format='DER')
+    my_key_string = self.irciot_crypto_hash_to_str_(my_key_bytes)
   else:
     return
   my_msgs = self.irciot_encryption_key_to_messages_( \
-    my_key_string.decode('utf-8'))
+    my_key_string)
   if my_msgs == []:
     return
   my_compat = self.irciot_compatibility_()
@@ -930,10 +945,7 @@ class PyLayerIRCIoT(object):
  def irciot_blockchain_check_publication_(self):
   if self.blockchain_key_published > 0:
     return
-  try:
-    if self.blockchain_public_key == None:
-      return
-  except:
+  if not isinstance(self.blockchain_public_key, object):
     return
   if not self.mid_method in [ \
     self.CONST.tag_mid_ED25519, \
@@ -943,12 +955,19 @@ class PyLayerIRCIoT(object):
   self.blockchain_key_published = self.CONST.BCHT
   self.irciot_blockchain_key_publication_( \
   self.blockchain_public_key)
-  return
   #
   # End of irciot_blockchain_check_publication_()
 
  def irciot_encryption_check_publication_(self):
-  pass
+  if self.encryption_key_published > 0:
+    return
+  if not isinstance(self.encryption_public_key, object):
+    return
+  if self.crypt_model != self.CONST.crypt_ASYMMETRIC:
+    return
+  self.encryption_key_published = self.CONST.ENCT
+  self.irciot_encryption_key_publication_( \
+  self.encryption_public_key)
   #
   # End of irciot_encryption_check_publication_()
 
@@ -1191,6 +1210,35 @@ class PyLayerIRCIoT(object):
   return my_result
   #
   # End of irciot_blockchain_verify_string_()
+  
+ def irciot_crypto_wo_encryption_(self, in_crypt_method):
+  if not isinstance(in_crypt_method, str):
+    return self.CONST.tag_ENC_BASE64
+  my_base = self.irciot_crypto_get_base_(in_crypt_method)
+  my_compress \
+    = self.irciot_crypto_get_compress_(in_crypt_method)
+  if my_base == self.CONST.base_BASE32:
+    if my_compress == self.CONST.compress_ZLIB:
+      return self.CONST.tag_ENC_B32_ZLIB
+    elif my_compress == self.CONST.compress_BZIP2:
+      return self.CONST.tag_ENC.B32_BZIP2
+    else:
+      return self.CONST.tag_ENC.BASE32
+  elif my_base == self.CONST.base_BASE64:
+    if my_compress == self.CONST.compress_ZLIB:
+      return self.CONST.tag_ENC_B64_ZLIB
+    elif my_compress == self.CONST.compress_BZIP2:
+      return self.CONST.tag_ENC_B64_BZIP2
+  elif my_base == self.CONST.base_BASE85:
+    if my_compress == self.CONST.comress_ZLIB:
+      return self.CONST.tag_ENC_B85_ZLIB
+    elif my_compress == self.CONST.compress_BZIP2:
+      return self.CONST.tag_ENC_B85_BZIP2
+    else:
+      return self.CONST.tag_ENC_BASE85
+  return self.CONST.tag_ENC_BASE64
+  #
+  # End of irciot_crypto_wo_encryption_()
 
  def irciot_crypto_get_base_(self, in_crypt_method):
   my_base = None
@@ -2306,7 +2354,11 @@ class PyLayerIRCIoT(object):
        pass
     elif (my_ok == 2):
        self.irciot_clear_defrag_chain_(my_did)
-       my_base = self.irciot_crypto_get_base_(self.crypt_method)
+       my_crypt_method = self.crypt_method
+       if my_ot == self.CONST.ot_ENC_INFO:
+          my_crypt_method \
+            = self.irciot_crypto_wo_encryption_(self.crypt_method)
+       my_base = self.irciot_crypto_get_base_(my_crypt_method)
        if (my_base == self.CONST.base_BASE64):
           try:
             my_count  = 4 - (len(defrag_buffer) % 4)
@@ -2330,7 +2382,9 @@ class PyLayerIRCIoT(object):
             return ""
        else:
           out_base = bytes(defrag_buffer, 'utf-8')
-       my_algo = self.irciot_crypto_get_algorithm_(self.crypt_method)
+       my_algo = self.irciot_crypto_get_algorithm_(my_crypt_method)
+       #if DO_auto_encryption and my_algo != None:
+       #   self.irciot_load_encryption_methods_(my_crypt_method)
        if my_algo == self.CONST.crypto_RSA:
           out_base = self.irciot_crypto_RSA_decrypt_(out_base, \
             self.encryption_private_key)
@@ -2338,21 +2392,23 @@ class PyLayerIRCIoT(object):
           out_base = self.irciot_crypto_AES_decrypt_(out_base, \
             self.encryption_private_key)
        elif my_algo == self.CONST.crypto_2FISH:
+          #out_base = self.irciot_crypto_2fish_decrypt_(out_base, \
+          #  self.encryption_private_key)
           pass
        my_compress = self.irciot_crypto_get_compress_( \
-          self.crypt_method )
+          my_crypt_method )
        if my_compress == self.CONST.compress_NONE:
-          out_json = str(out_base, 'utf-8')
+          out_json = str(out_base)[2:-1]
           del out_base
        elif my_compress == self.CONST.compress_ZLIB:
           if DO_auto_compress and self.crypt_ZLIB == None:
-            self.irciot_load_compression_methods(my_compress)
+            self.irciot_load_compression_methods_(my_crypt_method)
           if self.crypt_ZLIB == None:
             return ""
           try:
             out_compress = str(self.crypt_ZLIB.decompress(out_base))
             del out_base
-          except zlib.error as zlib_error:
+          except self.crypt_ZLIB.error as zlib_error:
             # print("\033[1;35m" + str(zlib_error) + "\033[0m")
             if zlib_error.args[0].startswith("Error -3 "):
               self.irciot_error_(self.CONST.err_COMP_ZLIB_HEADER, 0)
@@ -2366,7 +2422,7 @@ class PyLayerIRCIoT(object):
           del out_compress
        elif my_compress == self.CONST.compress_BZIP2:
           if DO_auto_compress and self.crypt_BZ2 == None:
-            self.irciot_load_compression_methods(my_compress)
+            self.irciot_load_compression_methods_(my_crypt_method)
           if self.crypt_BZ2 == None:
             return ""
           out_compress = str(self.crypt_BZ2.decompress(out_base))
@@ -2635,6 +2691,7 @@ class PyLayerIRCIoT(object):
  def irciot_deinencap_(self, in_json, in_vuid = None):
   ''' First/simple implementation of IRC-IoT "Datum" deinencapsulator '''
   self.irciot_blockchain_check_publication_()
+  self.irciot_encryption_check_publication_()
   try:
      iot_containers = json.loads(in_json)
   except ValueError:
@@ -2799,19 +2856,19 @@ class PyLayerIRCIoT(object):
            big_ot = my_datum[self.CONST.tag_OBJECT_TYPE]
            del my_datum[self.CONST.tag_OBJECT_TYPE]
         my_current += 1
-  if (big_ot == None):
+  if big_ot == None:
      return ("", 0)
   str_big_datum  = json.dumps(big_datum, separators=(',',':'))
   if self.crypt_compress == self.CONST.compress_ZLIB:
      if DO_auto_compress and self.crypt_ZLIB == None:
-       self.irciot_load_compression_methods(self.crypt_compress)
+       self.irciot_load_compression_methods_(my_crypt_method)
      if self.crypt_ZLIB == None:
        return ("", 0)
      bin_big_datum \
        = self.crypt_ZLIB.compress(bytes(str_big_datum, 'utf-8'))
   elif self.crypt_compress == self.CONST.compress_BZIP2:
      if DO_auto_compress and self.crypt_BZ2 == None:
-       self.irciot_load_compression_methods(self.crypt_compress)
+       self.irciot_load_compression_methods_(self.crypt_method)
      if self.crypt_BZ2 == None:
        return ("", 0)
      bin_big_datum \
@@ -2820,7 +2877,9 @@ class PyLayerIRCIoT(object):
      bin_big_datum = bytes(str_big_datum, 'utf-8')
   else: # Unknwon compression
      return ("", 0)
-  if self.crypt_algo == self.CONST.crypto_RSA:
+  if big_ot == self.CONST.ot_ENC_INFO:
+     pass
+  elif self.crypt_algo == self.CONST.crypto_RSA:
      crypt_big_datum = self.irciot_crypto_RSA_encrypt_( \
         bin_big_datum, self.encryption_public_key )
      if crypt_big_datum == None:
@@ -2837,6 +2896,7 @@ class PyLayerIRCIoT(object):
        bin_big_datum, self.encryption_private_key )
      if crypt_big_datum == None:
         return ("", 0)
+     # bin_big_datum = crypt_big_datum
   if self.crypt_base == self.CONST.base_BASE64:
      base_big_datum = base64.b64encode(bin_big_datum)
   elif self.crypt_base == self.CONST.base_BASE85:
@@ -2895,6 +2955,7 @@ class PyLayerIRCIoT(object):
 
  def irciot_encap_all_(self, in_datumset):
   self.irciot_blockchain_check_publication_()
+  self.irciot_encryption_check_publication_()
   result = self.output_pool
   self.output_pool = []
   if (isinstance(in_datumset, dict)):
