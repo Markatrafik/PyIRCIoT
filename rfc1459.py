@@ -7,6 +7,10 @@
 ''  Alexey Y. Woronov <alexey@woronov.ru>
 '''
 
+# Those Global options override default behavior and memory usage
+#
+DO_debug_library = False
+
 import socket
 import select
 import json
@@ -27,15 +31,16 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version = '0.3.25'
    #
-   irciot_library_version  = '0.0.103'
+   irciot_library_version  = '0.0.105'
    #
    # Bot specific constants
    #
    irc_first_wait = 28
    irc_micro_wait = 0.15
    irc_default_wait = 28
+   irc_latency_wait = 1
    #
-   irc_default_debug = False
+   irc_default_debug = DO_debug_library
    #
    irc_default_nick = "MyBot"
    irc_default_info = "IRC-IoT Bot"
@@ -889,7 +894,16 @@ class PyLayerIRC(object):
  def irc_recv_(self, recv_timeout):
    try:
      time_in_recv = datetime.datetime.now()
-     ready = select.select([self.irc], [], [], recv_timeout)
+     ready = select.select([self.irc], [], [], 0)
+     my_timerest = recv_timeout
+     while ready[0] == [] and my_timerest > 0:
+       my_timeout = my_timerest % self.CONST.irc_latency_wait
+       if my_timeout == 0:
+         my_timeout = self.CONST.irc_latency_wait
+       ready = select.select([self.irc], [], [], my_timeout)
+       if not self.irc_queue[self.CONST.irc_queue_output].empty():
+         break
+       my_timerest -= my_timeout
      time_out_recv = datetime.datetime.now()
      delta_time_in = self.irc_td2ms_(time_out_recv - time_in_recv)
      delta_time = self.CONST.irc_default_wait

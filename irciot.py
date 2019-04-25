@@ -37,7 +37,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.25'
   #
-  irciot_library_version  = '0.0.103'
+  irciot_library_version  = '0.0.105'
   #
   # IRC-IoT TAGs
   #
@@ -272,6 +272,7 @@ class PyLayerIRCIoT(object):
   err_BASE85_DECODING     = 253
   err_COMP_ZLIB_HEADER    = 301
   err_COMP_ZLIB_INCOMP    = 303
+  err_RSA_KEY_FORMAT      = 351
   #
   err_LOAD_ZLIB_MODULE    = 701
   err_LOAD_BZIP2_MODULE   = 702
@@ -296,6 +297,7 @@ class PyLayerIRCIoT(object):
    err_OVERLAP_MISSMATCH  : "Overlapping fragments missmatch",
    err_COMP_ZLIB_HEADER   : "Invalid Zlib header",
    err_COMP_ZLIB_INCOMP   : "Zlib incomplete block",
+   err_RSA_KEY_FORMAT     : "Invalid RSA Key format",
    err_LOAD_ZLIB_MODULE   : "Loading Zlib module",
    err_LOAD_BZIP2_MODULE  : "Loading BZIP2 module",
    err_LOAD_RSA_MODULE    : "Loading RSA module",
@@ -778,7 +780,7 @@ class PyLayerIRCIoT(object):
     return ""
   #
   # End of irciot_crypto_hash_to_str_()
-
+  
  def irciot_crypto_str_to_hash_(self, in_string):
   if not isinstance(in_string, str):
     return None
@@ -2261,7 +2263,8 @@ class PyLayerIRCIoT(object):
   #
   # End of irciot_clear_defrag_chain_()
 
- def irciot_defragmentation_(self, in_enc, in_header, orig_json):
+ def irciot_defragmentation_(self, in_enc, in_header, \
+   orig_json, in_vuid = None):
   (my_dt, my_ot, my_src, my_dst, \
    my_dc, my_dp, my_bc, my_bp, my_did) = in_header
   if ((my_dc == None) and (my_dp != None)) or \
@@ -2445,6 +2448,7 @@ class PyLayerIRCIoT(object):
           if ((not self.CONST.tag_DST_ADDR in my_datum) \
            and (my_dst != None)):
               my_datum[self.CONST.tag_DST_ADDR] = my_dst
+          self.irciot_check_datum_(my_datum, in_vuid, my_ot)
           return json.dumps(my_datum, separators=(',',':'))
        except:
           return ""
@@ -2458,7 +2462,8 @@ class PyLayerIRCIoT(object):
   #
   # End of irciot_defragmentation_()
 
- def irciot_decrypt_datum_(self, in_datum, in_header, orig_json):
+ def irciot_decrypt_datum_(self, in_datum, in_header, \
+   orig_json, in_vuid = None):
   (my_dt, my_ot, my_src, my_dst, my_dc, my_dp) = in_header
   my_bc  = None
   my_bp  = None
@@ -2479,12 +2484,12 @@ class PyLayerIRCIoT(object):
    my_dc, my_dp, my_bc, my_bp, my_did)
   my_in = in_datum[self.CONST.tag_ENC_DATUM]
   return self.irciot_defragmentation_(my_in, \
-     my_defrag_header, orig_json)
-  return my_dec
+     my_defrag_header, orig_json, in_vuid)
   #
   # End of irciot_decrypt_datum_()
 
- def irciot_prepare_datum_(self, in_datum, in_header, orig_json):
+ def irciot_prepare_datum_(self, in_datum, in_header, \
+   orig_json, in_vuid = None):
   if not self.CONST.tag_ENC_DATUM in in_datum.keys():
      (my_dt, my_ot, my_src, my_dst, my_dc, my_dp) = in_header
      if not self.CONST.tag_DATE_TIME in in_datum.keys():
@@ -2498,7 +2503,8 @@ class PyLayerIRCIoT(object):
      if (in_datum[self.CONST.tag_DATE_TIME] == None):
         del in_datum[self.CONST.tag_DATE_TIME]
   else:
-     return self.irciot_decrypt_datum_(in_datum, in_header, orig_json)
+     return self.irciot_decrypt_datum_(in_datum, in_header, \
+       orig_json, in_vuid)
   return json.dumps(in_datum, separators=(',',':'))
   #
   # End of irciot_prepare_datum_()
@@ -2508,17 +2514,17 @@ class PyLayerIRCIoT(object):
     return
   if not isinstance(in_datum, dict):
     return
-  my_check = [ \
+  for my_key in [ \
     self.CONST.tag_DATUM_ID, \
-    self.CONST.tag_DATE_TIME ]
-  for in_key in my_check:
-    if not in_key in in_datum.keys():
+    self.CONST.tag_DATE_TIME ]:
+    if not my_key in in_datum.keys():
       return
   if in_ot == self.CONST.ot_BCH_INFO:
-    if not self.CONST.tag_BCH_METHOD in in_datum.keys():
-      return
-    if not self.CONST.tag_BCH_PUBKEY in in_datum.keys():
-      return
+    for my_key in [ \
+      self.CONST.tag_BCH_METHOD, \
+      self.CONST.tag_BCH_PUBKEY ]:
+      if not my_key in in_datum.keys():
+        return
     my_method = in_datum[self.CONST.tag_BCH_METHOD]
     if my_method != self.mid_method and DO_auto_blockchain:
       self.irciot_load_blockchain_methods_(my_method)
@@ -2532,6 +2538,32 @@ class PyLayerIRCIoT(object):
     # will be here
     pass
   elif in_ot == self.CONST.ot_BCH_ACK:
+    pass
+  elif in_ot == self.CONST.ot_ENC_INFO:
+    for my_key in [ \
+      self.CONST.tag_ENC_METHOD, \
+      self.CONST.tag_ENC_PUBKEY ]:
+      if not my_key in in_datum.keys():
+        return
+    my_method = in_datum[self.CONST.tag_ENC_METHOD]
+    if my_method != self.crypt_method and DO_auto_encryption:
+      self.irciot_load_encryption_methods_(my_method)
+    my_string_key = '__' + in_datum[self.CONST.tag_ENC_PUBKEY]
+    if not isinstance(my_string_key, str):
+      return
+    my_algo = self.irciot_crypto_get_algorithm_(my_method)
+    if my_algo == self.CONST.crypto_RSA:
+      if self.crypt_RSA == None:
+        return
+      ( my_own, my_public_key ) \
+        = self.irciot_crypto_str_to_hash_(my_string_key)
+      my_binary_key = self.crypt_RSA.importKey(my_public_key)
+      my_public_key = str(my_binary_key)
+      self.irciot_encryption_update_foreign_key_( \
+        in_vuid, my_public_key)
+  elif in_ot == self.CONST.ot_ENC_REQUEST:
+    pass
+  elif in_ot == self.CONST.ot_ENC_ACK:
     pass
   #
   # End of irciot_check_datum_()
@@ -2574,7 +2606,8 @@ class PyLayerIRCIoT(object):
        if in_vuid != None:
          self.irciot_check_datum_(iot_datum, in_vuid, iot_ot)
        str_datum = self.irciot_prepare_datum_(iot_datum, \
-         (iot_dt, iot_ot, iot_src, iot_dst, iot_dc, iot_dp), orig_json)
+         (iot_dt, iot_ot, iot_src, iot_dst, iot_dc, iot_dp), \
+            orig_json, in_vuid)
        if (str_datum != ""):
          if (str_datums != ""):
            str_datums += ","
@@ -2584,7 +2617,8 @@ class PyLayerIRCIoT(object):
      if in_vuid != None:
        self.irciot_check_datum_(iot_datums, in_vuid, iot_ot)
      return self.irciot_prepare_datum_(iot_datums, \
-      (iot_dt, iot_ot, iot_src, iot_dst, iot_dc, iot_dp), orig_json)
+      (iot_dt, iot_ot, iot_src, iot_dst, iot_dc, iot_dp), \
+         orig_json, in_vuid)
   return ""
   #
   # End of irciot_deinencap_object_()
