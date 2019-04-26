@@ -31,7 +31,7 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version = '0.3.25'
    #
-   irciot_library_version  = '0.0.105'
+   irciot_library_version  = '0.0.107'
    #
    # Bot specific constants
    #
@@ -85,9 +85,13 @@ class PyLayerIRC(object):
    api_SET_EKEY = 302 # Set Encryption Key
    api_GET_BKEY = 501 # Get Blockchain key
    api_SET_BKEY = 502 # Set Blockchain Key
+   api_GET_VUID = 700 # Get list of Virutal User IDs
    #
-   api_vuid_cfg = "c" # VUID prefix for users from config
-   api_vuid_tmp = "t" # VUID prefix for temporal users
+   api_vuid_cfg = 'c' # VUID prefix for users from config
+   api_vuid_tmp = 't' # VUID prefix for temporal users
+   api_vuid_all = '*' # Means All VUIDs when sending messages
+   #
+   api_vuid_self = 'c0'
    #
    irc_queue_input  = 0
    irc_queue_output = 1
@@ -459,29 +463,35 @@ class PyLayerIRC(object):
     or not (isinstance(in_params, str) or in_params == None):
      return (False, None)
    my_vt = None # VUID Type
-   my_re = re.search("%s(\d+)" \
-     % self.CONST.api_vuid_cfg, in_vuid)
-   if my_re:
-     my_vt = self.CONST.api_vuid_cfg
-     my_id = my_re.group(1)
-     if my_vt == None:
-       return (False, None)
-       my_user = self.irc_cfg_get_user_by_vuid_(in_vuid)
+   if in_vuid in [ \
+     self.CONST.api_vuid_cfg, \
+     self.CONST.api_vuid_tmp, \
+     self.CONST.api_vuid_all ]:
+     my_vt = in_vuid
+   else:
+     my_re = re.search("%s(\d+)" \
+       % self.CONST.api_vuid_cfg, in_vuid)
+     if my_re:
+       my_vt = self.CONST.api_vuid_cfg
+       my_id = my_re.group(1)
+       if my_vt == None:
+         return (False, None)
+       my_user = self.irc_cfg_get_user_struct_by_vuid_(in_vuid)
        if my_user != None:
          ( my_uid, my_mask, my_chan, my_opt, \
            my_ekey, my_bkey, my_lmid ) = my_user
-   else:
-     my_re = re.search("%s(\d+)" \
-       % self.CONST.api_vuid_tmp, in_vuid)
-     if my_re:
-       my_vt = self.CONST.api_vuid_tmp
-       my_id = my_re.group(1)
-     if my_vt == None:
-       return (False, None)
-     my_anon = self.irc_track_get_anons_by_vuid_(in_vuid)
-     if my_anon != None:
-       ( an_id, an_mask, an_chan, an_opt, \
-         an_ekey, an_bkey, an_lmid ) = my_anon
+     else:
+       my_re = re.search("%s(\d+)" \
+         % self.CONST.api_vuid_tmp, in_vuid)
+       if my_re:
+         my_vt = self.CONST.api_vuid_tmp
+         my_id = my_re.group(1)
+       if my_vt == None:
+         return (False, None)
+       my_anon = self.irc_track_get_anons_by_vuid_(in_vuid)
+       if my_anon != None:
+         ( an_id, an_mask, an_chan, an_opt, \
+           an_ekey, an_bkey, an_lmid ) = my_anon
    if   in_action == self.CONST.api_GET_LMID:
      if my_vt == self.CONST.api_vuid_cfg:
        if my_user != None:
@@ -495,6 +505,28 @@ class PyLayerIRC(object):
      if my_vt == self.CONST.api_vuid_tmp:
        self.irc_track_update_anons_by_vuid_(in_vuid, \
          None, None, None, None, None, in_params)
+   elif in_action == self.CONST.api_GET_VUID:
+     if my_vt in [ \
+       self.CONST.api_vuid_all, \
+       self.CONST.api_vuid_cfg, \
+       self.CONST.api_vuid_tmp ]:
+       my_vuid_list = []
+       for my_nick in self.irc_nicks:
+         (in_nick, my_mask, my_vuid, my_info) = my_nick
+         if not self.irc_talk_with_strangers:
+           if my_vuid[0] != self.CONST.api_vuid_cfg:
+             continue
+         if my_vt in [ \
+           self.CONST.api_vuid_cfg,
+           self.CONST.api_vuid_tmp ]:
+           if my_vuid[0] != my_vt:
+             continue
+         my_vuid_list.append(my_vuid)
+       return (True, my_vuid_list)
+     elif my_vt == self.CONST.api_vuid_cfg:
+       pass
+     elif my_vt == self.CONST.api_vuid_tmp:
+       pass
    elif in_action == self.CONST.api_GET_BKEY:
      if my_vt == self.CONST.api_vuid_cfg:
        if my_user != None:

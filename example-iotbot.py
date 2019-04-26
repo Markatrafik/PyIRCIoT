@@ -54,6 +54,8 @@ def main():
 
   # irciot.irciot_enable_blockchain_(irciot.CONST.tag_mid_ED25519)
 
+  # irciot.irciot_enable_encryption_(irciot.CONST.tag_ENC_B64_RSA)
+
   print("Starting IRC, press any key to exit", "\r")
 
   stdin_fd = sys.stdin.fileno()
@@ -73,11 +75,12 @@ def main():
       = ircbot.irc_check_queue_(ircbot.CONST.irc_queue_input)
 
     if (irc_message != ""):
+       print("irc_message=[\033[0;44m%s\033[0m]" % irc_message)
 
        if (irciot.is_irciot_(irc_message)):
           irc_json = irciot.irciot_deinencap_(irc_message, irc_vuid)
           if (irc_json != ""):
-             print("Datumset: [" + str(irc_json) + "]", "\r")
+             print("Datumset: [\033[0;41m" + str(irc_json) + "\033[0m]", "\r")
              sys.stdout.flush()
 
     key_a, key_b, key_c = select.select([stdin_fd], [], [], 0.0001)

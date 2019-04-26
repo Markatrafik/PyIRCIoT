@@ -37,7 +37,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.25'
   #
-  irciot_library_version  = '0.0.105'
+  irciot_library_version  = '0.0.107'
   #
   # IRC-IoT TAGs
   #
@@ -200,9 +200,13 @@ class PyLayerIRCIoT(object):
   api_SET_EKEY = 302 # Set Encryption Key
   api_GET_BKEY = 501 # Get Blockchain Key
   api_SET_BKEY = 502 # Set Blockchain Key
+  api_GET_VUID = 700 # Get list of Virtual User IDs
   #
-  api_vuid_cfg = "c" # VUID prefix for users from config
-  api_vuid_tmp = "t" # VUID prefix for temporal users
+  api_vuid_cfg = 'c' # VUID prefix for users from config
+  api_vuid_tmp = 't' # VUID prefix for temporal users
+  api_vuid_all = '*' # Means All VUIDs when sending messages
+  #
+  api_vuid_self = 'c0'
   #
   # IRC-IoT Base Types
   #
@@ -455,7 +459,7 @@ class PyLayerIRCIoT(object):
 
  def user_pointer (self, in_compatibility, in_action, in_vuid, in_params):
   # Warning: method parameters and API may be changed while developing
-  retrun (False, None)
+  return (False, None)
 
  def irciot_error_(self, in_error_code, in_mid):
   # Warning: This version of error handler is made for
@@ -836,7 +840,7 @@ class PyLayerIRCIoT(object):
   # Copy destination address from last message source address?!
   my_datum[self.CONST.tag_DATE_TIME] \
     = self.irciot_get_current_datetime_()
-  my_messages = self.irciot_encap_all_(my_datum)
+  my_messages = self.irciot_encap_all_(my_datum, in_vuid)
   return my_messages
   #
   # End of irciot_blockchain_request_to_messages_()
@@ -854,7 +858,7 @@ class PyLayerIRCIoT(object):
   # Copy destination address from last message source address?!
   my_datum[self.CONST.tag_DATE_TIME] \
     = self.irciot_get_current_datetime_()
-  my_messages = self.irciot_encap_all_(my_datum)
+  my_messages = self.irciot_encap_all_(my_datum, in_vuid)
   return my_messages
   #
   # End of irciot_encryption_request_to_messages_()
@@ -1019,10 +1023,20 @@ class PyLayerIRCIoT(object):
  def irciot_blockchain_get_foreign_key_(self, in_vuid):
   if not isinstance(in_vuid, str):
     return None
+  if in_vuid == self.CONST.api_vuid_self:
+    try:
+      if self.mid_method == self.CONST.tag_mid_ED25519:
+        my_key_string \
+         = self.blockchain_public_key.encode( \
+           encoder = self.crypt_NACE.HexEncoder )
+      else:
+        return None
+    except:
+      return None
+    return my_key_string
   my_compat = self.irciot_compatibility_()
-  my_params = None
   my_result = self.user_pointer (my_compat, \
-    self.CONST.api_GET_BKEY, in_vuid, my_params)
+    self.CONST.api_GET_BKEY, in_vuid, None)
   try:
     (my_status, my_answer) = my_result
   except:
@@ -1040,10 +1054,21 @@ class PyLayerIRCIoT(object):
  def irciot_encryption_get_foreign_key_(self, in_vuid):
   if not isinstance(in_vuid, str):
     return None
+  if in_vuid == self.CONST.api_vuid_self:
+    try:
+      if self.crypt_algo == self.CONST.crypto_RSA:
+        my_key_bytes \
+          = self.encryption_public_key.exportKey(format='DER')
+        my_key_string \
+          = self.irciot_crypto_hash_to_str_(my_key_bytes)
+      else:
+        return None
+    except:
+      return None
+    return my_key_string
   my_compat = self.irciot_compatibility_()
-  my_params = None
   my_result = self.user_pointer (my_compat, \
-    self.CONST.api_GET_EKEY, in_vuid, my_params)
+    self.CONST.api_GET_EKEY, in_vuid, None)
   try:
     (my_status, my_answer) = my_result
   except:
@@ -1062,9 +1087,8 @@ class PyLayerIRCIoT(object):
   if not isinstance(in_vuid, str):
     return None
   my_compat = self.irciot_compatibility_()
-  my_params = None
   my_result = self.user_pointer (my_compat, \
-    self.CONST.api_GET_LMID, in_vuid, my_params)
+    self.CONST.api_GET_LMID, in_vuid, None)
   try:
     (my_status, my_answer) = my_result
   except:
@@ -1074,6 +1098,24 @@ class PyLayerIRCIoT(object):
   if isinstance(my_answer, str):
     return my_answer
   return None
+  #
+  # End of irciot_blockchain_get_last_mid_()
+
+ def irciot_get_vuid_list_(self, in_vuid_mask):
+  if not isinstance(in_vuid_mask, str):
+    return []
+  my_compat = self.irciot_compatibility_()
+  my_result = self.user_pointer (my_compat, \
+    self.CONST.api_GET_VUID, in_vuid_mask, None)
+  try:
+    (my_status, my_answer) = my_result
+  except:
+    return []
+  if not my_status:
+    return []
+  if isinstance(my_answer, list):
+    return my_answer
+  return []
   #
   # End of irciot_blockchain_get_last_mid_()
 
@@ -2548,19 +2590,15 @@ class PyLayerIRCIoT(object):
     my_method = in_datum[self.CONST.tag_ENC_METHOD]
     if my_method != self.crypt_method and DO_auto_encryption:
       self.irciot_load_encryption_methods_(my_method)
-    my_string_key = '__' + in_datum[self.CONST.tag_ENC_PUBKEY]
+    my_string_key = in_datum[self.CONST.tag_ENC_PUBKEY]
     if not isinstance(my_string_key, str):
       return
     my_algo = self.irciot_crypto_get_algorithm_(my_method)
     if my_algo == self.CONST.crypto_RSA:
       if self.crypt_RSA == None:
         return
-      ( my_own, my_public_key ) \
-        = self.irciot_crypto_str_to_hash_(my_string_key)
-      my_binary_key = self.crypt_RSA.importKey(my_public_key)
-      my_public_key = str(my_binary_key)
       self.irciot_encryption_update_foreign_key_( \
-        in_vuid, my_public_key)
+        in_vuid, my_string_key)
   elif in_ot == self.CONST.ot_ENC_REQUEST:
     pass
   elif in_ot == self.CONST.ot_ENC_ACK:
@@ -2780,7 +2818,7 @@ class PyLayerIRCIoT(object):
   #
   # End of irciot_encap_datum_()
 
- def irciot_encap_internal_(self, in_datumset):
+ def irciot_encap_internal_(self, in_datumset, in_vuid = None):
   ''' First/simple implementation of IRC-IoT "Datum" set encapsulator '''
   try:
      my_datums = json.loads(in_datumset)
@@ -2873,7 +2911,8 @@ class PyLayerIRCIoT(object):
   #
   # End of irciot_encap_internal_()
 
- def irciot_encap_bigdatum_(self, my_bigdatum, my_part):
+ def irciot_encap_bigdatum_(self, my_bigdatum, my_part, \
+    in_vuid = None):
   ''' Hidden part of encapsulator creates mutlipart "Datum" '''
   save_mid  = self.current_mid
   big_datum = {}
@@ -2914,8 +2953,22 @@ class PyLayerIRCIoT(object):
   if big_ot == self.CONST.ot_ENC_INFO:
      pass
   elif self.crypt_algo == self.CONST.crypto_RSA:
+     my_string_key \
+      = self.irciot_encryption_get_foreign_key_(in_vuid)
+     if not isinstance(my_string_key, str):
+        return ("", 0)
+     ( my_own, my_binary_key ) \
+       = self.irciot_crypto_str_to_hash_('__' + my_string_key)
+     try:
+        my_object_key = self.crypt_RSA.importKey(my_binary_key)
+     except:
+        self.irciot_error_(self.CONST.err_RSA_KEY_FORMAT, 0)
+        return ("", 0)
+     if not isinstance(my_object_key, object):
+        self.irciot_error_(self.CONST.err_RSA_KEY_FORMAT, 0)
+        return ("", 0)
      crypt_big_datum = self.irciot_crypto_RSA_encrypt_( \
-        bin_big_datum, self.encryption_public_key )
+        bin_big_datum, my_object_key )
      if crypt_big_datum == None:
         return ("", 0)
      bin_big_datum = crypt_big_datum
@@ -2949,7 +3002,7 @@ class PyLayerIRCIoT(object):
   my_bc = len(raw_big_datum)
   out_big_datum  = '{"' + self.CONST.tag_ENC_DATUM
   out_big_datum += '":"' + raw_big_datum + '"}'
-  my_irciot = self.irciot_encap_internal_(out_big_datum)
+  my_irciot = self.irciot_encap_internal_(out_big_datum, in_vuid)
   self.current_mid = save_mid # mid rollback
   out_skip  = len(my_irciot)
   out_head  = len(big_ot)
@@ -2980,35 +3033,58 @@ class PyLayerIRCIoT(object):
   if (my_size > my_okay):
      my_size = my_okay
   out_big_datum += raw_big_datum[my_part:my_part + my_size] + '"}'
-  my_irciot = self.irciot_encap_internal_(out_big_datum)
+  my_irciot = self.irciot_encap_internal_(out_big_datum, in_vuid)
   if (my_size < my_okay):
     return (my_irciot, 0)
   return (my_irciot, len(raw_big_datum) + my_part - out_skip)
   #
   # End of irciot_encap_bigdatum_()
 
- def irciot_encap_all_(self, in_datumset):
-  self.irciot_blockchain_check_publication_()
-  self.irciot_encryption_check_publication_()
+ def irciot_encap_all_(self, in_datumset, in_vuid = None):
+  if not in_vuid in [ \
+    self.CONST.api_vuid_all, \
+    self.CONST.api_vuid_cfg, \
+    self.CONST.api_vuid_tmp ]:
+    self.irciot_blockchain_check_publication_()
+    self.irciot_encryption_check_publication_()
   result = self.output_pool
   self.output_pool = []
   if (isinstance(in_datumset, dict)):
     in_datumset = [ in_datumset ]
-  in_datumset = json.dumps(in_datumset, separators=(',',':'))
+  my_datumset = json.dumps(in_datumset, separators=(',',':'))
+  if in_vuid in [ \
+    self.CONST.api_vuid_all, \
+    self.CONST.api_vuid_cfg, \
+    self.CONST.api_vuid_tmp ]:
+    if not DO_auto_encryption:
+      if self.crypt_model == self.CONST.crypt_NO_ENCRYPTION:
+        return result
+    # If the message is to be encrypted with end-to-end encryption
+    # then it is need to create a separate message for each VUID
+    my_vuid_list = self.irciot_get_vuid_list_(in_vuid)
+    if my_vuid_list == []:
+      return result
+    for my_vuid in my_vuid_list:
+      my_result = self.irciot_encap_all_(in_datumset, my_vuid)
+      for json_text in my_result:
+        if self.is_irciot_(json_text):
+          result.append(json_text)
+    return result
   json_text, my_skip, my_part \
-    = self.irciot_encap_(in_datumset, 0, 0)
+    = self.irciot_encap_(my_datumset, 0, 0, in_vuid)
   if (json_text != ""):
     result.append(json_text)
   while ((my_skip > 0) or (my_part > 0)):
     json_text, my_skip, my_part \
-      = self.irciot_encap_(in_datumset, my_skip, my_part)
+      = self.irciot_encap_(my_datumset, my_skip, my_part, in_vuid)
     if (json_text != ""):
       result.append(json_text)
   return result
   #
   # End of irciot_encap_all_()
 
- def irciot_encap_(self, in_datumset, my_skip, my_part):
+ def irciot_encap_(self, in_datumset, my_skip, my_part, \
+   in_vuid = None):
   ''' Public part of encapsulator with per-"Datum" fragmentation '''
   self.irciot_blockchain_check_publication_()
   self.irciot_encryption_check_publication_()
@@ -3032,7 +3108,7 @@ class PyLayerIRCIoT(object):
      my_datums = json.loads(my_datums_set)
      del my_datums_obj
      del my_datums_cnt
-  my_irciot = self.irciot_encap_internal_(my_datums_set)
+  my_irciot = self.irciot_encap_internal_(my_datums_set, in_vuid)
   if (len(my_irciot) > self.message_mtu) or my_encrypt:
      if (my_skip == 0):
         self.current_mid = save_mid # mid rollback
@@ -3054,7 +3130,7 @@ class PyLayerIRCIoT(object):
                  break
               str_part_datums = json.dumps(part_datums, separators=(',',':'))
               self.current_mid = save_mid # mid rollback
-              my_irciot = self.irciot_encap_internal_(str_part_datums)
+              my_irciot = self.irciot_encap_internal_(str_part_datums, in_vuid)
               if (len(my_irciot) <= self.message_mtu):
                 test_len = len(my_datums)
                 my_skip_out = my_skip + my_datums_skip
@@ -3072,7 +3148,7 @@ class PyLayerIRCIoT(object):
      if (one_datum == 1):
         self.current_mid = save_mid # Message ID rollback
         (my_irciot, my_datums_part) \
-         = self.irciot_encap_bigdatum_(my_datums, my_part)
+         = self.irciot_encap_bigdatum_(my_datums, my_part, in_vuid)
         if (my_datums_part == 0):
           my_datums_skip += 1
   else:

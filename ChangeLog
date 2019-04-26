@@ -16,3 +16,11 @@
 	and the addition of cryptographic keys from this message to the Virtual
 	Users database has been added.
 
+2019-04-26 19:30 GMT+7 PyIRCIoT 0.0.107 Alexey Y. Woronov <alexey@woronov.ru>
+        * Since Version 0.0.107 in all methods of PyLayerIRCIoT new optional
+        parameter has been added: in_vuid (Virtual User ID), by default: None
+        In API beetwen PyLayerIRCIoT and any transport class new method added:
+        with index api_GET_VUID = 700, and optional parameters 'in_vuid':
+        'c': get configured VUIDs, 't': get temporal VUIDs, '*': get all VUIDs
+        Also, the new transport class PyLayerCOM added in the file rfc2217.py
+
