@@ -24,3 +24,9 @@
         'c': get configured VUIDs, 't': get temporal VUIDs, '*': get all VUIDs
         Also, the new transport class PyLayerCOM added in the file rfc2217.py
 
+2019-04-27 12:30 GMT+7 PyIRCIoT 0.0.108 Alexey Y. Woronov <alexey@woronov.ru>
+        * Since Version 0.0.108; Previously PyLayerIRCIoT.irciot_encap_all_()
+        method returned an array (list) of strings, now it returns array of
+        touples containing string and VUID. Similar changes were made to the
+        parameters of PyLayerIRC.irc_handler_(). Please make the corrections.
+

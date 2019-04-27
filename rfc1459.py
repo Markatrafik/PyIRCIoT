@@ -31,7 +31,7 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version = '0.3.25'
    #
-   irciot_library_version  = '0.0.107'
+   irciot_library_version  = '0.0.108'
    #
    # Bot specific constants
    #
@@ -91,7 +91,7 @@ class PyLayerIRC(object):
    api_vuid_tmp = 't' # VUID prefix for temporal users
    api_vuid_all = '*' # Means All VUIDs when sending messages
    #
-   api_vuid_self = 'c0'
+   api_vuid_self = 'c0' # Default preconfigured VUID
    #
    irc_queue_input  = 0
    irc_queue_output = 1
@@ -441,16 +441,23 @@ class PyLayerIRC(object):
  def irciot_library_version_(self):
    return self.CONST.irciot_library_version
 
- def irc_handler (self, in_compatibility, in_message):
+ def irc_handler (self, in_compatibility, in_message_pack):
    # Warning: interface may be changed
    (in_protocol, in_library) = in_compatibility
    if not self.irciot_protocol_version_() == in_protocol \
     or not self.irciot_library_version_() == in_library:
      return False
-   my_vuid = "%s0" % self.CONST.api_vuid_cfg
-   self.irc_add_to_queue_( \
-     self.CONST.irc_queue_output, in_message, \
-     self.CONST.irc_micro_wait, my_vuid)
+   if isinstance(in_message_pack, list):
+     for my_pack in in_message_pack:
+       (my_message, my_vuid) = my_pack
+       self.irc_add_to_queue_( \
+         self.CONST.irc_queue_output, my_message, \
+         self.CONST.irc_micro_wait, my_vuid)
+   else:
+     (my_message, my_vuid) = in_message_pack
+     self.irc_add_to_queue_( \
+       self.CONST.irc_queue_output, my_message, \
+       self.CONST.irc_micro_wait, my_vuid)
    return True
 
  def user_handler (self, in_compatibility, in_action, in_vuid, in_params):
@@ -760,6 +767,24 @@ class PyLayerIRC(object):
        return my_struct
    return None
 
+ def irc_track_get_nick_struct_by_vuid_(self, in_vuid):
+   if not isinstance(in_vuid, str):
+     return None
+   for my_struct in self.irc_nicks:
+     (my_nick, my_mask, my_vuid, my_info) = my_struct
+     if my_vuid == in_vuid:
+       return my_struct
+   return None
+
+ def irc_track_get_nick_by_vuid_(self, in_vuid):
+   if not isinstance(in_vuid, str):
+     return None
+   for my_struct in self.irc_nicks:
+     (my_nick, my_mask, my_vuid, my_info) = my_struct
+     if my_vuid == in_vuid:
+       return my_nick
+   return None
+
  def irc_track_clarify_nicks_(self):
    for my_struct in self.irc_nicks:
      (my_nick, my_mask, my_vuid, my_info) = my_struct
@@ -1054,7 +1079,7 @@ class PyLayerIRC(object):
      sleep(self.CONST.irc_micro_wait)
    except:
      pass
-   return ("", self.CONST.irc_default_wait, 0)
+   return ("", self.CONST.irc_default_wait, self.CONST.api_vuid_all)
    #
    # End of irc_check_queue_()
 
@@ -1461,8 +1486,17 @@ class PyLayerIRC(object):
            = self.irc_check_queue_(self.CONST.irc_queue_output)
           irc_message = str(irc_message)
           if (irc_message != ""):
-             self.irc_send_(self.CONST.cmd_PRIVMSG + " " \
-               + self.irc_channel + " :" + irc_message)
+             my_private = False
+             if irc_vuid != self.CONST.api_vuid_all:
+               my_nick = self.irc_track_get_nick_by_vuid_(irc_vuid)
+               if self.is_irc_nick_(my_nick):
+                 my_private = True
+             if my_private:
+               self.irc_send_(self.CONST.cmd_PRIVMSG + " " \
+                 + my_nick + " :" + irc_message)
+             else:
+               self.irc_send_(self.CONST.cmd_PRIVMSG + " " \
+                 + self.irc_channel + " :" + irc_message)
           irc_message = ""    
 
    except socket.error:

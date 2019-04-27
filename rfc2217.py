@@ -25,7 +25,7 @@ class PyLayerCOM(object):
    #
    irciot_protocol_version = '0.3.25'
    #
-   irciot_library_version  = '0.0.107'
+   irciot_library_version  = '0.0.108'
    #
    com_default_debug = False
    #
@@ -43,8 +43,13 @@ class PyLayerCOM(object):
    api_SET_EKEY = 302 # Set Encryption Key
    api_GET_BKEY = 501 # Get Blockchain key
    api_SET_BKEY = 502 # Set Blockchain Key
+   api_GET_VUID = 700 # Get list of Virtual User IDs
    #
-   api_vuid_cfg = "c0" # Default preconfigured VUID
+   api_vuid_cfg = 'c' # VUID prefix for users from config
+   api_vuid_tmp = 't' # VUID prefix for temporal users
+   api_vuid_all = '*' # Means All VUIDs when sending messages
+   #
+   api_vuid_self = 'c0' # Default preconfigured VUID
    #
    com_queue_input  = 0
    com_queue_output = 1
@@ -133,16 +138,26 @@ class PyLayerCOM(object):
  def irciot_library_version_(self):
    return self.CONST.irciot_library_version
 
- def com_handler (self, in_compatibility, in_message):
+ def com_handler (self, in_compatibility, in_message_pack):
    # Warning: interface may be changed
    (in_protocol, in_library) = in_compatibility
    if not self.irciot_protocol_version_() == in_protocol \
     or not self.irciot_library_version_() == in_library:
      return False
-   my_vuid = "%s0" % self.CONST.api_vuid_cfg
-   self.com_add_to_queue_( \
-     self.CONST.com_queue_output, in_message, \
-     self.CONST.com_micro_wait, my_vuid)
+   try:
+     if isinstance(in_message_pack, list):
+       for my_pack in in_message_pack:
+         (my_message, my_vuid) = my_pack
+         self.com_add_to_queue_( \
+           self.CONST.com_queue_output, my_message, \
+           self.CONST.com_micro_wait, my_vuid)
+     else:
+       (my_message, my_vuid) = in_message_pack
+       self.com_add_to_queue_( \
+         self.CONST.com_queue_output, my_message, \
+         self.CONST.com_micro_wait, my_vuid)
+   except:
+     return False
    return True
 
  def user_handler (self, in_compatibility, in_action, in_vuid, in_params):
