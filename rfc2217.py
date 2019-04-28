@@ -25,7 +25,7 @@ class PyLayerCOM(object):
    #
    irciot_protocol_version = '0.3.25'
    #
-   irciot_library_version  = '0.0.108'
+   irciot_library_version  = '0.0.109'
    #
    com_default_debug = False
    #
@@ -41,8 +41,12 @@ class PyLayerCOM(object):
    api_SET_LMID = 102 # Set last Message ID
    api_GET_EKEY = 301 # Get Encryption Key
    api_SET_EKEY = 302 # Set Encryption Key
+   api_GET_EKTO = 351 # Get Encryption Key Timeout
+   api_SET_EKTO = 352 # Set Encryption Key Timeout
    api_GET_BKEY = 501 # Get Blockchain key
    api_SET_BKEY = 502 # Set Blockchain Key
+   api_GET_BKTO = 551 # Get Blockchain Key Timeout
+   api_SET_BKTO = 552 # Set Blockchain Key Timeout
    api_GET_VUID = 700 # Get list of Virtual User IDs
    #
    api_vuid_cfg = 'c' # VUID prefix for users from config
