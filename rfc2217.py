@@ -25,7 +25,7 @@ class PyLayerCOM(object):
    #
    irciot_protocol_version = '0.3.25'
    #
-   irciot_library_version  = '0.0.109'
+   irciot_library_version  = '0.0.111'
    #
    com_default_debug = False
    #
@@ -51,9 +51,19 @@ class PyLayerCOM(object):
    #
    api_vuid_cfg = 'c' # VUID prefix for users from config
    api_vuid_tmp = 't' # VUID prefix for temporal users
-   api_vuid_all = '*' # Means All VUIDs when sending messages
+   api_vuid_srv = 's' # VUID prefix for IRC-IoT Services
+   api_vuid_all = '*' # Means All users VUIDs when sending messages
    #
    api_vuid_self = 'c0' # Default preconfigured VUID
+   #
+   # Basic IRC-IoT Services
+   #
+   api_vuid_CRS = 'sC' # Сryptographic Repository Service
+   api_vuid_GDS = 'sD' # Global Dictionary Service
+   api_vuid_GRS = 'sR' # Global Resolving Service
+   api_vuid_GTS = 'sT' # Global Time Service
+   #
+   api_vuid_PRS = 'sr' # Primary Routing Service
    #
    com_queue_input  = 0
    com_queue_output = 1
@@ -101,6 +111,14 @@ class PyLayerCOM(object):
    self.com_task  = None
    self.com_run   = False
    self.com_debug = self.CONST.com_default_debug
+   #
+   # Trivial Virtual Users Database (for One User)
+   #
+   self.lmid = None  # Last Message ID
+   self.ekey = None  # Encryption Public Key
+   self.bkey = None  # Blockchain Public Key
+   self.ekto = None  # Encryption Public Key Timeout
+   self.bkto = None  # Blockchain Public Key Timeout
    #
    self.time_now   = datetime.datetime.now()
    self.delta_time = 0
@@ -171,30 +189,39 @@ class PyLayerCOM(object):
     or not self.irciot_library_version_() == in_library \
     or not isinstance(in_action, int) \
     or not isinstance(in_vuid, str) \
-    or not (isinstance(in_params, str) or in_params == None):
+    or not (isinstance(in_params, str) \
+         or isinstance(in_params, int) \
+         or in_params == None):
      return (False, None)
-   if in_viud == self.CONST.api_vuid_cfg:
-     my_uid  = ""
-     my_mask = ""
-     my_chan = ""
-     my_opt  = ""
-     my_ekey = ""
-     my_bkey = ""
-     my_lmid = ""
-   else:
+   if in_vuid != self.CONST.api_vuid_cfg:
      return (False, None)
    if   in_action == self.CONST.api_GET_LMID:
-     return (True, my_lmid)
+     return (True, self.lmid)
    elif in_action == self.CONST.api_SET_LMID:
-     pass
+     if isinstance(in_params, str):
+       self.lmid = in_params
+   elif in_action == self.CONST.api_GET_VUID:
+     return (True, self.CONST.api_vuid_self)
    elif in_action == self.CONST.api_GET_BKEY:
-     return (True, my_bkey)
+     return (True, self.bkey)
    elif in_action == self.CONST.api_SET_BKEY:
-     pass
+     if isinstance(in_params, str):
+       self.bkey = in_params
+   elif in_action == self.CONST.api_GET_BKTO:
+     return (True, self.bkto)
+   elif in_action == self.CONST.api_SET_BKTO:
+     if isinstance(in_params, int):
+       self.bkto = in_params
    elif in_action == self.CONST.api_GET_EKEY:
-     return (True, my_ekey)
+     return (True, self.ekey)
    elif in_action == self.CONST.api_SET_EKEY:
-     pass
+     if isinstance(in_params, str):
+       self.ekey = in_params
+   elif in_action == self.CONST.api_GET_EKTO:
+     return (True, self.ekto)
+   elif in_action == self.CONST.api_SET_EKTO:
+     if isinstance(jn_params, int):
+       self.ekto = in_params
    return (False, None)
    #
    # End of user_handler_()

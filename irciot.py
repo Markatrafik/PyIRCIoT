@@ -28,8 +28,6 @@ from ctypes import c_ushort
 
 if CAN_debug_library:
   from pprint import pprint
-if CAN_encrypt_datum or CAN_mid_blockchain:
-  from Crypto.Signature import PKCS1_v1_5
 
 class PyLayerIRCIoT(object):
 
@@ -37,7 +35,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.25'
   #
-  irciot_library_version  = '0.0.109'
+  irciot_library_version  = '0.0.111'
   #
   # IRC-IoT TAGs
   #
@@ -208,9 +206,19 @@ class PyLayerIRCIoT(object):
   #
   api_vuid_cfg = 'c' # VUID prefix for users from config
   api_vuid_tmp = 't' # VUID prefix for temporal users
-  api_vuid_all = '*' # Means All VUIDs when sending messages
+  api_vuid_srv = 's' # VUID prefix for IRC-IoT Services
+  api_vuid_all = '*' # Means All users VUIDs when sending messages
   #
   api_vuid_self = 'c0' # Default preconfigured VUID
+  #
+  # Basic IRC-IoT Services
+  #
+  api_vuid_CRS = 'sC' # Сryptographic Repository Service
+  api_vuid_GDS = 'sD' # Global Dictionary Service
+  api_vuid_GRS = 'sR' # Global Resolving Service
+  api_vuid_GTS = 'sT' # Global Time Service
+  #
+  api_vuid_RoS = 'sr' # Primary Routing Service
   #
   # IRC-IoT Base Types
   #
@@ -336,7 +344,13 @@ class PyLayerIRCIoT(object):
   mod_BZIP2 = 'bz2'
   mod_RSA   = 'Crypto.PublicKey.RSA'
   mod_AES   = 'Crypto.Cipher.AES'
+  mod_OAEP  = 'Crypto.Cipher.PKCS1_OAEP'
+  mod_PKCS  = 'Crypto.Signature.PKCS1_v1_5'
+  mod_SHA   = 'Crypto.Hash.SHA'
+  mod_NACE  = 'nacl.encoding'
+  mod_NACS  = 'nacl.signing'
   mod_2FISH = 'twofish'
+  mod_HASH  = 'hashlib'
   #
   mod_USERSIGN  = 'irciot-usersign'
   mod_USERCRYPT = 'irciot-usercrypt'
@@ -399,7 +413,6 @@ class PyLayerIRCIoT(object):
     = self.irciot_crypto_get_compress_(self.crypt_method)
   #
   if CAN_encrypt_datum:
-    self.crypt_PKCS = PKCS1_v1_5
     if self.crypt_algo != None:
       self.irciot_load_encryption_methods_(self.crypt_method)
   #
@@ -457,7 +470,7 @@ class PyLayerIRCIoT(object):
   #
   # End of PyLayerIRCIoT.__init__()
 
- def irc_pointer (self, in_compatibility, in_message):
+ def irc_pointer (self, in_compatibility, in_messages_pack):
   # Warning: interface may be changed while developing
   return False
 
@@ -621,6 +634,8 @@ class PyLayerIRCIoT(object):
     return my_pointer
   else:
     return in_pointer
+  #
+  # End of import_()
 
  def irciot_load_blockchain_methods_(self, in_mid_method):
   if in_mid_method == self.CONST.tag_mid_ED25519:
@@ -628,25 +643,26 @@ class PyLayerIRCIoT(object):
       return False
     if self.crypt_NACS == None:
       self.crypt_NACS = self.import_(self.crypt_NACS, \
-        'nacl.signing')
+        self.CONST.mod_NACS)
     if self.crypt_NACE == None:
       self.crypt_NACE = self.import_(self.crypt_NACE, \
-        'nacl.encoding')
+        self.CONST.mod_NACE)
   elif in_mid_method == self.CONST.tag_mid_RSA1024:
     if self.crypt_HASH != None and self.crypt_RSA  != None and \
        self.crypt_PKCS != None and self.crypt_SHA1 != None:
       return False
     if self.crypt_HASH == None:
-      self.crypt_HASH = self.import_(self.crypt_HASH, 'hashlib')
+      self.crypt_HASH = self.import_(self.crypt_HASH, \
+        self.CONST.mod_HASH)
     if self.crypt_RSA == None:
       self.crypt_RSA  = self.import_( \
       self.crypt_RSA, self.CONST.mod_RSA )
     if self.crypt_PKCS == None:
       self.crypt_PKCS = self.import_(self.crypt_PKCS, \
-        'Crypto.Signature.PKCS1_v1_5')
+        self.CONST.mod_PKCS)
     if self.crypt_SHA1 == None:
       self.crypt_SHA1 = self.import_(self.crypt_SHA1, \
-        'Crypto.Hash.SHA')
+        self.CONST.mod_SHA)
   elif in_mid_method == self.CONST.tag_mid_GOST12:
     pass
   self.irciot_init_blockchain_method_(in_mid_method)
@@ -655,6 +671,8 @@ class PyLayerIRCIoT(object):
   # End of irciot_load_blockchian_methods_()
 
  def irciot_load_encryption_methods_(self, in_crypt_method):
+  if not isinstance(in_crypt_method, str):
+    return False
   my_algo = self.irciot_crypto_get_algorithm_(in_crypt_method)
   if my_algo == self.CONST.crypto_RSA:
     if self.crypt_RSA  != None and \
@@ -666,10 +684,10 @@ class PyLayerIRCIoT(object):
       self.crypt_RSA, self.CONST.mod_RSA )
     if self.crypt_OAEP == None:
       self.crypt_OAEP = self.import_(self.crypt_OAEP, \
-        'Crypto.Cipher.PKCS1_OAEP')
+        self.CONST.mod_OAEP)
     if self.crypt_HASH == None:
       self.crypt_HASH = self.import_(self.crypt_HASH, \
-        'hashlib')
+        self.CONST.mod_HASH)
   elif my_algo == self.CONST.crypto_AES:
     if self.crypt_AES != None:
       return False
@@ -686,6 +704,8 @@ class PyLayerIRCIoT(object):
   # End of irciot_load_encryption_methods_()
 
  def irciot_load_compression_methods_(self, in_crypt_method):
+  if not isinstance(in_crypt_method, str):
+    return False
   my_compress \
     = self.irciot_crypto_get_compress_(in_crypt_method)
   try:
@@ -2352,10 +2372,14 @@ class PyLayerIRCIoT(object):
        pass
     elif (my_ok == 2):
        self.irciot_clear_defrag_chain_(my_did)
+       if CAN_debug_library:
+         print("\033[1;42m DEFRAGMENTATION STARTED \033[0m")
        my_crypt_method = self.crypt_method
        if my_ot in [ \
          self.CONST.ot_ENC_INFO, self.CONST.ot_ENC_ACK, \
-         self.CONST.ot_BCH_INFO, self.CONST.ot_BCH_ACK ]:
+         self.CONST.ot_BCH_INFO, self.CONST.ot_BCH_ACK, \
+         self.CONST.ot_ENC_REQUEST, \
+         self.CONST.ot_BCH_REQUEST ]:
           my_crypt_method \
             = self.irciot_crypto_wo_encryption_(self.crypt_method)
        my_base = self.irciot_crypto_get_base_(my_crypt_method)
@@ -2409,7 +2433,9 @@ class PyLayerIRCIoT(object):
             out_compress = str(self.crypt_ZLIB.decompress(out_base))
             del out_base
           except self.crypt_ZLIB.error as zlib_error:
-            # print("\033[1;35m" + str(zlib_error) + "\033[0m")
+            if CAN_debug_library:
+              print("\033[1;41m ZLIB ENCRIPION FAILED \33[0m")
+              print("\033[1;35m" + str(zlib_error) + "\033[0m")
             if zlib_error.args[0].startswith("Error -3 "):
               self.irciot_error_(self.CONST.err_COMP_ZLIB_HEADER, 0)
             else:
@@ -2686,8 +2712,13 @@ class PyLayerIRCIoT(object):
   my_result = self.irciot_blockchain_verify_string_( \
     my_message, my_mid, my_verify_key)
   if my_result:
-    # print("\033[1;45m BLOCKCHAIN VERIFICATION OK \033[0m")
+    if CAN_debug_library:
+      print("\033[1;45m BLOCKCHAIN VERIFICATION OK \033[0m")
     self.irciot_blockchain_update_last_mid_(in_vuid, my_mid)
+  else:
+    if CAN_debug_library:
+      print("\033[1;41m BLOCKCHAIN VERIFICATION FAILED \033[0m")
+      print("mid was: '\033[1m%s\033[0m'" % my_oldmid)
   return my_result
   #
   # End of irciot_check_container_()
@@ -2915,7 +2946,9 @@ class PyLayerIRCIoT(object):
      return ("", 0)
   if big_ot in [ \
     self.CONST.ot_ENC_INFO, self.CONST.ot_ENC_ACK, \
-    self.CONST.ot_BCH_INFO, self.CONST.ot_BCH_ACK ]:
+    self.CONST.ot_BCH_INFO, self.CONST.ot_BCH_ACK, \
+    self.CONST.ot_ENC_REQUEST, \
+    self.CONST.ot_BCH_REQUEST ]:
      pass
   elif self.crypt_algo == self.CONST.crypto_RSA:
      my_string_key \

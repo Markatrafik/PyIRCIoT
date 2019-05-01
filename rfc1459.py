@@ -21,7 +21,8 @@ import ssl
 from queue import Queue
 from time import sleep
 
-#from pprint import pprint
+if DO_debug_library:
+  from pprint import pprint
 
 import datetime
 
@@ -31,7 +32,7 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version = '0.3.25'
    #
-   irciot_library_version  = '0.0.109'
+   irciot_library_version  = '0.0.111'
    #
    # Bot specific constants
    #
@@ -95,9 +96,19 @@ class PyLayerIRC(object):
    #
    api_vuid_cfg = 'c' # VUID prefix for users from config
    api_vuid_tmp = 't' # VUID prefix for temporal users
-   api_vuid_all = '*' # Means All VUIDs when sending messages
+   api_vuid_srv = 's' # VUID prefix for IRC-IoT Services
+   api_vuid_all = '*' # Means All users VUIDs when sending messages
    #
    api_vuid_self = 'c0' # Default preconfigured VUID
+   #
+   # Basic IRC-IoT Services
+   #
+   api_vuid_CRS = 'sC' # Сryptographic Repository Service
+   api_vuid_GDS = 'sD' # Global Dictionary Service
+   api_vuid_GRS = 'sR' # Global Resolving Service
+   api_vuid_GTS = 'sT' # Global Time Service
+   #
+   api_vuid_RoS = 'sr' # Primary Routing Service
    #
    irc_queue_input  = 0
    irc_queue_output = 1
@@ -1194,8 +1205,8 @@ class PyLayerIRC(object):
 
  def func_not_reg_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
-   if (self.irc_random_nick_(self.irc_nick) == 1):
-     return (-1, 0, in_wait)
+   #if (self.irc_random_nick_(self.irc_nick) == 1):
+   #  return (-1, 0, in_wait)
    return (in_ret, 1, self.CONST.irc_default_wait)
 
  def func_banned_(self, in_args):
