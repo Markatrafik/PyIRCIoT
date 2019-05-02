@@ -35,7 +35,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.25'
   #
-  irciot_library_version  = '0.0.111'
+  irciot_library_version  = '0.0.113'
   #
   # IRC-IoT TAGs
   #
@@ -192,8 +192,10 @@ class PyLayerIRCIoT(object):
   #
   ot_ERROR       = "err"    # General errors
   #
-  api_GET_LMID = 101 # Get last Message ID
-  api_SET_LMID = 102 # Set last Message ID
+  api_GET_LMID = 101 # Get Last Message ID
+  api_SET_LMID = 102 # Set Last Message ID
+  api_GET_OMID = 111 # Get Own last Message ID
+  api_SET_OMID = 112 # Set Own last Message ID
   api_GET_EKEY = 301 # Get Encryption Key
   api_SET_EKEY = 302 # Set Encryption Key
   api_GET_EKTO = 351 # Get Encryption Key Timeout
@@ -357,6 +359,8 @@ class PyLayerIRCIoT(object):
   #
   crc16_start = 0xA001
   #
+  virtual_mid_pipeline_size = 16
+  #
   def __setattr__(self, *_):
       pass
 
@@ -376,6 +380,9 @@ class PyLayerIRCIoT(object):
   #
   self.output_pool = []
   self.output_lock = False
+  #
+  self.virtual_lmid = [] # Virtual Last Message IDs pipeline
+  self.virtual_omid = [] # Virtual Own Message IDs pipeline
   #
   self.ldict       = []
   self.ldict_types = []
@@ -476,6 +483,24 @@ class PyLayerIRCIoT(object):
 
  def user_pointer (self, in_compatibility, in_action, in_vuid, in_params):
   # Warning: method parameters and API may be changed while developing
+  # Below is Virtualization Mechanism for the Loopback MIDs Pipelines:
+  if   in_action == self.CONST.api_SET_LMID:
+    self.virtual_lmid.append(in_params)
+    if len(self.virtual_lmid) \
+     > self.CONST.virtual_mid_pipeline_size:
+      del self.virtual_lmid[0]
+  elif in_action == self.CONST.api_GET_LMID:
+    return (True, self.virtual_lmid)
+  elif in_action == self.CONST.api_SET_OMID:
+    self.virtual_omid.append(in_params)
+    if len(self.virtual_omid) \
+     > self.CONST.virtual_mid_pipeline_size:
+      del self.virtual_omid[0]
+    return (True, None)
+  elif in_action == self.CONST.api_GET_OMID:
+    return (True, self.virtual_omid)
+  elif in_action == self.CONST.api_GET_VUID:
+    return (True, [ self.CONST.api_vuid_self ])
   return (False, None)
 
  def irciot_error_(self, in_error_code, in_mid, in_vuid = None):
@@ -1115,9 +1140,9 @@ class PyLayerIRCIoT(object):
   #
   # End of irciot_encryption_get_foreign_key_()
 
- def irciot_blockchain_get_last_mid_(self, in_vuid):
+ def irciot_blockchain_get_last_mids_(self, in_vuid):
   if not isinstance(in_vuid, str):
-    return None
+    return [ str(self.current_mid) ]
   my_compat = self.irciot_compatibility_()
   my_result = self.user_pointer (my_compat, \
     self.CONST.api_GET_LMID, in_vuid, None)
@@ -1127,11 +1152,29 @@ class PyLayerIRCIoT(object):
     return None
   if not my_status:
     return None
-  if isinstance(my_answer, str):
+  if isinstance(my_answer, list):
     return my_answer
   return None
   #
   # End of irciot_blockchain_get_last_mid_()
+
+ def irciot_blockchain_get_own_mids_(self, in_vuid):
+  if not isinstance(in_vuid, str):
+    return [ str(self.current_mid) ]
+  my_compat = self.irciot_compatibility_()
+  my_result = self.user_pointer (my_compat, \
+    self.CONST.api_GET_OMID, in_vuid, None)
+  try:
+    (my_status, my_answer) = my_result
+  except:
+    return [ str(self.virtual_mid) ]
+  if not my_status:
+    return [ str(self.virtual_mid) ]
+  if isinstance(my_answer, list):
+    return my_answer
+  return [ str(self.virtual_mid) ]
+  #
+  # End of irciot_blockchain_get_own_mid_()
 
  def irciot_get_vuid_list_(self, in_vuid_mask):
   if not isinstance(in_vuid_mask, str):
@@ -1155,10 +1198,29 @@ class PyLayerIRCIoT(object):
    in_message_id):
   if not isinstance(in_vuid, str):
     return
+  if not isinstance(in_message_id, str):
+    return
   my_compat = self.irciot_compatibility_()
-  my_params = in_message_id
   self.user_pointer (my_compat, \
-    self.CONST.api_SET_LMID, in_vuid, my_params)
+    self.CONST.api_SET_LMID, in_vuid, in_message_id)
+  try:
+    (my_status, my_answer) = my_result
+  except:
+    return
+  if not my_status:
+    return
+  #
+  # End of irciot_blockchain_update_last_mid_()
+
+ def irciot_blockchain_update_own_mid_(self, in_vuid, \
+   in_message_id):
+  if not isinstance(in_vuid, str):
+    return
+  if not isinstance(in_message_id, str):
+    return
+  my_compat = self.irciot_compatibility_()
+  my_result = self.user_pointer (my_compat, \
+    self.CONST.api_SET_OMID, in_vuid, in_message_id)
   try:
     (my_status, my_answer) = my_result
   except:
@@ -1172,10 +1234,11 @@ class PyLayerIRCIoT(object):
    in_public_key):
   if not isinstance(in_vuid, str):
     return
+  if not isinstance(in_public_key, str):
+    return
   my_compat = self.irciot_compatibility_()
-  my_params = in_public_key
   my_result = self.user_pointer (my_compat, \
-    self.CONST.api_SET_BKEY, in_vuid, my_params)
+    self.CONST.api_SET_BKEY, in_vuid, in_public_key)
   try:
     (my_status, my_answer) = my_result
   except:
@@ -1189,10 +1252,11 @@ class PyLayerIRCIoT(object):
    in_public_key):
   if not isinstance(in_vuid, str):
     return
+  if not isinstance(in_public_key, str):
+    return
   my_compat = self.irciot_compatibility_()
-  my_params = in_public_key
   my_result = self.user_pointer (my_compat, \
-    self.CONST.api_SET_EKEY, in_vuid, my_params)
+    self.CONST.api_SET_EKEY, in_vuid, in_public_key)
   try:
     (my_status, my_answer) = my_result
   except:
@@ -2293,6 +2357,7 @@ class PyLayerIRCIoT(object):
   my_new = False
   my_err = 0
   my_ok  = 0
+  my_fragments = False
   defrag_array = []
   defrag_buffer = ""
   for my_item in self.defrag_pool: # IRC-IoT defragmentation loop
@@ -2304,6 +2369,7 @@ class PyLayerIRCIoT(object):
       break
     else:
       if (test_did == my_did):
+         my_fragments = True
          if ((test_ot  == my_ot)  and \
              (test_src == my_src) and \
              (test_dst == my_dst)):
@@ -2359,7 +2425,10 @@ class PyLayerIRCIoT(object):
        my_ok = 2
     else:
        my_new = True
+  elif not my_fragments:
+    my_new = True
   if (my_err > 0):
+    self.irciot_error_(my_err, 0)
     self.irciot_clear_defrag_chain_(my_did)
     return ""
   if my_new:
@@ -2373,7 +2442,7 @@ class PyLayerIRCIoT(object):
     elif (my_ok == 2):
        self.irciot_clear_defrag_chain_(my_did)
        if CAN_debug_library:
-         print("\033[1;42m DEFRAGMENTATION STARTED \033[0m")
+         print("\033[1;42m DEFRAGMENTATION COMPLETED \033[0m")
        my_crypt_method = self.crypt_method
        if my_ot in [ \
          self.CONST.ot_ENC_INFO, self.CONST.ot_ENC_ACK, \
@@ -2652,6 +2721,17 @@ class PyLayerIRCIoT(object):
 
  def irciot_check_container_(self, in_container, \
    orig_json = None, in_vuid = None):
+
+  def check_blockchain_(self, in_json, in_mesmid, in_newmid, in_key):
+    if in_mesmid == in_newmid:
+      return False
+    my_message = in_json.replace( \
+      '"' + self.CONST.tag_MESSAGE_ID + '":"' + in_mesmid + '"', \
+      '"' + self.CONST.tag_MESSAGE_ID + '":"' + in_newmid + '"')
+    my_result = self.irciot_blockchain_verify_string_( \
+      my_message, in_mesmid, in_key)
+    return my_result
+
   if not isinstance(orig_json, str):
     return False
   if not isinstance(in_container, dict):
@@ -2665,22 +2745,36 @@ class PyLayerIRCIoT(object):
     else:
       return False
   if in_vuid == None:
-    # self.mid_method == "":
     return True
   try:
-    my_mid = str(in_container[self.CONST.tag_MESSAGE_ID])
+    my_hismid = str(in_container[self.CONST.tag_MESSAGE_ID])
   except:
     return False
-  if len(my_mid) < 2:
-    self.irciot_blockchain_update_last_mid_(in_vuid, my_mid)
-    my_mid_method = ""
+  try:
+    # Blockchain exchange has only one object in container
+    # trying to get object type directly from IRC-IoT message
+    my_object = in_container[self.CONST.tag_OBJECT]
+    my_ot = my_object[self.CONST.tag_OBJECT_TYPE]
+  except:
+    my_ot = None
+  if len(my_hismid) < 2:
+    self.irciot_blockchain_update_last_mid_(in_vuid, my_hismid)
+    my_hismid_method = ""
   else:
-    my_mid_method = my_mid[:2]
-  if not my_mid_method in [ \
+    my_hismid_method = my_hismid[:2]
+  if not my_hismid_method in [ \
      self.CONST.tag_mid_ED25519, \
      self.CONST.tag_mid_RSA1024, \
      self.CONST.tag_mid_GOST12 ]:
-    self.irciot_blockchain_update_last_mid_(in_vuid, my_mid)
+    self.irciot_blockchain_update_last_mid_(in_vuid, my_hismid)
+    return True
+  if my_ot in [ \
+     self.CONST.ot_BCH_INFO, \
+     self.CONST.ot_BCH_REQUEST, \
+     self.CONST.ot_BCH_ACK ]:
+    if CAN_debug_library:
+      print("\033[1;33mBLOCKCHAIN TEST SKIPPED OT '%s' \033[0m" % my_ot)
+    self.irciot_blockchain_update_last_mid_(in_vuid, my_hismid)
     return True
   my_bkey = self.irciot_blockchain_get_foreign_key_(in_vuid)
   if my_bkey == None:
@@ -2688,7 +2782,7 @@ class PyLayerIRCIoT(object):
     # any verification if we do not yet have a public key.
     # It is useful in order to accept a key for this user.
     return True
-  if my_mid_method == self.CONST.tag_mid_ED25519:
+  if my_hismid_method == self.CONST.tag_mid_ED25519:
     try:
       # For performance optimization the public key may be
       # moved to Virtual User Database instead of string form
@@ -2696,29 +2790,66 @@ class PyLayerIRCIoT(object):
         encoder = self.crypt_NACE.HexEncoder )
     except: # Incorrect Public Key
       return False
-  elif my_mid_method == self.CONST.tag_mid_RSA1024:
+  elif my_hismid_method == self.CONST.tag_mid_RSA1024:
     # Not implemented yet
     return False
-  elif my_mid_method == self.CONST.tag_mid_GOST12:
+  elif my_hismid_method == self.CONST.tag_mid_GOST12:
     # Not implemented yet
     return False
-  my_oldmid = self.irciot_blockchain_get_last_mid_(in_vuid)
-  if my_oldmid == None:
-    self.irciot_blockchain_update_last_mid_(in_vuid, my_mid)
+  self.irciot_blockchain_update_last_mid_(in_vuid, my_hismid)
+  if my_hismid == None:
     return True
-  my_message = orig_json.replace( \
-    '"' + self.CONST.tag_MESSAGE_ID + '":"' + my_mid + '"', \
-    '"' + self.CONST.tag_MESSAGE_ID + '":"' + my_oldmid + '"')
-  my_result = self.irciot_blockchain_verify_string_( \
-    my_message, my_mid, my_verify_key)
-  if my_result:
+  if CAN_debug_library:
+    print('MAIN BLOCKCHAIN CHECK')
+  my_newmids = self.irciot_blockchain_get_own_mids_(in_vuid)
+  my_result  = False
+  if isinstance(my_newmids, list):
+    for my_newmid in reversed(my_newmids):
+      if my_newmid == None:
+        continue
+      my_result = check_blockchain_( self, \
+        orig_json, my_hismid, my_newmid, my_verify_key )
+      if my_result:
+        break
+  if not my_result:
     if CAN_debug_library:
+      print("ALTERNATIVE BLOCKCHAIN CHECK")
+    my_vuid_list = self.irciot_get_vuid_list_(self.CONST.api_vuid_all)
+    my_vuid_list.append(self.CONST.api_vuid_self)
+    my_mids = [ my_newmid, my_hismid ]
+    for my_vuid in my_vuid_list:
+      if my_vuid == in_vuid:
+        continue # The User Already Checked
+      if CAN_debug_library:
+        print("Checking blockcahin for VUID = '%s' ..." % my_vuid)
+      my_newmids = self.irciot_blockchain_get_own_mids_(in_vuid)
+      if isinstance(my_newmids, list):
+        for my_newmid in reversed(my_newmids):
+          if not my_newmid in my_mids and my_newmid != None:
+            my_result = check_blockchain_( self, \
+              orig_json, my_hismid, my_newmid, my_verify_key )
+            if my_result:
+              break
+        if my_result:
+          break
+        my_mids += my_newmids
+      my_newmids = self.irciot_blockchain_get_last_mids_(in_vuid)
+      if isinstance(my_newmids, list):
+        for my_newmid in reversed(my_newmids):
+          if not my_newmid in my_mids and my_newmid != None:
+            my_result = check_blockchain_( self, \
+              orig_json, my_hismid, my_newmid, my_verify_key )
+            if my_result:
+              break
+        if my_result:
+          break
+        my_mids += my_newmids
+    del my_mids
+  if CAN_debug_library:
+    if my_result:
       print("\033[1;45m BLOCKCHAIN VERIFICATION OK \033[0m")
-    self.irciot_blockchain_update_last_mid_(in_vuid, my_mid)
-  else:
-    if CAN_debug_library:
+    else:
       print("\033[1;41m BLOCKCHAIN VERIFICATION FAILED \033[0m")
-      print("mid was: '\033[1m%s\033[0m'" % my_oldmid)
   return my_result
   #
   # End of irciot_check_container_()
@@ -2883,8 +3014,16 @@ class PyLayerIRCIoT(object):
      str_object += '"' + self.CONST.tag_DST_ADDR
      str_object += '":"' + my_dst + '",'
   save_mid = self.current_mid
+  sign_mid = self.current_mid
+  if self.mid_method in [ \
+    self.CONST.tag_mid_ED25519, \
+    self.CONST.tag_mid_RSA1024 ]:
+    if in_vuid != None:
+      my_mids = self.irciot_blockchain_get_last_mids_(in_vuid)
+      if isinstance(my_mids, list) and my_mids != []:
+        sign_mid = my_mids[-1]
   str_container = '{"' + self.CONST.tag_MESSAGE_ID + '":"'
-  str_for_sign  = str_container + str(save_mid)
+  str_for_sign  = str_container + str(sign_mid)
   str_for_sign += '",' + str_object + my_irciot + "}}"
   if self.mid_method == "": # Default mid method
     if not isinstance(self.current_mid, int):
@@ -2898,6 +3037,15 @@ class PyLayerIRCIoT(object):
     if sign_hash == None:
       return ""
     self.current_mid = sign_hash
+    if not in_vuid in [ None, self.CONST.api_vuid_all ]:
+      self.irciot_blockchain_update_own_mid_( \
+        in_vuid, sign_hash )
+    else:
+      my_vuid_list = self.irciot_get_vuid_list_(self.CONST.api_vuid_all)
+      if my_vuid_list != []:
+        for my_vuid in my_vuid_list:
+          self.irciot_blockchain_update_own_mid_( \
+            my_vuid, sign_hash )
   str_container += str(self.current_mid) + '",'
   my_irciot = str_container + str_object + my_irciot + "}}"
   # + '"oc":1,"op":1,'  # Must be implemented later

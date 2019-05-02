@@ -25,7 +25,7 @@ class PyLayerCOM(object):
    #
    irciot_protocol_version = '0.3.25'
    #
-   irciot_library_version  = '0.0.111'
+   irciot_library_version  = '0.0.113'
    #
    com_default_debug = False
    #
@@ -37,8 +37,10 @@ class PyLayerCOM(object):
    com_micro_wait = 0.1
    com_default_wait = 1
    #
-   api_GET_LMID = 101 # Get last Message ID
-   api_SET_LMID = 102 # Set last Message ID
+   api_GET_LMID = 101 # Get Last Message ID
+   api_SET_LMID = 102 # Set Last Message ID
+   api_GET_OMID = 111 # Get Own last Message ID
+   api_SET_OMID = 112 # Set Own last Message ID
    api_GET_EKEY = 301 # Get Encryption Key
    api_SET_EKEY = 302 # Set Encryption Key
    api_GET_EKTO = 351 # Get Encryption Key Timeout
@@ -75,6 +77,8 @@ class PyLayerCOM(object):
    com_buffer_size  = 2048
    #
    com_modes = [ "CLIENT", "SERVER" ]
+   #
+   com_default_mid_pipeline_size = 16
    #
    # According RFC 2217
    #
@@ -114,7 +118,8 @@ class PyLayerCOM(object):
    #
    # Trivial Virtual Users Database (for One User)
    #
-   self.lmid = None  # Last Message ID
+   self.lmid = []    # Last Message ID
+   self.omid = []    # Own last Message ID
    self.ekey = None  # Encryption Public Key
    self.bkey = None  # Blockchain Public Key
    self.ekto = None  # Encryption Public Key Timeout
@@ -199,7 +204,18 @@ class PyLayerCOM(object):
      return (True, self.lmid)
    elif in_action == self.CONST.api_SET_LMID:
      if isinstance(in_params, str):
-       self.lmid = in_params
+       self.lmid.append(in_params)
+       if len(self.lmid) > self.CONST.com_mid_pipeline_size:
+         del self.lmid[0]
+       return (True, None)
+   elif in_action == self.CONST.api_GET_OMID:
+     return (True, self.omid)
+   elif in_action == self.CONST.api_SET_OMID:
+     if isinstance(in_params, str):
+       self.omid.append(in_params)
+       if len(self.omid) > self.CONST.com_mid_pipeline_size:
+         del self.omid[0]
+       return (True, None)
    elif in_action == self.CONST.api_GET_VUID:
      return (True, self.CONST.api_vuid_self)
    elif in_action == self.CONST.api_GET_BKEY:
@@ -207,21 +223,25 @@ class PyLayerCOM(object):
    elif in_action == self.CONST.api_SET_BKEY:
      if isinstance(in_params, str):
        self.bkey = in_params
+     return (True, None)
    elif in_action == self.CONST.api_GET_BKTO:
      return (True, self.bkto)
    elif in_action == self.CONST.api_SET_BKTO:
      if isinstance(in_params, int):
        self.bkto = in_params
+     return (True, None)
    elif in_action == self.CONST.api_GET_EKEY:
      return (True, self.ekey)
    elif in_action == self.CONST.api_SET_EKEY:
      if isinstance(in_params, str):
        self.ekey = in_params
+     return (True, None)
    elif in_action == self.CONST.api_GET_EKTO:
      return (True, self.ekto)
    elif in_action == self.CONST.api_SET_EKTO:
      if isinstance(jn_params, int):
        self.ekto = in_params
+     return (True, None)
    return (False, None)
    #
    # End of user_handler_()

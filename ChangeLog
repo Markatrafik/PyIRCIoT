@@ -30,3 +30,11 @@
         touples containing string and VUID. Similar changes were made to the
         parameters of PyLayerIRC.irc_handler_(). Please make the corrections.
 
+2019-05-01 15:00 GMT+7 PyIRCIoT 0.0.112 Alexey Y. Woronov <alexey@woronov.ru>
+        * In API beetwen PyLayerIRCIoT and transport classes new methods has
+        been added: api_GET_OMID = 111, and api_SET_OMID = 112, argument: VUID
+        Methods api_GET_LMID, api_GET_OMID now returns the set, not a single
+        Message ID. In the PyLayerIRC class, a pipeline of Message IDs created
+        separately own, and taken from other robots. The size of the pipeline
+        is set by the constant: PyLayerIRC.CONST.irc_default_mid_pipeline_size
+
