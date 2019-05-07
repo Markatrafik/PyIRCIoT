@@ -35,7 +35,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.25'
   #
-  irciot_library_version  = '0.0.113'
+  irciot_library_version  = '0.0.115'
   #
   # IRC-IoT TAGs
   #
@@ -1749,6 +1749,7 @@ class PyLayerIRCIoT(object):
     ( my_id, my_ot, my_parent_id, my_type_id, my_type_param, \
       my_default, my_child_obj_id, my_method, my_method_lang, \
       my_sections ) = my_ldict_item
+    #print(my_ldict_item)
     if my_max_id < my_id:
       my_max_id = my_id
   return my_max_id
@@ -1767,10 +1768,10 @@ class PyLayerIRCIoT(object):
   my_item.update({self.CONST.ldict_ITEMS_TYPEID : my_type_id })
   my_item.update({self.CONST.ldict_ITEMS_TYPEPR : my_type_param })
   my_item.update({self.CONST.ldict_ITEMS_DEFVAL : my_default })
-  my_item.update({self.CONST.ldict_ITEMS_CHILD : my_child_obj_id })
+  my_item.update({self.CONST.ldict_ITEMS_CHILD  : my_child_obj_id })
   my_item.update({self.CONST.ldict_ITEMS_METHOD : my_method })
-  my_item.update({self.CONST.ldict_ITEMS_LANG : my_method_lang })
-  my_item.update({self.CONST.ldict_ITEMS_SECTS : my_sections })
+  my_item.update({self.CONST.ldict_ITEMS_LANG   : my_method_lang })
+  my_item.update({self.CONST.ldict_ITEMS_SECTS  : my_sections })
   #
   if not self.irciot_ldict_check_item_(my_item):
     return
@@ -2096,6 +2097,25 @@ class PyLayerIRCIoT(object):
   #
   # End of irciot_ldict_check_section_()
 
+ def irciot_ldict_validate_object_by_ot_(self, in_ot, in_object):
+  if not isinstance(in_ot, str):
+    return False
+  # Incomplete code
+  return True
+  #
+  # End of irciot_ldict_validate_object_by_ot_()
+
+ def irciot_ldict_validate_json_by_ot_(self, in_ot, in_json):
+  if not isinstance(in_ot, str):
+    return False
+  try:
+    my_object = json.loads(in_json)
+  except:
+    return False
+  return self.irciot_ldict_validate_object_by_ot_(in_ot, my_object)
+  #
+  # End of irciot_ldict_validate_json_by_ot_()
+
  def irciot_ldict_load_from_file_(self, in_filename):
   if not isinstance(in_filename, str):
     return False
@@ -2110,7 +2130,7 @@ class PyLayerIRCIoT(object):
       return False
     if not self.CONST.ldict_VERSION in load_dict.keys():
       return False
-    my_ldict_version = load_dict[self.CONST.lidcit_VERSION]
+    my_ldict_version = load_dict[self.CONST.ldict_VERSION]
     if my_ldict_version != self.CONST.irciot_protocol_version:
       return False
     if self.CONST.ldict_ITEMS_TABLE in load_dict.keys():

@@ -11,6 +11,7 @@ import socket
 import select
 import json
 import threading
+import pyserial
 import ssl
 from queue import Queue
 from time import sleep
@@ -25,7 +26,7 @@ class PyLayerCOM(object):
    #
    irciot_protocol_version = '0.3.25'
    #
-   irciot_library_version  = '0.0.113'
+   irciot_library_version  = '0.0.115'
    #
    com_default_debug = False
    #
@@ -330,6 +331,26 @@ class PyLayerCOM(object):
    self.com_queue_lock[in_queue_id] = True
    self.com_queue[in_queue_id].put((in_message, in_wait, in_vuid))
    self.com_queue_lock[in_queue_id] = old_queue_lock
+
+ def com_output_all_(self, in_messages_packs, in_wait = None):
+   if not isinstance(in_messages_packs, list):
+     return
+   if not isinstance(in_wait, int) and \
+      not isinstance(in_wait, float):
+     in_wait = self.CONST.com_default_wait
+   for my_pack in in_messages_packs:
+     (my_messages, my_vuid) = my_pack
+     if isinstance(my_messages, str):
+       self.com_add_to_queue_( \
+         self.CONST.com_queue_output, \
+         my_messages, in_wait, my_vuid)
+     elif isinstance(my_messages, list):
+       for my_message in my_messages:
+         self.com_add_to_queue_( \
+           self.CONST.com_queue_output, \
+           my_message, in_wait, my_vuid)
+   #
+   # End of com_output_all_()
 
  # SERVICE Hooks:
 
