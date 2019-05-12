@@ -38,3 +38,9 @@
         separately own, and taken from other robots. The size of the pipeline
         is set by the constant: PyLayerIRC.CONST.irc_default_mid_pipeline_size
 
+2019-05-12 12:05 GMT+7 PyIRCIoT 0.0.117 Alexey Y. Woronov <alexey@woronov.ru>
+        * The protocol version was changed to 0.3.27. The "item_name" field
+        was added to the structure of the Local Dictionary items, which may
+        contain the name of a variable in the structure, it may be useful to
+        generate JSON, or SQL queries.
+

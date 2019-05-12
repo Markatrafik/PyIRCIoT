@@ -30,9 +30,9 @@ class PyLayerIRC(object):
 
  class CONST(object):
    #
-   irciot_protocol_version = '0.3.25'
+   irciot_protocol_version = '0.3.27'
    #
-   irciot_library_version  = '0.0.115'
+   irciot_library_version  = '0.0.117'
    #
    # Bot specific constants
    #
