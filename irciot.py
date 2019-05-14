@@ -35,7 +35,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.27'
   #
-  irciot_library_version  = '0.0.117'
+  irciot_library_version  = '0.0.118'
   #
   # IRC-IoT TAGs
   #
@@ -520,7 +520,7 @@ class PyLayerIRCIoT(object):
   # Incomplete code
   my_datum[self.CONST.tag_SRC_ADDR] = ""
   my_datum[self.CONST.tag_DST_ADDR] = ""
-  # The dstination-address must be taken from
+  # The destination-address must be taken from
   # the source-address of the message that caused the problem
   my_datum[self.CONST.tag_DATE_TIME] \
     = self.irciot_get_current_datetime_()

@@ -32,7 +32,7 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version = '0.3.27'
    #
-   irciot_library_version  = '0.0.117'
+   irciot_library_version  = '0.0.118'
    #
    # Bot specific constants
    #
@@ -141,6 +141,17 @@ class PyLayerIRC(object):
    irc_translation = "".maketrans( \
      irc_ascii_uppercase + "[]\\^",
      irc_ascii_lowercase + "{}|~")
+   irc_change_modes = "+-"
+   irc_user_modes = "ovb"
+   irc_channel_modes = "psitnm"
+   irc_extra_modes = "lk"
+   irc_all_modes \
+     = irc_user_modes \
+     + irc_channel_modes \
+     + irc_extra_modes
+   irc_all_modes_chars \
+     = irc_change_modes \
+     + irc_all_modes
    #
    irc_max_nick_length = 15
    #
@@ -157,12 +168,13 @@ class PyLayerIRC(object):
    code_CREATED            = "003"
    code_MYINFO             = "004"
    code_FEATURELIST        = "005" # Unknown
-   code_MAP                = "005" # Undernet
-   code_MAPMORE            = "006" # Undernet
-   code_MAPEND             = "007" # Undernet
-   code_SNOMASK            = "008" # Undernet
-   code_STATMEMTOT         = "009" # Undernet
-   code_STATMEM            = "010" # Undernet
+   if irc_default_draft == 'Undernet':
+     code_MAP              = "005"
+     code_MAPMORE          = "006"
+     code_MAPEND           = "007"
+     code_SNOMASK          = "008"
+     code_STATMEMTOT       = "009"
+     code_STATMEM          = "010"
    code_TRACELINK          = "200"
    code_TRACECONNECTING    = "201"
    code_TRACEHANDSHAKE     = "202"
@@ -183,14 +195,16 @@ class PyLayerIRC(object):
    code_STATSQLINE         = "217"
    code_STATSYLINE         = "218"
    code_ENDOFSTATS         = "219"
-   code_STATSBLINE         = "220" # Unreal
+   if irc_default_draft == 'Unreal':
+     code_STATSBLINE       = "220"
    code_UMODEIS            = "221"
-   code_SQLINE_NICK        = "222" # Unreal
-   code_STATSGLINE         = "223" # Unreal
-   code_STATSTLINE         = "224" # Unreal
-   code_STATSELINE         = "225" # Unreal
-   code_STATSNLINE         = "226" # Unreal
-   code_STATSVLINE         = "227" # Unreal
+   if irc_default_draft == 'Unreal':
+     code_SQLINE_NICK      = "222"
+     code_STATSGLINE       = "223"
+     code_STATSTLINE       = "224"
+     code_STATSELINE       = "225"
+     code_STATSNLINE       = "226"
+     code_STATSVLINE       = "227"
    code_SERVICEINFO        = "231"
    code_ENDOFSERVICES      = "232"
    code_SERVICE            = "233"
@@ -201,10 +215,13 @@ class PyLayerIRC(object):
    code_STATSOLINE         = "243"
    code_STATSHLINE         = "244"
    code_STATSSLINE         = "245" # Unknown
-   code_STATSTLINE         = "246" # Undernet
-   code_STATSGLINE         = "247" # Undernet
-   code_STATSXLINE         = "247" # Unreal
-   code_STATSULINE         = "248" # Undernet
+   if irc_default_draft == 'Undernet':
+     code_STATSTLINE       = "246"
+     code_STATSGLINE       = "247"
+   if irc_default_draft == 'Unreal':
+     code_STATSXLINE       = "247"
+   if irc_default_draft == 'Undernet':
+     code_STATSULINE       = "248"
    code_STATSDEBUG         = "249" # Unknown
    code_LUSERCONNS         = "250"
    code_LUSERCLIENT        = "251"
@@ -221,27 +238,32 @@ class PyLayerIRC(object):
    code_TRYAGAIN           = "263"
    code_N_LOCAL            = "265"
    code_N_GLOBAL           = "266"
-   code_SILELIST           = "271" # Undernet
-   code_ENDOFSILELIST      = "272" # Undernet
-   code_STATUSDLINE        = "275" # Undernet
-   code_GLIST              = "280" # Undernet
-   code_ENDOFGLIST         = "281" # Undernet
-   code_HELPHDR            = "290" # Unreal
-   code_HELPOP             = "291" # Unreal
-   code_HELPTLR            = "292" # Unreal
-   code_HELPHLP            = "293" # Unreal
-   code_HELPFWD            = "294" # Unreal
-   code_HELPIGN            = "295" # Unreal
+   if irc_default_draft == 'Undernet':
+     code_SILELIST         = "271"
+     code_ENDOFSILELIST    = "272"
+     code_STATUSDLINE      = "275"
+     code_GLIST            = "280"
+     code_ENDOFGLIST       = "281"
+   if irc_default_draft == 'Unreal':
+     code_HELPHDR          = "290"
+     code_HELPOP           = "291"
+     code_HELPTLR          = "292"
+     code_HELPHLP          = "293"
+     code_HELPFWD          = "294"
+     code_HELPIGN          = "295"
    code_NONE               = "300"
    code_AWAY               = "301"
    code_USERHOST           = "302"
    code_ISON               = "303"
-   code_RPL_TEXT           = "304" # Bahamut
+   if irc_default_draft == 'Bahamut':
+     code_RPL_TEXT         = "304"
    code_UNAWAY             = "305"
    code_NOAWAY             = "306"
-   code_USERIP             = "307" # Undernet
-   code_RULESSTART         = "308" # Unreal
-   code_ENDOFRULES         = "309" # Unreal
+   if irc_default_draft == 'Undernet':
+     code_USERIP           = "307"
+   if irc_default_draft == 'Unreal':
+     code_RULESSTART       = "308"
+     code_ENDOFRULES       = "309"
    code_WHOISHELP          = "310" # Unknown
    code_WHOISUSER          = "311"
    code_WHOISSERVER        = "312"
@@ -261,18 +283,22 @@ class PyLayerIRC(object):
    code_NOTOPIC            = "331"
    code_CURRENTTOPIC       = "332"
    code_TOPICINFO          = "333"
-   code_LISTUSAGE          = "334" # Undernet
-   code_WHOISBOT           = "335" # Unreal
+   if irc_default_draft == 'Undernet':
+     code_LISTUSAGE        = "334"
+   if irc_default_draft == 'Unreal':
+     code_WHOISBOT         = "335"
    code_INVITING           = "341"
    code_SUMMONING          = "342"
-   code_INVITELIST         = "346" # Unreal
-   code_ENDOFINVITELIST    = "347" # Unreal
-   code_EXCEPTLIST         = "348" # Unreal
-   code_ENDOFEXCEPTLIST    = "349" # Unreal
+   if irc_default_draft == 'Unreal':
+     code_INVITELIST       = "346"
+     code_ENDOFINVITELIST  = "347"
+     code_EXCEPTLIST       = "348"
+     code_ENDOFEXCEPTLIST  = "349"
    code_VERSION            = "351"
    code_WHOREPLY           = "352"
    code_NAMREPLY           = "353"
-   code_WHOSPCRP1          = "354" # Undernet
+   if irc_default_draft == 'Undernet':
+     code_WHOSPCRP1        = "354"
    code_KILLDONE           = "361"
    code_CLOSING            = "362"
    code_CLOSEEND           = "363"
@@ -290,16 +316,19 @@ class PyLayerIRC(object):
    code_ENDOFMOTD          = "376"
    code_MOTD2              = "377" # Unknown
    code_AUSTMOTD           = "378" # Unknown
-   code_WHOISMODES         = "379" # Unreal
+   if irc_default_draft == 'Unreal':
+     code_WHOISMODES       = "379"
    code_YOUREOPER          = "381"
    code_REHASHING          = "382"
-   code_YOURESERVICE       = "383" # Unreal
+   if irc_default_draft == 'Unreal':
+     code_YOURESERVICE     = "383"
    code_MYPORTIS           = "384"
    code_NOTOPERANYMORE     = "385" # Unknown
-   code_QLIST              = "386" # Unreal
-   code_ENDOFQLIST         = "387" # Unreal
-   code_ALIST              = "388" # Unreal
-   code_ENDOFALIST         = "389" # Unreal
+   if irc_default_draft == 'Unreal':
+     code_QLIST            = "386"
+     code_ENDOFQLIST       = "387"
+     code_ALIST            = "388"
+     code_ENDOFALIST       = "389"
    code_TIME               = "391"
    code_USERSSTART         = "392"
    code_USERS              = "393"
@@ -312,40 +341,48 @@ class PyLayerIRC(object):
    code_TOOMANYCHANNELS    = "405"
    code_WASNOSUCHNICK      = "406"
    code_TOOMANYTARGETS     = "407"
-   code_NOSUCHSERVICE      = "408" # Unreal
+   if irc_default_draft == 'Unreal':
+     code_NOSUCHSERVICE    = "408"
    code_NOORIGIN           = "409"
    code_NORECIPIENT        = "411"
    code_NOTEXTTOSEND       = "412"
    code_NOOPLEVEL          = "413"
    code_WILDTOPLEVEL       = "414"
-   code_QUERYTOOLONG       = "416" # Undernet
+   if irc_default_draft == 'Undernet':
+     code_QUERYTOOLONG     = "416"
    code_UNKNOWNCOMMAND     = "421"
    code_NOMOTD             = "422"
    code_NOADMININFO        = "423"
    code_FILEERROR          = "424"
-   code_NOOPERMOTD         = "425" # Unreal
+   if irc_default_draft == 'Unreal':
+     code_NOOPERMOTD       = "425"
    code_NONICKNAMEGIVEN    = "431"
    code_ERRONEUSNICKNAME   = "432"
    code_NICKNAMEINUSE      = "433"
-   code_NORULES            = "434" # Unreal
-   code_SERVICECONFUSED    = "435" # Unreal
+   if irc_default_draft == 'Unreal':
+     code_NORULES          = "434"
+     code_SERVICECONFUSED  = "435"
    code_NICKCOLLISION      = "436"
    code_UNAVAILRESOURCE    = "437" # Unknown
-   code_BANNICKCHANGE      = "437" # Undernet
-   code_NICKCHANGETOOFAST  = "438" # Undernet
-   code_TARGETTOOFAST      = "439" # Undernet
-   cdoe_SERVICESDOWN       = "440" # Bahamut
+   if irc_default_draft == 'Undernet':
+     code_BANNICKCHANGE    = "437"
+     code_NICKCHANGETOOFAST = "438"
+     code_TARGETTOOFAST    = "439"
+   if irc_default_draft == 'Bahamut':
+     code_SERVICESDOWN     = "440"
    code_USERNOTINCHANNEL   = "441"
    code_NOTONCHANNEL       = "442"
    code_USERONCHANNEL      = "443"
    code_NOLOGIN            = "444"
    code_SUMMONDISABLED     = "445"
    code_USERSDISABLED      = "446"
-   code_NONICKCHANGE       = "447" # Unreal
+   if irc_default_draft == 'Unreal':
+     code_NONICKCHANGE     = "447"
    code_NOTREGISTERED      = "451"
-   code_HOSTILENAME        = "455" # Unreal
-   code_NOHIDING           = "459" # Unreal
-   code_NOTFORHALFOPS      = "460" # Unreal
+   if irc_default_draft == 'Unreal':
+     code_HOSTILENAME      = "455"
+     code_NOHIDING         = "459"
+     code_NOTFORHALFOPS    = "460"
    code_NEEDMOREPARAMS     = "461"
    code_ALREADYREGISTERED  = "462"
    code_NOPERMFORHOST      = "463"
@@ -353,55 +390,68 @@ class PyLayerIRC(object):
    code_YOUREBANNEDCREEP   = "465"
    code_YOUWILLBEBANNED    = "466"
    code_KEYSET             = "467"
-   code_INVALIDUSERNAME    = "468" # Undernet
-   code_LINKSET            = "469" # Unreal
-   code_LINKCHANNEL        = "470" # Unreal
+   if irc_default_draft == 'Undernet':
+     code_INVALIDUSERNAME  = "468"
+   if irc_default_draft == 'Unreal':
+     code_LINKSET          = "469"
+     code_LINKCHANNEL      = "470"
    code_CHANNELISFULL      = "471"
    code_UNKNOWNMODE        = "472"
    code_INVITEONLYCHAN     = "473"
    code_BANNEDFROMCHAN     = "474"
    code_BADCHANNELKEY      = "475"
    code_BADCHANNELMASK     = "476"
-   code_NOCHANMODES        = "477" # Unknown
-   code_NEEDREGGEDNICK     = "477" # Bahamut
+   if irc_default_draft == 'Bahamut':
+     code_NEEDREGGEDNICK   = "477"
+   else:
+     code_NOCHANMODES      = "477" # Unknown
    code_BANLISTFULL        = "478"
-   code_SECUREONLYCHANNEL  = "479" # pircd
-   code_LINKFULL           = "479" # Unreal
-   code_CANNOTKNOCK        = "480" # Unreal
+   if irc_default_draft == 'pircd':
+     code_SECUREONLYCHANNEL = "479"
+   if irc_default_draft == 'Unreal':
+     code_LINKFULL         = "479"
+     code_CANNOTKNOCK      = "480"
    code_NOPRIVILEGES       = "481"
    code_CHANOPRIVSNEEDED   = "482"
    code_CANTKILLSERVER     = "483"
    code_RESTRICTED         = "484" # Unknown
-   code_ISCHANSERVICE      = "484" # Undernet
+   if irc_default_draft == 'Undernet':
+     code_ISCHANSERVICE    = "484"
    code_UNIQOPPRIVSNEEDED  = "485" # Unknown
-   code_KILLDENY           = "485" # Unreal
-   code_HTMDISABLED        = "486" # Unreal
-   code_SECUREONLYCHAN     = "489" # Unreal
+   if irc_default_draft == 'Unreal':
+     code_KILLDENY         = "485"
+     code_HTMDISABLED      = "486"
+     code_SECUREONLYCHAN   = "489"
    code_NOOPERHOST         = "491"
    code_NOSERVICEHOST      = "492"
    code_UMODEUNKNOWNFLAG   = "501"
    code_USERSDONTMATCH     = "502"
-   code_SILELISTFULL       = "511" # Undernet
-   code_NOSUCHGLINE        = "513" # Undernet
-   code_BADPING            = "513" # Undernet
-   code_NOINVITE           = "518" # Unreal
-   code_ADMONLY            = "519" # Unreal
-   code_OPERONLY           = "520" # Unreal
-   code_LISTSYTAX          = "521" # Unreal
-   code_OPERSPVERIFY       = "524" # Unreal
-   code_RPL_LOGON          = "600" # Unreal
-   code_RPL_LOGOFF         = "601" # Unreal
-   code_RPL_WATCHOFF       = "602" # Unreal
-   code_RPL_WATCHSTAT      = "603" # Unreal
-   code_RPL_NOWON          = "604" # Bahamut
-   code_RPL_NOWOFF         = "605" # Bahamut
-   code_RPL_WATCHLIST      = "606" # Unreal
-   code_RPL_ENDOFWATCHLIST = "607" # Unreal
-   code_MAPMORE            = "610" # Unreal
-   code_RPL_DUMPING        = "640" # Unreal
-   code_RPL_DUMPRPL        = "641" # Unreal
-   code_RPL_EODUMP         = "642" # Unreal
-   code_NUMERICERROR       = "999" # Bahamut
+   if irc_default_draft == 'Undernet':
+     code_SILELISTFULL     = "511"
+     code_NOSUCHGLINE      = "513"
+     code_BADPING          = "513"
+   if irc_default_draft == 'Unreal':
+     code_NOINVITE         = "518"
+     code_ADMONLY          = "519"
+     code_OPERONLY         = "520"
+     code_LISTSYTAX        = "521"
+     code_OPERSPVERIFY     = "524"
+     code_RPL_LOGON        = "600"
+     code_RPL_LOGOFF       = "601"
+     code_RPL_WATCHOFF     = "602"
+     code_RPL_WATCHSTAT    = "603"
+   if irc_default_draft == 'Bahamut':
+     code_RPL_NOWON        = "604"
+     code_RPL_NOWOFF       = "605"
+   if irc_default_draft == 'Unreal':
+     code_RPL_WATCHLIST    = "606"
+     code_RPL_ENDOFWATCHLIST = "607"
+     code_MAPMORE          = "610"
+     code_RPL_DUMPING      = "640"
+     code_RPL_DUMPRPL      = "641"
+     code_RPL_EODUMP       = "642"
+   if irc_default_draft == 'Bahamut':
+     code_NUMERICERROR     = "999"
    #
    cmd_ADMIN      = "ADMIN"
    cmd_AWAY       = "AWAY"
@@ -463,8 +513,10 @@ class PyLayerIRC(object):
    self.irc_host = socket.gethostname()
    #
    self.irc_nick = self.CONST.irc_default_nick
+   self.irc_user = self.irc_tolower_(self.CONST.irc_default_nick)
    self.irc_info = self.CONST.irc_default_info
    self.irc_quit = self.CONST.irc_default_quit
+   self.irc_nick_old = self.irc_nick
    #
    self.irc_nick_length = self.CONST.irc_max_nick_length
    #
@@ -1271,12 +1323,12 @@ class PyLayerIRC(object):
 
  def irc_extract_nick_mask_(self, in_string):
    try:
-     irc_mask = in_string.split(' ', 1)[0][1:]
-     irc_nick = irc_mask.split('!', 1)[0]
+     my_mask = in_string.split(' ', 1)[0][1:]
+     my_nick = my_mask.split('!', 1)[0]
    except:
-     irc_mask = "!@"
-     irc_nick = ""
-   return (irc_nick, irc_mask)
+     my_mask = "!@"
+     my_nick = ""
+   return (my_nick, my_mask)
 
  def irc_extract_message_(self, in_string):
    try:
@@ -1298,18 +1350,19 @@ class PyLayerIRC(object):
    ret = self.irc_send_(self.CONST.cmd_WHO + " " + in_channel)
    return ret
 
- def irc_random_nick_(self, in_nick):
+ def irc_random_nick_(self, in_nick, in_force = False):
    if not self.is_irc_nick_(in_nick):
      return -1
    random.seed()
    irc_nick = in_nick + "%d" % random.randint(0, 999)
-   if (self.join_retry > 2):
+   if (self.join_retry > 2) or in_force:
      nick_length = random.randint(1, self.irc_nick_length)
      irc_nick = ''.join( \
       random.choice(self.CONST.irc_nick_chars) \
       for i in range(nick_length))
    ret = self.irc_send_(self.CONST.cmd_NICK + " " + irc_nick)
    if ret == 0:
+     self.irc_nick_old = self.irc_nick
      self.irc_nick = irc_nick
    return ret
    #
@@ -1363,6 +1416,11 @@ class PyLayerIRC(object):
    if (self.irc_random_nick_(self.CONST.irc_default_nick) == 1):
      return (-1, 0, in_wait)
    return (in_ret, in_init, in_wait)
+
+ def func_restore_nick_(self, in_args):
+   (in_string, in_ret, in_init, in_wait) = in_args
+   self.irc_nick = self.irc_nick_old
+   return (in_ret, 3, in_wait)
 
  def func_not_reg_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
@@ -1483,6 +1541,61 @@ class PyLayerIRC(object):
    self.irc_track_delete_nick_(irc_nick)
    return (in_ret, in_init, self.CONST.irc_default_wait)
 
+ def func_on_mode_(self, in_args):
+   (in_string, in_ret, in_init, in_wait) = in_args
+   (irc_nick, irc_mask) = self.irc_extract_nick_mask_(in_string)
+   try:
+     my_array = in_string.split(" ")
+     if len(my_array) < 5:
+       return (in_ret, in_init, in_wait)
+     if my_array[1] != 'MODE':
+       return (in_ret, in_init, in_wait)
+     my_channel = my_array[2]
+     if not self.is_irc_channel_(my_channel):
+       return (in_ret, in_init, in_wait)
+     my_mode_string = my_array[3]
+     if len(my_mode_string) < 2:
+       return (in_ret, in_init, in_wait)
+     for my_char in my_mode_string:
+       if not my_char in self.CONST.irc_all_modes_chars:
+         return (in_ret, in_init, in_wait)
+     my_change = '+'
+     my_index = 0
+     my_nick = False
+     for my_char in my_mode_string:
+       if my_char in self.CONST.irc_change_modes:
+         my_change = my_char
+       elif my_char in self.CONST.irc_user_modes:
+         my_mask = my_array[my_index + 4]
+         self.to_log_( \
+           "mode change '%s','%s' for '%s' on '%s'" \
+           % (my_change, my_char, my_mask, my_channel))
+         if ((my_change == "+") and (my_char == "b")):
+           my_mask_array = my_mask.split("!")
+           my_pseudo  = self.irc_nick + '!'
+           my_pseudo += my_mask_array[1]
+           if self.irc_check_mask_(my_pseudo, my_mask):
+              my_nick = True
+         my_index += 1
+       elif my_char in self.CONST.irc_channel_modes:
+         self.to_log_( \
+           "mode change '%s','%s' for '%s'" \
+           % (my_change, my_char, my_channel))
+       elif my_char in self.CONST.irc_extra_modes:
+         my_extra = my_array[my_index + 4]
+         self.to_log_( \
+           "mode change '%s','%s' extra '%s' for '%s'" \
+           % (my_change, my_char, my_extra, my_channel))
+         my_index += 1
+       if my_nick:
+         self.irc_random_nick_(self.irc_nick, True)
+         return (in_ret, in_init, 0)
+   except:
+     return (in_ret, in_init, in_wait)
+   return (in_ret, in_init, self.CONST.irc_default_wait)
+   #
+   # End of func_on_mode_()
+
  def func_on_error_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
    if (in_string.find("Closing ") or in_string.find(" timeout")):
@@ -1509,6 +1622,8 @@ class PyLayerIRC(object):
     (C.code_ENDOFNAMES,       "ENDOFNAMES",       self.func_end_nicks_), \
     (C.code_WHOREPLY,         "WHOREPLY",         self.func_who_user_), \
     (C.code_NOSUCHNICK,       "NOSUCHNICK",       self.func_no_such_nick_), \
+    (C.code_CHANNELISFULL,    "CHANNELISFULL",    self.func_banned_), \
+    (C.code_BADCHANNELKEY,    "BADCHANNELKEY",    self.func_banned_), \
     (C.code_NOSUCHSERVER,     "NOSUCHSERVER",     None), \
     (C.code_NOSUCHCHANNEL,    "NOSUCHCHANNEL",    None), \
     (C.code_CANNOTSENDTOCHAN, "CANNOTSENDTOCHAN", None), \
@@ -1541,21 +1656,35 @@ class PyLayerIRC(object):
     (C.code_YOUREBANNEDCREEP, "YOUREBANNEDCREEP", None), \
     (C.code_YOUWILLBEBANNED,  "YOUWILLBEBANNED",  None), \
     (C.code_KEYSET,           "KEYSET",           None), \
-    (C.code_CHANNELISFULL,    "CHANNELISFULL",    None), \
     (C.code_UNKNOWNMODE,      "UNKNOWNMODE",      None), \
     (C.code_INVITEONLYCHAN,   "INVITEONLYCHAN",   None), \
     (C.code_BANNEDFROMCHAN,   "BANNEDFROMCHAN",   None), \
-    (C.code_BADCHANNELKEY,    "BADCHANNELKEY",    None), \
     (C.code_BADCHANNELMASK,   "BADCHANNELMASK",   None), \
-    (C.code_NOCHANMODES,      "NOCHANMODES",      None), \
     (C.code_BANLISTFULL,      "BANLISTFULL",      None), \
     (C.code_NOPRIVILEGES,     "NOPRIVILEGES",     None), \
     (C.code_CANTKILLSERVER,   "CANTKILLSERVER",   None), \
-    (C.code_RESTRICTED,       "RESTRICTED",       None), \
     (C.code_UNIQOPPRIVSNEEDED,"UNIQOPPRIVSNEEDED",None), \
     (C.code_NOOPERHOST,       "NOOPERHOST",       None), \
     (C.code_NOSERVICEHOST,    "NOSERVICEHOST",    None), \
     (C.code_UMODEUNKNOWNFLAG, "UMODEUNKNOWNFLAG", None) ]
+
+   if self.CONST.irc_default_draft == 'Undernet':
+     self.irc_codes.extend( [ \
+      (C.code_BANNICKCHANGE,  "BANNICKCHANGE",    self.func_restore_nick_), \
+      (C.code_USERIP,         "USERIP",           None), \
+      (C.code_INVALIDUSERNAME,"INVALIDUSERNAME",  None) ] )
+
+   elif self.CONST.irc_default_draft == 'Unreal':
+     self.irc_codes.extend( [ \
+      (C.code_NONICKCHANGE,   "NONICKCHANGE",     self.func_restore_nick_), \
+      (C.code_WHOISBOT,       "WHOISBOT",         None), \
+      (C.code_NOSUCHSERVICE,  "NOSUCHSERVICE",    None), \
+      (C.code_NOINVITE,       "NOINVITE",         None) ] )
+
+   else: # Unknown extending
+     self.irc_codes.extend( [ \
+      (C.code_NOCHANMODES,    "NOCHANMODES",      None), \
+      (C.code_RESTRICTED,     "RESTRICTED",       None) ] )
    #
    if self.irc_mode == self.CONST.irc_modes[0]:
      self.irc_commands = [ \
@@ -1563,7 +1692,7 @@ class PyLayerIRC(object):
       (C.cmd_JOIN,    self.func_on_join_), \
       (C.cmd_KICK,    self.func_on_kick_), \
       (C.cmd_KILL,    self.func_on_kill_), \
-      (C.cmd_MODE,    None), \
+      (C.cmd_MODE,    self.func_on_mode_), \
       (C.cmd_NICK,    self.func_on_nick_), \
       (C.cmd_NOTICE,  None), \
       (C.cmd_PART,    self.func_on_part_), \
@@ -1571,7 +1700,7 @@ class PyLayerIRC(object):
       (C.cmd_PRIVMSG, None), \
       (C.cmd_QUIT,    self.func_on_quit_), \
       (C.cmd_ERROR,   self.func_on_error_) ]
-
+   #
    else: # RFC 2813
      self.irc_cmmands = [ \
       (C.cmd_PASS,    None), (C.cmd_SERVER,     None), \
@@ -1654,8 +1783,9 @@ class PyLayerIRC(object):
          if self.irc_password:
            self.irc_send_(self.CONST.cmd_PASS \
             + " " + self.irc_password)
+         self.irc_user = self.irc_tolower_(self.irc_nick)
          if (self.irc_send_(self.CONST.cmd_USER \
-          + " " + self.irc_tolower_(self.irc_nick) \
+          + " " + self.irc_user \
           + " " + self.irc_host + " 1 :" \
           + self.irc_info) == -1):
            irc_init = 0
