@@ -33,9 +33,9 @@ class PyLayerIRCIoT(object):
 
  class CONST(object):
   #
-  irciot_protocol_version = '0.3.27'
+  irciot_protocol_version = '0.3.28'
   #
-  irciot_library_version  = '0.0.118'
+  irciot_library_version  = '0.0.119'
   #
   # IRC-IoT TAGs
   #
@@ -265,7 +265,8 @@ class PyLayerIRCIoT(object):
   ldict_TYPE_SIZE    = "size"
   ldict_TYPE_MIN     = "interval_minimum"
   ldict_TYPE_MAX     = "interval_maximum"
-  ldict_TYPE_PRECESS = "precession"
+  ldict_TYPE_PRECIS  = "precision"
+  ldict_TYPE_EXPSIZE = "exponent"
   ldict_TYPE_ENDIAN  = "endianness"
   ldict_TYPE_ENCODE  = "encoding"
   #
@@ -1831,23 +1832,59 @@ class PyLayerIRCIoT(object):
   #
   # End of irciot_ldict_delete_item_by_id_()
 
- def irciot_ldict_get_type_max_id_(self):
+ def irciot_ldict_get_sect_max_id_(self):
   my_max_id = 0
-  for my_ldict_type in self.ldict_types:
-    ( my_id, my_name, my_type, my_is_array, my_is_dynamic, \
-      my_is_dynarray, my_array_size, my_size, my_min, my_max, \
-      my_precession, my_edianness, my_encoding ) = my_ldict_type
+  for my_ldict_sect in self.ldict_sects:
+    ( my_id, my_items_ids, my_check_values, \
+      my_method, my_method_laguage ) = my_ldict_sect
     if not isinstance(my_id, int):
       my_id = 0
     if my_max_id < my_id:
       my_max_id = my_id
   return my_max_id
 
+ def irciot_ldict_get_type_max_id_(self):
+  my_max_id = 0
+  for my_ldict_type in self.ldict_types:
+    ( my_id, my_name, my_type, my_is_array, my_is_dynamic, \
+      my_is_dynarray, my_array_size, my_size, my_min, my_max, \
+      my_precision, my_expsize, my_edianness, my_encoding ) \
+       = my_ldict_type
+    if not isinstance(my_id, int):
+      my_id = 0
+    if my_max_id < my_id:
+      my_max_id = my_id
+  return my_max_id
+
+ def irciot_ldict_create_sect_(self, in_ldict_sect):
+  try:
+    ( my_id, my_items_ids, my_check_values, \
+      my_method, my_method_laguage ) = in_ldict_sect
+  except:
+    return
+  my_sect = {}
+  my_sect.update({ self.CONST.ldict_SECT_ID : my_id })
+  my_sect.update({ self.CONST.ldict_SECT_ITEMS : my_items_ids })
+  my_sect.update({ self.CONST.ldict_SECT_CHECKS : my_check_values })
+  my_sect.update({ self.CONST.ldict_SECT_METHOD : my_method })
+  my_sect.update({ self.CONST.ldict_SECT_LANG : my_method_language })
+  #
+  # Checks will be here
+  my_max_id = self.irciot_ldict_get_sect_max_id_()
+  if my_id <= my_max_id:
+    my_type[self.CONST.ldict_SECT_ID] = my_max_id + 1
+  self.ldict_sect.append(my_sect)
+  if isinstance(self.ldict_file, str):
+    self.irciot_ldict_dump_to_file_(self.ldict_file)
+  #
+  # End of irciot_ldict_create_sect_()
+
  def irciot_ldict_create_type_(self, in_ldict_type):
   try:
    ( my_id, my_name, my_type_type, my_is_array, my_is_dynamic, \
      my_is_dynarray, my_array_size, my_size, my_min, my_max, \
-     my_precession, my_endianness, my_encoding ) = in_ldict_type
+     my_precision, my_expsize, my_endianness, my_encoding ) \
+      = in_ldict_type
   except:
     return
   my_type = {}
@@ -1861,7 +1898,8 @@ class PyLayerIRCIoT(object):
   my_type.update({ self.CONST.ldict_TYPE_SIZE : my_size })
   my_type.update({ self.CONST.ldict_TYPE_MIN : my_min })
   my_type.update({ self.CONST.ldict_TYPE_MAX : my_max })
-  my_type.update({ self.CONST.ldict_TYPE_PRECESS : my_precession })
+  my_type.update({ self.CONST.ldict_TYPE_PRECIS : my_precision })
+  my_type.update({ self.CONST.ldict_TYPE_EXPSIZE : my_expsize })
   my_type.update({ self.CONST.ldict_TYPE_ENDIAN : my_endianness })
   my_type.update({ self.CONST.ldict_TYPE_ENCODE : my_encoding })
   #
@@ -1884,7 +1922,8 @@ class PyLayerIRCIoT(object):
   for my_ldict_type in self.ldict_types:
     ( my_id, my_name, my_type, my_is_array, my_is_dynamic, \
       my_is_dynarray, my_array_size, my_size, my_min, my_max, \
-      my_precession, my_edianness, my_encoding ) = my_ldict_type
+      my_precision, my_expsize, my_edianness, my_encoding ) \
+       = my_ldict_type
     if my_name == in_type_name:
       self.ldict_types.remove(my_ldict_type)
       break
@@ -1899,7 +1938,8 @@ class PyLayerIRCIoT(object):
   for my_ldict_type in self.ldict_types:
     ( my_id, my_name, my_type, my_is_array, my_is_dynamic, \
       my_is_dynarray, my_array_size, my_size, my_min, my_max, \
-      my_precession, my_edianness, my_encoding ) = my_ldict_type
+      my_precision, my_expsize, my_edianness, my_encoding ) \
+       = my_ldict_type
     if my_id == in_type_id:
       self.ldict_types.remove(my_ldict_type)
       break
@@ -1914,7 +1954,8 @@ class PyLayerIRCIoT(object):
   for my_ldict_type in self.ldict_types:
     ( my_id, my_name, my_type, my_is_array, my_is_dynamic, \
       my_is_dynarray, my_array_size, my_size, my_min, my_max, \
-      my_precession, my_edianness, my_encoding ) = my_ldict_type
+      my_precision, my_expsize, my_edianness, my_encoding ) \
+       = my_ldict_type
     if my_name == in_type_name:
       return ldict_type
   return None
@@ -2042,9 +2083,9 @@ class PyLayerIRCIoT(object):
   if not isinstance(my_type_max, str) \
      and my_type_max != None:
     return False
-  if not self.CONST.ldict_TYPE_PRECESS in in_ldict_type.keys():
+  if not self.CONST.ldict_TYPE_PRECIS in in_ldict_type.keys():
     return False
-  my_type_precess = in_ldict_type[self.CONST.ldict_TYPE_PRECESS]
+  my_type_precess = in_ldict_type[self.CONST.ldict_TYPE_PRECIS]
   if not isinstance(my_type_precess, str) \
      and my_type_precess != None:
     return False
