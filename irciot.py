@@ -35,7 +35,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.28'
   #
-  irciot_library_version  = '0.0.119'
+  irciot_library_version  = '0.0.121'
   #
   # IRC-IoT TAGs
   #
@@ -527,9 +527,10 @@ class PyLayerIRCIoT(object):
     = self.irciot_get_current_datetime_()
   my_message = json.dumps(my_datum, separators=(',',':'))
   my_compat = self.irciot_compatibility_()
-  if not self.irc_pointer (my_compat, my_message):
+  my_pack = (my_message, in_vuid)
+  if not self.irc_pointer (my_compat, my_pack):
     # Handler not inserted
-    self.output_pool.append((my_message, in_vuid))
+    self.output_pool.append(my_pack)
   #
   # End of irciot_error_()
 
@@ -1748,20 +1749,18 @@ class PyLayerIRCIoT(object):
  def irciot_ldict_get_item_max_id_(self):
   my_max_id = 0
   for my_ldict_item in self.ldict:
-    ( my_id, my_ot, my_name, my_parent_id, my_type_id, \
-      my_type_param, my_default, my_child_obj_id, my_method, \
-      my_method_lang, my_sections ) = my_ldict_item
+    my_id = my_ldict_item[self.CONST.ldict_ITEM_ID]
     if not isinstance(my_id, int):
       my_id = 0
     if my_max_id < my_id:
       my_max_id = my_id
   return my_max_id
 
- def irciot_ldict_create_item_(self, in_ldict_item):
+ def irciot_ldict_create_item_(self, in_ldict_pack):
   try:
    ( my_id, my_ot, my_name, my_parent_id, my_type_id, \
      my_type_param, my_default, my_child_obj_id, my_method, \
-     my_method_lang, my_sections ) = in_ldict_item
+     my_method_lang, my_sections ) = in_ldict_pack
   except:
     return
   my_item = {}
@@ -1779,7 +1778,7 @@ class PyLayerIRCIoT(object):
   #
   if not self.irciot_ldict_check_item_(my_item):
     return
-  if self.irciot_ldict_get_item_by_ot_(my_ot):
+  if self.irciot_ldict_get_item_by_ot_(my_ot, my_name):
     return
   my_max_id = self.irciot_ldict_get_item_max_id_()
   if my_id <= my_max_id:
@@ -1790,15 +1789,16 @@ class PyLayerIRCIoT(object):
   #
   # End of irciot_ldict_create_item_()
 
- def irciot_ldict_get_item_by_ot_(self, in_object_type):
+ def irciot_ldict_get_item_by_ot_(self, in_object_type, \
+  in_item_name = None):
   if not isinstance(in_object_type, str):
     return None
-  for my_ldict_item in self.ldict:
-    ( my_id, my_ot, my_name, my_parent_id, my_type_id, \
-      my_type_param, my_default, my_child_obj_id, my_nmethod, \
-      my_method_lang, my_sections ) = my_ldict_item
-    if my_ot == in_object_type:
-      return my_ldict_item
+  for my_item in self.ldict:
+    if my_item[self.CONST.ldict_ITEM_OT] == in_object_type:
+      if isinstance(in_item_name, str):
+        if my_item[self.CONST.ldict_ITEM_NAME] != in_item_name:
+          continue
+      return my_item
   #
   # End of irciot_ldict_get_item_by_ot_()
 
@@ -1806,10 +1806,7 @@ class PyLayerIRCIoT(object):
   if not isinstance(in_object_type, str):
     return
   for my_ldict_item in self.ldict:
-    ( my_id, my_ot, my_name, my_parent_id, my_type_id, \
-      my_type_param, my_default, my_child_obj_id, my_nmethod, \
-      my_method_lang, my_sections ) = my_ldict_item
-    if my_ot == in_object_type:
+    if my_ldict_item[self.CONST.ldict_ITEM_OT] == in_object_type:
       self.ldict.remove(my_ldict_item)
       break
   if isinstance(self.ldict_file, str):
@@ -1821,10 +1818,7 @@ class PyLayerIRCIoT(object):
   if not isinstance(in_item_id, int):
     return
   for my_ldict_item in self.ldict:
-    ( my_id, my_ot, my_name, my_parent_id, my_type_id, \
-      my_type_param, my_default, my_child_obj_id, my_nmethod, \
-      my_method_lang, my_sections ) = my_ldict_item
-    if my_id == in_item_id:
+    if my_ldict_item[self.CONST.ldict_ITEM_ID] == in_item_id:
       self.ldict.remove(my_ldict_item)
       break
   if isinstance(self.ldict_file, str):
@@ -1835,8 +1829,7 @@ class PyLayerIRCIoT(object):
  def irciot_ldict_get_sect_max_id_(self):
   my_max_id = 0
   for my_ldict_sect in self.ldict_sects:
-    ( my_id, my_items_ids, my_check_values, \
-      my_method, my_method_laguage ) = my_ldict_sect
+    my_id = my_ldict_sect[self.CONST.ldict_SECT_ID]
     if not isinstance(my_id, int):
       my_id = 0
     if my_max_id < my_id:
@@ -1846,10 +1839,7 @@ class PyLayerIRCIoT(object):
  def irciot_ldict_get_type_max_id_(self):
   my_max_id = 0
   for my_ldict_type in self.ldict_types:
-    ( my_id, my_name, my_type, my_is_array, my_is_dynamic, \
-      my_is_dynarray, my_array_size, my_size, my_min, my_max, \
-      my_precision, my_expsize, my_edianness, my_encoding ) \
-       = my_ldict_type
+    my_id = my_ldict_type[self.CONST.ldict_TYPE_ID]
     if not isinstance(my_id, int):
       my_id = 0
     if my_max_id < my_id:
@@ -1879,12 +1869,12 @@ class PyLayerIRCIoT(object):
   #
   # End of irciot_ldict_create_sect_()
 
- def irciot_ldict_create_type_(self, in_ldict_type):
+ def irciot_ldict_create_type_(self, in_ldict_type_pack):
   try:
    ( my_id, my_name, my_type_type, my_is_array, my_is_dynamic, \
      my_is_dynarray, my_array_size, my_size, my_min, my_max, \
      my_precision, my_expsize, my_endianness, my_encoding ) \
-      = in_ldict_type
+      = in_ldict_type_pack
   except:
     return
   my_type = {}
@@ -1920,11 +1910,7 @@ class PyLayerIRCIoT(object):
   if not isinstance(in_type_name, str):
     return
   for my_ldict_type in self.ldict_types:
-    ( my_id, my_name, my_type, my_is_array, my_is_dynamic, \
-      my_is_dynarray, my_array_size, my_size, my_min, my_max, \
-      my_precision, my_expsize, my_edianness, my_encoding ) \
-       = my_ldict_type
-    if my_name == in_type_name:
+    if my_ldict_type[self.CONST.ldict_TYPE_NAME] == in_type_name:
       self.ldict_types.remove(my_ldict_type)
       break
   if isinstance(self.ldict_file, str):
@@ -1936,11 +1922,7 @@ class PyLayerIRCIoT(object):
   if not isinstance(in_type_id, int):
     return
   for my_ldict_type in self.ldict_types:
-    ( my_id, my_name, my_type, my_is_array, my_is_dynamic, \
-      my_is_dynarray, my_array_size, my_size, my_min, my_max, \
-      my_precision, my_expsize, my_edianness, my_encoding ) \
-       = my_ldict_type
-    if my_id == in_type_id:
+    if my_ldict_type[self.CONST.ldict_TYPE_ID] == in_type_id:
       self.ldict_types.remove(my_ldict_type)
       break
   if isinstance(self.ldict_file, str):
@@ -1950,20 +1932,16 @@ class PyLayerIRCIoT(object):
 
  def irciot_ldict_get_type_by_name_(self, in_type_name):
   if not isinstance(in_type_name, str):
-    return
+    return None
   for my_ldict_type in self.ldict_types:
-    ( my_id, my_name, my_type, my_is_array, my_is_dynamic, \
-      my_is_dynarray, my_array_size, my_size, my_min, my_max, \
-      my_precision, my_expsize, my_edianness, my_encoding ) \
-       = my_ldict_type
-    if my_name == in_type_name:
+    if my_ldict_type[self.CONST.ldict_TYPE_NAME] == in_type_name:
       return ldict_type
   return None
   #
   # End of irciot_ldict_get_type_by_name_()
 
  def irciot_ldict_check_item_(self, in_ldict_item):
-  # Will be replaced by Python SCHEMA analyzer
+  # Will be replaced by ldict self check
   if not isinstance(in_ldict_item, dict):
     return False
   if not self.CONST.ldict_ITEM_ID in in_ldict_item.keys():
@@ -2146,7 +2124,8 @@ class PyLayerIRCIoT(object):
  def irciot_ldict_validate_object_by_ot_(self, in_ot, in_object):
   if not isinstance(in_ot, str):
     return False
-  # Incomplete code
+  if not is_irciot_ldict_object_(in_object, None, in_ot):
+    return False
   return True
   #
   # End of irciot_ldict_validate_object_by_ot_()
@@ -2235,10 +2214,9 @@ class PyLayerIRCIoT(object):
 
  def irciot_ldict_get_type_by_id_(self, in_type_id):
   if not isinstance(in_type_id, int):
-    return
+    return None
   for ldict_type in self.ldict_types:
-    (my_type_id, my_type_name) = ldict_type
-    if my_type_id == in_type_id:
+    if ldict_type[self.CONST.ldict_TYPE_ID] == in_type_id:
       return ldict_type 
   return None
   #
@@ -2250,6 +2228,73 @@ class PyLayerIRCIoT(object):
   if (in_mtu < 128):
     return
   self.message_mtu = in_mtu
+
+ def is_irciot_ldict_type_(self, in_variable, in_type_id):
+  my_type = self.irciot_ldict_get_type_by_id_(in_type_id)
+  if my_type == None:
+    return True
+  my_id   = my_type[self.CONST.ldict_TYPE_ID]
+  my_name = my_type[self.CONST.ldict_TYPE_NAME]
+  my_size = my_type[self.CONST.ldict_TYPE_SIZE]
+  my_min  = my_type[self.CONST.ldict_TYPE_MIN]
+  my_max  = my_type[self.CONST.ldict_TYPE_MAX]
+  my_type_type   = my_type[self.CONST.ldict_TYPE_TYPE]
+  my_is_array    = my_type[self.CONST.ldict_TYPE_ARR]
+  my_is_dynamic  = my_type[self.CONST.ldict_TYPE_DYNSIZE]
+  my_is_dynarray = my_type[self.CONST.ldict_TYPE_DINARR]
+  my_array_size  = my_type[self.CONST.ldict_TYPE_ARRSIZE]
+  my_precision   = my_type[self.CONST.ldict_TYPE_PRECIS]
+  my_expsize     = my_type[self.CONST.ldict_TYPE_EXPSIZE]
+  my_endianness  = my_type[self.CONST.ldict_TYPE_ENDIAN]
+  my_encoding    = my_type[self.CONST.ldict_TYPE_ENCODE]
+  if my_is_array == True:
+    if not isinstance(in_variable, list):
+      return False
+    if isinstance(my_array_size, int) \
+      and not my_is_dynarray == True:
+      if len(in_variable) != my_array_size:
+        return False
+    for my_elemet in in_variable:
+      if not self.is_irciot_ldict_type_(my_element, my_type_type):
+        return False
+    return True
+  #
+  # incomplete code
+  #
+  return True
+  #
+  # End of is_irciot_ldict_type_()
+
+ def is_irciot_ldict_object_(self, in_object, in_id, in_ot = None):
+  if isintance(in_object, dict):
+    return False
+  if in_ot == None:
+    if not isinstance(in_id, int):
+      return False
+  else:
+    if not isinstance(in_ot, str):
+      return False
+    if in_id != None:
+      return False
+  for my_item in self.ldict:
+    if in_id != None:
+      if my_item[self.CONST.ldict_ITEM_ID] != in_id:
+        continue
+    if in_ot != None:
+      if my_item[self.CONST.ldict_ITEM_OT] != in_ot:
+        continue
+    my_item_name = my_item[self.CONST.ldict_ITEM_NAME]
+    my_item_type = my_item[self.CONST.ldict_ITEM_TYPEID]
+    try:
+      my_variable = in_object[my_item_name]
+    except:
+      return False
+    if not self.is_irciot_ldict_type_(my_variable, my_item_type):
+      return False
+  #
+  return True
+  #
+  # End of is_irciot_ldict_object_()
 
  def is_irciot_datum_(self, in_datum, in_ot, in_src, in_dst):
   if self.CONST.tag_ENC_DATUM in in_datum:

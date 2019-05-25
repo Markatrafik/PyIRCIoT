@@ -32,7 +32,7 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version = '0.3.28'
    #
-   irciot_library_version  = '0.0.119'
+   irciot_library_version  = '0.0.121'
    #
    # Bot specific constants
    #
@@ -916,9 +916,9 @@ class PyLayerIRC(object):
      return
    my_ok = False
    for my_index, my_anon in enumerate(self.irc_anons):
-     ( an_id, my_mask, my_chan, my_opt, \
-       my_ekey, my_bkey, my_lmid, \
-       my_ekto, my_bkto, my_omid ) = my_anon
+     ( an_id,   my_mask, my_chan, my_opt,  \
+       my_ekey, my_bkey, my_lmid, my_ekto, \
+       my_bkto, my_omid ) = my_anon
      if my_id == an_id:
        my_ok = True
        if isinstance(in_mask, str):
@@ -952,15 +952,12 @@ class PyLayerIRC(object):
          else:
            my_omid = [ in_omid ]
        my_anon = ( an_id, my_mask, my_chan, my_opt, my_ekey, \
-         my_bkey, my_lmid, my_ekto, my_bkto, my_omid )
+        my_bkey, my_lmid, my_ekto, my_bkto, my_omid )
        self.irc_anons[my_index] = my_anon
        break
    if not my_ok:
      for my_anon in self.irc_anons:
-       ( an_id, my_mask, my_tmp, my_tmp, \
-         my_tmp, my_tmp, my_tmp, my_tmp, \
-         my_tmp, my_tmp ) = my_anon
-       if my_mask == in_mask:
+       if my_anon[1] == in_mask:
          my_ok = True
    if not my_ok:
      my_lmid = None
@@ -997,8 +994,7 @@ class PyLayerIRC(object):
  def irc_track_fast_nick_(self, in_nick, in_mask):
    my_ok = True
    for my_struct in self.irc_nicks:
-     (my_nick, my_tmp, my_tmp, my_tmp) = my_struct
-     if my_nick == in_nick:
+     if my_struct[0] == in_nick:
        my_ok = False
    if my_ok:
      self.irc_track_add_nick_(in_nick, in_mask, None, None)
@@ -1117,9 +1113,9 @@ class PyLayerIRC(object):
      return None
    try:
      my_user = self.irc_users[ in_position ]
-     ( my_id, my_mask, my_chan, my_opt, \
-       my_ekey, my_bkey, my_lmid, \
-       my_ekto, my_bkto, my_omid ) = my_user
+     ( my_id,   my_mask, my_chan, my_opt,  \
+       my_ekey, my_bkey, my_lmid, my_ekto, \
+       my_bkto, my_omid ) = my_user
      return my_mask
    except:
      return None
@@ -1143,11 +1139,8 @@ class PyLayerIRC(object):
    if not isinstance(in_vuid, str):
      return None
    for my_user in self.irc_users:
-     ( user_id, my_mask, my_chan, my_opt, \
-       my_ekey, my_bkey, my_lmid, \
-       my_ekto, my_bkto, my_omid ) = my_user
      my_vuid = self.CONST.api_vuid_cfg
-     my_vuid += "%d" % user_id
+     my_vuid += "%d" % my_user[0]
      if my_vuid == in_vuid:
        return my_user
    return None
@@ -1166,13 +1159,12 @@ class PyLayerIRC(object):
    in_bkto = None
    in_omid = None
    if irciot_parameters != None:
-     ( in_opt, in_ekey, in_bkey, \
-      in_lmid, in_ekto, in_bkto, \
-      in_omid ) = irciot_parameters
+     ( in_opt, in_ekey, in_bkey, in_lmid, \
+      in_ekto, in_bkto, in_omid ) = irciot_parameters
    for my_user in self.irc_users:
-     ( my_uid, my_mask, my_chan, my_opt, \
-       my_ekey, my_bkey, my_lmid, \
-       my_ekto, my_bkto, my_omid ) = my_user
+     ( my_uid,  my_mask, my_chan, my_opt,  \
+       my_ekey, my_bkey, my_lmid, my_ekto, \
+       my_bkto, my_omid ) = my_user
      if ((in_channel == "*") or \
       (self.irc_compare_channels_(in_channel, my_chan))):
        if self.irc_check_mask_(in_from, my_mask):
