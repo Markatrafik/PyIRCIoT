@@ -50,3 +50,7 @@
         new numeric field "exponent" was added meaning the size of the number,
         which is the degree of base 10, expressed in bits.
 
+2019-06-01 21:45 GMT+7 PyIRCIoT 0.0.123 Alexey Y. Woronov <alexey@woronov.ru>
+        * Added a first simplified version of library worked on MicroPython
+        for uploading it to IoT devices such as ESP8266 by Espressif Systems.
+

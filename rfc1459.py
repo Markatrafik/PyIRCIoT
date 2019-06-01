@@ -1,7 +1,7 @@
 '''
 '' PyIRCIoT (PyLayerIRC class)
 ''
-'' Copyright (c) 2018, 2019 Alexey Y. Woronov
+'' Copyright (c) 2018-2019 Alexey Y. Woronov
 ''
 '' Authors:
 ''  Alexey Y. Woronov <alexey@woronov.ru>
@@ -32,7 +32,7 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version = '0.3.28'
    #
-   irciot_library_version  = '0.0.121'
+   irciot_library_version  = '0.0.123'
    #
    # Bot specific constants
    #

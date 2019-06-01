@@ -1,7 +1,7 @@
 '''
 '' PyIRCIoT (PyLayerIRCIoT class)
 ''
-'' Copyright (c) 2018, 2019 Alexey Y. Woronov
+'' Copyright (c) 2018-2019 Alexey Y. Woronov
 ''
 '' Authors:
 ''  Alexey Y. Woronov <alexey@woronov.ru>
@@ -35,7 +35,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.28'
   #
-  irciot_library_version  = '0.0.121'
+  irciot_library_version  = '0.0.123'
   #
   # IRC-IoT TAGs
   #
@@ -293,6 +293,8 @@ class PyLayerIRCIoT(object):
   err_COMP_ZLIB_HEADER    = 301
   err_COMP_ZLIB_INCOMP    = 303
   err_RSA_KEY_FORMAT      = 351
+  err_LDICT_VERIFY_OK     = 811
+  err_LDICT_VERIFY_FAIL   = 812
   #
   err_LOAD_ZLIB_MODULE    = 701
   err_LOAD_BZIP2_MODULE   = 702
@@ -324,7 +326,9 @@ class PyLayerIRCIoT(object):
    err_LOAD_AES_MODULE    : "Loading AES module",
    err_LOAD_2FISH_MODULE  : "Loading Twofish module",
    err_LOAD_USER_SIGN     : "Loading UserSign module",
-   err_LOAD_USER_CRYPT    : "Loading UserCrypt module"
+   err_LOAD_USER_CRYPT    : "Loading UserCrypt module",
+   err_LDICT_VERIFY_OK    : "Local Dictionary verification OK",
+   err_LDICT_VERIFY_FAIL  : "Local Dictionary verification failed"
   }
   #
   pattern = chr(0) # or "@", chr(255)
@@ -505,13 +509,16 @@ class PyLayerIRCIoT(object):
     return (True, [ self.CONST.api_vuid_self ])
   return (False, None)
 
- def irciot_error_(self, in_error_code, in_mid, in_vuid = None):
+ def irciot_error_(self, in_error_code, in_mid, \
+    in_vuid = None, in_addon = None):
   # Warning: This version of error handler is made for
   # testing and does not comply with the specification
   my_message = ""
   my_datum = {}
   if in_error_code in self.CONST.err_DESCRIPTIONS.keys():
     my_descr = self.CONST.err_DESCRIPTIONS[in_error_code]
+    if isinstance(in_addon, str):
+      my_descr += " (%s)" % in_addon
     my_datum.update({ self.CONST.tag_DESCRIPTION : my_descr })
   else:
     return
@@ -596,6 +603,8 @@ class PyLayerIRCIoT(object):
   if my_algo == self.CONST.crypto_RSA:
     self.crypto_RSA_KEY_SIZE = self.CONST.crypto_RSA_KEY_SIZE
   elif my_algo == self.CONST.crypto_AES:
+    if self.crypt_AES == None:
+      return
     self.crypto_AES_BLOCK_SIZE = self.crypt_AES.block_size
     self.crypto_AES_iv = self.irciot_crypto_hasher_(None, \
     self.crypto_AES_BLOCK_SIZE )
@@ -861,10 +870,14 @@ class PyLayerIRCIoT(object):
  def irciot_blockchain_generate_keys_(self, in_mid_method):
   try:
     if in_mid_method == self.CONST.tag_mid_ED25519:
+      if self.crypt_NACS == None:
+        return (None, None)
       my_private_key \
         = self.crypt_NACS.SigningKey.generate()
       my_public_key = my_private_key.verify_key
     elif in_mid_method == self.CONST.tag_mid_RSA1024:
+      if self.crypt_RSA == None:
+        return (None, None)
       my_private_key = self.crypt_RSA.generate(1024)
       my_public_key = my_private_key.publickey()
     elif in_mid_method == self.CONST.tag_mid_GOST12:
@@ -1718,6 +1731,8 @@ class PyLayerIRCIoT(object):
   crypto_private_key = None
   my_algo = self.irciot_crypto_get_algorithm_(in_crypt_method)
   if my_algo == self.CONST.crypto_RSA:
+    if self.crypt_RSA == None:
+      return (None, None)
     crypto_private_key \
       = self.crypt_RSA.generate(self.crypto_RSA_KEY_SIZE)
     crypto_public_key = crypto_private_key.publickey()
@@ -1756,11 +1771,11 @@ class PyLayerIRCIoT(object):
       my_max_id = my_id
   return my_max_id
 
- def irciot_ldict_create_item_(self, in_ldict_pack):
+ def irciot_ldict_create_item_(self, in_ldict_item_pack):
   try:
    ( my_id, my_ot, my_name, my_parent_id, my_type_id, \
      my_type_param, my_default, my_child_obj_id, my_method, \
-     my_method_lang, my_sections ) = in_ldict_pack
+     my_method_lang, my_sections ) = in_ldict_item_pack
   except:
     return
   my_item = {}
@@ -1799,6 +1814,7 @@ class PyLayerIRCIoT(object):
         if my_item[self.CONST.ldict_ITEM_NAME] != in_item_name:
           continue
       return my_item
+  return None
   #
   # End of irciot_ldict_get_item_by_ot_()
 
@@ -2121,16 +2137,16 @@ class PyLayerIRCIoT(object):
   #
   # End of irciot_ldict_check_section_()
 
- def irciot_ldict_validate_object_by_ot_(self, in_ot, in_object):
+ def irciot_ldict_validate_object_by_ot_(self, in_object, in_ot):
   if not isinstance(in_ot, str):
     return False
-  if not is_irciot_ldict_object_(in_object, None, in_ot):
+  if not self.is_irciot_ldict_object_(in_object, None, in_ot):
     return False
   return True
   #
   # End of irciot_ldict_validate_object_by_ot_()
 
- def irciot_ldict_validate_json_by_ot_(self, in_ot, in_json):
+ def irciot_ldict_validate_json_by_ot_(self, in_json, in_ot):
   if not isinstance(in_ot, str):
     return False
   try:
@@ -2265,8 +2281,8 @@ class PyLayerIRCIoT(object):
   #
   # End of is_irciot_ldict_type_()
 
- def is_irciot_ldict_object_(self, in_object, in_id, in_ot = None):
-  if isintance(in_object, dict):
+ def is_irciot_ldict_object_(self, in_object, in_id, in_ot):
+  if not isinstance(in_object, dict):
     return False
   if in_ot == None:
     if not isinstance(in_id, int):
@@ -2302,10 +2318,12 @@ class PyLayerIRCIoT(object):
         return True # Stub
   # Object Type filed must exists or inherits
   if not self.CONST.tag_OBJECT_TYPE in in_datum:
-     if (in_ot == None):
+     if in_ot == None:
         return False
+     my_ot = in_ot
   else:
-     if not isinstance(in_datum[self.CONST.tag_OBJECT_TYPE], str):
+     my_ot = in_datum[self.CONST.tag_OBJECT_TYPE]
+     if not isinstance(my_ot, str):
         return False
   # Fragmented message header:
   if self.CONST.tag_DATUM_BC in in_datum:
@@ -2331,6 +2349,13 @@ class PyLayerIRCIoT(object):
   else:
      if not isinstance(in_datum[self.CONST.tag_DST_ADDR], str):
         return False
+  #
+  if self.irciot_ldict_get_item_by_ot_(my_ot) != None:
+    if not self.is_irciot_ldict_object_(in_datum, None, my_ot):
+      self.irciot_error_( \
+        self.CONST.err_LDICT_VERIFY_FAIL, 0, None, my_ot)
+      return False
+  #
   return True
   #
   # End of is_irciot_datum_()
@@ -2370,8 +2395,8 @@ class PyLayerIRCIoT(object):
     # Go deeper
     if isinstance(my_datums, list):
        for my_datum in my_datums:
-          if (not self.is_irciot_datum_(my_datum, \
-           in_object[self.CONST.tag_OBJECT_TYPE], my_src, my_dst)):
+          if not self.is_irciot_datum_(my_datum, \
+           in_object[self.CONST.tag_OBJECT_TYPE], my_src, my_dst):
              return False
        return True
     if isinstance(my_datums, dict):
