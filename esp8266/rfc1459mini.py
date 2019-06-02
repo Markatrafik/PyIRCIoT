@@ -1,9 +1,9 @@
-# PyLayerIRC mini (c) 2019 Alexey Y. Woronov
+# Micro PyLayerIRC (c) 2019 Alexey Y. Woronov
 import socket,select,random,time
 class PyLayerIRC(object):
  class CONST(object):
   ii_proto_ver='0.3.28'
-  ii_lib_ver='0.0.123'
+  ii_lib_ver='0.0.125'
   i_big_wait=28
   i_min_wait=1
   i_server='irc-iot.nsk.ru'
@@ -34,6 +34,8 @@ class PyLayerIRC(object):
   time.sleep(self.CONST.i_min_wait)
  def __del__(self):
   self.i_stop_()
+ def i_handler(self,in_msg,in_nick,in_mask):
+  pass
  def i_disconnect_(self):
   try:
    self.i.shutdown()
@@ -83,11 +85,25 @@ class PyLayerIRC(object):
   return (0,'',0)
  def i_pong_(self,inp):
   str=inp.split(':')
-  r=self.i_send_("PONG %s\r\n" % str[1])
+  r=self.i_send_("PONG %s\r\n"%str[1])
   return r
  def i_quit_(self):
   r=self.i_send_("QUIT :CYL8R\r\n")
   return r
+ def i_extract_nm_(self,in_str):
+  try:
+   m=in_str.split(' ',1)[0][1:]
+   n=m.split('!',1)[0]
+  except:
+   m='!@'
+   n=''
+  return (n,m)
+ def i_extract_msg_(self,in_str):
+  try:
+   i_msg = in_str.split('PRIVMSG',1)[1].split(':',1)[1]
+   return i_msg.strip()
+  except:
+   return None
  def i_process_(self):
   try:
    i_i=0
@@ -159,7 +175,11 @@ class PyLayerIRC(object):
       if i_cmd=='451':
        i_i=1
      if i_cmd=='PRIVMSG':
-      print('msg: '+i_item)
+      (i_n,i_m)=self.i_extract_nm_(i_item)
+      i_msg=self.i_extract_msg_(i_item)
+      if i_msg!=None:
+       print('msg(%s)$%s$'%(i_n,i_msg))
+       self.i_handler(i_msg,i_n,i_m)
   except:
    self.i_disconnect_()
    i_i=0

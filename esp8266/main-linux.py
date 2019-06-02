@@ -1,11 +1,7 @@
 #!/usr/bin/python3
 import sys
-import network
 from rfc1459mini import PyLayerIRC
 from irciotmini import PyLayerIRCIoT
-w=network.WLAN(network.STA_IF);
-w.active(True)
-w.connect("ESSID", "password")
 i=PyLayerIRC()
 ii=PyLayerIRCIoT()
 i.i_server="irc-iot.nsk.ru"

@@ -24,6 +24,7 @@ OK, let's add this Chip to IRC-IoT ecosystem
 
 5. Upload mini version of PyIRCIoT to your ESP8266:
 > for i in rfc1459mini.py irciotmini.py main.py ; do
+>  ampy -p $myport -b 115200 rm $i 2>/dev/null
 >  ampy -p $myport -b 115200 put $i ; done
 > ampy -p $myport -b 115200 ls
 /boot.py

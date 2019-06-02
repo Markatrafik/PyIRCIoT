@@ -35,7 +35,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.28'
   #
-  irciot_library_version  = '0.0.123'
+  irciot_library_version  = '0.0.125'
   #
   # IRC-IoT TAGs
   #
@@ -2323,8 +2323,8 @@ class PyLayerIRCIoT(object):
      my_ot = in_ot
   else:
      my_ot = in_datum[self.CONST.tag_OBJECT_TYPE]
-     if not isinstance(my_ot, str):
-        return False
+  if not isinstance(my_ot, str):
+     return False
   # Fragmented message header:
   if self.CONST.tag_DATUM_BC in in_datum:
      if not isinstance(in_datum[self.CONST.tag_DATUM_BC], int):
@@ -2366,12 +2366,12 @@ class PyLayerIRCIoT(object):
   def is_irciot_object_(self, in_object):
     if not self.CONST.tag_OBJECT_ID in in_object: # IRC-IoT Object ID
        return False
-    if (in_object[self.CONST.tag_OBJECT_ID] == ""):
+    if in_object[self.CONST.tag_OBJECT_ID] == "":
        return False
     if not self.CONST.tag_OBJECT_TYPE in in_object:
        in_object[self.CONST.tag_OBJECT_TYPE] = None
        # it will test all datums for "object type"
-    if (in_object[self.CONST.tag_OBJECT_TYPE] == ""):
+    if in_object[self.CONST.tag_OBJECT_TYPE] == "":
        return False
     if not self.CONST.tag_DATUM in in_object:
        return False
@@ -2399,7 +2399,7 @@ class PyLayerIRCIoT(object):
            in_object[self.CONST.tag_OBJECT_TYPE], my_src, my_dst):
              return False
        return True
-    if isinstance(my_datums, dict):
+    elif isinstance(my_datums, dict):
        if not self.is_irciot_datum_(my_datums, \
         in_object[self.CONST.tag_OBJECT_TYPE], my_src, my_dst):
           return False
@@ -2410,7 +2410,7 @@ class PyLayerIRCIoT(object):
   def is_irciot_container_(self, in_container):
     if not self.CONST.tag_MESSAGE_ID in in_container:
        return False
-    if (in_container[self.CONST.tag_MESSAGE_ID] == ""):
+    if in_container[self.CONST.tag_MESSAGE_ID] == "":
        return False
     if self.CONST.tag_MESSAGE_OC in in_container:
        if not isinstance(in_container[self.CONST.tag_MESSAGE_OC], int):
@@ -2430,10 +2430,10 @@ class PyLayerIRCIoT(object):
     my_objects = in_container[self.CONST.tag_OBJECT]
     if isinstance(my_objects, list):
       for my_object in my_objects:
-         if (not is_irciot_object_(self, my_object)):
+         if not is_irciot_object_(self, my_object):
            return False
       return True
-    if isinstance(my_objects, dict):
+    elif isinstance(my_objects, dict):
       if not is_irciot_object_(self, my_objects):
          return False
       return True
@@ -2450,10 +2450,10 @@ class PyLayerIRCIoT(object):
   # This is Top-level JSON with ONE or more IRC-IoT message "containers"
   if isinstance(irciot_message, list):
      for my_container in irciot_message:
-        if (not is_irciot_container_(self, my_container)):
+        if not is_irciot_container_(self, my_container):
            return False
      return True
-  if isinstance(irciot_message, dict):
+  elif isinstance(irciot_message, dict):
      if not is_irciot_container_(self, irciot_message):
         return False
   return True
