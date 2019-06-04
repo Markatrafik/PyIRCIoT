@@ -6,6 +6,7 @@ class PyLayerIRC(object):
   ii_lib_ver='0.0.125'
   i_big_wait=28
   i_min_wait=1
+  i_keep_cnt=16
   i_server='irc-iot.nsk.ru'
   i_port=6667
   i_channel='#NSK'
@@ -23,6 +24,7 @@ class PyLayerIRC(object):
   self.i_server=self.CONST.i_server
   self.i_port=self.CONST.i_port
   self.i_status=0
+  self.i_keep=0
   self.i_recon=1
   self.i_channel=self.CONST.i_channel
   self.i_users=[]
@@ -90,6 +92,12 @@ class PyLayerIRC(object):
  def i_quit_(self):
   r=self.i_send_("QUIT :CYL8R\r\n")
   return r
+ def i_who_(self,in_str):
+  r=self.i_send_("WHO %s\r\n"%in_str)
+  return r
+ def i_join_(self,in_str):
+  r=self.i_send_("JOIN %s\r\n"%in_str)
+  return r
  def i_extract_nm_(self,in_str):
   try:
    m=in_str.split(' ',1)[0][1:]
@@ -131,34 +139,38 @@ class PyLayerIRC(object):
     elif i_i==3:
      if self.i_send_('NICK '+self.i_nick)==-1:
       i_i=0
-    elif i_i==4:
+    elif i_i in [4,5]:
      i_w=self.CONST.i_min_wait
-     if self.i_send_('JOIN '+self.i_channel)==-1:
-      i_i=0
-    elif i_i==5:
-     i_w=self.CONST.i_min_wait
-     if self.i_send_('JOIN '+self.i_channel+'\r\n')==-1:
+     if self.i_join_(self.i_channel)==-1:
       i_i=0
     i_dt=0
     if i_i>0:
      (i_r,i_buf,i_dt)=self.i_recv_(i_w)
      if i_r==0:
       if i_buf=='':
+       i=self.i_keep+1
+       if i>self.CONST.i_keep_cnt:
+        if self.i_join_(self.i_channel)==-1:
+         i_i=0
+        i=0
+       self.i_keep=i
        continue
+      else:
+       self.i_keep=0
       print(i_buf)
     i_w=self.CONST.i_big_wait
     if (i_dt>0):
      i_w=i_dt
      i_dt=0
     if (i_r==-1):
-     print('here,dt=%d.' % i_dt)
+     print('here,dt=%d.'%i_dt)
      self.i_reconnect_()
      i_buf=''
      i_i=0
      self.i=self.i_socket_()
     i_pref=':'+self.i_server+' '
     i_pref_l=len(i_pref)
-    for i_item in i_buf.split(r'[\r\n]'):
+    for i_item in i_buf.replace('\r','\n').split('\n'):
      if i_item[:5]=='PING ':
       if self.i_pong_(i_item)==-1:
        i_r=-1

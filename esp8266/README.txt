@@ -9,7 +9,8 @@ OK, let's add this Chip to IRC-IoT ecosystem
 > myport=/dev/ttyUSB1
 
 1. Install required tools:
-> pip3 install esptool mock adafruit-ampy picocom
+> pip3 install esptool mock adafruit-ampy
+> apt-get install picocom # for Debian based Linux
 
 2. Download MicroPython firmware, for example:
 > myfw="esp8266-20190125-v1.10.bin"
