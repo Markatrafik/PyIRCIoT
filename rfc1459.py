@@ -32,7 +32,7 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version = '0.3.28'
    #
-   irciot_library_version  = '0.0.125'
+   irciot_library_version  = '0.0.127'
    #
    # Bot specific constants
    #
@@ -1366,7 +1366,7 @@ class PyLayerIRC(object):
      if self.irc_ssl:
        irc_socket = ssl.wrap_socket(irc_socket)
    except socket.error:
-     to_log_("Cannot create socket for IRC")
+     self.to_log_("Cannot create socket for IRC")
      return None
    return irc_socket
 

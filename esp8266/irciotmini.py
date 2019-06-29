@@ -2,7 +2,7 @@
 class PyLayerIRCIoT(object):
  class CONST(object):
   ii_proto_ver='0.3.28'
-  ii_lib_ver='0.0.125'
+  ii_lib_ver='0.0.127'
   def __setattr__(self,*_):
    pass
  def __init__(self):
@@ -72,3 +72,15 @@ class PyLayerIRCIoT(object):
    if not is_ii_cont_(self,my_cont):
     return False
   return True
+ def ii_deinencap_obj_(self,in_obj,in_json):
+  pass
+ def ii_deinencap_cont_(self,in_cont):
+  pass
+ def ii_deinencap_(self,in_json):
+  pass
+ def ii_encap_datum_(self,in_datum,in_ot,in_src,in_dst):
+  pass
+ def ii_encap_internal_(self,in_datumset):
+  pass
+ def ii_encap_(self,in_datumset,my_skip,my_part):
+  pass

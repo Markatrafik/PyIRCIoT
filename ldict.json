@@ -518,6 +518,38 @@
       "type_of_type": null
     },
     {
+      "encoding": null,
+      "endianness": null,
+      "exponent": null,
+      "interval_maximum": null,
+      "interval_minimum": null,
+      "is_array_dynamically_sized": true,
+      "is_it_array": true,
+      "is_variable_dynamically_sized": true,
+      "precision": null,
+      "size": null,
+      "size_of_array": null,
+      "type_id": 3,
+      "type_name": "json-array",
+      "type_of_type": null
+    },
+    {
+      "encoding": null,
+      "endianness": null,
+      "exponent": null,
+      "interval_maximum": null,
+      "interval_minimum": null,
+      "is_array_dynamically_sized": false,
+      "is_it_array": false,
+      "is_variable_dynamically_sized": true,
+      "precision": null,
+      "size": null,
+      "size_of_array": null,
+      "type_id": 53,
+      "type_name": "named-pair",
+      "type_of_type": null
+    },
+    {
       "encoding": "utf-8",
       "endianness": null,
       "exponent": null,
