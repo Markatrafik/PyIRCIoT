@@ -2,7 +2,7 @@
 class PyLayerIRCIoT(object):
  class CONST(object):
   ii_proto_ver='0.3.28'
-  ii_lib_ver='0.0.127'
+  ii_lib_ver='0.0.128'
   def __setattr__(self,*_):
    pass
  def __init__(self):

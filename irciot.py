@@ -35,7 +35,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.28'
   #
-  irciot_library_version  = '0.0.127'
+  irciot_library_version  = '0.0.128'
   #
   # IRC-IoT TAGs
   #
@@ -2274,6 +2274,16 @@ class PyLayerIRCIoT(object):
       if not self.is_irciot_ldict_type_(my_element, my_type_type):
         return False
     return True
+  if type(in_variable) in [ int, float ]:
+    try:
+      if my_min != None:
+        if in_variable < float(my_min):
+          return False
+      if my_min != None:
+        if in_variable > float(my_max):
+          return False
+    except:
+      return False
   #
   # incomplete code
   #
