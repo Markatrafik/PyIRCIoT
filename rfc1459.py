@@ -32,7 +32,7 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version = '0.3.28'
    #
-   irciot_library_version  = '0.0.128'
+   irciot_library_version  = '0.0.129'
    #
    # Bot specific constants
    #
@@ -582,7 +582,9 @@ class PyLayerIRC(object):
      = self.CONST.irc_default_mid_pipeline_size
    #
    self.time_now   = datetime.datetime.now()
+   self.time_ping  = self.time_now
    self.delta_time = 0
+   self.delta_ping = 0
    #
    # End of __init__()
 
@@ -1188,7 +1190,7 @@ class PyLayerIRC(object):
          return my_vuid
        my_id = my_re.group(1)
      my_id = int(my_id)
-     if (my_id > max_id):
+     if my_id > max_id:
        max_id = my_id
    self.irc_last_temporal_vuid = tmp_id
    return "%s%d" % (self.CONST.api_vuid_tmp, tmp_id)
@@ -1197,7 +1199,7 @@ class PyLayerIRC(object):
    if not self.is_irc_channel_(in_channel):
      return None
    my_vuid = self.irc_cfg_check_user_(in_mask, in_channel)
-   if (my_vuid == None and self.irc_talk_with_strangers):
+   if my_vuid == None and self.irc_talk_with_strangers:
      my_vuid = self.irc_get_unique_temporal_vuid_(in_mask)
    return my_vuid
 
@@ -1240,7 +1242,7 @@ class PyLayerIRC(object):
 
  def irc_send_(self, irc_out):
    try:
-     if (irc_out == ""):
+     if irc_out == "":
        return -1
      if (self.irc_debug):
        self.to_log_("Sending to IRC: [" + irc_out + "]")
@@ -1273,11 +1275,11 @@ class PyLayerIRC(object):
      time_out_recv = datetime.datetime.now()
      delta_time_in = self.irc_td2ms_(time_out_recv - time_in_recv)
      delta_time = self.CONST.irc_default_wait
-     if (recv_timeout < self.CONST.irc_default_wait):
+     if recv_timeout < self.CONST.irc_default_wait:
        delta_time = 0
-     if (delta_time_in < recv_timeout):
+     if delta_time_in < recv_timeout:
        delta_time = recv_timeout - delta_time_in
-     if (delta_time_in < 0):
+     if delta_time_in < 0:
        delta_time = 0
      if ready[0]:
        irc_input \
@@ -1760,10 +1762,10 @@ class PyLayerIRC(object):
          self.irc = self.irc_socket_()
          irc_init = 0
 
-       if (irc_init < 6):
+       if irc_init < 6:
          irc_init += 1
 
-       if (irc_init == 1):
+       if irc_init == 1:
          try:
            self.irc_connect_(self.irc_server, self.irc_port)
          except socket.error:
@@ -1771,7 +1773,7 @@ class PyLayerIRC(object):
            self.irc = self.irc_socket_()
            irc_init = 0
 
-       elif (irc_init == 2):
+       elif irc_init == 2:
          if self.irc_password:
            self.irc_send_(self.CONST.cmd_PASS \
             + " " + self.irc_password)
@@ -1782,13 +1784,13 @@ class PyLayerIRC(object):
           + self.irc_info) == -1):
            irc_init = 0
 
-       elif (irc_init == 3):
+       elif irc_init == 3:
          self.join_retry = 0
          if (self.irc_send_(self.CONST.cmd_NICK \
           + " " + self.irc_nick) == -1):
            irc_init = 0
 
-       elif (irc_init == 4):
+       elif irc_init == 4:
          irc_wait = self.CONST.irc_default_wait
          self.join_retry += 1
          if (self.irc_send_(self.CONST.cmd_JOIN \
@@ -1796,7 +1798,7 @@ class PyLayerIRC(object):
           + self.irc_chankey if self.irc_chankey else "")) == -1):
            irc_init = 0
 
-       elif (irc_init == 5):
+       elif irc_init == 5:
          irc_wait = self.CONST.irc_default_wait
          self.join_retry += 1
          if (self.irc_send_(self.CONST.cmd_JOIN \
@@ -1804,7 +1806,7 @@ class PyLayerIRC(object):
           + self.irc_chankey if self.irc_chankey else "")) == -1):
            irc_init = 0
 
-       if (irc_init > 0):
+       if irc_init > 0:
          (irc_ret, irc_input_buffer, self.delta_time) \
           = self.irc_recv_(irc_wait)
 
@@ -1813,10 +1815,10 @@ class PyLayerIRC(object):
        if (self.delta_time > 0):
          irc_wait = self.delta_time
        else:
-         if (irc_init == 6):
+         if irc_init == 6:
             self.irc_track_clarify_nicks_()
 
-       if (irc_ret == -1):
+       if irc_ret == -1:
          self.irc_reconnect_()
          irc_input_buffer = ""
          irc_init = 0
@@ -1828,6 +1830,9 @@ class PyLayerIRC(object):
        for irc_input_split in re.split(r'[\r\n]', irc_input_buffer):
 
          if irc_input_split[:5] == self.CONST.cmd_PING + " ":
+           self.delta_ping \
+             = self.irc_td2ms_(self.time_now - self.time_ping)
+           self.time_ping = self.time_now
            if (self.irc_pong_(irc_input_split) == -1):
              irc_ret = -1
              irc_init = 0
@@ -1844,7 +1849,7 @@ class PyLayerIRC(object):
            for irc_cod_pack in self.irc_codes:
              (irc_code, code_name, irc_function)  = irc_cod_pack
              if (irc_function != None):
-                if (irc_input_cmd == irc_code):
+                if irc_input_cmd == irc_code:
                   irc_args = (irc_input_split, \
                    irc_ret, irc_init, irc_wait)
                   (irc_ret, irc_init, irc_wait) = irc_function(irc_args)
@@ -1857,15 +1862,15 @@ class PyLayerIRC(object):
                  irc_ret, irc_init, irc_wait)
                 (irc_ret, irc_init, irc_wait) = irc_function(irc_args)
 
-         if (irc_input_cmd == self.CONST.cmd_PRIVMSG \
-          or irc_input_split == ""):
+         if irc_input_cmd == self.CONST.cmd_PRIVMSG \
+          or irc_input_split == "":
 
            irc_nick = ""
            irc_mask = "!@"
            irc_vuid = None
            irc_message = None
 
-           if (irc_input_split != ""):
+           if irc_input_split != "":
              (irc_nick, irc_mask) \
                = self.irc_extract_nick_mask_(irc_input_split)
              self.irc_track_fast_nick_(irc_nick, irc_mask)
@@ -1893,7 +1898,7 @@ class PyLayerIRC(object):
 
          irc_input_buff = ""
 
-       if (irc_init > 5):
+       if irc_init > 5:
           (irc_message, irc_wait, irc_vuid) \
            = self.irc_check_queue_(self.CONST.irc_queue_output)
           irc_message = str(irc_message)
@@ -1909,7 +1914,12 @@ class PyLayerIRC(object):
              else:
                self.irc_send_(self.CONST.cmd_PRIVMSG + " " \
                  + self.irc_channel + " :" + irc_message)
-          irc_message = ""    
+          irc_message = ""
+          if self.irc_td2ms_(self.time_now - self.time_ping) \
+           > self.delta_ping * 2 and self.delta_ping > 0:
+             if self.irc_who_channel_(self.irc_channel) == -1:
+               irc_init = 0
+             self.delta_ping = 0
 
    except socket.error:
      self.irc_disconnect()
