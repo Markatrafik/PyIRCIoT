@@ -26,7 +26,7 @@ class PyLayerCOM(object):
    #
    irciot_protocol_version = '0.3.28'
    #
-   irciot_library_version  = '0.0.129'
+   irciot_library_version  = '0.0.131'
    #
    com_default_debug = False
    #
@@ -283,9 +283,9 @@ class PyLayerCOM(object):
 
  def com_send_(self, com_out):
    try:
-     if (com_out == ""):
+     if com_out == "":
        return -1
-     if (self.com_debug):
+     if self.com_debug:
        self.to_log_("Sending to Serial over Network: [" + com_out + "]")
      #self.com_send(bytes(com_out + "\n", 'utf-8'))
      sleep(self.CONST.com_micro_wait)

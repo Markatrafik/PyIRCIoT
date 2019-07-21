@@ -35,7 +35,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.28'
   #
-  irciot_library_version  = '0.0.129'
+  irciot_library_version  = '0.0.131'
   #
   # IRC-IoT TAGs
   #
@@ -333,7 +333,9 @@ class PyLayerIRCIoT(object):
   #
   pattern = chr(0) # or "@", chr(255)
   #
-  default_mtu = 450
+  # Default Maximum IRC message size (in bytes)
+  #
+  default_mtu = 450 # Undernet IRCd at 2019
   #
   # Fragmented Message Delete Timeout (in seconds)
   #
@@ -466,12 +468,6 @@ class PyLayerIRCIoT(object):
   self.irciot_init_encryption_method_(self.crypt_method)
   #
   self.message_mtu = self.CONST.default_mtu
-  #
-  # Default Maximum IRC message size:
-  #
-  # 450 for Undernet IRCd at 2018
-  # ... for RusNet IRCd at ...
-  # ... for IRCNet IRCd at ...
   #
   self.integrity_check = 0
   #
@@ -849,7 +845,7 @@ class PyLayerIRCIoT(object):
  def irciot_crypto_str_to_hash_(self, in_string):
   if not isinstance(in_string, str):
     return None
-  if (len(in_string) < 6):
+  if len(in_string) < 6:
     self.irciot_error_(self.CONST.err_BASE64_DECODING, 0)
     return None
   try:
@@ -1712,7 +1708,7 @@ class PyLayerIRCIoT(object):
         if my_offset == my_size:
           my_chunk = 0
           my_loop = False
-      if (len(my_block) != 0):
+      if len(my_block) != 0:
         my_decrypted += my_decryptor.decrypt(my_block)
       my_offset += my_chunk
   except:
@@ -1791,6 +1787,7 @@ class PyLayerIRCIoT(object):
   my_item.update({self.CONST.ldict_ITEM_LANG   : my_method_lang })
   my_item.update({self.CONST.ldict_ITEM_SECTS  : my_sections })
   #
+  # print('adding to ldict: ot="%s", field="%s"' % (my_ot, my_name))
   if not self.irciot_ldict_check_item_(my_item):
     return
   if self.irciot_ldict_get_item_by_ot_(my_ot, my_name):
@@ -2241,7 +2238,7 @@ class PyLayerIRCIoT(object):
  def irciot_set_mtu_(self, in_mtu):
   if not isinstance(in_mtu, int):
     return
-  if (in_mtu < 128):
+  if in_mtu < 128:
     return
   self.message_mtu = in_mtu
 
@@ -2342,19 +2339,19 @@ class PyLayerIRCIoT(object):
      if self.CONST.tag_DATUM_BP in in_datum:
         if not isinstance(in_datum[self.CONST.tag_DATUM_BP], int):
            return False # Bytes Passed must be int
-        if (in_datum[self.CONST.tag_DATUM_BP] \
-          > in_datum[self.CONST.tag_DATUM_BC]):
+        if in_datum[self.CONST.tag_DATUM_BP] \
+         > in_datum[self.CONST.tag_DATUM_BC]:
            return False
   # Source address field must exists or inherits
   if not self.CONST.tag_SRC_ADDR in in_datum:
-     if (in_src == None):
+     if in_src == None:
         return False
   else:
      if not isinstance(in_datum[self.CONST.tag_SRC_ADDR], str):
         return False
   # Destination address field must exits or ihnerits
   if not self.CONST.tag_DST_ADDR in in_datum:
-     if (in_dst == None):
+     if in_dst == None:
         return False
   else:
      if not isinstance(in_datum[self.CONST.tag_DST_ADDR], str):
@@ -2399,8 +2396,8 @@ class PyLayerIRCIoT(object):
        if self.CONST.tag_DATUM_BP in in_object:
           if not isinstance(in_datum[self.CONST.tag_OBJECT_DP], int):
              return False # Datums Passed must be int
-          if (in_object[self.CONST.tag_DATUM_BP] \
-            > in_object[self.CONST.tag_DATUM_BC]):
+          if in_object[self.CONST.tag_DATUM_BP] \
+           > in_object[self.CONST.tag_DATUM_BC]:
              return False
     # Go deeper
     if isinstance(my_datums, list):
@@ -2430,8 +2427,8 @@ class PyLayerIRCIoT(object):
     if self.CONST.tag_MESSAGE_OP in in_container:
        if not isinstance(in_container[self.CONST.tag_MESSAGE_OP], int):
           return False # Objects Passed must be int
-       if (in_container[self.CONST.tag_MESSAGE_OP] \
-         > in_container[self.CONST.tag_MESSAGE_OC]):
+       if in_container[self.CONST.tag_MESSAGE_OP] \
+        > in_container[self.CONST.tag_MESSAGE_OC]:
           return False
     else:
        in_container[self.CONST.tag_MESSAGE_OP] = 1
@@ -2479,7 +2476,7 @@ class PyLayerIRCIoT(object):
        (test_enc, test_header, test_json) = my_item
        (test_dt, test_ot, test_src, test_dst, \
         test_dc, test_dp, test_bc, test_bp, test_did) = test_header
-       if (in_did == test_did):
+       if in_did == test_did:
           self.defrag_pool.remove(my_item)
           break
     self.defrag_lock = False
@@ -2510,18 +2507,18 @@ class PyLayerIRCIoT(object):
     (test_enc, test_header, test_json) = my_item
     (test_dt, test_ot, test_src, test_dst, \
      test_dc, test_dp, test_bc, test_bp, test_did) = test_header
-    if (test_json == orig_json):
+    if test_json == orig_json:
       my_dup = True
       break
     else:
-      if (test_did == my_did):
+      if test_did == my_did:
          my_fragments = True
          if ((test_ot  == my_ot)  and \
              (test_src == my_src) and \
              (test_dst == my_dst)):
             if ((test_dc == my_dc) and (test_dp == my_dp) and \
                 (test_bp == my_bp) and (test_bc == my_bc)):
-               if (test_enc == in_enc):
+               if test_enc == in_enc:
                   my_dup = True
                else:
                   my_err = self.CONST.err_DEFRAG_CONTENT_MISSMATCH
@@ -2529,10 +2526,10 @@ class PyLayerIRCIoT(object):
             else:
                if ((test_dc != None) and (test_dp != None) and \
                    (test_bc == None) and (test_bp == None)):
-                  if (my_dp == None):
+                  if my_dp == None:
                      my_err = self.CONST.err_DEFRAG_DP_MISSING
                      break
-                  if (defrag_array == []):
+                  if defrag_array == []:
                      defrag_item = (my_dp, in_enc)
                      defrag_array.append(defrag_item)
                   defrag_item = (test_dp, test_enc)
@@ -2545,14 +2542,14 @@ class PyLayerIRCIoT(object):
                      break
                elif ((test_bc != None) and (test_bp != None) and \
                      (test_dc == None) and (test_dp == None)):
-                  if (my_bp == None):
+                  if my_bp == None:
                      my_err = self.CONST.err_DEFRAG_BP_MISSING
                      break
-                  if (defrag_buffer == ""):
+                  if defrag_buffer == "":
                      defrag_buffer += self.CONST.pattern * my_bc
                      defrag_buffer = defrag_buffer[:my_bp] + \
                         in_enc + defrag_buffer[my_bp + len(in_enc):]
-                  if (defrag_buffer != ""):
+                  if defrag_buffer != "":
                      # here will be a comparison of overlapping buffer intervals
                      defrag_buffer = defrag_buffer[:test_bp] + \
                         str(test_enc) + defrag_buffer[test_bp + len(test_enc):]
@@ -2565,15 +2562,15 @@ class PyLayerIRCIoT(object):
          else:
             my_err = self.CONST.err_DEFRAG_INVALID_DID
             break
-  if (self.defrag_pool == []):
-    if (len(in_enc) == my_bc):
+  if self.defrag_pool == []:
+    if len(in_enc) == my_bc:
        defrag_buffer = in_enc
        my_ok = 2
     else:
        my_new = True
   elif not my_fragments:
     my_new = True
-  if (my_err > 0):
+  if my_err > 0:
     self.irciot_error_(my_err, 0)
     self.irciot_clear_defrag_chain_(my_did)
     return ""
@@ -2582,10 +2579,10 @@ class PyLayerIRCIoT(object):
     self.defrag_lock = True
     self.defrag_pool.append(my_item)
     self.defrag_lock = False
-  if (my_ok > 0):
-    if (my_ok == 1):
+  if my_ok > 0:
+    if my_ok == 1:
        pass
-    elif (my_ok == 2):
+    elif my_ok == 2:
        self.irciot_clear_defrag_chain_(my_did)
        if CAN_debug_library:
          print("\033[1;42m DEFRAGMENTATION COMPLETED \033[0m")
@@ -2598,7 +2595,7 @@ class PyLayerIRCIoT(object):
           my_crypt_method \
             = self.irciot_crypto_wo_encryption_(self.crypt_method)
        my_base = self.irciot_crypto_get_base_(my_crypt_method)
-       if (my_base == self.CONST.base_BASE64):
+       if my_base == self.CONST.base_BASE64:
           try:
             my_count  = 4 - (len(defrag_buffer) % 4)
             if my_count > 0:
@@ -2608,13 +2605,13 @@ class PyLayerIRCIoT(object):
           except:
             self.irciot_error_(self.CONST.err_BASE64_DECODING, 0)
             return ""
-       elif (my_base == self.CONST.base_BASE85):
+       elif my_base == self.CONST.base_BASE85:
           try:
             out_base = base64.b85decode(defrag_buffer)
           except:
             self.irciot_error_(self.CONST.err_BASE85_DECODING, 0)
             return ""
-       elif (my_base == self.CONST.base_BASE32):
+       elif my_base == self.CONST.base_BASE32:
           try:
             out_base = base64.b32decode(defrag_buffer)
           except:
@@ -2738,7 +2735,7 @@ class PyLayerIRCIoT(object):
         in_datum[self.CONST.tag_SRC_ADDR] = my_src
      if not self.CONST.tag_DST_ADDR in in_datum.keys():
         in_datum[self.CONST.tag_DST_ADDR] = my_dst
-     if (in_datum[self.CONST.tag_DATE_TIME] == None):
+     if in_datum[self.CONST.tag_DATE_TIME] == None:
         del in_datum[self.CONST.tag_DATE_TIME]
   else:
      return self.irciot_decrypt_datum_(in_datum, in_header, \
@@ -2850,8 +2847,8 @@ class PyLayerIRCIoT(object):
        str_datum = self.irciot_prepare_datum_(iot_datum, \
          (iot_dt, iot_ot, iot_src, iot_dst, iot_dc, iot_dp), \
             orig_json, in_vuid)
-       if (str_datum != ""):
-         if (str_datums != ""):
+       if str_datum != "":
+         if str_datums != "":
            str_datums += ","
          str_datums += str_datum
      return str_datums
@@ -3014,17 +3011,17 @@ class PyLayerIRCIoT(object):
     for iot_object in iot_objects:
        str_datum = self.irciot_deinencap_object_(iot_object, \
          orig_json, in_vuid)
-       if (str_datum != ""):
-          if (str_datums != ""):
+       if str_datum != "":
+          if str_datums != "":
              str_datums += ","
           str_datums += str_datum
-    #if (str_datums != ""):
+    #if str_datums != "":
     #   str_datums = "[" + str_datums + "]"
     return str_datums
   if isinstance(iot_objects, dict):
     return self.irciot_deinencap_object_(iot_objects, \
       orig_json, in_vuid)
-    if (str_datums != ""):
+    if str_datums != "":
        str_datums = "[" + str_datums + "]"
     return str_datums
   return ""
@@ -3047,8 +3044,8 @@ class PyLayerIRCIoT(object):
        # To check the blockchain id of each message, it is necessary
        # to cut the messages into separate substrings, exactly as they
        # came in, but not reassemble it by json.loads() and dumps()
-       if (str_datum != ""):
-          if (str_datums != "["):
+       if str_datum != "":
+          if str_datums != "[":
              str_datums += ","
           str_datums += str_datum
     return str_datums + "]"
@@ -3066,11 +3063,11 @@ class PyLayerIRCIoT(object):
      return ""
   if isinstance(my_datums, list):
      for my_datum in my_datums:
-        if (not self.is_irciot_datum_(my_datum, None, None, None)):
+        if not self.is_irciot_datum_(my_datum, None, None, None):
            return False
      return True
   if isinstance(my_datums, dict):
-     if (not self.is_irciot_datum_(my_datums, None, None, None)):
+     if not self.is_irciot_datum_(my_datums, None, None, None):
         return False
      return True
   return False
@@ -3079,11 +3076,11 @@ class PyLayerIRCIoT(object):
 
  def irciot_encap_datum_(self, in_datum, in_ot, in_src, in_dst):
   if not self.CONST.tag_ENC_DATUM in in_datum.keys():
-   if (in_ot == in_datum[self.CONST.tag_OBJECT_TYPE]):
+   if in_ot == in_datum[self.CONST.tag_OBJECT_TYPE]:
       del in_datum[self.CONST.tag_OBJECT_TYPE]
-   if (in_src == in_datum[self.CONST.tag_SRC_ADDR]):
+   if in_src == in_datum[self.CONST.tag_SRC_ADDR]:
       del in_datum[self.CONST.tag_SRC_ADDR]
-   if (in_dst == in_datum[self.CONST.tag_DST_ADDR]):
+   if in_dst == in_datum[self.CONST.tag_DST_ADDR]:
       del in_datum[self.CONST.tag_DST_ADDR]
   return json.dumps(in_datum, separators=(',',':'))
   #
@@ -3105,7 +3102,7 @@ class PyLayerIRCIoT(object):
      my_src_cnt = 0
      my_dst_cnt = 0
      for my_datum in my_datums:
-        if (my_datums_cnt == 0):
+        if my_datums_cnt == 0:
            my_ot  = my_datum[self.CONST.tag_OBJECT_TYPE]
            my_ot_cnt  = 1
            my_src = my_datum[self.CONST.tag_SRC_ADDR]
@@ -3113,26 +3110,26 @@ class PyLayerIRCIoT(object):
            my_dst = my_datum[self.CONST.tag_DST_ADDR]
            my_dst_cnt = 1
         else:
-           if (my_ot  == my_datum[self.CONST.tag_OBJECT_TYPE]):
+           if my_ot  == my_datum[self.CONST.tag_OBJECT_TYPE]:
               my_ot_cnt += 1
-           if (my_src == my_datum[self.CONST.tag_SRC_ADDR]):
+           if my_src == my_datum[self.CONST.tag_SRC_ADDR]:
               my_src_cnt += 1
-           if (my_dst == my_datum[self.CONST.tag_DST_ADDR]):
+           if my_dst == my_datum[self.CONST.tag_DST_ADDR]:
               my_dst_cnt += 1
         my_datums_cnt += 1
      my_datums_cnt = len(my_datums)
-     if (my_ot_cnt  < my_datums_cnt):
+     if my_ot_cnt  < my_datums_cnt:
         my_ot  = None
-     if (my_src_cnt < my_datums_cnt):
+     if my_src_cnt < my_datums_cnt:
         my_src = None
-     if (my_dst_cnt < my_datums_cnt):
+     if my_dst_cnt < my_datums_cnt:
         my_dst = None
      for my_datum in my_datums:
-        if (my_irciot != ""):
+        if my_irciot != "":
            my_irciot += ","
         my_irciot += self.irciot_encap_datum_( \
           my_datum, my_ot, my_src, my_dst)
-     if (my_datums_cnt > 1):
+     if my_datums_cnt > 1:
         my_irciot = "[" + my_irciot + "]"
      my_irciot = '"' + self.CONST.tag_DATUM + '":' + my_irciot
   if isinstance(my_datums, dict):
@@ -3144,19 +3141,19 @@ class PyLayerIRCIoT(object):
          my_src = my_datums[self.CONST.tag_SRC_ADDR]
      if self.CONST.tag_DST_ADDR in my_datums:
          my_dst = my_datums[self.CONST.tag_DST_ADDR]
-     if (self.is_irciot_datum_(my_datums, my_ot, my_src, my_dst)):
+     if self.is_irciot_datum_(my_datums, my_ot, my_src, my_dst):
         my_irciot = '"' + self.CONST.tag_DATUM + '":' \
          + self.irciot_encap_datum_(my_datums, my_ot, my_src, my_dst)
   str_object  = '"' + self.CONST.tag_OBJECT
   str_object += '":{"' + self.CONST.tag_OBJECT_ID
   str_object += '":"' + str(self.current_oid) + '",'
-  if (my_ot  != None):
+  if my_ot  != None:
      str_object += '"' + self.CONST.tag_OBJECT_TYPE
      str_object += '":"'  + my_ot  + '",'
-  if (my_src != None):
+  if my_src != None:
      str_object += '"' + self.CONST.tag_SRC_ADDR
      str_object += '":"' + my_src + '",'
-  if (my_dst != None):
+  if my_dst != None:
      str_object += '"' + self.CONST.tag_DST_ADDR
      str_object += '":"' + my_dst + '",'
   save_mid = self.current_mid
@@ -3212,7 +3209,7 @@ class PyLayerIRCIoT(object):
   if isinstance(my_bigdatum, list):
      my_current = 0
      for my_datum in my_bigdatum:
-        if (my_current == 0):
+        if my_current == 0:
            big_datum = my_datum
            big_ot = my_datum[self.CONST.tag_OBJECT_TYPE]
            del my_datum[self.CONST.tag_OBJECT_TYPE]
@@ -3322,11 +3319,11 @@ class PyLayerIRCIoT(object):
   out_big_datum += ',"' + self.CONST.tag_ENC_DATUM + '":"'
   my_okay = self.message_mtu - out_head - 43 # Must be calculated
   my_size = my_bc - my_part
-  if (my_size > my_okay):
+  if my_size > my_okay:
      my_size = my_okay
   out_big_datum += raw_big_datum[my_part:my_part + my_size] + '"}'
   my_irciot = self.irciot_encap_internal_(out_big_datum, in_vuid)
-  if (my_size < my_okay):
+  if my_size < my_okay:
     return (my_irciot, 0)
   return (my_irciot, len(raw_big_datum) + my_part - out_skip)
   #
@@ -3341,7 +3338,7 @@ class PyLayerIRCIoT(object):
     self.irciot_encryption_check_publication_()
   result = self.output_pool
   self.output_pool = []
-  if (isinstance(in_datumset, dict)):
+  if isinstance(in_datumset, dict):
     in_datumset = [ in_datumset ]
   my_datumset = json.dumps(in_datumset, separators=(',',':'))
   if in_vuid in [ \
@@ -3368,12 +3365,12 @@ class PyLayerIRCIoT(object):
     return result
   json_text, my_skip, my_part \
     = self.irciot_encap_(my_datumset, 0, 0, in_vuid)
-  if (json_text != ""):
+  if json_text != "":
     result.append((json_text, in_vuid))
   while ((my_skip > 0) or (my_part > 0)):
     json_text, my_skip, my_part \
       = self.irciot_encap_(my_datumset, my_skip, my_part, in_vuid)
-    if (json_text != ""):
+    if json_text != "":
       result.append((json_text, in_vuid))
   return result
   #
@@ -3393,12 +3390,12 @@ class PyLayerIRCIoT(object):
   my_irciot = ""
   my_datums = json.loads(in_datumset)
   my_total  = len(my_datums)
-  if (my_skip > 0):
+  if my_skip > 0:
      my_datums_obj = []
      my_datums_cnt = 0
      for my_datum in my_datums:
         my_datums_cnt += 1
-        if (my_datums_cnt > my_skip):
+        if my_datums_cnt > my_skip:
            my_datums_obj.append(my_datum)
      my_datums_set = json.dumps(my_datums_obj, separators=(',',':'))
      my_datums = json.loads(my_datums_set)
@@ -3412,25 +3409,25 @@ class PyLayerIRCIoT(object):
      one_datum = 0
      if isinstance(my_datums, list):
         my_datums_total = len(my_datums)
-        if (my_datums_total > 1):
+        if my_datums_total > 1:
            my_datums_skip = my_datums_total
            while (len(my_irciot) > self.message_mtu) \
              and (my_datums_skip <= my_datums_total):
               part_datums = []
               my_datums_cnt = 0
               for my_datum in my_datums:
-                 if (my_datums_cnt < my_datums_skip):
+                 if my_datums_cnt < my_datums_skip:
                     part_datums.append(my_datum)
                  my_datums_cnt += 1
-              if (part_datums == []):
+              if part_datums == []:
                  break
               str_part_datums = json.dumps(part_datums, separators=(',',':'))
               self.current_mid = save_mid # mid rollback
               my_irciot = self.irciot_encap_internal_(str_part_datums, in_vuid)
-              if (len(my_irciot) <= self.message_mtu):
+              if len(my_irciot) <= self.message_mtu:
                 test_len = len(my_datums)
                 my_skip_out = my_skip + my_datums_skip
-                if (my_skip_out >= my_total):
+                if my_skip_out >= my_total:
                    my_skip_out = 0
                 return my_irciot, my_skip_out, 0
               my_datums_skip -= 1
@@ -3441,16 +3438,16 @@ class PyLayerIRCIoT(object):
         one_datum = 1    # One large "Datum" without list
      if my_encrypt:
         one_datum = 1
-     if (one_datum == 1):
+     if one_datum == 1:
         self.current_mid = save_mid # Message ID rollback
         (my_irciot, my_datums_part) \
          = self.irciot_encap_bigdatum_(my_datums, my_part, in_vuid)
-        if (my_datums_part == 0):
+        if my_datums_part == 0:
           my_datums_skip += 1
   else:
      my_datums_skip = my_total - my_skip
      self.current_did += 1 # Default Datum ID changing method
-  if (my_skip + my_datums_skip >= my_total):
+  if my_skip + my_datums_skip >= my_total:
     my_skip = 0
     my_datums_skip = 0
     if CAN_encrypt_datum and my_datums_part == 0:
