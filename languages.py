@@ -60,4 +60,3 @@ class PyLayerIRCIoT_EL_(object):
     self.CONST.irciot_protocol_version, \
     self.CONST.irciot_library_version)
 
- def 

@@ -54,3 +54,9 @@
         * Added a first simplified version of library worked on MicroPython
         for uploading it to IoT devices such as ESP8266 by Espressif Systems.
 
+2019-08-15 09:05 GMT+7 PyIRCIoT 0.0.133 Alexey Y. Woronov <alexey@woronov.ru>
+        * Changes have been made to the PyLayerIRC class: if the NickName of
+        the robot is occupied, it tryies to return its NickName, periodically
+        and when another user release the Nick. Warning! Instead of assigning
+        a NickName to a variable irc_nick, use method irc_define_nick_(string)
+

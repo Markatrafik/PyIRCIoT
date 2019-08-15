@@ -445,8 +445,21 @@
     },
     {
       "child_object_id": null,
-      "default_value": null,
+      "default_value": "0",
       "item_id": 35,
+      "item_name": "crc",
+      "item_ot": "modbus01",
+      "method": null,
+      "method_language": null,
+      "parent_item_id": null,
+      "sections": [],
+      "type_id": 81,
+      "type_parameters": null
+    },
+    {
+      "child_object_id": null,
+      "default_value": null,
+      "item_id": 36,
       "item_name": "t",
       "item_ot": "noocmd",
       "method": null,
@@ -459,7 +472,7 @@
     {
       "child_object_id": null,
       "default_value": null,
-      "item_id": 36,
+      "item_id": 37,
       "item_name": "id",
       "item_ot": "noocmd",
       "method": null,
@@ -472,7 +485,7 @@
     {
       "child_object_id": null,
       "default_value": null,
-      "item_id": 37,
+      "item_id": 38,
       "item_name": "chn",
       "item_ot": "noocmd",
       "method": null,
@@ -485,7 +498,7 @@
     {
       "child_object_id": null,
       "default_value": null,
-      "item_id": 38,
+      "item_id": 39,
       "item_name": "cmd",
       "item_ot": "noocmd",
       "method": null,
@@ -576,6 +589,38 @@
       "size_of_array": null,
       "type_id": 53,
       "type_name": "named-pair",
+      "type_of_type": null
+    },
+    {
+      "encoding": null,
+      "endianness": null,
+      "exponent": null,
+      "interval_maximum": "65535",
+      "interval_minimum": "0",
+      "is_array_dynamically_sized": false,
+      "is_it_array": false,
+      "is_variable_dynamically_sized": false,
+      "precision": null,
+      "size": 2,
+      "size_of_array": null,
+      "type_id": 81,
+      "type_name": "crc16",
+      "type_of_type": null
+    },
+    {
+      "encoding": null,
+      "endianness": null,
+      "exponent": null,
+      "interval_maximum": "4294967295",
+      "interval_minimum": "0",
+      "is_array_dynamically_sized": false,
+      "is_it_array": false,
+      "is_variable_dynamically_sized": false,
+      "precision": null,
+      "size": 4,
+      "size_of_array": null,
+      "type_id": 82,
+      "type_name": "crc32",
       "type_of_type": null
     },
     {

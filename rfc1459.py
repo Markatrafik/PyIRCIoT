@@ -32,7 +32,7 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version = '0.3.28'
    #
-   irciot_library_version  = '0.0.131'
+   irciot_library_version  = '0.0.133'
    #
    # Bot specific constants
    #
@@ -522,6 +522,7 @@ class PyLayerIRC(object):
    self.irc_info = self.CONST.irc_default_info
    self.irc_quit = self.CONST.irc_default_quit
    self.irc_nick_old = self.irc_nick
+   self.irc_nick_base = self.irc_nick
    #
    self.irc_nick_length = self.CONST.irc_max_nick_length
    #
@@ -835,6 +836,15 @@ class PyLayerIRC(object):
      return False
    return (self.irc_tolower_(ref_nick) \
         == self.irc_tolower_(cmp_nick))
+
+ def irc_define_nick_(self, in_nick):
+   if not self.is_irc_nick_(in_nick):
+     return
+   self.irc_nick = in_nick
+   self.irc_nick_old = in_nick
+   self.irc_nick_base = in_nick
+   if self.irc_run:
+     self.irc_send_(self.CONST.cmd_NICK + " " + in_nick)
 
  def irc_check_mask_(self, in_from, in_mask):
    str_from = self.irc_tolower_(in_from)
@@ -1408,11 +1418,18 @@ class PyLayerIRC(object):
    self.irc_queue[in_queue_id].put((in_message, in_wait, in_vuid))
    self.irc_queue_lock[in_queue_id] = old_queue_lock
 
+ def irc_check_and_return_nick_(self):
+   if self.irc_nick != self.irc_nick_base:
+     if self.irc_send_(self.CONST.cmd_NICK \
+      + " " + self.irc_nick_base) != -1:
+      self.irc_nick_old = self.irc_nick
+      self.irc_nick = self.irc_nick_base
+
  # CLIENT Hooks:
 
  def func_nick_in_use_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
-   if self.irc_random_nick_(self.CONST.irc_default_nick) == 1:
+   if self.irc_random_nick_(self.irc_nick_base) == 1:
      return (-1, 0, in_wait)
    return (in_ret, in_init, in_wait)
 
@@ -1456,6 +1473,9 @@ class PyLayerIRC(object):
 
  def func_on_nick_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
+   (irc_nick, irc_mask) = self.irc_extract_nick_mask_(in_string)
+   if irc_nick == self.irc_nick_base:
+     self.irc_check_and_return_nick_()
    return (in_ret, in_init, self.CONST.irc_default_wait)
 
  def func_fast_nick_(self, in_args):
@@ -1538,6 +1558,8 @@ class PyLayerIRC(object):
    (in_string, in_ret, in_init, in_wait) = in_args
    (irc_nick, irc_mask) = self.irc_extract_nick_mask_(in_string)
    self.irc_track_delete_nick_(irc_nick)
+   if irc_nick == self.irc_nick_base:
+     self.irc_check_and_return_nick_()
    return (in_ret, in_init, self.CONST.irc_default_wait)
 
  def func_on_mode_(self, in_args):
@@ -1924,11 +1946,8 @@ class PyLayerIRC(object):
            > self.delta_ping * 2 and self.delta_ping > 0:
              if self.irc_who_channel_(self.irc_channel) == -1:
                irc_init = 0
-             elif self.irc_nick != self.CONST.irc_default_nick:
-               if self.irc_send_(self.CONST.cmd_NICK \
-                   + " " + self.CONST.irc_default_nick) != -1:
-                  self.irc_nick_old = self.irc_nick
-                  self.irc_nick = self.CONST.irc_default_nick
+             else:
+               self.irc_check_and_return_nick_()
              self.delta_ping = 0
 
    except socket.error:
