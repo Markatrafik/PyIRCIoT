@@ -45,7 +45,7 @@
         generate JSON, or SQL queries.
 
 2019-05-17 09:30 GMT+7 PyIRCIoT 0.0.119 Alexey Y. Woronov <alexey@woronov.ru>
-        * The protocol version was chaned to 0.3.28. Changes in the structure
+        * The protocol version was changed to 0.3.28. Changes in the structure
         of the Local Dictionary: field name was changed to "precision" and a
         new numeric field "exponent" was added meaning the size of the number,
         which is the degree of base 10, expressed in bits.
@@ -59,4 +59,9 @@
         the robot is occupied, it tryies to return its NickName, periodically
         and when another user release the Nick. Warning! Instead of assigning
         a NickName to a variable irc_nick, use method irc_define_nick_(string)
+
+2019-08-25 21:00 GMT+7 PyIRCIoT 0.0.135 Alexey Y. Woronov <alexey@woronov.ru>
+        * The protocol version was changed to 0.3.29. Introduced versioning of
+        the IRC-IoT protocol, the interaction for determining the used version
+        on the remote side is defined.
 

@@ -30,9 +30,9 @@ class PyLayerIRC(object):
 
  class CONST(object):
    #
-   irciot_protocol_version = '0.3.28'
+   irciot_protocol_version = '0.3.29'
    #
-   irciot_library_version  = '0.0.133'
+   irciot_library_version  = '0.0.135'
    #
    # Bot specific constants
    #
@@ -1446,7 +1446,7 @@ class PyLayerIRC(object):
 
  def func_banned_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
-   if (self.join_retry > 1):
+   if self.join_retry > 1:
      if (self.irc_random_nick_(self.irc_nick) == 1):
         return (-1, 0, in_wait)
    return (in_ret, 3, self.CONST.irc_default_wait)
@@ -1619,7 +1619,7 @@ class PyLayerIRC(object):
 
  def func_on_error_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
-   if (in_string.find("Closing ") or in_string.find(" timeout")):
+   if in_string.find("Closing ") or in_string.find(" timeout"):
       return (-1, 0, in_wait)
    return (in_ret, 1, self.CONST.irc_default_wait)
 
@@ -1743,6 +1743,8 @@ class PyLayerIRC(object):
       (C.cmd_PUBMSG,  None), (C.cmd_PUBNOTICE,  None), \
       (C.cmd_NOTICE,  None), (C.cmd_PRIVNOTICE, None), \
       (C.cmd_ISON,    None) ]
+   #
+   # End of init_rfc1459_()
 
  def irc_output_all_(self, in_messages_packs, in_wait = None):
    if not isinstance(in_messages_packs, list):

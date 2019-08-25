@@ -24,9 +24,9 @@ class PyLayerCOM(object):
 
  class CONST(object):
    #
-   irciot_protocol_version = '0.3.28'
+   irciot_protocol_version = '0.3.29'
    #
-   irciot_library_version  = '0.0.133'
+   irciot_library_version  = '0.0.135'
    #
    com_default_debug = False
    #

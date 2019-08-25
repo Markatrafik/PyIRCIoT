@@ -33,9 +33,9 @@ class PyLayerIRCIoT(object):
 
  class CONST(object):
   #
-  irciot_protocol_version = '0.3.28'
+  irciot_protocol_version = '0.3.29'
   #
-  irciot_library_version  = '0.0.133'
+  irciot_library_version  = '0.0.135'
   #
   # IRC-IoT TAGs
   #
@@ -54,6 +54,8 @@ class PyLayerIRCIoT(object):
   tag_DATE_TIME   = 't'   # Date and Time
   tag_SRC_ADDR    = 'src' # Source Address
   tag_DST_ADDR    = 'dst' # Destination Address
+  tag_VERSION     = 'ver' # IRC-IoT Protocol Version
+  tag_RETRY_LOST  = 'lst' # Request to resend LoST data
   tag_ENC_DATUM   = 'ed'  # Encrypted Datum
   #
   # Special TAGs, not reserved for "Object" level
@@ -2433,7 +2435,13 @@ class PyLayerIRCIoT(object):
     else:
        in_container[self.CONST.tag_MESSAGE_OP] = 1
     if not self.CONST.tag_OBJECT in in_container:
-       return False # IRC-IoT Object must exists
+       if self.CONST.tag_VERSION in in_container:
+          in_container[self.CONST.tag_OBJECT] = []
+       elif self.CONST.tag_RETRY_LOST in in_container:
+          in_container[self.CONST.tag_OBJECT] = []
+          return True
+       else: # IRC-IoT Object must exists
+          return False
     my_objects = in_container[self.CONST.tag_OBJECT]
     if isinstance(my_objects, list):
       for my_object in my_objects:
@@ -2553,7 +2561,7 @@ class PyLayerIRCIoT(object):
                      # here will be a comparison of overlapping buffer intervals
                      defrag_buffer = defrag_buffer[:test_bp] + \
                         str(test_enc) + defrag_buffer[test_bp + len(test_enc):]
-                     if (defrag_buffer.count(self.CONST.pattern) == 0):
+                     if defrag_buffer.count(self.CONST.pattern) == 0:
                         my_ok = 2
                      else:
                         my_new = True
@@ -3403,7 +3411,7 @@ class PyLayerIRCIoT(object):
      del my_datums_cnt
   my_irciot = self.irciot_encap_internal_(my_datums_set, in_vuid)
   if (len(my_irciot) > self.message_mtu) or my_encrypt:
-     if (my_skip == 0):
+     if my_skip == 0:
         self.current_mid = save_mid # mid rollback
      my_datums = json.loads(my_datums_set)
      one_datum = 0
