@@ -32,7 +32,7 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version = '0.3.29'
    #
-   irciot_library_version  = '0.0.135'
+   irciot_library_version  = '0.0.137'
    #
    # Bot specific constants
    #
@@ -61,6 +61,14 @@ class PyLayerIRC(object):
    irc_default_channel = "#myhome"
    irc_default_chankey = None
    #
+   # User options:
+   irc_aop   = 101 # give (+o) him channel operator status
+   irc_aban  = 102 # ban (+b) him on these channels
+   irc_avo   = 103 # give (+v) him a voice on channels
+   irc_akick = 130 # kick it from these channles
+   irc_adeop = 131 # take away (-o) his channel operator status
+   irc_adevo = 133 # take away (-v) his voice on channels
+   #
    # 0. Unique User ID
    # 1. IRC User Mask
    # 2. IRC Channel Name
@@ -76,12 +84,12 @@ class PyLayerIRC(object):
    irc_default_mid_pipeline_size = 16
    #
    irc_default_users = [ \
-    ( 1, "iotBot!*irc@irc-iot.nsk.ru",    "#myhome", \
+    ( 1, "iotBot!*irc@irc-iot.nsk.ru",    irc_default_channel, \
       None, None, None, None, None, None, None ), \
-    ( 2, "FaceBot!*irc@faceserv*.nsk.ru", "#myhome", \
-      None, None, None, None, None, None, None ), \
-    ( 3, "noobot!*bot@irc-iot.nsk.ru",    "#myhome", \
-      None, None, None, None, None, None, None ) ]
+    ( 2, "FaceBot!*irc@faceserv*.nsk.ru", irc_default_channel, \
+      irc_aop, None, None, None, None, None, None ), \
+    ( 3, "noobot!*bot@irc-iot.nsk.ru",    irc_default_channel, \
+      [ irc_aop ], None, None, None, None, None, None ) ]
    #
    irc_default_talk_with_strangers = False
    irc_first_temporal_vuid = 1000
@@ -1218,6 +1226,22 @@ class PyLayerIRC(object):
      my_vuid = self.irc_get_unique_temporal_vuid_(in_mask)
    return my_vuid
 
+ def irc_get_vuid_type_(self, in_vuid):
+   if isinstance(in_vuid, str):
+     if len(in_vuid) > 0:
+       return in_vuid[0]
+   return None
+
+ def irc_get_useropts_from_user_struct_(self, in_user_struct):
+   if not isinstance(in_user_struct, tuple):
+     return []
+   if len(in_user_struct) < 4:
+     return []
+   my_opts = in_user_struct[3]
+   if not isinstance(my_opts, list):
+     my_opts = [ my_opts ]
+   return my_opts
+
  def is_json_(self, in_message):
    if not isinstance(in_message, str):
      return False
@@ -1323,6 +1347,27 @@ class PyLayerIRC(object):
    ret = self.irc_send_("QUIT :%s\r\n" % self.irc_quit)
    return ret
    
+ def irc_op_(self, in_channel, in_nicks):
+   if not self.is_irc_channel_(in_channel):
+     return
+   if isinstance(in_nicks, str):
+     my_nicks = [ in_nicks ]
+   elif isinstance(in_nicks, list):
+     my_nicks = in_nicks
+   else:
+     return
+   my_str = ''
+   for my_nick in my_nicks:
+     if not self.is_irc_nick_(my_nick):
+       return
+     my_str += 'o'
+   for my_nick in my_nicks:
+     my_str += ' ' + my_nick
+   ret = self.irc_send_("MODE %s +%s\r\n" % (in_channel, my_str))
+   return ret
+   #
+   # End of irc_op_()
+
  def irc_extract_single_(self, in_string):
    try:
      irc_single = in_string.split()[3]
@@ -1424,6 +1469,13 @@ class PyLayerIRC(object):
       + " " + self.irc_nick_base) != -1:
       self.irc_nick_old = self.irc_nick
       self.irc_nick = self.irc_nick_base
+
+ def irc_aop_by_nick_mask_(self, in_nick, in_mask, in_vuid):
+   if self.irc_get_vuid_type_(in_vuid) == self.CONST.api_vuid_cfg:
+     my_user = self.irc_cfg_get_user_struct_by_vuid_(in_vuid)
+     my_opts = self.irc_get_useropts_from_user_struct_(my_user)
+     if self.CONST.irc_aop in my_opts:
+       self.irc_op_(self.irc_channel, in_nick)
 
  # CLIENT Hooks:
 
@@ -1551,6 +1603,7 @@ class PyLayerIRC(object):
    (in_string, in_ret, in_init, in_wait) = in_args
    (irc_nick, irc_mask) = self.irc_extract_nick_mask_(in_string)
    my_vuid = self.irc_get_vuid_by_mask_(irc_mask, self.irc_channel)
+   self.irc_aop_by_nick_mask_(irc_nick, irc_mask, my_vuid)
    self.irc_track_add_nick_(irc_nick, irc_mask, my_vuid, None)
    return (in_ret, in_init, self.CONST.irc_default_wait)
 
@@ -1591,6 +1644,10 @@ class PyLayerIRC(object):
          self.to_log_( \
            "mode change '%s','%s' for '%s' on '%s'" \
            % (my_change, my_char, my_mask, my_channel))
+         if ((my_change == "-") and (my_char == "o")):
+           my_vuid = self.irc_get_vuid_by_mask_(irc_mask, \
+             self.irc_channel)
+           self.irc_aop_by_nick_mask_(my_mask, irc_mask, my_vuid)
          if ((my_change == "+") and (my_char == "b")):
            my_mask_array = my_mask.split("!")
            my_pseudo  = self.irc_nick + '!'

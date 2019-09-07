@@ -35,7 +35,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.29'
   #
-  irciot_library_version  = '0.0.135'
+  irciot_library_version  = '0.0.137'
   #
   # IRC-IoT TAGs
   #
@@ -56,6 +56,7 @@ class PyLayerIRCIoT(object):
   tag_DST_ADDR    = 'dst' # Destination Address
   tag_VERSION     = 'ver' # IRC-IoT Protocol Version
   tag_RETRY_LOST  = 'lst' # Request to resend LoST data
+  tag_LIVES_COUNT = 'ttl' # Time-To-Live counter
   tag_ENC_DATUM   = 'ed'  # Encrypted Datum
   #
   # Special TAGs, not reserved for "Object" level
@@ -275,8 +276,8 @@ class PyLayerIRCIoT(object):
   ldict_SECT_ID      = "section_id"
   ldict_SECT_ITEMS   = "items_ids"
   ldict_SECT_CHECKS  = "checking_values"
-  idict_SECT_METHOD  = "method"
-  idict_SECT_LANG    = "method_language"
+  ldict_SECT_METHOD  = "method"
+  ldict_SECT_LANG    = "method_language"
   #
   # IRC-IoT Errors
   #
@@ -3058,8 +3059,8 @@ class PyLayerIRCIoT(object):
           str_datums += str_datum
     return str_datums + "]"
   if isinstance(iot_containers, dict):
-    return self.irciot_deinencap_container_(iot_containers, \
-      in_json, in_vuid)
+    return "[" + self.irciot_deinencap_container_(iot_containers, \
+      in_json, in_vuid) + "]"
   return ""
   #
   # End of irciot_deinencap_container_()

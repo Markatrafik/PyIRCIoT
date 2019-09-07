@@ -65,3 +65,9 @@
         the IRC-IoT protocol, the interaction for determining the used version
         on the remote side is defined.
 
+2019-09-07 22:45 GMT+7 PyIRCIoT 0.0.137 Alexey Y. Woronov <alexey@woronov.ru>
+        * User options has been added for preconfigured users. First option is
+        PyLayerIRC.CONST.irc_aop to automatically assign IRC channel operator.
+        PyLayerIRCIoT.irciot_deinencap_() method now always returns values
+        enclosed in square brackets. Value "[]" this means no values.
+
