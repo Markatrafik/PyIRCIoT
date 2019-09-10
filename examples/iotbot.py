@@ -79,7 +79,7 @@ def main():
 
        if (irciot.is_irciot_(irc_message)):
           irc_json = irciot.irciot_deinencap_(irc_message, irc_vuid)
-          if (irc_json != ""):
+          if not irc_json in [ None, "", "[]" ]:
              print("Datumset: [\033[0;41m" + str(irc_json) + "\033[0m]", "\r")
              sys.stdout.flush()
 

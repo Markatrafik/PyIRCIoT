@@ -1,7 +1,7 @@
 
   2019-05-27 : Instead of using PyCrypto library, it will need
  ............: to use PyCryptodome, also it is need to rewrite
- ~ Urgnet! ~ : the PyCrypto calls into the new methods.
+ ~ Urgent! ~ : the PyCrypto calls into the new methods.
 
   2019-06-07 : UDP broadcast transport in flat IP / Ethernet
  ............: subnets such as WiFi will be useful for IoT

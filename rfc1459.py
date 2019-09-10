@@ -32,7 +32,7 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version = '0.3.29'
    #
-   irciot_library_version  = '0.0.137'
+   irciot_library_version  = '0.0.138'
    #
    # Bot specific constants
    #
@@ -65,8 +65,9 @@ class PyLayerIRC(object):
    irc_aop   = 101 # give (+o) him channel operator status
    irc_aban  = 102 # ban (+b) him on these channels
    irc_avo   = 103 # give (+v) him a voice on channels
-   irc_akick = 130 # kick it from these channles
+   irc_akick = 130 # kick it from these channels
    irc_adeop = 131 # take away (-o) his channel operator status
+   irc_unban = 132 # unban (-b) mask on channels when banned
    irc_adevo = 133 # take away (-v) his voice on channels
    #
    # 0. Unique User ID
@@ -133,7 +134,7 @@ class PyLayerIRC(object):
    #
    irc_buffer_size  = 2048
    #
-   irc_modes = [ "CLIENT", "SERVICE", "SERVER" ]
+   irc_layer_modes  = [ "CLIENT", "SERVICE", "SERVER" ]
    #
    irc_default_nick_retry = 3600 # in seconds
    #
@@ -149,8 +150,18 @@ class PyLayerIRC(object):
    irc_translation = "".maketrans( \
      irc_ascii_uppercase + "[]\\^",
      irc_ascii_lowercase + "{}|~")
-   irc_change_modes = "+-"
-   irc_user_modes = "ovb"
+   irc_mode_add = "+"
+   irc_mode_del = "-"
+   irc_change_modes \
+     = irc_mode_add \
+     + irc_mode_del
+   irc_umode_op = "o"
+   irc_umode_voice = "v"
+   irc_umode_ban = "b"
+   irc_user_modes \
+     = irc_umode_op \
+     + irc_umode_voice\
+     + irc_umode_ban
    irc_channel_modes = "psitnm"
    irc_extra_modes = "lk"
    irc_all_modes \
@@ -587,9 +598,11 @@ class PyLayerIRC(object):
    self.irc_commands = []
    self.irc_codes    = []
    #
+   self.irc_layer_mode \
+     = self.CONST.irc_layer_modes[0]
+   #
    self.irc_task  = None
    self.irc_run   = False
-   self.irc_mode  = self.CONST.irc_modes[0]
    self.irc_debug = self.CONST.irc_default_debug
    #
    self.irc_mid_pipeline_size \
@@ -680,7 +693,7 @@ class PyLayerIRC(object):
        my_vt = self.CONST.api_vuid_cfg
        my_user = self.irc_cfg_get_user_struct_by_vuid_(in_vuid)
        if my_user != None:
-         ( my_uid, my_mask, my_chan, my_opt, \
+         ( my_uid,  my_mask, my_chan, my_opt, \
            my_ekey, my_bkey, my_lmid, \
            my_ekto, my_bkto, my_omid ) = my_user
      else:
@@ -811,6 +824,14 @@ class PyLayerIRC(object):
 
  def irc_tolower_(self, in_input):
    return in_input.translate(self.CONST.irc_translation)
+
+ def irc_get_list_(self, in_input):
+   if in_input == None:
+     return []
+   if isinstance(in_input, list):
+     return in_input
+   else:
+     return [ in_input ]
 
  def is_irc_nick_(self, in_nick):
    if not isinstance(in_nick, str):
@@ -1144,7 +1165,6 @@ class PyLayerIRC(object):
      return my_mask
    except:
      return None
-   return None
    #
    # End of irc_cfg_get_user_mask_()
 
@@ -1156,9 +1176,22 @@ class PyLayerIRC(object):
      return my_struct
    except:
      return None
-   return None
    #
    # End of irc_cfg_get_user_struct_()
+
+ def irc_cfg_get_vuid_(self, in_position):
+   if not isinstance(in_position, int):
+     return None
+   try:
+     my_user = self.irc_users[ in_position ]
+     ( my_id,   my_mask, my_chan, my_opt,  \
+       my_ekey, my_bkey, my_lmid, my_ekto, \
+       my_bkto, my_omid ) = my_user
+     return "%s%d" % (self.CONST.api_vuid_cfg, my_id)
+   except:
+     return None
+   #
+   # End of irc_cfg_get_vuid_()
 
  def irc_cfg_get_user_struct_by_vuid_(self, in_vuid):
    if not isinstance(in_vuid, str):
@@ -1340,33 +1373,52 @@ class PyLayerIRC(object):
 
  def irc_pong_(self, irc_input):
    irc_string = irc_input.split(":")
-   ret = self.irc_send_("PONG %s\r\n" % irc_string[1])
+   ret = self.irc_send_("%s %s\r\n" \
+     % (self.CONST.cmd_PONG, irc_string[1]))
    return ret
 
  def irc_quit_(self):
-   ret = self.irc_send_("QUIT :%s\r\n" % self.irc_quit)
+   ret = self.irc_send_("%s :%s\r\n" \
+     % (self.CONST.cmd_QUIT, self.irc_quit))
    return ret
-   
- def irc_op_(self, in_channel, in_nicks):
+
+ def irc_umode_(self, in_channel, in_nicks, in_change, in_umode):
    if not self.is_irc_channel_(in_channel):
-     return
+     return None
    if isinstance(in_nicks, str):
      my_nicks = [ in_nicks ]
    elif isinstance(in_nicks, list):
      my_nicks = in_nicks
    else:
-     return
+     return None
    my_str = ''
    for my_nick in my_nicks:
      if not self.is_irc_nick_(my_nick):
-       return
-     my_str += 'o'
+       return None
+     my_str += in_umode
    for my_nick in my_nicks:
      my_str += ' ' + my_nick
-   ret = self.irc_send_("MODE %s +%s\r\n" % (in_channel, my_str))
+   ret = self.irc_send_("%s %s %s%s\r\n" \
+     % (self.CONST.cmd_MODE, in_channel, in_change, my_str))
    return ret
    #
-   # End of irc_op_()
+   # End of irc_umode_()
+
+ def irc_op_(self, in_channel, in_nicks):
+   return self.irc_umode_(in_channel, in_nicks, \
+      self.CONST.irc_mode_add, self.CONST.irc_umode_op)
+
+ def irc_deop_(self, in_channel, in_nicks):
+   return self.irc_umode_(in_channel, in_nicks, \
+      self.CONST.irc_mode_del, self.CONST.irc_umode_op)
+
+ def irc_voice_(self, in_channel, in_nicks):
+   return self.irc_umode_(in_channel, in_nicks, \
+      self.CONST.irc_mode_add, self.CONST.irc_umode_voice)
+
+ def irc_devoice_(self, in_channel, in_nicks):
+   return self.irc_umode_(in_channel, in_nicks, \
+      self.CONST.irc_mode_del, self.CONST.irc_umode_voice)
 
  def irc_extract_single_(self, in_string):
    try:
@@ -1470,12 +1522,16 @@ class PyLayerIRC(object):
       self.irc_nick_old = self.irc_nick
       self.irc_nick = self.irc_nick_base
 
- def irc_aop_by_nick_mask_(self, in_nick, in_mask, in_vuid):
+ def irc_umode_by_nick_mask_(self, in_nick, in_mask, in_vuid):
    if self.irc_get_vuid_type_(in_vuid) == self.CONST.api_vuid_cfg:
      my_user = self.irc_cfg_get_user_struct_by_vuid_(in_vuid)
+     if my_user == None:
+       return
      my_opts = self.irc_get_useropts_from_user_struct_(my_user)
      if self.CONST.irc_aop in my_opts:
        self.irc_op_(self.irc_channel, in_nick)
+     if self.CONST.irc_avo in my_opts:
+       self.irc_voice_(self.irc_channel, in_nick)
 
  # CLIENT Hooks:
 
@@ -1603,7 +1659,7 @@ class PyLayerIRC(object):
    (in_string, in_ret, in_init, in_wait) = in_args
    (irc_nick, irc_mask) = self.irc_extract_nick_mask_(in_string)
    my_vuid = self.irc_get_vuid_by_mask_(irc_mask, self.irc_channel)
-   self.irc_aop_by_nick_mask_(irc_nick, irc_mask, my_vuid)
+   self.irc_umode_by_nick_mask_(irc_nick, irc_mask, my_vuid)
    self.irc_track_add_nick_(irc_nick, irc_mask, my_vuid, None)
    return (in_ret, in_init, self.CONST.irc_default_wait)
 
@@ -1633,9 +1689,10 @@ class PyLayerIRC(object):
      for my_char in my_mode_string:
        if not my_char in self.CONST.irc_all_modes_chars:
          return (in_ret, in_init, in_wait)
-     my_change = '+'
+     my_change = self.CONST.irc_mode_add
      my_index = 0
      my_nick = False
+     my_unban = None
      for my_char in my_mode_string:
        if my_char in self.CONST.irc_change_modes:
          my_change = my_char
@@ -1644,16 +1701,35 @@ class PyLayerIRC(object):
          self.to_log_( \
            "mode change '%s','%s' for '%s' on '%s'" \
            % (my_change, my_char, my_mask, my_channel))
-         if ((my_change == "-") and (my_char == "o")):
+         if ((my_change == self.CONST.irc_mode_del) \
+           and (my_char == self.CONST.irc_umode_op)):
            my_vuid = self.irc_get_vuid_by_mask_(irc_mask, \
              self.irc_channel)
-           self.irc_aop_by_nick_mask_(my_mask, irc_mask, my_vuid)
-         if ((my_change == "+") and (my_char == "b")):
+           self.irc_umode_by_nick_mask_(my_mask, irc_mask, \
+             my_vuid)
+         if ((my_change == self.CONST.irc_mode_add) \
+           and (my_char == self.CONST.irc_umode_ban)):
            my_mask_array = my_mask.split("!")
            my_pseudo  = self.irc_nick + '!'
            my_pseudo += my_mask_array[1]
            if self.irc_check_mask_(my_pseudo, my_mask):
-              my_nick = True
+             my_nick = True
+           for my_item in self.irc_nicks:
+             (n_nick, n_mask, n_vuid, n_info) = my_item
+             if n_vuid[0] == self.CONST.api_vuid_cfg:
+               if self.irc_check_mask_(n_mask, my_mask):
+                 my_unban = n_vuid
+                 break
+           if not my_unban:
+             for my_num in range(len(self.irc_users)):
+               u_mask = self.irc_cfg_get_user_mask_(my_num)
+               if isinstance(u_mask, str):
+                 u_mask = u_mask.replace('*', '_')
+                 if self.irc_check_mask_(u_mask, my_mask):
+                   u_vuid = self.irc_cfg_get_vuid_(my_num)
+                   if u_vuid != None:
+                     my_unban = u_vuid
+                     break
          my_index += 1
        elif my_char in self.CONST.irc_channel_modes:
          self.to_log_( \
@@ -1665,8 +1741,18 @@ class PyLayerIRC(object):
            "mode change '%s','%s' extra '%s' for '%s'" \
            % (my_change, my_char, my_extra, my_channel))
          my_index += 1
+       if my_unban != None:
+         my_user = self.irc_cfg_get_user_struct_by_vuid_(my_unban)
+         if my_user != None:
+           my_opts = self.irc_get_useropts_from_user_struct_(my_user)
+           if self.CONST.irc_unban in my_opts:
+             in_ret = self.irc_send_("%s %s %s%s %s\r\n" \
+               % (self.CONST.cmd_MODE, my_channel, \
+                  self.CONST.irc_mode_del, \
+                  self.CONST.irc_umode_ban, my_mask))
        if my_nick:
          self.irc_random_nick_(self.irc_nick, True)
+       if my_nick or my_unban:
          return (in_ret, in_init, 0)
    except:
      return (in_ret, in_init, in_wait)
@@ -1764,7 +1850,7 @@ class PyLayerIRC(object):
       (C.code_NOCHANMODES,    "NOCHANMODES",      None), \
       (C.code_RESTRICTED,     "RESTRICTED",       None) ] )
    #
-   if self.irc_mode == self.CONST.irc_modes[0]:
+   if self.irc_layer_mode == self.CONST.irc_layer_modes[0]:
      self.irc_commands = [ \
       (C.cmd_INVITE,  None), \
       (C.cmd_JOIN,    self.func_on_join_), \
