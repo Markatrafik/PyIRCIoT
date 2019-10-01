@@ -32,7 +32,7 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version = '0.3.29'
    #
-   irciot_library_version  = '0.0.138'
+   irciot_library_version  = '0.0.139'
    #
    # Bot specific constants
    #
@@ -495,6 +495,7 @@ class PyLayerIRC(object):
    cmd_LINKS      = "LINKS"
    cmd_LIST       = "LIST"
    cmd_MODE       = "MODE"
+   cmd_MOTD       = "MOTD"
    cmd_NAMES      = "NAMES"
    cmd_NICK       = "NICK"
    cmd_NOTICE     = "NOTICE"
@@ -526,6 +527,37 @@ class PyLayerIRC(object):
    cmd_WHOIS      = "WHOIS"
    cmd_WHOWAS     = "WHOWAS"
    cmd_WHO        = "WHO"
+   if irc_default_draft == 'Undernet':
+     cmd_ACCOUNT   = "ACCOUNT"
+     cmd_CLARMODE  = "CLEARMODE"
+     cmd_CLOSE     = "CLOSE"
+     cmd_CNOTICE   = "CNOTICE"
+     cmd_CONNECT   = "CONNECT"
+     cmd_CPRIVMSG  = "CPRIVMSG"
+     cmd_CREATE    = "CREATE"
+     cmd_DESTRUCT  = "DESCTRUCT"
+     cmd_DESYNCH   = "DESYNCH
+     cmd_DIE       = "DIE"
+     cmd_GLINE     = "GLINE"
+     cmd_HASH      = "HASH"
+     cmd_HELP      = "HELP"
+     cmd_JUPE      = "JUPE"
+     cmd_LUSERS    = "LUSERS"
+     cmd_MAP       = "MAP"
+     cmd_OPMODE    = "OPMODE"
+     cmd_PRIVS     = "PRIVS"
+     cmd_PROTO     = "PROTO"
+     cmd_RESET     = "RESET"
+     cmd_RPING     = "RPING"
+     cmd_RPONG     = "RPONG"
+     cmd_SET       = "SET"
+     cmd_SETTIME   = "SETTIME"
+     cmd_SILENCE   = "SILENCE"
+     cmd_UPING     = "UPING"
+     cmd_USERIP    = "USERIP"
+     cmd_WALLUSERS = "WALLUSERS"
+     cmd_WALLCHOPS = "WALLCHOPS"
+     cmd_WALLVOICE = "WALLVOICE"
    #
    def __setattr__(self, *_):
       pass

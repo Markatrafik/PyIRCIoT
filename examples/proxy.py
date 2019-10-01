@@ -68,7 +68,9 @@ def main():
         print(str(output_json))
       else:
         exit(1)
-        
+
+    if os.name == 'posix':
+      os.umask(0o077) # in security reason
     save_fd = open(save_file, 'w')
     save_object = {}
     save_object.update({'mid' : irciot.current_mid})
