@@ -536,7 +536,7 @@ class PyLayerIRC(object):
      cmd_CPRIVMSG  = "CPRIVMSG"
      cmd_CREATE    = "CREATE"
      cmd_DESTRUCT  = "DESCTRUCT"
-     cmd_DESYNCH   = "DESYNCH
+     cmd_DESYNCH   = "DESYNCH"
      cmd_DIE       = "DIE"
      cmd_GLINE     = "GLINE"
      cmd_HASH      = "HASH"
