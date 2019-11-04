@@ -35,7 +35,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.29'
   #
-  irciot_library_version  = '0.0.141'
+  irciot_library_version  = '0.0.143'
   #
   # IRC-IoT TAGs
   #
@@ -1557,8 +1557,8 @@ class PyLayerIRCIoT(object):
     else:
       return None
   my_decrypted = bytes()
-  my_chunk  = 16
-  my_loop   = True
+  my_chunk = 16
+  my_loop  = True
   try:
     my_KEY   = str(in_secret_key, 'utf-8')
     my_size  = len(in_encrypted_data)-my_chunk-1

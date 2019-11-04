@@ -32,7 +32,7 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version = '0.3.29'
    #
-   irciot_library_version  = '0.0.141'
+   irciot_library_version  = '0.0.143'
    #
    # Bot specific constants
    #
@@ -145,6 +145,7 @@ class PyLayerIRC(object):
    irc_ascii_letters = irc_ascii_lowercase + irc_ascii_uppercase
    irc_ascii_digits = "0123456789"
    irc_special_chars = "-[]\\`^{}"
+   irc_nick_first_char = irc_ascii_letters + irc_special_chars
    irc_nick_chars = irc_ascii_letters \
      + irc_ascii_digits + irc_special_chars
    irc_translation = "".maketrans( \
@@ -1494,8 +1495,9 @@ class PyLayerIRC(object):
    random.seed()
    irc_nick = in_nick + "%d" % random.randint(0, 999)
    if (self.join_retry > 2) or in_force:
-     nick_length = random.randint(1, self.irc_nick_length)
-     irc_nick = ''.join( \
+     nick_length = random.randint(2, self.irc_nick_length)
+     irc_nick = random.choice(self.CONST.irc_nick_first_char)
+     irc_nick += ''.join( \
       random.choice(self.CONST.irc_nick_chars) \
       for i in range(nick_length))
    ret = self.irc_send_(self.CONST.cmd_NICK + " " + irc_nick)
@@ -1588,7 +1590,8 @@ class PyLayerIRC(object):
    (in_string, in_ret, in_init, in_wait) = in_args
    if self.join_retry > 1:
      if (self.irc_random_nick_(self.irc_nick) == 1):
-        return (-1, 0, in_wait)
+       self.join_retry += 1
+       return (-1, 0, in_wait)
    return (in_ret, 3, self.CONST.irc_default_wait)
 
  def func_on_kick_(self, in_args):
@@ -1820,6 +1823,7 @@ class PyLayerIRC(object):
     (C.code_NOSUCHNICK,       "NOSUCHNICK",       self.func_no_such_nick_), \
     (C.code_CHANNELISFULL,    "CHANNELISFULL",    self.func_banned_), \
     (C.code_BADCHANNELKEY,    "BADCHANNELKEY",    self.func_banned_), \
+    (C.code_ERRONEUSNICKNAME, "ERRONEUSNICKNAME", self.func_nick_in_use_), \
     (C.code_NOSUCHSERVER,     "NOSUCHSERVER",     None), \
     (C.code_NOSUCHCHANNEL,    "NOSUCHCHANNEL",    None), \
     (C.code_CANNOTSENDTOCHAN, "CANNOTSENDTOCHAN", None), \
@@ -1836,8 +1840,6 @@ class PyLayerIRC(object):
     (C.code_NOADMININFO,      "NOADMININFO",      None), \
     (C.code_FILEERROR,        "FILEERROR",        None), \
     (C.code_NONICKNAMEGIVEN,  "NONICKNAMEGIVEN",  None), \
-    (C.code_ERRONEUSNICKNAME, "ERRONEUSNICKNAME", None), \
-    (C.code_NICKNAMEINUSE,    "NICKNAMEINUSE",    None), \
     (C.code_NICKCOLLISION,    "NICKCOLLISION",    None), \
     (C.code_UNAVAILRESOURCE,  "UNAVAILRESOURCE",  None), \
     (C.code_USERNOTINCHANNEL, "USERNOTINCHANNEL", None), \
@@ -1854,7 +1856,6 @@ class PyLayerIRC(object):
     (C.code_KEYSET,           "KEYSET",           None), \
     (C.code_UNKNOWNMODE,      "UNKNOWNMODE",      None), \
     (C.code_INVITEONLYCHAN,   "INVITEONLYCHAN",   None), \
-    (C.code_BANNEDFROMCHAN,   "BANNEDFROMCHAN",   None), \
     (C.code_BADCHANNELMASK,   "BADCHANNELMASK",   None), \
     (C.code_BANLISTFULL,      "BANLISTFULL",      None), \
     (C.code_NOPRIVILEGES,     "NOPRIVILEGES",     None), \
@@ -1917,7 +1918,7 @@ class PyLayerIRC(object):
       (C.cmd_ERROR,   None), (C.cmd_PRIVMSG,    None), \
       (C.cmd_PUBMSG,  None), (C.cmd_PUBNOTICE,  None), \
       (C.cmd_NOTICE,  None), (C.cmd_PRIVNOTICE, None), \
-      (C.cmd_ISON,    None) ]
+      (C.cmd_ISON,    None), (C.cmd_REHASH,     None) ]
    #
    # End of init_rfc1459_()
 
