@@ -32,12 +32,12 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version = '0.3.29'
    #
-   irciot_library_version  = '0.0.143'
+   irciot_library_version  = '0.0.145'
    #
    # Bot specific constants
    #
    irc_first_wait = 28
-   irc_micro_wait = 0.15
+   irc_micro_wait = 0.12
    irc_default_wait = 28
    irc_latency_wait = 1
    #
@@ -1319,7 +1319,7 @@ class PyLayerIRC(object):
 
  def irc_disconnect_(self):
    try:
-     self.irc.shutdown()
+     self.irc.shutdown(2)
    except:
      pass
    self.irc_track_clear_nicks_()
@@ -1351,7 +1351,7 @@ class PyLayerIRC(object):
        return -1
      if self.irc_debug:
        self.to_log_("Sending to IRC: [" + irc_out + "]")
-     self.irc.send(bytes(irc_out + "\n", 'utf-8'))
+     self.irc.send(bytes(irc_out + "\n", 'UTF-8'))
      sleep(self.CONST.irc_micro_wait)
      irc_out = ""
      return 0
@@ -1388,7 +1388,7 @@ class PyLayerIRC(object):
        delta_time = 0
      if ready[0]:
        irc_input \
-        = self.irc.recv(self.CONST.irc_buffer_size).decode('utf-8')
+        = self.irc.recv(self.CONST.irc_buffer_size).decode('UTF-8')
        irc_input = irc_input.strip("\n")
        irc_input = irc_input.strip("\r")
        if irc_input != "":
