@@ -13,7 +13,7 @@ class PyLayerIRCIoT_EL_(object):
   #
   irciot_protocol_version = '0.3.29'
   #
-  irciot_library_version  = '0.0.145'
+  irciot_library_version  = '0.0.147'
   #
   # IRC-IoT Embedded Languages tags:
   #

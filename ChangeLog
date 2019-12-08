@@ -71,3 +71,12 @@
         PyLayerIRCIoT.irciot_deinencap_() method now always returns values
         enclosed in square brackets. Value "[]" this means no values.
 
+2019-12-07 19:57 GMT+7 PyIRCIoT 0.0.145 Alexey Y. Woronov <alexey@woronov.ru>
+        * The function PyLayerIRCIoT.is_ii_() for validation an unencrypted
+        IRC-IoT object in the irciotmini library (MicroPython) is implemented.
+
+2019-12-08 19:45 GMT+7 PyIRCIoT 0.0.147 Alexey Y. Woronov <alexey@woronov.ru>
+        * The PyLayerIRCIoT.ii_deinencap_() function was implemented in the
+        irciotmini library (MicroPython) to deinencapsulate datums from the
+        stream of unencrypted messages of the IRC-IoT protocol.
+
