@@ -35,7 +35,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.29'
   #
-  irciot_library_version  = '0.0.147'
+  irciot_library_version  = '0.0.148'
   #
   # IRC-IoT TAGs
   #
@@ -3142,7 +3142,7 @@ class PyLayerIRCIoT(object):
         my_irciot = "[" + my_irciot + "]"
      my_irciot = '"' + self.CONST.tag_DATUM + '":' + my_irciot
   if isinstance(my_datums, dict):
-     if self.CONST.tag_OBJECT_TYPE in my_datums:
+     if self.CONST.tag_OBJECT_TYPE in my_datums.keys():
         my_ot  = my_datums[self.CONST.tag_OBJECT_TYPE]
         if self.CONST.tag_ENC_DATUM in my_datums.keys():
            del my_datums[self.CONST.tag_OBJECT_TYPE]
@@ -3385,7 +3385,7 @@ class PyLayerIRCIoT(object):
   #
   # End of irciot_encap_all_()
 
- def irciot_encap_(self, in_datumset, my_skip, my_part, \
+ def irciot_encap_(self, in_datumset, in_skip, in_part, \
    in_vuid = None):
   ''' Public part of encapsulator with per-"Datum" fragmentation '''
   self.irciot_blockchain_check_publication_()
@@ -3399,12 +3399,12 @@ class PyLayerIRCIoT(object):
   my_irciot = ""
   my_datums = json.loads(in_datumset)
   my_total  = len(my_datums)
-  if my_skip > 0:
+  if in_skip > 0:
      my_datums_obj = []
      my_datums_cnt = 0
      for my_datum in my_datums:
         my_datums_cnt += 1
-        if my_datums_cnt > my_skip:
+        if my_datums_cnt > in_skip:
            my_datums_obj.append(my_datum)
      my_datums_set = json.dumps(my_datums_obj, separators=(',',':'))
      my_datums = json.loads(my_datums_set)
@@ -3412,7 +3412,7 @@ class PyLayerIRCIoT(object):
      del my_datums_cnt
   my_irciot = self.irciot_encap_internal_(my_datums_set, in_vuid)
   if (len(my_irciot) > self.message_mtu) or my_encrypt:
-     if my_skip == 0:
+     if in_skip == 0:
         self.current_mid = save_mid # mid rollback
      my_datums = json.loads(my_datums_set)
      one_datum = 0
@@ -3450,18 +3450,18 @@ class PyLayerIRCIoT(object):
      if one_datum == 1:
         self.current_mid = save_mid # Message ID rollback
         (my_irciot, my_datums_part) \
-         = self.irciot_encap_bigdatum_(my_datums, my_part, in_vuid)
+         = self.irciot_encap_bigdatum_(my_datums, in_part, in_vuid)
         if my_datums_part == 0:
           my_datums_skip += 1
   else:
-     my_datums_skip = my_total - my_skip
+     my_datums_skip = my_total - in_skip
      self.current_did += 1 # Default Datum ID changing method
-  if my_skip + my_datums_skip >= my_total:
-    my_skip = 0
+  if in_skip + my_datums_skip >= my_total:
+    in_skip = 0
     my_datums_skip = 0
     if CAN_encrypt_datum and my_datums_part == 0:
       self.crypt_cache = None
-  return my_irciot, my_skip + my_datums_skip, my_datums_part
+  return my_irciot, in_skip + my_datums_skip, my_datums_part
   #
   # End of irciot_encap_()
 
