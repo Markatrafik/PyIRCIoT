@@ -35,7 +35,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.29'
   #
-  irciot_library_version  = '0.0.148'
+  irciot_library_version  = '0.0.149'
   #
   # IRC-IoT TAGs
   #
@@ -3435,7 +3435,7 @@ class PyLayerIRCIoT(object):
               my_irciot = self.irciot_encap_internal_(str_part_datums, in_vuid)
               if len(my_irciot) <= self.message_mtu:
                 test_len = len(my_datums)
-                my_skip_out = my_skip + my_datums_skip
+                my_skip_out = in_skip + my_datums_skip
                 if my_skip_out >= my_total:
                    my_skip_out = 0
                 return my_irciot, my_skip_out, 0
