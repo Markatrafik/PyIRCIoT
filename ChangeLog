@@ -80,3 +80,9 @@
         irciotmini library (MicroPython) to deinencapsulate datums from the
         stream of unencrypted messages of the IRC-IoT protocol.
 
+2019-12-20 18:05 GMT+7 Today the Service Name "irc-iot" and TXT-key "_irc-iot"
+         for DNS has been registered by the IANA. Unfortunately, the IANA did
+         not agree to allocate the port from the base port range, and recom-
+         mending using the ports of the IRC protocol like 6667/TCP or the free
+         range of ports: 49152-65535 without registration.
+

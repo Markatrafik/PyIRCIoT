@@ -13,7 +13,7 @@ class PyLayerIRCIoT_EL_(object):
   #
   irciot_protocol_version = '0.3.29'
   #
-  irciot_library_version  = '0.0.149'
+  irciot_library_version  = '0.0.151'
   #
   # IRC-IoT Embedded Languages tags:
   #
@@ -21,11 +21,20 @@ class PyLayerIRCIoT_EL_(object):
   lang_JRE    = 'jre' # Java (Runtime Enivronment)
   lang_JS     = 'js'  # JavaScript
   lang_PHP    = 'php' # PHP
-  lang_PYHON  = 'py'  # Python
+  lang_PYTHON = 'py'  # Python
   lang_RUBY   = 'rb'  # Ruby
+  #
+  lang_ALL = [
+   lang_BASH, lang_JRE, lang_JS,
+   lang_PHP, lang_PYTHON, lang_RUBY
+  ]
+  #
+  err_UNKNOWN_LANGUAGE = 1001
+  err_LANGUAGE_SYNTAX  = 1007
   #
   err_DESCRIPTIONS = {
    err_UNKNOWN_LANGUAGE   : "This language is not supported"
+   err_LANGUAGE_SYNTAX    : "Incorrect syntax for this language"
   }
   #
   def __setattr__(self, *_):

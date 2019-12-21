@@ -35,7 +35,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.29'
   #
-  irciot_library_version  = '0.0.149'
+  irciot_library_version  = '0.0.151'
   #
   # IRC-IoT TAGs
   #
@@ -2403,16 +2403,14 @@ class PyLayerIRCIoT(object):
            > in_object[self.CONST.tag_DATUM_BC]:
              return False
     # Go deeper
+    if isinstance(my_datums, dict):
+       my_datums = [ my_datums ]
     if isinstance(my_datums, list):
        for my_datum in my_datums:
           if not self.is_irciot_datum_(my_datum, \
            in_object[self.CONST.tag_OBJECT_TYPE], my_src, my_dst):
              return False
        return True
-    elif isinstance(my_datums, dict):
-       if not self.is_irciot_datum_(my_datums, \
-        in_object[self.CONST.tag_OBJECT_TYPE], my_src, my_dst):
-          return False
     return True
     #
     # End of is_irciot_() :: is_irciot_object_()
@@ -2848,6 +2846,8 @@ class PyLayerIRCIoT(object):
   else:
      in_object[self.CONST.tag_OBJECT_DP] = None
      iot_dp = None
+  if isinstance(iot_datums, dict):
+     iot_datums = [ iot_datums ]
   if isinstance(iot_datums, list):
      str_datums = ""
      for iot_datum in iot_datums:
@@ -2861,12 +2861,6 @@ class PyLayerIRCIoT(object):
            str_datums += ","
          str_datums += str_datum
      return str_datums
-  if isinstance(iot_datums, dict):
-     if in_vuid != None:
-       self.irciot_check_datum_(iot_datums, in_vuid, iot_ot)
-     return self.irciot_prepare_datum_(iot_datums, \
-      (iot_dt, iot_ot, iot_src, iot_dst, iot_dc, iot_dp), \
-         orig_json, in_vuid)
   return ""
   #
   # End of irciot_deinencap_object_()
@@ -3045,6 +3039,8 @@ class PyLayerIRCIoT(object):
      iot_containers = json.loads(in_json)
   except ValueError:
      return ""
+  if isinstance(iot_containers, dict):
+    iot_containers = [ iot_containers ]
   if isinstance(iot_containers, list):
     str_datums = "["
     for iot_container in iot_containers:
@@ -3058,9 +3054,6 @@ class PyLayerIRCIoT(object):
              str_datums += ","
           str_datums += str_datum
     return str_datums + "]"
-  if isinstance(iot_containers, dict):
-    return "[" + self.irciot_deinencap_container_(iot_containers, \
-      in_json, in_vuid) + "]"
   return ""
   #
   # End of irciot_deinencap_container_()

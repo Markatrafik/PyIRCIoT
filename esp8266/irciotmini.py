@@ -6,7 +6,7 @@ N=None
 class PyLayerIRCIoT(object):
  class CONST(object):
   ii_proto_ver='0.3.29'
-  ii_lib_ver='0.0.149'
+  ii_lib_ver='0.0.151'
   def __setattr__(self,*_):
    pass
  def __init__(self):
@@ -272,8 +272,19 @@ class PyLayerIRCIoT(object):
   s_cont='{"mid":"%d",'%s_mid
   i_ii=s_cont+s_obj+i_ii+'}}'
   return i_ii
- def ii_encap_all_(self,in_datumset):
-  pass
+ def ii_encap_all_(self,in_datums):
+  result=self.o_pool
+  if type(in_datums)==dict:
+   in_datums=[in_datums]
+  my_dats=jdumps(in_datums)
+  j_text,my_skip,my_part=self.ii_encap_(my_dats,0,0)
+  if j_text!='':
+   result.append(j_text)
+  while my_skip>0 or my_part>0:
+   j_text,my_skip,my_part=self.ii_encap_(my_dats,my_skip,my_part)
+   if j_text!='':
+    result.append(j_text)
+  return result
  def ii_encap_(self,in_datumset,in_skip,in_part):
   i_save_mid=self.ii_mid
   i_dats=json.loads(in_datumset)
