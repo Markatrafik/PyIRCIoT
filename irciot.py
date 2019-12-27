@@ -35,7 +35,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.29'
   #
-  irciot_library_version  = '0.0.151'
+  irciot_library_version  = '0.0.153'
   #
   # IRC-IoT TAGs
   #
@@ -3449,6 +3449,8 @@ class PyLayerIRCIoT(object):
   else:
      my_datums_skip = my_total - in_skip
      self.current_did += 1 # Default Datum ID changing method
+  if my_datums_part == 0:
+     self.current_oid += 1
   if in_skip + my_datums_skip >= my_total:
     in_skip = 0
     my_datums_skip = 0

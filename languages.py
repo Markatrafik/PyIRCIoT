@@ -13,11 +13,14 @@ class PyLayerIRCIoT_EL_(object):
   #
   irciot_protocol_version = '0.3.29'
   #
-  irciot_library_version  = '0.0.151'
+  irciot_library_version  = '0.0.153'
   #
   # IRC-IoT Embedded Languages tags:
   #
   lang_BASH   = 'sh'  # Bash Script
+  lang_CS     = 'cs'  # C Sharp
+  lang_CSP    = 'csp' # Caché Server Pages
+  lang_GO     = 'go'  # Golang
   lang_JRE    = 'jre' # Java (Runtime Enivronment)
   lang_JS     = 'js'  # JavaScript
   lang_PHP    = 'php' # PHP

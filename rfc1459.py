@@ -32,7 +32,7 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version = '0.3.29'
    #
-   irciot_library_version  = '0.0.151'
+   irciot_library_version  = '0.0.153'
    #
    # Bot specific constants
    #
@@ -1824,8 +1824,8 @@ class PyLayerIRC(object):
     (C.code_CHANNELISFULL,    "CHANNELISFULL",    self.func_banned_), \
     (C.code_BADCHANNELKEY,    "BADCHANNELKEY",    self.func_banned_), \
     (C.code_ERRONEUSNICKNAME, "ERRONEUSNICKNAME", self.func_nick_in_use_), \
+    (C.code_NOSUCHCHANNEL,    "NOSUCHCHANNEL",    self.func_banned_), \
     (C.code_NOSUCHSERVER,     "NOSUCHSERVER",     None), \
-    (C.code_NOSUCHCHANNEL,    "NOSUCHCHANNEL",    None), \
     (C.code_CANNOTSENDTOCHAN, "CANNOTSENDTOCHAN", None), \
     (C.code_TOOMANYCHANNELS,  "TOOMANYCHANNELS",  None), \
     (C.code_WASNOSUCHNICK,    "WASNOSUCHNICK",    None), \
