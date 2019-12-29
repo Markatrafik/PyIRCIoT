@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-import sys,time.json
+import sys,time,json
 import network
 from machine import Pin
 from rfc1459mini import PyLayerIRC

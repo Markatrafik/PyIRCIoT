@@ -33,7 +33,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   # This is list of tuples each of which contains an source and
   # destination IRC-IoT address or mask in the input messages
   #
-  self.router_graphs = [ ( self.do_forwarding, {} ) ]
+  self.router_graphs = [ ( self.do_router_forwarding, {} ) ]
   # This is list of tuples each of which contains an function
   # and it's optional parameters. Each function sequentially
   # performed on the message flow and must have a same inbound
@@ -56,6 +56,10 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   #
   super(PyIRCIoT_router, self).__init__()
   #
+  self.dir_in   = 'i' # input traffic direction
+  self.dir_out  = 'o' # output traffic direction
+  self.dir_both = 'b' # input and output directions
+  #
   # End of PyIRCIoT_router.__init__()
 
  def router_pointer (self, in_compatibility, in_messages_pack):
@@ -67,7 +71,13 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   return
 
  def is_router_route_(self, in_route):
-  if not isinstance(in_route, tuple):
+  try:
+    ( left_addr, right_addr ) = in_route
+  except:
+    return False
+  if not isinstance(left_addr, str):
+    return False
+  if not isinstance(right_addr, str):
     return False
   return True
 
@@ -75,13 +85,13 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   if not isinstance(in_routes, list):
     return False
   for my_route in in_routes:
-    if not is_route_(self, my_route):
+    if not self.is_router_route_(my_route):
       return False
   return True
 
  def is_router_graph_(self, in_graph):
   try:
-    ( my_func, my_params ) = in_tuple
+    ( my_func, my_params ) = in_graph
   except:
     return False
   if not isinstance(my_func, object):
@@ -95,14 +105,14 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
     return False
   for my_item in in_graphs:
     if isinstance(my_item, list):
-      if not self.is_graphs_(my_item):
+      if not self.is_router_graphs_(my_item):
         return False
     else:
-      if not self.is_graph_(my_item):
+      if not self.is_router_graph_(my_item):
         return False
   return True
 
- def do_main_graph_(in_datum, in_graph, in_vuid = None):
+ def do_router_graph_(self, in_datum, in_graph, in_vuid = None):
   if not isinstance(in_datum, dict):
     return None
   if not self.is_router_graph_(in_graph):
@@ -112,7 +122,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   ( my_function_, my_params ) = in_graph
   return my_function_( in_datum, my_params, in_vuid )
 
- def do_main_route_(in_datum, in_route, in_vuid = None):
+ def do_router_route_(self, in_datum, in_route, in_vuid = None):
   if not isinstance(in_datum, dict):
     return None
   if not isinstance(in_route, tuple):
@@ -121,19 +131,19 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
     return None
   return in_datum
 
- def do_main_graphs_(in_datum, in_graphs, in_vuid = None):
+ def do_router_graphs_(self, in_datum, in_graphs, in_vuid = None):
   if not isinstance(in_datum, dict):
     return None
   if not isinstance(in_graphs, list):
     return None
   my_datum = in_datum
-  for my_index, my_graph in enumerate(my_graphs):
+  for my_index, my_graph in enumerate(in_graphs):
     if isinstance(my_graph, list):
       if my_graph == []:
         return None
-      my_datum = self.do_main_graphs_(my_datum, my_graph, in_vuid)
+      my_datum = self.do_router_graphs_(my_datum, my_graph, in_vuid)
     else:
-      tmp_datum = self.do_main_graph_(my_datum, in_graph, in_vuid)
+      tmp_datum = self.do_router_graph_(my_datum, my_graph, in_vuid)
       if my_index == 0 and isinstance(tmp_datum, bool):
         if not tmp_datum:
           break
@@ -144,9 +154,9 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
       del tmp_datum
   return my_datum
   #
-  # End of PyIRCIoT_router.do_main_graphs_()
+  # End of PyIRCIoT_router.do_router_graphs_()
 
- def do_main_routes_(in_datum, in_routes, in_vuid = None):
+ def do_router_routes_(self, in_datum, in_routes, in_vuid = None):
   if not isinstance(in_datum, dict):
     return None
   if not isinstance(in_routes, list):
@@ -155,44 +165,57 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
     pass
   return in_datum
 
- def do_main(self, in_message, in_vuid = None):
-  if not is_routes(self.in_routes) \
-  or not is_routes(self.out_routes) \
-  or not is_graphs(self.router_graphs):
-    return
+ def do_router_(self, in_message, in_direction, in_vuid = None):
+  if in_direction in [ self.dir_in, self.dir_both ] \
+   and not self.is_router_routes_(self.input_routes):
+    return ""
+  if in_direction in [ self.dir_out, self.dir_both ] \
+   and not self.is_router_routes_(self.output_routes):
+    return ""
+  if not self.is_router_graphs_(self.router_graphs):
+    return ""
   my_json = self.irciot_deinencap_(in_message, in_vuid)
   if my_json == "":
-    return
+    return ""
   try:
     my_datums = json.loads(my_json)
   except:
-    return
+    return ""
   if isinstance(my_datums, dict):
     my_datums = [ my_datums ]
   if not isinstance(my_datums, list):
-    return
+    return ""
   my_outdat = []
   for my_datum in my_datums:
-    my_datum = self.do_main_routes_(my_datum, self.in_routes, in_vuid)
-    my_datum = self.do_main_graphs_(my_datum, in_vuid)
-    my_datum = self.do_main_routes_(my_datum, self.out_routes, in_vuid)
+    if in_direction in [ self.dir_in, self.dir_both ]:
+      my_datum = self.do_router_routes_(my_datum, self.input_routes, in_vuid)
+    my_datum = self.do_router_graphs_(my_datum, self.router_graphs, in_vuid)
+    if in_direction in [ self.dir_out, self.dir_both ]:
+      my_datum = self.do_router_routes_(my_datum, self.output_routes, in_vuid)
     if my_datum != None:
       my_outdat.append(my_datum)
   if my_outdat == []:
-    return "[]"
-  out_message = self.irciot_encap_all_(my_outdat, in_vuid)
+    return ""
+  out_message = ""
+  out_pack = self.irciot_encap_all_(my_outdat, in_vuid)
+  if isinstance(out_pack, list):
+    if len(out_pack) > 0:
+      ( out_message, out_vuid ) = out_pack[0]
+  if not isinstance(out_message, str):
+    out_message = ""
   return out_message
   #
-  # End of PyIRCIoT_router.do_main()
+  # End of PyIRCIoT_router.do_router_()
 
- def do_translation(self, in_datum, in_params, in_vuid = None):
-  if not isinstance(in_parpams, dict):
+ def do_router_translation(self, in_datum, in_params, in_vuid = None):
+  if not isinstance(in_params, dict):
     return None
   #
   out_datum = in_datum
   return out_datum
 
- def do_forwarding(self, in_datum, in_params, in_vuid = None):
+ def do_router_forwarding(self, in_datum, in_params, in_vuid = None):
   out_datum = in_datum
+  # print('do_router_forwarding("%s", ... )' % in_datum)
   return out_datum
 
