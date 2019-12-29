@@ -3,6 +3,10 @@
 ''
 '' Copyright (c) 2019 Alexey Y. Woronov
 ''
+'' By using this file, you agree to the terms and conditions set
+'' forth in the LICENSE file which can be found at the top level
+'' of this package
+''
 '' Authors:
 ''  Alexey Y. Woronov <alexey@woronov.ru>
 '''

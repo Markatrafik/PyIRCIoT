@@ -3,6 +3,10 @@
 ''
 '' Copyright (c) 2018-2019 Alexey Y. Woronov
 ''
+'' By using this file, you agree to the terms and conditions set
+'' forth in the LICENSE file which can be found at the top level
+'' of this package
+''
 '' Authors:
 ''  Alexey Y. Woronov <alexey@woronov.ru>
 '''
@@ -35,7 +39,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.29'
   #
-  irciot_library_version  = '0.0.153'
+  irciot_library_version  = '0.0.155'
   #
   # IRC-IoT TAGs
   #
