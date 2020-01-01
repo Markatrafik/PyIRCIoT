@@ -40,7 +40,7 @@ def main():
   irciot.user_pointer = ircbot.user_handler
   irciot.ldict_file = "./ldict.json"
 
-  ircbot.irc_server  = "irc.undernet.org"
+  ircbot.irc_server  = "irc-iot.nsk.ru"
 
   # Warning: Please, run your own IRC server
   # don't use public networks for testing!!!

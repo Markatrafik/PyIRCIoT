@@ -9,8 +9,6 @@ import termios
 import fcntl
 import select
 
-from pprint import pprint
-from irciot import PyLayerIRCIoT
 from irciot_router import PyIRCIoT_router
 from rfc1459 import PyLayerIRC
 
@@ -67,24 +65,24 @@ def main():
 
     (irc1in_message, irc1_wait, irc1_vuid) \
       = ircbot1.irc_check_queue_(ircbot1.CONST.irc_queue_input)
-    if (irc1in_message != ""):
+    if irc1in_message != "":
        print("irc1in_message=[\033[0;44m%s\033[0m]" % irc1in_message)
-       irc1int_message = irciot1.do_router_(irc1in_message, irciot1.dir_in, irc1_vuid)
+       irc1int_message = irciot1.do_router_(irc1in_message, irciot1.CONST.dir_in, irc1_vuid)
        print('irc1int_message=[\033[1m%s\033[0m]' % irc1int_message)
-       if not irc1int_message in [ None, "", "[]" ]:
-          irc2out_message = irciot2.do_router_(irc1int_message, irciot1.dir_out, irc1_vuid)
+       if irc1int_message != "":
+          irc2out_message = irciot2.do_router_(irc1int_message, irciot1.CONST.dir_out, irc1_vuid)
           print('irc2out_message=[\033[1m%s\033[0m]' % irc2out_message)
           ircbot2.irc_add_to_queue_(ircbot2.CONST.irc_queue_output, \
            irc2out_message, irc1_wait, irc1_vuid)
 
     (irc2in_message, irc2_wait, irc2_vuid) \
       = ircbot2.irc_check_queue_(ircbot2.CONST.irc_queue_input)
-    if (irc2in_message != ""):
+    if irc2in_message != "":
        print("irc2in_message=[\033[0;1;44m%s\033[0m]" % irc2in_message)
-       irc2int_message = irciot1.do_router_(irc2in_message, irciot2.dir_in, irc2_vuid)
+       irc2int_message = irciot1.do_router_(irc2in_message, irciot2.CONST.dir_in, irc2_vuid)
        print('irc2int_message=[\033[1m%s\033[0m]' % irc2int_message)
-       if not irc2int_message in [ None, "", "[]" ]:
-          irc1out_message = irciot2.do_router_(irc2int_message, irciot2.dir_out, irc2_vuid)
+       if irc2int_message != "":
+          irc1out_message = irciot2.do_router_(irc2int_message, irciot2.CONST.dir_out, irc2_vuid)
           print('irc2out_message=[\033[1m%s\033[0m]' % irc1out_message)
           ircbot1.irc_add_to_queue_(ircbot1.CONST.irc_queue_output, \
            irc1out_message, irc2_wait, irc2_vuid)
