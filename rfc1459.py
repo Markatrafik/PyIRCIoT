@@ -36,7 +36,7 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version = '0.3.29'
    #
-   irciot_library_version  = '0.0.159'
+   irciot_library_version  = '0.0.160'
    #
    # Bot specific constants
    #
@@ -1180,7 +1180,7 @@ class PyLayerIRC(object):
  def irc_track_clarify_nicks_(self):
    for my_struct in self.irc_nicks:
      (my_nick, my_mask, my_vuid, my_info) = my_struct
-     if ((my_mask == None) or (my_info == None)):
+     if my_mask == None or my_info == None:
        self.irc_whois_nick_(my_nick)
        if my_mask == None:
          my_mask = ""
