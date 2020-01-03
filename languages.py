@@ -1,7 +1,7 @@
 '''
 '' PyIRCIoT_EL_ (IRC-IoT Embedded Languages class)
 ''
-'' Copyright (c) 2019 Alexey Y. Woronov
+'' Copyright (c) 2019-2020 Alexey Y. Woronov
 ''
 '' By using this file, you agree to the terms and conditions set
 '' forth in the LICENSE file which can be found at the top level
@@ -17,7 +17,7 @@ class PyLayerIRCIoT_EL_(object):
   #
   irciot_protocol_version = '0.3.29'
   #
-  irciot_library_version  = '0.0.160'
+  irciot_library_version  = '0.0.161'
   #
   # IRC-IoT Embedded Languages tags:
   #

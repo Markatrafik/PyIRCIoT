@@ -1,7 +1,7 @@
 '''
 '' PyIRCIoT-router (PyIRCIoT_router class)
 ''
-'' Copyright (c) 2019 Alexey Y. Woronov
+'' Copyright (c) 2019-2020 Alexey Y. Woronov
 ''
 '' By using this file, you agree to the terms and conditions set
 '' forth in the LICENSE file which can be found at the top level
@@ -24,6 +24,10 @@ import json
 class PyIRCIoT_router( PyLayerIRCIoT ):
 
  class CONST( PyLayerIRCIoT.CONST ):
+  #
+  irciot_router_protocol_version = '0.3.29'
+  #
+  irciot_router_library_version = '0.0.161'
   #
   default_detect_dup_messages = 128
   #
@@ -78,6 +82,15 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   self.detect_dup_messages = self.CONST.default_detect_dup_messages
   #
   self.irciot_crc16_init_()
+  #
+  if self.CONST.irciot_router_protocol_version \
+   != self.CONST.irciot_protocol_version:
+    self.irciot_error_(self.CONST.err_PROTO_VER_MISMATCH, 0)
+  if self.CONST.irciot_router_library_version \
+   != self.CONST.irciot_library_version:
+    self.irciot_error_(self.CONST.err_LIB_VER_MISMATCH, 0)
+    raise ValueError(self.CONST.irciot_library_version, \
+     self.CONST.irciot_router_library_version)
   #
   # End of PyIRCIoT_router.__init__()
 

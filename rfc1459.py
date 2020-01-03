@@ -1,7 +1,7 @@
 '''
 '' PyIRCIoT (PyLayerIRC class)
 ''
-'' Copyright (c) 2018-2019 Alexey Y. Woronov
+'' Copyright (c) 2018-2020 Alexey Y. Woronov
 ''
 '' By using this file, you agree to the terms and conditions set
 '' forth in the LICENSE file which can be found at the top level
@@ -36,7 +36,7 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version = '0.3.29'
    #
-   irciot_library_version  = '0.0.160'
+   irciot_library_version  = '0.0.161'
    #
    # Bot specific constants
    #
@@ -186,6 +186,7 @@ class PyLayerIRC(object):
    # "ircu",    "Nefarious", "Rock",   "Synchronet",
    # "solid",   "PieXus",    "ratbox", "Charybdis"
    # "pure",    "Rubl",      "ngl",    "ConfRoom"
+   # "pircd"
    #
    default_mtu = 480
    if irc_default_draft == 'Undernet':
@@ -391,11 +392,12 @@ class PyLayerIRC(object):
      code_NORULES          = "434"
      code_SERVICECONFUSED  = "435"
    code_NICKCOLLISION      = "436"
-   code_UNAVAILRESOURCE    = "437" # Unknown
    if irc_default_draft == 'Undernet':
      code_BANNICKCHANGE    = "437"
      code_NICKCHANGETOOFAST = "438"
      code_TARGETTOOFAST    = "439"
+   else:
+     code_UNAVAILRESOURCE  = "437" # Unknown
    if irc_default_draft == 'Bahamut':
      code_SERVICESDOWN     = "440"
    code_USERNOTINCHANNEL   = "441"
@@ -442,14 +444,16 @@ class PyLayerIRC(object):
    code_NOPRIVILEGES       = "481"
    code_CHANOPRIVSNEEDED   = "482"
    code_CANTKILLSERVER     = "483"
-   code_RESTRICTED         = "484" # Unknown
    if irc_default_draft == 'Undernet':
      code_ISCHANSERVICE    = "484"
-   code_UNIQOPPRIVSNEEDED  = "485" # Unknown
+   else:
+     code_RESTRICTED       = "484" # Unknown
    if irc_default_draft == 'Unreal':
      code_KILLDENY         = "485"
      code_HTMDISABLED      = "486"
      code_SECUREONLYCHAN   = "489"
+   else:
+    code_UNIQOPPRIVSNEEDED = "485" # Unknown
    code_NOOPERHOST         = "491"
    code_NOSERVICEHOST      = "492"
    code_UMODEUNKNOWNFLAG   = "501"
@@ -457,6 +461,7 @@ class PyLayerIRC(object):
    if irc_default_draft == 'Undernet':
      code_SILELISTFULL     = "511"
      code_NOSUCHGLINE      = "513"
+   else:
      code_BADPING          = "513"
    code_TOOMANYWATCH       = "512" # Unknown
    if irc_default_draft == 'Unreal':

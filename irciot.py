@@ -1,7 +1,7 @@
 '''
 '' PyIRCIoT (PyLayerIRCIoT class)
 ''
-'' Copyright (c) 2018-2019 Alexey Y. Woronov
+'' Copyright (c) 2018-2020 Alexey Y. Woronov
 ''
 '' By using this file, you agree to the terms and conditions set
 '' forth in the LICENSE file which can be found at the top level
@@ -39,7 +39,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.29'
   #
-  irciot_library_version  = '0.0.160'
+  irciot_library_version  = '0.0.161'
   #
   # IRC-IoT TAGs
   #
@@ -285,6 +285,8 @@ class PyLayerIRCIoT(object):
   #
   # IRC-IoT Errors
   #
+  err_PROTO_VER_MISMATCH  = 101
+  err_LIB_VER_MISMATCH    = 102
   err_DEFRAG_INVALID_DID  = 103
   err_CONTENT_MISSMATCH   = 104
   err_DEFRAG_OP_MISSING   = 111
@@ -312,6 +314,8 @@ class PyLayerIRCIoT(object):
   err_LOAD_USER_CRYPT     = 777
   #
   err_DESCRIPTIONS = {
+   err_PROTO_VER_MISMATCH : "Protocol version mismatch",
+   err_LIB_VER_MISMATCH   : "Library version mismatch",
    err_BASE64_DECODING    : "BASE64 decoding",
    err_BASE85_DECODING    : "BASE85 decoding",
    err_BASE32_DECODING    : "BASE32 decoding",
