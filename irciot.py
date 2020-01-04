@@ -39,7 +39,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.29'
   #
-  irciot_library_version  = '0.0.161'
+  irciot_library_version  = '0.0.163'
   #
   # IRC-IoT TAGs
   #
@@ -116,6 +116,91 @@ class PyLayerIRCIoT(object):
   tag_ENC_B64Z_USER = 'b64U'
   tag_ENC_B85Z_USER = 'b85U'
   #
+  tag_ALL_BASE32_ENC = [ \
+    tag_ENC_BASE32, \
+    tag_ENC_B32_ZLIB, \
+    tag_ENC_B32_BZIP2 ]
+  #
+  tag_ALL_BASE64_ENC = [ \
+    tag_ENC_BASE64, \
+    tag_ENC_B64_AES, \
+    tag_ENC_B64Z_AES, \
+    tag_ENC_B64_ZLIB, \
+    tag_ENC_B64_BZIP2, \
+    tag_ENC_B64_RSA, \
+    tag_ENC_B64Z_RSA, \
+    tag_ENC_B64_2FISH, \
+    tag_ENC_B64Z_2FISH ]
+  #
+  tag_ALL_BASE85_ENC = [ \
+    tag_ENC_BASE85, \
+    tag_ENC_B85_ZLIB, \
+    tag_ENC_B85_BZIP2, \
+    tag_ENC_B85_AES, \
+    tag_ENC_B85Z_AES, \
+    tag_ENC_B85_2FISH, \
+    tag_ENC_B85Z_2FISH ]
+  #
+  tag_ALL_BASE122_ENC = [ \
+    tag_ENC_BASE122 ]
+  #
+  tag_ALL_nocompress_ENC = [ \
+    tag_ENC_BASE32, \
+    tag_ENC_BASE64, \
+    tag_ENC_BASE85, \
+    tag_ENC_BASE122, \
+    tag_ENC_B64_RSA, \
+    tag_ENC_B85_RSA, \
+    tag_ENC_B64_AES, \
+    tag_ENC_B85_AES, \
+    tag_ENC_B64_2FISH, \
+    tag_ENC_B85_2FISH ]
+  #
+  tag_ALL_ZLIB_ENC = [ \
+    tag_ENC_B64_ZLIB, \
+    tag_ENC_B85_ZLIB, \
+    tag_ENC_B64Z_RSA, \
+    tag_ENC_B85Z_RSA, \
+    tag_ENC_B64Z_AES, \
+    tag_ENC_B85Z_AES, \
+    tag_ENC_B64Z_2FISH, \
+    tag_ENC_B85Z_2FISH ]
+  #
+  tag_ALL_BZIP2_ENC = [ \
+    tag_ENC_B32_BZIP2, \
+    tag_ENC_B64_BZIP2, \
+    tag_ENC_B85_BZIP2 ]
+  #
+  tag_ALL_RSA_ENC = [ \
+    tag_ENC_B64_RSA, \
+    tag_ENC_B85_RSA, \
+    tag_ENC_B64Z_RSA, \
+    tag_ENC_B85Z_RSA ]
+  #
+  tag_ALL_AES_ENC = [ \
+    tag_ENC_B64_AES, \
+    tag_ENC_B85_AES, \
+    tag_ENC_B64Z_AES, \
+    tag_ENC_B85Z_AES ]
+  #
+  tag_ALL_2FISH_ENC = [ \
+    tag_ENC_B64_2FISH, \
+    tag_ENC_B85_2FISH, \
+    tag_ENC_B64Z_2FISH, \
+    tag_ENC_B85Z_2FISH ]
+  #
+  tag_ALL_nocrypt_ENC = [ \
+    tag_ENC_BASE32, \
+    tag_ENC_BASE64, \
+    tag_ENC_BASE85, \
+    tag_ENC_BASE122, \
+    tag_ENC_B32_ZLIB, \
+    tag_ENC_B64_ZLIB, \
+    tag_ENC_B85_ZLIB, \
+    tag_ENC_B32_BZIP2, \
+    tag_ENC_B64_BZIP2, \
+    tag_ENC_B85_BZIP2 ]
+  #
   # Blockchain signing methods:
   #
   tag_mid_ED25519   = 'ed' # RFC 8032
@@ -185,6 +270,10 @@ class PyLayerIRCIoT(object):
   compress_NONE  = 0
   compress_ZLIB  = 3
   compress_BZIP2 = 102
+  #
+  crypto_ALL_asymmetric  = [ crypto_RSA ]
+  crypto_ALL_symmetric   = []
+  crypto_ALL_private_key = [ crypto_AES, crypto_2FISH ]
   #
   # The Object Types, will be replaced
   # by IRC-IoT "Dictionaries" mechanism
@@ -380,6 +469,13 @@ class PyLayerIRCIoT(object):
   #
   virtual_mid_pipeline_size = 16
   #
+  default_integrity_check = 0
+  #
+  # 0 is No Integrity Check
+  # 1 is CRC16 Check "c1": +12 bytes
+  # 2 is CRC32 Check "c2": +14 bytes
+  #
+  #
   def __setattr__(self, *_):
       pass
 
@@ -480,11 +576,7 @@ class PyLayerIRCIoT(object):
   #
   self.message_mtu = self.CONST.default_mtu
   #
-  self.integrity_check = 0
-  #
-  # 0 is No Integrity Check
-  # 1 is CRC16 Check "c1": +12 bytes
-  # 2 is CRC32 Check "c2": +14 bytes
+  self.integrity_check = self.CONST.default_integrity_check
   #
   self.crc16_table = []
   #
@@ -653,9 +745,9 @@ class PyLayerIRCIoT(object):
   if in_pointer == None:
     import importlib
     try:
-       my_pointer = importlib.import_module(in_module_name)
+      my_pointer = importlib.import_module(in_module_name)
     except ImportError:
-       my_pointer = None
+      my_pointer = None
     if my_pointer == None:
       my_error = None
       if in_module_name == self.CONST.mod_ZLIB:
@@ -1405,33 +1497,13 @@ class PyLayerIRCIoT(object):
 
  def irciot_crypto_get_base_(self, in_crypt_method):
   my_base = None
-  if in_crypt_method in [ \
-     self.CONST.tag_ENC_BASE32, \
-     self.CONST.tag_ENC_B32_ZLIB, \
-     self.CONST.tag_ENC_B32_BZIP2 ]:
+  if in_crypt_method in self.CONST.tag_ALL_BASE32_ENC:
     my_base = self.CONST.base_BASE32
-  if in_crypt_method in [ \
-     self.CONST.tag_ENC_BASE64, \
-     self.CONST.tag_ENC_B64_AES, \
-     self.CONST.tag_ENC_B64Z_AES, \
-     self.CONST.tag_ENC_B64_ZLIB, \
-     self.CONST.tag_ENC_B64_BZIP2, \
-     self.CONST.tag_ENC_B64_RSA, \
-     self.CONST.tag_ENC_B64Z_RSA, \
-     self.CONST.tag_ENC_B64_2FISH, \
-     self.CONST.tag_ENC_B64Z_2FISH ]:
+  elif in_crypt_method in self.CONST.tag_ALL_BASE64_ENC:
     my_base = self.CONST.base_BASE64
-  if in_crypt_method in [ \
-     self.CONST.tag_ENC_BASE85, \
-     self.CONST.tag_ENC_B85_ZLIB, \
-     self.CONST.tag_ENC_B85_BZIP2, \
-     self.CONST.tag_ENC_B85_AES, \
-     self.CONST.tag_ENC_B85Z_AES, \
-     self.CONST.tag_ENC_B85_2FISH, \
-     self.CONST.tag_ENC_B85Z_2FISH ]:
+  elif in_crypt_method in self.CONST.tag_ALL_BASE85_ENC:
     my_base = self.CONST.base_BASE85
-  if in_crypt_method in [ \
-     self.CONST.tag_ENC_BASE122 ]:
+  elif in_crypt_method in self.CONST.tag_ALL_BASE122_ENC:
     my_base = self.CONST.base_BASE122
   return my_base
   #
@@ -1439,33 +1511,11 @@ class PyLayerIRCIoT(object):
 
  def irciot_crypto_get_compress_(self, in_crypt_method):
   my_compress = None
-  if in_crypt_method in [ \
-     self.CONST.tag_ENC_BASE32, \
-     self.CONST.tag_ENC_BASE64, \
-     self.CONST.tag_ENC_BASE85, \
-     self.CONST.tag_ENC_BASE122, \
-     self.CONST.tag_ENC_B64_RSA, \
-     self.CONST.tag_ENC_B85_RSA, \
-     self.CONST.tag_ENC_B64_AES, \
-     self.CONST.tag_ENC_B85_AES, \
-     self.CONST.tag_ENC_B64_2FISH, \
-     self.CONST.tag_ENC_B85_2FISH ]:
+  if in_crypt_method in self.CONST.tag_ALL_nocompress_ENC:
     my_compress = self.CONST.compress_NONE
-  elif in_crypt_method in [  \
-     self.CONST.tag_ENC_B32_ZLIB, \
-     self.CONST.tag_ENC_B64_ZLIB, \
-     self.CONST.tag_ENC_B85_ZLIB, \
-     self.CONST.tag_ENC_B64Z_RSA, \
-     self.CONST.tag_ENC_B85Z_RSA, \
-     self.CONST.tag_ENC_B64Z_AES, \
-     self.CONST.tag_ENC_B85Z_AES, \
-     self.CONST.tag_ENC_B64Z_2FISH, \
-     self.CONST.tag_ENC_B85Z_2FISH ]:
+  elif in_crypt_method in self.CONST.tag_ALL_ZLIB_ENC:
     my_compress = self.CONST.compress_ZLIB
-  elif in_crypt_method in [ \
-     self.CONST.tag_ENC_B32_BZIP2, \
-     self.CONST.tag_ENC_B64_BZIP2, \
-     self.CONST.tag_ENC_B85_BZIP2 ]:
+  elif in_crypt_method in self.CONST.tag_ALL_BZIP2_ENC:
     my_compress = self.CONST.compress_BZIP2
   return my_compress
   #
@@ -1473,23 +1523,11 @@ class PyLayerIRCIoT(object):
   
  def irciot_crypto_get_algorithm_(self, in_crypt_method):
   my_algorithm = None
-  if in_crypt_method in [ \
-     self.CONST.tag_ENC_B64_RSA, \
-     self.CONST.tag_ENC_B85_RSA, \
-     self.CONST.tag_ENC_B64Z_RSA, \
-     self.CONST.tag_ENC_B85Z_RSA ]:
+  if in_crypt_method in self.CONST.tag_ALL_RSA_ENC:
     my_algorithm = self.CONST.crypto_RSA
-  elif in_crypt_method in [ \
-     self.CONST.tag_ENC_B64_AES, \
-     self.CONST.tag_ENC_B85_AES, \
-     self.CONST.tag_ENC_B64Z_AES, \
-     self.CONST.tag_ENC_B85Z_AES ]:
+  elif in_crypt_method in self.CONST.tag_ALL_AES_ENC:
     my_algorithm = self.CONST.crypto_AES
-  elif in_crypt_method in [ \
-     self.CONST.tag_ENC_B64_2FISH, \
-     self.CONST.tag_ENC_B85_2FISH, \
-     self.CONST.tag_ENC_B64Z_2FISH, \
-     self.CONST.tag_ENC_B85Z_2FISH ]:
+  elif in_crypt_method in self.CONST.tag_ALL_2FISH_ENC:
     my_algorithm = self.CONST.crypto_2FISH
   return my_algorithm
   #
@@ -1497,25 +1535,15 @@ class PyLayerIRCIoT(object):
 
  def irciot_crypto_get_model_(self, in_crypt_method):
   my_model = None
-  if in_crypt_method in [ \
-     self.CONST.tag_ENC_BASE32, \
-     self.CONST.tag_ENC_BASE64, \
-     self.CONST.tag_ENC_BASE85, \
-     self.CONST.tag_ENC_BASE122, \
-     self.CONST.tag_ENC_B32_ZLIB, \
-     self.CONST.tag_ENC_B64_ZLIB, \
-     self.CONST.tag_ENC_B85_ZLIB, \
-     self.CONST.tag_ENC_B32_BZIP2, \
-     self.CONST.tag_ENC_B64_BZIP2, \
-     self.CONST.tag_ENC_B85_BZIP2 ]:
+  if in_crypt_method in self.CONST.tag_ALL_nocrypt_ENC:
     my_model = self.CONST.crypt_NO_ENCRYPTION
   else:
     my_algo = self.irciot_crypto_get_algorithm_(in_crypt_method)
-    if my_algo == self.CONST.crypto_RSA:
+    if my_algo in self.CONST.crypto_ALL_asymmetric:
       my_model = self.CONST.crypt_ASYMMETRIC
-    elif my_algo in [ \
-       self.CONST.crypto_AES, \
-       self.CONST.crypto_2FISH ]:
+    elif my_algo in self.CONST.crypto_ALL_symmetric:
+      my_model = self.CONST.crypt_SYMMETRIC
+    elif my_algo in self.CONST.crytpo_ALL_private_key:
       my_model = self.CONST.crypt_PRIVATE_KEY
   return my_model
   #

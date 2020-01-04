@@ -36,7 +36,7 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version = '0.3.29'
    #
-   irciot_library_version  = '0.0.161'
+   irciot_library_version  = '0.0.163'
    #
    # Bot specific constants
    #
@@ -392,12 +392,11 @@ class PyLayerIRC(object):
      code_NORULES          = "434"
      code_SERVICECONFUSED  = "435"
    code_NICKCOLLISION      = "436"
+   code_UNAVAILRESOURCE    = "437" # Unknown
    if irc_default_draft == 'Undernet':
      code_BANNICKCHANGE    = "437"
      code_NICKCHANGETOOFAST = "438"
      code_TARGETTOOFAST    = "439"
-   else:
-     code_UNAVAILRESOURCE  = "437" # Unknown
    if irc_default_draft == 'Bahamut':
      code_SERVICESDOWN     = "440"
    code_USERNOTINCHANNEL   = "441"
