@@ -30,15 +30,15 @@ class PyLayerCOM(object):
    #
    irciot_protocol_version = '0.3.29'
    #
-   irciot_library_version  = '0.0.163'
+   irciot_library_version  = '0.0.165'
    #
    com_default_debug = False
    #
    com_default_server = "serial.nsk.ru"
-   com_default_tcpport = 2217
+   com_default_tcp_port = 2217
    com_default_ssl = False
    #
-   com_first_wait = 8
+   com_first_wait = 1
    com_micro_wait = 0.1
    com_default_wait = 1
    #
@@ -99,7 +99,7 @@ class PyLayerCOM(object):
    self.com_host = socket.gethostname()
    #
    self.com_server = self.CONST.com_default_server
-   self.com_tcpport = self.CONST.com_default_tcpport
+   self.com_tcp_port = self.CONST.com_default_tcp_port
    self.com_ssl = self.CONST.com_default_ssl
    #
    self.com_status = 0
@@ -107,7 +107,7 @@ class PyLayerCOM(object):
    self.com_last = None
    #
    self.com_servers = [ ( \
-     self.com_server, self.com_tcpport, self.com_ssl, 0, None ) ]
+     self.com_server, self.com_tcp_port, self.com_ssl, 0, None ) ]
    #
    self.com_queue = [0, 0]
    self.com_queue[self.CONST.com_queue_input]  = Queue(maxsize=0)
@@ -326,7 +326,7 @@ class PyLayerCOM(object):
      sleep(self.CONST.com_micro_wait)
    except:
      pass
-   return ("", self.CONST.com_default_wait, 0)
+   return ("", self.CONST.com_default_wait, self.CONST.api_vuid_all)
    #
    # End of com_check_queue_()
 
@@ -381,7 +381,23 @@ class PyLayerCOM(object):
      # must be FIXed for Unprivileged user
 
      while (self.com_run):
-     
+
+       if not self.com:
+         sleep(self.CONST.com_first_wait)
+         # self.com = self.irc_socket_()
+         com_init = 0
+
+       if com_init < 2:
+         com_init += 1
+
+       if irc_init == 1:
+         try:
+           self.com_connect_(self.com_server, self.tcp_port)
+         except:
+           self.com_disconnect_()
+           # self.com = self.com_socket_()
+           irc_init = 0
+
        sleep(self.CONST.com_micro_wait)
 
    except socket.error:

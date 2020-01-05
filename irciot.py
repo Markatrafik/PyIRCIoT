@@ -39,7 +39,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.29'
   #
-  irciot_library_version  = '0.0.163'
+  irciot_library_version  = '0.0.165'
   #
   # IRC-IoT TAGs
   #
@@ -1543,7 +1543,7 @@ class PyLayerIRCIoT(object):
       my_model = self.CONST.crypt_ASYMMETRIC
     elif my_algo in self.CONST.crypto_ALL_symmetric:
       my_model = self.CONST.crypt_SYMMETRIC
-    elif my_algo in self.CONST.crytpo_ALL_private_key:
+    elif my_algo in self.CONST.crypto_ALL_private_key:
       my_model = self.CONST.crypt_PRIVATE_KEY
   return my_model
   #
@@ -1792,9 +1792,6 @@ class PyLayerIRCIoT(object):
     return
   #
   pass
-
- def irciot_get_objects_count_(self):
-  return 0
 
  def irciot_ldict_get_item_max_id_(self):
   my_max_id = 0
@@ -3426,7 +3423,10 @@ class PyLayerIRCIoT(object):
   my_datums_part = 0
   save_mid  = self.current_mid
   my_irciot = ""
-  my_datums = json.loads(in_datumset)
+  try:
+     my_datums = json.loads(in_datumset)
+  except:
+     return "", 0, 0
   my_total  = len(my_datums)
   if in_skip > 0:
      my_datums_obj = []
@@ -3463,7 +3463,6 @@ class PyLayerIRCIoT(object):
               self.current_mid = save_mid # mid rollback
               my_irciot = self.irciot_encap_internal_(str_part_datums, in_vuid)
               if len(my_irciot) <= self.message_mtu:
-                test_len = len(my_datums)
                 my_skip_out = in_skip + my_datums_skip
                 if my_skip_out >= my_total:
                    my_skip_out = 0
