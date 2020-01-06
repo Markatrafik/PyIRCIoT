@@ -36,7 +36,7 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version = '0.3.29'
    #
-   irciot_library_version  = '0.0.165'
+   irciot_library_version  = '0.0.167'
    #
    # Bot specific constants
    #
@@ -55,6 +55,7 @@ class PyLayerIRC(object):
    irc_default_port = 6667
    irc_default_password = None
    irc_default_ssl = False
+   irc_default_ident = False
    #
    irc_default_proxy = None
    irc_default_proxy_server = None
@@ -568,6 +569,9 @@ class PyLayerIRC(object):
      cmd_WALLCHOPS = "WALLCHOPS"
      cmd_WALLVOICE = "WALLVOICE"
    #
+   ident_default_ip   = '127.0.0.1'
+   ident_default_port = 113
+   #
    def __setattr__(self, *_):
       pass
 
@@ -590,6 +594,12 @@ class PyLayerIRC(object):
    self.irc_port = self.CONST.irc_default_port
    self.irc_password = self.CONST.irc_default_password
    self.irc_ssl = self.CONST.irc_default_ssl
+   self.irc_ident = self.CONST.irc_default_ident
+   #
+   # This variable is not used to connect, if you don't have a server name
+   # and you want to use the IP, put its text value into self.irc_server
+   self.irc_server_ip = None
+   self.irc_local_port = 0
    #
    self.irc_proxy = None
    if self.CONST.irc_default_proxy != None:
@@ -646,6 +656,11 @@ class PyLayerIRC(object):
    self.irc_run   = False
    self.irc_debug = self.CONST.irc_default_debug
    #
+   self.ident_task = None
+   self.ident_run  = False
+   self.ident_ip   = self.CONST.ident_default_ip
+   self.ident_port = self.CONST.ident_default_port
+   #
    self.irc_mid_pipeline_size \
      = self.CONST.irc_default_mid_pipeline_size
    #
@@ -656,10 +671,70 @@ class PyLayerIRC(object):
    #
    # End of __init__()
 
+ def ident_server_(self):
+   if not self.is_ip_address_(self.ident_ip):
+     return
+   while (self.ident_run):
+     try:
+       if self.is_ipv4_address_(self.ident_ip):
+         my_af_inet = socket.AF_INET
+       else:
+         my_af_inet = socket.AF_INET6
+       my_socket = socket.socket(my_af_inet, socket.SOCK_STREAM)
+       my_socket.bind((self.ident_ip, self.ident_port))
+       my_socket.listen(1)
+     except:
+       my_socket.close()
+       sleep(self.CONST.irc_default_wait)
+       continue
+     while (self.ident_run):
+       try:
+         my_conn, my_addr = my_socket.accept()
+         if not my_addr[0] in [ self.irc_server_ip, '127.0.0.1', '::1' ]:
+           my_conn.close()
+           break
+         while (self.ident_run):
+           my_ready = select.select([my_socket], [], [], 0)
+           if my_ready[0] == []:
+             my_data = my_conn.recv(self.CONST.irc_buffer_size).decode('UTF-8')
+             if my_data:
+               for my_char in [ '\n', '\r', ' ' ]:
+                 my_data = my_data.replace(my_char, '')
+               my_split = my_data.split(',')
+               my_ok = True
+               my_port = "%s" % self.irc_port
+               if my_split[0] == "" or my_split[1] != my_port:
+                 break
+               if self.irc_local_port != 0:
+                 my_port = "%s" % self.irc_local_port
+                 if my_split[0] != my_port:
+                   my_ok = False
+               my_out = "%s , %s : " % (my_split[0], my_split[1])
+               if my_ok:
+                 my_out += "USERID : UNIX : %s\n" % self.irc_user
+               else:
+                 my_out += "ERROR : NO-USER\n"
+               my_conn.send(bytes(my_out, 'UTF-8'))
+               self.ident_run = False
+               break
+             else:
+               break;
+           else:
+             sleep(self.CONST.irc_micro_wait)
+         my_conn.close()
+         sleep(self.CONST.irc_micro_wait)
+       except:
+         my_conn.close()
+       sleep(self.CONST.irc_micro_wait)
+     my_socket.close()
+     sleep(self.CONST.irc_micro_wait)
+   #
+   # End of ident_server_()
+
  def start_IRC_(self):
    #
-   self.irc_task = threading.Thread(target = self.irc_process_)
    self.irc_run  = True
+   self.irc_task = threading.Thread(target = self.irc_process_)
    self.irc_task.start()
    #
    # End of start_IRC_()
@@ -667,6 +742,7 @@ class PyLayerIRC(object):
  def stop_IRC_(self):
    #
    self.irc_run = False
+   self.ident_run = False
    sleep(self.CONST.irc_micro_wait)
    self.irc_disconnect_()
    #
@@ -676,6 +752,23 @@ class PyLayerIRC(object):
      pass
    #
    # End of stop_IRC_()
+
+ def start_ident_(self):
+   #
+   self.ident_run = True
+   self.ident_task = threading.Thread(target = self.ident_server_)
+   self.ident_task.start()
+   #
+   # End of start_ident_()
+
+ def stop_ident_(self):
+   #
+   self.ident_run = False
+   try:
+     if self.ident_task != None:
+       self.ident_task.join()
+   except:
+     pass
 
  def __del__(self):
    self.stop_IRC_()
@@ -873,6 +966,31 @@ class PyLayerIRC(object):
      return in_input
    else:
      return [ in_input ]
+
+ def is_ipv4_address_(self, in_ipv4_address):
+   if not isinstance(in_ipv4_address, str):
+     return False
+   try:
+     socket.inet_pton(socket.AF_INET, in_ipv4_address)
+   except socket.error:
+     return False
+   return True
+
+ def is_ipv6_address_(self, in_ipv6_address):
+   if not isinstance(in_ipv6_address, str):
+     return False
+   try:
+     socket.inet_pton(socket.AF_INET6, in_ipv6_address)
+   except socket.error:
+     return False
+   return True
+
+ def is_ip_address_(self, in_ip_address):
+   if self.is_ipv4_address_(in_ip_address):
+     return True
+   if self.is_ipv6_address_(in_ip_address):
+     return True
+   return False
 
  def is_irc_nick_(self, in_nick):
    if not isinstance(in_nick, str):
@@ -1330,6 +1448,7 @@ class PyLayerIRC(object):
      self.irc.shutdown(2)
    except:
      pass
+   self.stop_ident_()
    self.irc_track_clear_nicks_()
    self.irc_track_clear_anons_()
    try:
@@ -1516,18 +1635,30 @@ class PyLayerIRC(object):
    #
    # End of irc_random_nick_()
 
- def irc_socket_(self):
+ def irc_socket_(self, in_server_name):
    try:
-     irc_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+     my_server_ip = socket.gethostbyname(in_server_name)
+     if self.is_ipv6_address_(my_server_ip):
+       my_af_inet = socket.AF_INET6
+     else:
+       my_af_inet = socket.AF_INET
+     irc_socket = socket.socket(my_af_inet, socket.SOCK_STREAM)
      if self.irc_ssl:
        irc_socket = ssl.wrap_socket(irc_socket)
    except socket.error:
      self.to_log_("Cannot create socket for IRC")
      return None
+   self.irc_server_ip = my_server_ip
    return irc_socket
 
- def irc_connect_(self, irc_server, irc_port):
-   self.irc.connect((irc_server, irc_port))
+ def irc_connect_(self, in_server_ip, in_port):
+   if self.irc_ident:
+     self.start_ident_()
+   try:
+     self.irc.connect((in_server_ip, in_port))
+   except:
+     return
+   self.irc_local_port = self.irc.getsockname()[1]
    # self.irc.setblocking(False)
 
  def irc_check_queue_(self, queue_id):
@@ -1966,13 +2097,13 @@ class PyLayerIRC(object):
      # app.run(host='0.0.0.0', port=50000, debug=True)
      # must be FIXed for Unprivileged user
 
-     self.irc = self.irc_socket_()
+     self.irc = self.irc_socket_(self.irc_server)
 
      while (self.irc_run):
      
        if not self.irc:
          sleep(self.CONST.irc_first_wait)
-         self.irc = self.irc_socket_()
+         self.irc = self.irc_socket_(self.irc_server)
          irc_init = 0
 
        if irc_init < 6:
@@ -1980,10 +2111,10 @@ class PyLayerIRC(object):
 
        if irc_init == 1:
          try:
-           self.irc_connect_(self.irc_server, self.irc_port)
+           self.irc_connect_(self.irc_server_ip, self.irc_port)
          except socket.error:
            self.irc_disconnect_()
-           self.irc = self.irc_socket_()
+           self.irc = self.irc_socket_(self.irc_server)
            irc_init = 0
 
        elif irc_init == 2:
@@ -2035,7 +2166,7 @@ class PyLayerIRC(object):
          self.irc_reconnect_()
          irc_input_buffer = ""
          irc_init = 0
-         self.irc = self.irc_socket_()
+         self.irc = self.irc_socket_(self.irc_server)
 
        irc_prefix = ":" + self.irc_server + " "
        irc_prefix_len = len(irc_prefix)

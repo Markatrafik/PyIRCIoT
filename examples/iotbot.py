@@ -48,7 +48,9 @@ def main():
   ircbot.irc_port    = 6667
   ircbot.irc_channel = "#Berdsk"
   ircbot.irc_debug   = True
+  ircbot.irc_define_nick_("TestBot")
   # ircbot.irc_talk_with_strangers = True
+  # ircbot.irc_ident   = True
 
   ircbot.start_IRC_()
 

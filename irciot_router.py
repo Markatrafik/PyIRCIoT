@@ -27,7 +27,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   #
   irciot_router_protocol_version = '0.3.29'
   #
-  irciot_router_library_version = '0.0.165'
+  irciot_router_library_version = '0.0.167'
   #
   default_detect_dup_messages = 128
   #
@@ -279,6 +279,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   #
   # End of PyIRCIoT_router.global_message_router_()
 
+ # incomplete
  def do_router_translation(self, in_datum, in_params, in_vuid = None):
   if not isinstance(in_params, dict):
     return None
