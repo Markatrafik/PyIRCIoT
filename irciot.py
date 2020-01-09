@@ -465,7 +465,7 @@ class PyLayerIRCIoT(object):
   mod_USERSIGN  = 'irciot-usersign'
   mod_USERCRYPT = 'irciot-usercrypt'
   #
-  crc16_start = 0xA001
+  crc16_start = 0xA001 # CRC-16-IBM
   #
   virtual_mid_pipeline_size = 16
   #
