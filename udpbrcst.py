@@ -31,6 +31,10 @@ class PyLayerUDPb(object):
    #
    irciot_library_version  = '0.0.167'
    #
+   default_udpb_port = 12345
+   default_udpb_ip   = ""
+   # where "" - all IP addresses
+   #
    def __setattr__(self, *_):
       pass
 
@@ -38,13 +42,26 @@ class PyLayerUDPb(object):
    #
    self.CONST = self.CONST()
    #
+   self.udpb_port = default_udpb_port
+   self.udpb_ip   = default_udpb_ip
+   #
+   self.udpb_sock = None
+   #
    # End of PyLayerUDPb.__init__()
 
  def udpb_setup_(self):
-  my_af_inet = socket.AF_INET
-  # sock = socket.socket(my_af_inet, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-  # sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-  # sock.bind(("", 12345))
+  if self.is_ipv4_address_(self.udpb_ip):
+    my_af_inet = socket.AF_INET
+  if self.is_ipv6_address_(self.udpb_ip):
+    my_af_inet = socket.AF_INET6
+  else:
+    return
+  try:
+    self.udpb_sock = socket.socket(my_af_inet, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    self.udpb_sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+    self.udpb_sock.bind((self.udpb_ip, self.udpb_port))
+  except:
+    return
 
  def udpb_receive_(self):
   # data, addr = sock.recvfrom(1024)
