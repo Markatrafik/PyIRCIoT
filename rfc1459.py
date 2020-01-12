@@ -36,7 +36,7 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version = '0.3.29'
    #
-   irciot_library_version  = '0.0.167'
+   irciot_library_version  = '0.0.168'
    #
    # Bot specific constants
    #
@@ -150,7 +150,7 @@ class PyLayerIRC(object):
    irc_ascii_letters = irc_ascii_lowercase + irc_ascii_uppercase
    irc_ascii_digits = "0123456789"
    irc_special_chars = "-[]\\`^{}"
-   irc_nick_first_char = irc_ascii_letters + irc_special_chars
+   irc_nick_first_char = irc_ascii_letters + "[]\\`^{}"
    irc_nick_chars = irc_ascii_letters \
      + irc_ascii_digits + irc_special_chars
    irc_translation = "".maketrans( \
@@ -178,7 +178,6 @@ class PyLayerIRC(object):
      = irc_change_modes \
      + irc_all_modes
    #
-   irc_max_nick_length = 15
    #
    irc_default_draft   = "Undernet"
    #
@@ -187,7 +186,11 @@ class PyLayerIRC(object):
    # "ircu",    "Nefarious", "Rock",   "Synchronet",
    # "solid",   "PieXus",    "ratbox", "Charybdis"
    # "pure",    "Rubl",      "ngl",    "ConfRoom"
-   # "pircd"
+   # "pircd",   "PyIRCIoT"
+   #
+   irc_max_nick_length = 15
+   if irc_default_draft == 'Undernet':
+     irc_max_nick_length = 12
    #
    default_mtu = 480
    if irc_default_draft == 'Undernet':
@@ -565,8 +568,8 @@ class PyLayerIRC(object):
      cmd_SILENCE   = "SILENCE"
      cmd_UPING     = "UPING"
      cmd_USERIP    = "USERIP"
-     cmd_WALLUSERS = "WALLUSERS"
      cmd_WALLCHOPS = "WALLCHOPS"
+     cmd_WALLUSERS = "WALLUSERS"
      cmd_WALLVOICE = "WALLVOICE"
    #
    ident_default_ip   = '127.0.0.1'
@@ -587,6 +590,7 @@ class PyLayerIRC(object):
    self.irc_quit = self.CONST.irc_default_quit
    self.irc_nick_old = self.irc_nick
    self.irc_nick_base = self.irc_nick
+   self.irc_nick_try = ""
    #
    self.irc_nick_length = self.CONST.irc_max_nick_length
    #
@@ -995,9 +999,11 @@ class PyLayerIRC(object):
  def is_irc_nick_(self, in_nick):
    if not isinstance(in_nick, str):
      return False
+   if len(in_nick) > self.CONST.irc_max_nick_length:
+     return False
    str_mask = "^[" + self.CONST.irc_ascii_letters \
-    + "_\^\[\]\{\}][" + self.CONST.irc_ascii_letters \
-    + self.CONST.irc_ascii_digits + "-_\^\[\]\{\}]{1,12}$"
+    + "_`\^\\\[\]\{\}][" + self.CONST.irc_ascii_letters \
+    + self.CONST.irc_ascii_digits + "\-_`\^\\\[\]\{\}]{1,12}$"
    irc_regexp = re.compile(str_mask, re.IGNORECASE)
    return irc_regexp.match(in_nick)
 
@@ -1005,7 +1011,7 @@ class PyLayerIRC(object):
    if not isinstance(in_channel, str):
      return False
    str_mask = "^#[" + self.CONST.irc_ascii_letters \
-    + self.CONST.irc_ascii_digits + "-_\^\[\]\{\}]{1,24}$"
+    + self.CONST.irc_ascii_digits + "\-_\^\[\]\{\}]{1,24}$"
    irc_regexp = re.compile(str_mask, re.IGNORECASE)
    return irc_regexp.match(in_channel)
 
@@ -1488,6 +1494,8 @@ class PyLayerIRC(object):
    except ValueError:
      self.to_log_("ValueError in irc_send_() ...")
      return -1
+   except:
+     return -1
    #
    # End of irc_send_()
 
@@ -1626,8 +1634,9 @@ class PyLayerIRC(object):
      irc_nick = random.choice(self.CONST.irc_nick_first_char)
      irc_nick += ''.join( \
       random.choice(self.CONST.irc_nick_chars) \
-      for i in range(nick_length))
+      for i in range(nick_length - 1))
    ret = self.irc_send_(self.CONST.cmd_NICK + " " + irc_nick)
+   self.irc_nick_try = irc_nick
    if ret == 0:
      self.irc_nick_old = self.irc_nick
      self.irc_nick = irc_nick
@@ -1762,7 +1771,7 @@ class PyLayerIRC(object):
 
  def func_fast_nick_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
-   # ... will be calculated from warning, not RFC 1459 ...
+   # ... will be calculated from warning, not by RFC 1459 ...
    in_wait = 3
    return (in_ret, in_init, in_wait)
 

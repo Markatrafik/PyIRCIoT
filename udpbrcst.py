@@ -29,7 +29,7 @@ class PyLayerUDPb(object):
    #
    irciot_protocol_version = '0.3.29'
    #
-   irciot_library_version  = '0.0.167'
+   irciot_library_version  = '0.0.168'
    #
    default_udpb_port = 12345
    default_udpb_ip   = ""
@@ -68,7 +68,7 @@ class PyLayerUDPb(object):
   pass
  
  def udpb_send_(self, in_data):
-  # sock.sendto(in_data, ('<broadcast>', 12345))
+  # sock.sendto(in_data, ('<broadcast>', self.udpb_port))
   # sleep(small_sleep)
   pass
 

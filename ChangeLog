@@ -90,7 +90,7 @@
         The new class PyIRCIoT_router has been added into file irciot_router.py
 
 2020-01-06 13:07 GMT+7 PyIRCIoT 0.0.167 Alexey Y. Woronov <alexey@woronov.ru>
-        An IDENT server (RFC 1413) has been added to the class PyLayerIRC.
+        * An IDENT server (RFC 1413) has been added to the class PyLayerIRC.
         In order for the IDENT server to be started, before calling the
         PyLayerIRC.start_IRC_() method, you must set the irc_ident = True.
 
