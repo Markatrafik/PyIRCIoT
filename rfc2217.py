@@ -30,7 +30,7 @@ class PyLayerCOM(object):
    #
    irciot_protocol_version = '0.3.29'
    #
-   irciot_library_version  = '0.0.168'
+   irciot_library_version  = '0.0.169'
    #
    com_default_debug = False
    #
@@ -144,11 +144,9 @@ class PyLayerCOM(object):
    # End of start_COM_()
 
  def stop_COM_(self):
-   #
    self.com_run = False
    sleep(self.CONST.com_micro_wait)
    #self.com_disconnect_()
-   #
    try:
      self.com_task.join()
    except:

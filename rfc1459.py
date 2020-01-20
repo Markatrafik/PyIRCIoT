@@ -36,7 +36,7 @@ class PyLayerIRC(object):
    #
    irciot_protocol_version = '0.3.29'
    #
-   irciot_library_version  = '0.0.168'
+   irciot_library_version  = '0.0.169'
    #
    # Bot specific constants
    #
@@ -582,7 +582,10 @@ class PyLayerIRC(object):
    #
    self.CONST = self.CONST()
    #
-   self.irc_host = socket.gethostname()
+   try:
+     self.irc_host = socket.gethostname()
+   except:
+     self.irc_host = "localhost";
    #
    self.irc_nick = self.CONST.irc_default_nick
    self.irc_user = self.irc_tolower_(self.CONST.irc_default_nick)

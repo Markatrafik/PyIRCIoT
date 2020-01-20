@@ -6,7 +6,7 @@ N=None
 class PyLayerIRC(object):
  class CONST(object):
   ii_proto_ver='0.3.29'
-  ii_lib_ver='0.0.168'
+  ii_lib_ver='0.0.169'
   i_big_wait=28
   i_min_wait=1
   i_keep_cnt=16

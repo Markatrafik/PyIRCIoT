@@ -19,9 +19,9 @@ CAN_encrypt_datum  = False # Ability to encrypt and decrypt of "Datums"
 CAN_compress_datum = True  # Ability to compress and decompress "Datums"
 #
 DO_always_encrypt  = False # Always encrypt "Datums" in IRC-IoT messages
-DO_auto_encryption = False # Automatic loading of necessary modules
-DO_auto_blockchain = False # Automatic loading of necessary modules
-DO_auto_compress   = False # Automatic loading of necessary modules
+DO_auto_encryption = False # Automatic loading of modules for encryption
+DO_auto_blockchain = False # Automatic loading of modules for Block Chain
+DO_auto_compress   = False # Automatic loading of modules for compression
 
 import json
 import random
@@ -39,7 +39,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.29'
   #
-  irciot_library_version  = '0.0.168'
+  irciot_library_version  = '0.0.169'
   #
   # IRC-IoT TAGs
   #
@@ -464,6 +464,10 @@ class PyLayerIRCIoT(object):
   #
   mod_USERSIGN  = 'irciot-usersign'
   mod_USERCRYPT = 'irciot-usercrypt'
+  #
+  # This timeout for automatic unloading of modules
+  # when they where automatically loaded (in seconds)
+  mod_uload_timeout = 1800
   #
   crc16_start = 0xA001 # CRC-16-IBM
   #
