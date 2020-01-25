@@ -37,9 +37,19 @@ class PyLayerIRCIoT(object):
 
  class CONST(object):
   #
-  irciot_protocol_version = '0.3.29'
+  irciot_protocol_version = '0.3.31'
   #
-  irciot_library_version  = '0.0.169'
+  irciot_library_version  = '0.0.170'
+  #
+  # IRC-IoT characters
+  #
+  irciot_chars_lower = "abcdefghijklmnopqrstuvwxyz"
+  irciot_chars_upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+  irciot_chars_digit = "0123456789"
+  irciot_chars_addon = "-_."
+  irciot_chars_addr_cell = \
+    irciot_chars_lower + irciot_chars_upper + \
+    irciot_chars_digit + irciot_chars_addon
   #
   # IRC-IoT TAGs
   #
@@ -311,7 +321,7 @@ class PyLayerIRCIoT(object):
   #
   # Basic IRC-IoT Services
   #
-  api_vuid_CRS = 'sC' # Сryptographic Repository Service
+  api_vuid_CRS = 'sC' # Cryptographic Repository Service
   api_vuid_GDS = 'sD' # Global Dictionary Service
   api_vuid_GRS = 'sR' # Global Resolving Service
   api_vuid_GTS = 'sT' # Global Time Service
@@ -391,6 +401,8 @@ class PyLayerIRCIoT(object):
   err_COMP_ZLIB_HEADER    = 301
   err_COMP_ZLIB_INCOMP    = 303
   err_RSA_KEY_FORMAT      = 351
+  err_INVALID_MESSAGE     = 501
+  err_IRVALID_ADDRESS     = 503
   err_LDICT_VERIFY_OK     = 811
   err_LDICT_VERIFY_FAIL   = 812
   #
@@ -417,6 +429,8 @@ class PyLayerIRCIoT(object):
    err_DEFRAG_DC_EXCEEDED : "Exceeded 'dc' field value",
    err_DEFRAG_BC_EXCEEDED : "Exceeded 'bc' field value",
    err_OVERLAP_MISSMATCH  : "Overlapping fragments missmatch",
+   err_INVALID_MESSAGE    : "Invalid IRC-IoT message format",
+   err_INVALID_ADDRESS    : "Invalid IRC-IoT address format",
    err_COMP_ZLIB_HEADER   : "Invalid Zlib header",
    err_COMP_ZLIB_INCOMP   : "Zlib incomplete block",
    err_RSA_KEY_FORMAT     : "Invalid RSA Key format",
@@ -2407,8 +2421,30 @@ class PyLayerIRCIoT(object):
   #
   # End of is_irciot_datum_()
 
+ def is_irciot_address_(in_address):
+  if isinstance(in_addr, str):
+    return False
+  if in_addr == "":
+    return True
+  if '/' in in_addr:
+    my_array = in_addr.split('/')
+    for my_item in my_array:
+      if not self.is_irciot_address_(my_item):
+        return False
+  elif '@' in in_addr:
+    my_array = in_addr.split('@')
+    if len(my_array) != 2:
+      return False
+    for my_item in my_array:
+      for my_char in my_item:
+        if not my_char in self.CONST.irciot_chars_addr_cell:
+          return False
+  return True
+  #
+  # End of is_irciot_address_()
+
  def is_irciot_(self, my_json):
-  ''' Сhecks whether the text string is a IRC-IoT message or not '''
+  ''' Checks whether the text string is a IRC-IoT message or not '''
   
   def is_irciot_object_(self, in_object):
     if not self.CONST.tag_OBJECT_ID in in_object: # IRC-IoT Object ID

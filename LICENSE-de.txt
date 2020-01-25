@@ -1,6 +1,6 @@
 MIT Lizenz
 
-Copyright (c) 2018-2019 Alexey Y. Woronov
+Copyright (c) 2018-2020 Alexey Y. Woronov
 
 Hiermit wird unentgeltlich jeder Person, die eine Kopie der Software und der
 zugehörigen Dokumentationen (die "Software") erhält, die Erlaubnis erteilt,

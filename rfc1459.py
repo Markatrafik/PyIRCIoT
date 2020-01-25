@@ -34,9 +34,9 @@ class PyLayerIRC(object):
 
  class CONST(object):
    #
-   irciot_protocol_version = '0.3.29'
+   irciot_protocol_version = '0.3.31'
    #
-   irciot_library_version  = '0.0.169'
+   irciot_library_version  = '0.0.170'
    #
    # Bot specific constants
    #
@@ -123,7 +123,7 @@ class PyLayerIRC(object):
    #
    # Basic IRC-IoT Services
    #
-   api_vuid_CRS = 'sC' # Сryptographic Repository Service
+   api_vuid_CRS = 'sC' # Cryptographic Repository Service
    api_vuid_GDS = 'sD' # Global Dictionary Service
    api_vuid_GRS = 'sR' # Global Resolving Service
    api_vuid_GTS = 'sT' # Global Time Service
@@ -645,13 +645,13 @@ class PyLayerIRC(object):
    self.irc_last_temporal_vuid = \
      self.CONST.irc_first_temporal_vuid
    #
-   self.irc_queue = [0, 0]
-   self.irc_queue[self.CONST.irc_queue_input]  = Queue(maxsize=0)
-   self.irc_queue[self.CONST.irc_queue_output] = Queue(maxsize=0)
+   self.irc_queue = []
+   self.irc_queue[self.CONST.irc_queue_input  ] = Queue(maxsize=0)
+   self.irc_queue[self.CONST.irc_queue_output ] = Queue(maxsize=0)
    #
-   self.irc_queue_lock = [0, 0]
-   self.irc_queue_lock[self.CONST.irc_queue_input]  = False
-   self.irc_queue_lock[self.CONST.irc_queue_output] = False
+   self.irc_queue_lock = []
+   self.irc_queue_lock[self.CONST.irc_queue_input  ] = False
+   self.irc_queue_lock[self.CONST.irc_queue_output ] = False
    #
    self.irc_commands = []
    self.irc_codes    = []
@@ -1673,19 +1673,19 @@ class PyLayerIRC(object):
    self.irc_local_port = self.irc.getsockname()[1]
    # self.irc.setblocking(False)
 
- def irc_check_queue_(self, queue_id):
-   old_queue_lock = self.irc_queue_lock[queue_id]
+ def irc_check_queue_(self, in_queue_id):
+   old_queue_lock = self.irc_queue_lock[in_queue_id]
    if not old_queue_lock:
-     check_queue = self.irc_queue[queue_id]
-     self.irc_queue_lock[queue_id] = True
+     check_queue = self.irc_queue[in_queue_id]
+     self.irc_queue_lock[in_queue_id] = True
      if not check_queue.empty():
        (irc_message, irc_wait, irc_vuid) = check_queue.get()
-       self.irc_queue_lock[queue_id] = old_queue_lock
+       self.irc_queue_lock[in_queue_id] = old_queue_lock
        return (irc_message, irc_wait, irc_vuid)
      else:
        if old_queue_lock:
           check_queue.task_done()
-     self.irc_queue_lock[queue_id] = old_queue_lock
+     self.irc_queue_lock[in_queue_id] = old_queue_lock
    try:
      sleep(self.CONST.irc_micro_wait)
    except:

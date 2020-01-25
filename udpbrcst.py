@@ -27,9 +27,9 @@ class PyLayerUDPb(object):
 
  class CONST(object):
    #
-   irciot_protocol_version = '0.3.29'
+   irciot_protocol_version = '0.3.31'
    #
-   irciot_library_version  = '0.0.169'
+   irciot_library_version  = '0.0.170'
    #
    udpb_default_debug = False
    #

@@ -1,12 +1,12 @@
-# PyLayerIRCIoT mini (c) 2019 Alexey Y. Woronov
+# PyLayerIRCIoT mini (c) 2020 Alexey Y. Woronov
 import json,re
 F=False
 T=True
 N=None
 class PyLayerIRCIoT(object):
  class CONST(object):
-  ii_proto_ver='0.3.29'
-  ii_lib_ver='0.0.169'
+  ii_proto_ver='0.3.31'
+  ii_lib_ver='0.0.170'
   def __setattr__(self,*_):
    pass
  def __init__(self):

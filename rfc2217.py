@@ -28,9 +28,9 @@ class PyLayerCOM(object):
 
  class CONST(object):
    #
-   irciot_protocol_version = '0.3.29'
+   irciot_protocol_version = '0.3.31'
    #
-   irciot_library_version  = '0.0.169'
+   irciot_library_version  = '0.0.170'
    #
    com_default_debug = False
    #
@@ -65,7 +65,7 @@ class PyLayerCOM(object):
    #
    # Basic IRC-IoT Services
    #
-   api_vuid_CRS = 'sC' # Сryptographic Repository Service
+   api_vuid_CRS = 'sC' # Cryptographic Repository Service
    api_vuid_GDS = 'sD' # Global Dictionary Service
    api_vuid_GRS = 'sR' # Global Resolving Service
    api_vuid_GTS = 'sT' # Global Time Service

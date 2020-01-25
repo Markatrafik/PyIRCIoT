@@ -94,3 +94,8 @@
         In order for the IDENT server to be started, before calling the
         PyLayerIRC.start_IRC_() method, you must set the irc_ident = True.
 
+2020-01-25 23:05 GMT+7 PyIRCIoT 0.0.170 Alexey Y. Woronov <alexey@woronov.ru>
+        * The protocol version was changed to 0.3.31. Error codes was added.
+        PyLayerIRC.is_irciot_address_() method has been added. Removed some
+        non-ASCII characters from the sources, that impeded work in MacOS.
+

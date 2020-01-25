@@ -25,9 +25,9 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
 
  class CONST( PyLayerIRCIoT.CONST ):
   #
-  irciot_router_protocol_version = '0.3.29'
+  irciot_router_protocol_version = '0.3.31'
   #
-  irciot_router_library_version = '0.0.169'
+  irciot_router_library_version = '0.0.170'
   #
   default_detect_dup_messages = 128
   #
@@ -283,10 +283,19 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
  def do_router_translation(self, in_datum, in_params, in_vuid = None):
   if not isinstance(in_params, dict):
     return None
+  dst_addr = ''
   try:
     src_addr = in_datum[ self.CONST.tag_SRC_ADDR ]
   except:
     return None
+  if self.CONST.tag_DST_ADDR in in_datum.keys():
+    dst_addr = in_datum[ self.CONST.tag_DST_ADDR ]
+  if not self.is_irciot_address_(src_addr) \
+  or not self.is_irciot_address_(dst_addr):
+    self.irciot_error_(self.CONST.err_INVALID_ADDRESS, 0)
+    return None
+  #
+
   #
   out_datum = in_datum
   return out_datum

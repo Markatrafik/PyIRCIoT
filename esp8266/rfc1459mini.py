@@ -1,12 +1,12 @@
-# Micro PyLayerIRC (c) 2019 Alexey Y. Woronov
+# Micro PyLayerIRC (c) 2020 Alexey Y. Woronov
 import socket,select,random,time
 T=True
 F=False
 N=None
 class PyLayerIRC(object):
  class CONST(object):
-  ii_proto_ver='0.3.29'
-  ii_lib_ver='0.0.169'
+  ii_proto_ver='0.3.31'
+  ii_lib_ver='0.0.170'
   i_big_wait=28
   i_min_wait=1
   i_keep_cnt=16
