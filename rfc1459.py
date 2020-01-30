@@ -184,9 +184,9 @@ class PyLayerIRC(object):
    # "RFC1459", "Undernet",  "Unreal", "Bahamut",
    # "Inspl",   "Hybrid",    "RusNet", "Shadow",
    # "ircu",    "Nefarious", "Rock",   "Synchronet",
-   # "solid",   "PieXus",    "ratbox", "Charybdis"
-   # "pure",    "Rubl",      "ngl",    "ConfRoom"
-   # "pircd",   "PyIRCIoT"
+   # "solid",   "PieXus",    "ratbox", "Charybdis",
+   # "aspIRCd", "pure",      "Rubl",   "ConfRoom",
+   # "ngl",     "pircd",     "PyIRCIoT"
    #
    irc_max_nick_length = 15
    if irc_default_draft == 'Undernet':
@@ -645,11 +645,11 @@ class PyLayerIRC(object):
    self.irc_last_temporal_vuid = \
      self.CONST.irc_first_temporal_vuid
    #
-   self.irc_queue = []
+   self.irc_queue = [0, 0]
    self.irc_queue[self.CONST.irc_queue_input  ] = Queue(maxsize=0)
    self.irc_queue[self.CONST.irc_queue_output ] = Queue(maxsize=0)
    #
-   self.irc_queue_lock = []
+   self.irc_queue_lock = [0, 0]
    self.irc_queue_lock[self.CONST.irc_queue_input  ] = False
    self.irc_queue_lock[self.CONST.irc_queue_output ] = False
    #
@@ -754,7 +754,8 @@ class PyLayerIRC(object):
    self.irc_disconnect_()
    #
    try:
-     self.irc_task.join()
+     if self.irc_task != None:
+       self.irc_task.join()
    except:
      pass
    #
@@ -1948,7 +1949,7 @@ class PyLayerIRC(object):
 
  def func_on_error_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
-   if in_string.find("Closing ") or in_string.find(" timeout"):
+   if in_string.find("Closing ") or in_string.find("imeout"):
       return (-1, 0, in_wait)
    return (in_ret, 1, self.CONST.irc_default_wait)
 

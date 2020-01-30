@@ -402,7 +402,7 @@ class PyLayerIRCIoT(object):
   err_COMP_ZLIB_INCOMP    = 303
   err_RSA_KEY_FORMAT      = 351
   err_INVALID_MESSAGE     = 501
-  err_IRVALID_ADDRESS     = 503
+  err_INVALID_ADDRESS     = 503
   err_LDICT_VERIFY_OK     = 811
   err_LDICT_VERIFY_FAIL   = 812
   #

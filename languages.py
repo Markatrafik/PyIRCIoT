@@ -21,26 +21,34 @@ class PyLayerIRCIoT_EL_(object):
   #
   # IRC-IoT Embedded Languages tags:
   #
+  lang_ANSYML = 'yml' # Ansible YAML
   lang_BASH   = 'sh'  # Bash Script
   lang_CS     = 'cs'  # C Sharp
-  lang_CSP    = 'csp' # Caché Server Pages
-  lang_GO     = 'go'  # Golang
+  lang_CSP    = 'csp' # Cache Server Pages
+  lang_GO     = 'go'  # Google Golang
   lang_JRE    = 'jre' # Java (Runtime Enivronment)
   lang_JS     = 'js'  # JavaScript
+  lang_LUA    = 'lua' # Lua Script
+  lang_QML    = 'qml' # Qt Meta Language
+  lang_PERL   = 'pl'  # Perl
   lang_PHP    = 'php' # PHP
   lang_PYTHON = 'py'  # Python
   lang_RUBY   = 'rb'  # Ruby
+  lang_SWIFT  = 'swt' # Apple Swift
   #
   lang_ALL = [
-   lang_BASH, lang_JRE, lang_JS,
-   lang_PHP, lang_PYTHON, lang_RUBY
+   lang_ANSYML, lang_BASH,   lang_CS,   lang_CSP,  lang_GO,
+   lang_JRE,    lang_JS,     lang_LUA,  lang_QML,  lang_PERL,
+   lang_PHP,    lang_PYTHON, lang_RUBY, lang_SWIFT
   ]
   #
   err_UNKNOWN_LANGUAGE = 1001
+  err_UNSUPPORTED_YET  = 1002
   err_LANGUAGE_SYNTAX  = 1007
   #
   err_DESCRIPTIONS = {
-   err_UNKNOWN_LANGUAGE   : "This language is not supported"
+   err_UNKNOWN_LANGUAGE   : "Unknown programming langauge"
+   err_UNSUPPORTED_YET    : "This language is not yet supported"
    err_LANGUAGE_SYNTAX    : "Incorrect syntax for this language"
   }
   #
