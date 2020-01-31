@@ -39,7 +39,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.31'
   #
-  irciot_library_version  = '0.0.170'
+  irciot_library_version  = '0.0.171'
   #
   # IRC-IoT characters
   #
@@ -483,7 +483,14 @@ class PyLayerIRCIoT(object):
   # when they where automatically loaded (in seconds)
   mod_uload_timeout = 1800
   #
-  crc16_start = 0xA001 # CRC-16-IBM
+  crc16_poly = 0xA001
+  # crc16_reversed = False
+  # 0xA001 -- x^16 + x^15 + x^2 + 1 (CRC-16-IBM)
+  # 0xC002 -- x^16 + x^14 + x   + 1 (CRC-16-IBM reversed)
+  # 0x8408 -- x^16 + x^12 + x^5 + 1 (CRC-16-CCITT) SDLC/HDLC
+  # 0x8810 -- x^16 + x^11 + x^4 + 1 (CRC-16-CCITT reversed)
+  # 0x8000 -- x^16 + 1 (LRCC-16)
+  # 0x8005
   #
   virtual_mid_pipeline_size = 16
   #
@@ -675,10 +682,10 @@ class PyLayerIRCIoT(object):
     for my_idx2 in range(0, 8):
       my_tab = c_ushort(my_crc >> 1).value
       if (my_crc & 0x0001):
-        my_crc = my_tab ^ self.CONST.crc16_start
+        my_crc = my_tab ^ self.CONST.crc16_poly
       else:
         my_crc = my_tab
-      self.crc16_table.append(hex(my_crc))
+    self.crc16_table.append(hex(my_crc))
   #
   # End of irciot_crc16_init_()
 
