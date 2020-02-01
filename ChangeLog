@@ -99,3 +99,9 @@
         PyLayerIRC.is_irciot_address_() method has been added. Removed some
         non-ASCII characters from the sources, that impeded work in MacOS.
 
+2020-02-01 19:15 GMT+7 PyIRCIoT 0.0.173 Alexey Y. Woronov <alexey@woronov.ru>
+        * The methods irciot_crc16_() and irciot_crc32_() in the PyLayerIRCIoT
+        class are debugged. To select the method used, you need to setup the
+        variable integrity_check, where 1 is for CRC16, 2 for CRC32, before
+        using Integrity Check you need to call the appropriate Init function.
+

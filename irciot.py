@@ -39,17 +39,24 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.31'
   #
-  irciot_library_version  = '0.0.171'
+  irciot_library_version  = '0.0.173'
   #
   # IRC-IoT characters
   #
   irciot_chars_lower = "abcdefghijklmnopqrstuvwxyz"
   irciot_chars_upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
   irciot_chars_digit = "0123456789"
-  irciot_chars_addon = "-_."
-  irciot_chars_addr_cell = \
+  irciot_chars_cell_addon = "-_."
+  irciot_chars_base_addon = "/\+-"
+  irciot_chars_lhex_addon = "abcdef"
+  irciot_chars_cell_addr  = \
     irciot_chars_lower + irciot_chars_upper + \
-    irciot_chars_digit + irciot_chars_addon
+    irciot_chars_digit + irciot_chars_cell_addon
+  irciot_chars_lhex = irciot_chars_digit + \
+    irciot_chars_lhex_addon
+  irciot_chars_base = irciot_chars_digit + \
+    irciot_chars_lower + irciot_chars_upper + \
+    irciot_chars_base_addon
   #
   # IRC-IoT TAGs
   #
@@ -689,6 +696,13 @@ class PyLayerIRCIoT(object):
   #
   # End of irciot_crc16_init_()
 
+ def irciot_crc32_init_(self):
+  if self.crypt_ZLIB == None:
+    self.crypt_ZLIB = self.import_( \
+      self.crypt_ZLIB, self.CONST.mod_ZLIB)
+  #
+  # End of irciot_crc32_init_()
+
  def irciot_crc16_(self, in_data):
   if not isinstance(in_data, bytes):
      return None
@@ -711,11 +725,11 @@ class PyLayerIRCIoT(object):
   if not isinstance(in_data, bytes):
      return None
   try:
-     my_crc = self.crypt_ZLIB.crc32(in_data)
+     my_crc = self.crypt_ZLIB.crc32(in_data) & 0xFFFFFFFF
      my_crc = my_crc.to_bytes(4,'little')
      my_out = ""
-     for my_idx in range(4):
-       my_out += "%2.2x" % in_data[my_idx]
+     for my_idx in range(3, -1, -1):
+       my_out += "%2.2x" % my_crc[my_idx]
      return my_out
   except:
      return None
@@ -739,7 +753,6 @@ class PyLayerIRCIoT(object):
     = self.irciot_encryption_generate_keys_(in_crypt_method)
   if not isinstance(self.encryption_private_key, object):
      return
-  pass
   #
   # End of irciot_init_encryption_method_()
 
@@ -2428,8 +2441,16 @@ class PyLayerIRCIoT(object):
   #
   # End of is_irciot_datum_()
 
- def is_irciot_address_(in_address):
-  if isinstance(in_addr, str):
+ def is_irciot_hex_(self, in_hex):
+  if not isinstance(in_hex, str):
+    return False
+  for my_ch in in_hex:
+    if not my_ch in self.CONST.irciot_chars_lhex:
+      return False
+  return True
+
+ def is_irciot_address_(self, in_address):
+  if not isinstance(in_addr, str):
     return False
   if in_addr == "":
     return True
@@ -2444,7 +2465,7 @@ class PyLayerIRCIoT(object):
       return False
     for my_item in my_array:
       for my_char in my_item:
-        if not my_char in self.CONST.irciot_chars_addr_cell:
+        if not my_char in self.CONST.irciot_chars_cell_addr:
           return False
   return True
   #
@@ -2538,18 +2559,28 @@ class PyLayerIRCIoT(object):
   # Begin of is_irciot_()
   #
   try:
-     irciot_message = json.loads(my_json)
+    irciot_message = json.loads(my_json)
   except ValueError:
-     return False
+    return False
   # This is Top-level JSON with ONE or more IRC-IoT message "containers"
+  if isinstance(irciot_message, dict):
+    irciot_message = [ irciot_message ]
+    my_shift = 0
+  else:
+    my_shift = 1
   if isinstance(irciot_message, list):
-     for my_container in irciot_message:
-        if not is_irciot_container_(self, my_container):
-           return False
-     return True
-  elif isinstance(irciot_message, dict):
-     if not is_irciot_container_(self, irciot_message):
+    for my_container in irciot_message:
+      if not is_irciot_container_(self, my_container):
         return False
+      if self.integrity_check > 0:
+        my_dump = json.dumps(my_container, separators=(',',':'))
+        my_len  = len(my_dump)
+        my_item = my_json[my_shift:my_len]
+        del my_dump
+        if not self.irciot_check_integrity_(my_item, my_container):
+          return False
+        my_shift = my_len + 1
+    return True
   return True
   #
   # End of is_irciot_()
@@ -2945,6 +2976,73 @@ class PyLayerIRCIoT(object):
   #
   # End of irciot_deinencap_object_()
 
+ def irciot_remove_text_tags_(self, in_json, in_tags):
+   if not isinstance(in_json, str):
+     return ""
+   if not isinstance(in_tags, list):
+     self.irciot_remove_text_tags_(in_json, [in_tags])
+   my_json = in_json
+   for my_item in in_tags:
+     if not isinstance(my_item, str):
+       continue
+     my_mark = '"%s":' % my_item
+     my_parts = my_json.split(my_mark)
+     if len(my_parts) != 2:
+       continue
+     my_out  = my_parts[0] + my_mark
+     my_part = my_parts[1]
+     skip_type = bool(my_part[0] == '"')
+     skip_step = 0
+     skip_chars = self.CONST.irciot_chars_base + '"'
+     if not skip_type:
+       skip_chars = self.CONST.irciot_chars_digit
+       skip_step = 1
+     for my_ch in my_part:
+       if skip_type and my_ch == '"':
+         if skip_step == 0:
+           my_out += '"'
+         skip_step += 1
+       if skip_step != 1:
+         my_out += my_ch
+       elif not my_ch in skip_chars:
+         break
+     if skip_step > 1:
+       my_json = my_out
+   return my_json
+   #
+   # End of irciot_remove_tags_()
+
+ def irciot_check_integrity_(self, in_json, in_dict):
+   if not isinstance(in_json, str):
+     return False
+   if not isinstance(in_dict, dict):
+     return False
+   if self.integrity_check == 1:
+     if self.CONST.tag_CHK_CRC16 in in_dict.keys():
+       my_crc16 = in_dict[self.CONST.tag_CHK_CRC16]
+       if not self.is_irciot_hex_(my_crc16) or len(my_crc16) != 4:
+         return False
+       my_json = self.irciot_remove_text_tags_(in_json, \
+         [ self.CONST.tag_MESSAGE_ID, self.CONST.tag_CHK_CRC16 ])
+       my_crc16_json = self.irciot_crc16_(bytes(my_json, 'UTF-8'))
+       del my_json
+       if (my_crc16 != my_crc16_json):
+         return False
+   elif self.integrity_check == 2:
+     if self.CONST.tag_CHK_CRC32 in in_dict.keys():
+       my_crc32 = in_dict[self.CONST.tag_CHK_CRC32]
+       if not self.is_irciot_hex_(my_crc32) or len(my_crc32) != 8:
+         return False
+       my_json = self.irciot_remove_text_tags_(in_json, \
+         [ self.CONST.tag_MESSAGE_ID, self.CONST.tag_CHK_CRC32 ])
+       del my_json
+       my_crc32_json = self.irciot_crc32_(bytes(my_json, 'UTF-8'))
+       if (my_crc32 != my_crc32_json):
+         return False
+   return True
+   #
+   # End of rciot_check_integrity_()
+
  def irciot_check_container_(self, in_container, \
    orig_json = None, in_vuid = None):
 
@@ -2957,21 +3055,18 @@ class PyLayerIRCIoT(object):
     my_result = self.irciot_blockchain_verify_string_( \
       my_message, in_mesmid, in_key)
     return my_result
+    #
+    # End of irciot_check_container:irciot_check_blockchain_()
 
   if not isinstance(orig_json, str):
     return False
   if not isinstance(in_container, dict):
     return False
-  if self.integrity_check:
-    # Lite optional checks will be here
-    if self.CONST.tag_CHK_CRC16 in in_container.keys():
-      my_crc16 = in_container[self.CONST.tag_CHK_CRC16]
-    elif self.CONST.tag_CHK_CRC32 in in_container_keys():
-      my_crc32 = in_container[self.CONST.tag_CHK_CRC32]
-    else:
-      return False
   if in_vuid == None:
     return True
+  if self.integrity_check > 0:
+    if not self.irciot_check_integrity_(self, orig_json):
+      return False
   try:
     my_hismid = str(in_container[self.CONST.tag_MESSAGE_ID])
   except:
