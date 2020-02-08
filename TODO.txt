@@ -1,8 +1,4 @@
 
-  2019-05-27 : Instead of using PyCrypto library, it will need
- ............: to use PyCryptodome, also it is need to rewrite
- ~ Urgent! ~ : the PyCrypto calls into the new methods.
-
   2019-06-07 : UDP broadcast transport in flat IP / Ethernet
  ............: subnets such as WiFi will be useful for IoT
  ~ Must be ~ : devices without using a dedicated IRC server.
@@ -20,4 +16,10 @@
   2020-01-17 : In the case when one of the modes of automatic
  ............: loading of dynamic modules is selected, provide
  ~ Must be ~ : for their automatic unloading by timeout.
+
+  2020-02-05 : It is need to debug the BASE85 base coding in
+ ............: combination with RSA cryptographic encryption.
+ ~ Urgent! ~ : BASE85 coding can be set by default, instead
+ ............: of BESE64, since it saves 6%, it is still 7-bit
+ ~ Must be ~ : and allows it to be placed in the JSON string.
 

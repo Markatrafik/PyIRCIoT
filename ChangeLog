@@ -105,3 +105,10 @@
         variable integrity_check, where 1 is for CRC16, 2 for CRC32, before
         using Integrity Check you need to call the appropriate Init function.
 
+2020-02-08 12:15 GMT+7 PyIRCIoT 0.0.175 Alexey Y. Woronov <alexey@woronov.ru>
+        * Starting with this version it is possible to use the PyCryptodome
+        library instead of PyCrypto for message encryption. In addition, changes
+        were made to the PyIRCIoT_router class: each function of the graph node
+        will return a list of parameters necessary for it's operation.
+
+

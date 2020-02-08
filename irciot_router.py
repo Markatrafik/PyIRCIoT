@@ -27,7 +27,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   #
   irciot_router_protocol_version = '0.3.31'
   #
-  irciot_router_library_version = '0.0.173'
+  irciot_router_library_version = '0.0.175'
   #
   default_detect_dup_messages = 128
   #
@@ -35,11 +35,22 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   dir_out  = 'o' # output traffic direction
   dir_both = 'b' # input and output directions
   #
+  rgn_REQUEST_PARAMS = 'irciot_req_rgn_prm'
+  #
+  tag_IN_SCOPE  = 'iscp'
+  tag_OUT_SCOPE = 'oscp'
+  #
   err_ROUTER_DUP_DETECT = 10015
+  err_MISSING_PARAMETER = 10505
+  err_INVALID_PARAMETER = 10507
   #
   err_DESCRIPTIONS = PyLayerIRCIoT.CONST.err_DESCRIPTIONS
   err_DESCRIPTIONS[ err_ROUTER_DUP_DETECT ] = \
    'Router detected a duplicate while forwarding the message'
+  err_DESCRIPTIONS[ err_MISSING_PARAMETER ] = \
+   "Missing required parameter for routing graph node"
+  err_DESCRIPTIONS[ err_INVALID_PARAMETER ] = \
+   "Invalid required parameter for routing graph node"
   #
   # End of PyIRCIoT_router.CONST()
 
@@ -54,9 +65,9 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   # This is list of tuples each of which contains an source and
   # destination IRC-IoT address or mask in the input messages
   #
-  self.router_graphs = [ ( self.do_router_forwarding, {} ) ]
+  self.router_graphs = [ ( self.do_router_forwarding_, {} ) ]
   # This is list of tuples each of which contains an function
-  # and it's optional parameters. Each function sequentially
+  # and it's required parameters. Each function sequentially
   # performed on the message flow and must have a same inbound
   # and outbound interface. If another list is used as a list
   # item, then the first item of a nested list may contain a
@@ -152,6 +163,11 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   if not self.is_irciot_datum_(in_datum, None, None, None):
     return None
   ( my_function_, my_params ) = in_graph
+  my_keys = my_function_( None, self.CONST.rgn_REQUEST_PARAMS )
+  for my_key in my_keys:
+    if not my_key in my_params.keys():
+      self.irciot_error_(self.CONST.err_MISSING_PARAMETER, 0)
+      return None
   return my_function_( in_datum, my_params, in_vuid )
 
  def do_router_route_(self, in_datum, in_route, in_vuid = None):
@@ -280,8 +296,10 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   # End of PyIRCIoT_router.global_message_router_()
 
  # incomplete
- def do_router_translation(self, in_datum, in_params, in_vuid = None):
+ def do_router_translation_(self, in_datum, in_params, in_vuid = None):
   if not isinstance(in_params, dict):
+    if in_params == self.CONST.cmd_REQUEST_PARAMS:
+      return [ self.CONST.tag_IN_SCOPE, self.CONST.tag_OUT_SCOPE ]
     return None
   dst_addr = ''
   try:
@@ -294,13 +312,19 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   or not self.is_irciot_address_(dst_addr):
     self.irciot_error_(self.CONST.err_INVALID_ADDRESS, 0)
     return None
+  in_scope = in_params[ self.CONST.tag_IN_SCOPE ]
+  out_scope = in_params[ self.CONST.tag_OUT_SCOPE ]
   #
 
   #
   out_datum = in_datum
   return out_datum
 
- def do_router_forwarding(self, in_datum, in_params, in_vuid = None):
+ def do_router_forwarding_(self, in_datum, in_params, in_vuid = None):
+  if not isinstance(in_params, dict):
+    if in_params == self.CONST.rgn_REQUEST_PARAMS:
+      return []
+    return None
   if self.dup_detection_(in_datum):
     self.irciot_error_(self.CONST.err_ROUTER_DUP_DETECT, 0)
     return None

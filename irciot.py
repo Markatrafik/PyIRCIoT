@@ -39,7 +39,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.31'
   #
-  irciot_library_version  = '0.0.173'
+  irciot_library_version  = '0.0.175'
   #
   # IRC-IoT characters
   #
@@ -502,10 +502,11 @@ class PyLayerIRCIoT(object):
   virtual_mid_pipeline_size = 16
   #
   default_integrity_check = 0
+  default_integrity_stamp = 0
   #
   # 0 is No Integrity Check
   # 1 is CRC16 Check "c1": +12 bytes
-  # 2 is CRC32 Check "c2": +14 bytes
+  # 2 is CRC32 Check "c2": +16 bytes
   #
   #
   def __setattr__(self, *_):
@@ -609,6 +610,7 @@ class PyLayerIRCIoT(object):
   self.message_mtu = self.CONST.default_mtu
   #
   self.integrity_check = self.CONST.default_integrity_check
+  self.integrity_stamp = self.CONST.default_integrity_stamp
   #
   self.crc16_table = []
   #
@@ -1601,7 +1603,7 @@ class PyLayerIRCIoT(object):
   try:
     my_KEY = str(in_secret_key, 'utf-8')
     my_AES = self.crypt_AES.new(in_secret_key, \
-      self.crypt_AES.MODE_CBC, self.crypto_AES_iv)
+      self.crypt_AES.MODE_CBC, bytes(self.crypto_AES_iv, 'utf-8'))
     while my_loop:
       my_block = in_raw_data[my_offset:my_offset + my_chunk]
       my_bsize = len(my_block) % my_chunk
@@ -1642,7 +1644,7 @@ class PyLayerIRCIoT(object):
     my_offset = my_size + my_chunk
     my_rawcut = in_encrypted_data[my_offset:my_offset+1]
     my_cut = int.from_bytes(my_rawcut, byteorder='little')
-    my_AES = self.crypt_AES.new(my_KEY, \
+    my_AES = self.crypt_AES.new(bytes(my_KEY, 'utf-8'), \
       self.crypt_AES.MODE_CBC, my_AES_iv)
     my_offset = 0
     while my_loop:
@@ -3035,8 +3037,8 @@ class PyLayerIRCIoT(object):
          return False
        my_json = self.irciot_remove_text_tags_(in_json, \
          [ self.CONST.tag_MESSAGE_ID, self.CONST.tag_CHK_CRC32 ])
-       del my_json
        my_crc32_json = self.irciot_crc32_(bytes(my_json, 'UTF-8'))
+       del my_json
        if (my_crc32 != my_crc32_json):
          return False
    return True
