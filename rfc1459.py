@@ -24,19 +24,20 @@ import threading
 import ssl
 from queue import Queue
 from time import sleep
+from irciot_shared import *
 
 if DO_debug_library:
   from pprint import pprint
 
 import datetime
 
-class PyLayerIRC(object):
+class PyLayerIRC(irciot_shared_):
 
  class CONST(object):
    #
    irciot_protocol_version = '0.3.31'
    #
-   irciot_library_version  = '0.0.175'
+   irciot_library_version  = '0.0.177'
    #
    # Bot specific constants
    #
@@ -95,7 +96,7 @@ class PyLayerIRC(object):
     ( 2, "FaceBot!*irc@faceserv*.nsk.ru", irc_default_channel, \
       irc_aop, None, None, None, None, None, None ), \
     ( 3, "noobot!*bot@irc-iot.nsk.ru",    irc_default_channel, \
-      [ irc_aop ], None, None, None, None, None, None ) ]
+      [ irc_aop, irc_unban ], None, None, None, None, None, None ) ]
    #
    irc_default_talk_with_strangers = False
    irc_first_temporal_vuid = 1000
@@ -572,7 +573,7 @@ class PyLayerIRC(object):
      cmd_WALLUSERS = "WALLUSERS"
      cmd_WALLVOICE = "WALLVOICE"
    #
-   ident_default_ip   = '127.0.0.1'
+   ident_default_ip   = '0.0.0.0'
    ident_default_port = 113
    #
    def __setattr__(self, *_):
@@ -974,31 +975,6 @@ class PyLayerIRC(object):
      return in_input
    else:
      return [ in_input ]
-
- def is_ipv4_address_(self, in_ipv4_address):
-   if not isinstance(in_ipv4_address, str):
-     return False
-   try:
-     socket.inet_pton(socket.AF_INET, in_ipv4_address)
-   except socket.error:
-     return False
-   return True
-
- def is_ipv6_address_(self, in_ipv6_address):
-   if not isinstance(in_ipv6_address, str):
-     return False
-   try:
-     socket.inet_pton(socket.AF_INET6, in_ipv6_address)
-   except socket.error:
-     return False
-   return True
-
- def is_ip_address_(self, in_ip_address):
-   if self.is_ipv4_address_(in_ip_address):
-     return True
-   if self.is_ipv6_address_(in_ip_address):
-     return True
-   return False
 
  def is_irc_nick_(self, in_nick):
    if not isinstance(in_nick, str):
@@ -1444,15 +1420,6 @@ class PyLayerIRC(object):
      my_opts = [ my_opts ]
    return my_opts
 
- def is_json_(self, in_message):
-   if not isinstance(in_message, str):
-     return False
-   try:
-     json_object = json.loads(in_message)
-   except ValueError:
-     return False
-   return True
-
  def irc_disconnect_(self):
    try:
      self.irc.shutdown(2)
@@ -1478,9 +1445,6 @@ class PyLayerIRC(object):
    self.irc_recon += 1
    if self.irc_recon > self.CONST.irc_recon_steps:
      self.irc_recon = 1
-
- def irc_td2ms_(self, td):
-   return td.days * 86400 + td.seconds + td.microseconds / 1000000
 
  def irc_send_(self, irc_out):
    try:
@@ -1517,7 +1481,7 @@ class PyLayerIRC(object):
          break
        my_timerest -= my_timeout
      time_out_recv = datetime.datetime.now()
-     delta_time_in = self.irc_td2ms_(time_out_recv - time_in_recv)
+     delta_time_in = self.td2ms_(time_out_recv - time_in_recv)
      delta_time = self.CONST.irc_default_wait
      if recv_timeout < self.CONST.irc_default_wait:
        delta_time = 0
@@ -2188,7 +2152,7 @@ class PyLayerIRC(object):
 
          if irc_input_split[:5] == self.CONST.cmd_PING + " ":
            self.delta_ping \
-             = self.irc_td2ms_(self.time_now - self.time_ping)
+             = self.td2ms_(self.time_now - self.time_ping)
            self.time_ping = self.time_now
            if self.irc_pong_(irc_input_split) == -1:
              irc_ret = -1
@@ -2272,7 +2236,7 @@ class PyLayerIRC(object):
                self.irc_send_(self.CONST.cmd_PRIVMSG + " " \
                  + self.irc_channel + " :" + irc_message)
           irc_message = ""
-          if self.irc_td2ms_(self.time_now - self.time_ping) \
+          if self.td2ms_(self.time_now - self.time_ping) \
            > self.delta_ping * 2 and self.delta_ping > 0:
              if self.irc_who_channel_(self.irc_channel) == -1:
                irc_init = 0

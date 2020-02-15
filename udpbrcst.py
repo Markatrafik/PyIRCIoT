@@ -18,18 +18,19 @@ import threading
 import ssl
 from queue import Queue
 from time import sleep
+from irciot_shared import *
 
 #from pprint import pprint
 
 import datetime
 
-class PyLayerUDPb(object):
+class PyLayerUDPb(irciot_shared_):
 
  class CONST(object):
    #
    irciot_protocol_version = '0.3.31'
    #
-   irciot_library_version  = '0.0.175'
+   irciot_library_version  = '0.0.177'
    #
    udpb_default_debug = False
    #
@@ -114,40 +115,6 @@ class PyLayerUDPb(object):
  def udpb_send_(self, in_data):
   # sock.sendto(in_data, ('<broadcast>', self.udpb_port))
   sleep(self.CONST.udpb_micro_wait)
-
- def is_json_(self, in_message):
-   if not isinstance(in_message, str):
-     return False
-   try:
-     json_object = json.loads(in_message)
-   except ValueError:
-     return False
-   return True
-
- def is_ipv4_address_(self, in_ipv4_address):
-   if not isinstance(in_ipv4_address, str):
-     return False
-   try:
-     socket.inet_pton(socket.AF_INET, in_ipv4_address)
-   except socket.error:
-     return False
-   return True
-
- def is_ipv6_address_(self, in_ipv6_address):
-   if not isinstance(in_ipv6_address, str):
-     return False
-   try:
-     socket.inet_pton(socket.AF_INET6, in_ipv6_address)
-   except socket.error:
-     return False
-   return True
-
- def is_ip_address_(self, in_ip_address):
-   if self.is_ipv4_address_(in_ip_address):
-     return True
-   if self.is_ipv6_address_(in_ip_address):
-     return True
-   return False
 
  def udpb_process_(self):
    #

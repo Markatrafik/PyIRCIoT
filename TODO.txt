@@ -23,3 +23,7 @@
  ............: of BESE64, since it saves 6%, it is still 7-bit
  ~ Must be ~ : and allows it to be placed in the JSON string.
 
+  2020-02-08 : There is some warnings in the 'twofish' module:
+ ............: PendingDeprecationWarning: import 'imp' module;
+  Figure out : ResourceWarning: unclosed file 'BufferedReader'
+

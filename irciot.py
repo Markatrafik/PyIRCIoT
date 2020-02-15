@@ -39,7 +39,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.31'
   #
-  irciot_library_version  = '0.0.175'
+  irciot_library_version  = '0.0.177'
   #
   # IRC-IoT characters
   #
@@ -516,9 +516,9 @@ class PyLayerIRCIoT(object):
   #
   self.CONST = self.CONST()
   #
-  self.current_mid = 0 # Message ID
-  self.current_oid = 0 # Object ID
-  self.current_did = 0 # Datum ID
+  self.current_mid = '0' # Message ID
+  self.current_oid =  0  # Object ID
+  self.current_did =  0  # Datum ID
   self.mid_lock = 0
   self.oid_lock = 0
   self.did_lock = 0

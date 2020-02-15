@@ -111,4 +111,9 @@
         were made to the PyIRCIoT_router class: each function of the graph node
         will return a list of parameters necessary for it's operation.
 
+2020-02-15 12:00 GMT+7 PyIRCIoT 0.0.177 Alexey Y. Woronov <alexey@woronov.ru>
+        * All simple methods that are repeated in the network transport classes
+        PyLayerIRC(), PyLayerCOM() and PyLayerUDPb(), moved from corresponding
+        files: rfc1459.py, rfc2217.py and udpbrcst.py to a class irciot_shared_
+        into the new separte file named: irciot_shared.py
 
