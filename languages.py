@@ -23,6 +23,7 @@ class PyLayerIRCIoT_EL_(object):
   #
   lang_ANSYML = 'yml' # Ansible YAML
   lang_BASH   = 'sh'  # Bash Script
+  lang_BASIC  = 'bas' # BASIC
   lang_CS     = 'cs'  # C Sharp
   lang_CSP    = 'csp' # Cache Server Pages
   lang_GO     = 'go'  # Google Golang
@@ -33,13 +34,15 @@ class PyLayerIRCIoT_EL_(object):
   lang_PERL   = 'pl'  # Perl
   lang_PHP    = 'php' # PHP
   lang_PYTHON = 'py'  # Python
+  lang_R      = 'r'   # GNU R
   lang_RUBY   = 'rb'  # Ruby
   lang_SWIFT  = 'swt' # Apple Swift
   #
   lang_ALL = [
-   lang_ANSYML, lang_BASH,   lang_CS,   lang_CSP,  lang_GO,
-   lang_JRE,    lang_JS,     lang_LUA,  lang_QML,  lang_PERL,
-   lang_PHP,    lang_PYTHON, lang_RUBY, lang_SWIFT
+   lang_ANSYML, lang_BASH, lang_BASIC,  lang_CS,   lang_CSP,
+   lang_GO,     lang_JRE,  lang_JS,     lang_LUA,  lang_QML,
+   lang_PERL,   lang_PHP,  lang_PYTHON, lang_RUBY, lang_R,
+   lang_SWIFT
   ]
   #
   err_UNKNOWN_LANGUAGE = 1001
@@ -52,8 +55,11 @@ class PyLayerIRCIoT_EL_(object):
    err_LANGUAGE_SYNTAX    : "Incorrect syntax for this language"
   }
   #
+  mod_JAVA = 'py4j.java_gateway'
+  mod_LUA  = 'lupa'
+  #
   def __setattr__(self, *_):
-      pass
+    pass
 
  def __init__(self):
   #
@@ -84,4 +90,41 @@ class PyLayerIRCIoT_EL_(object):
     self.CONST.irciot_protocol_version, \
     self.CONST.irciot_library_version)
 
+ # incomplete
+ def irciot_EL_init_language_(self, in_lang):
+  if not isinstance(in_lang, str):
+    return False
+  if in_lang == lang_ANSYML:
+    pass
+  elif in_lang == lang_BASH:
+    pass
+  elif in_lang == lang_BASIC:
+    pass
+  elif in_lang == lang_CS:
+    pass
+  elif in_lang == lang_CSP:
+    pass
+  elif in_lang == lang_GO:
+    pass
+  elif in_lang == lang_JRE:
+    pass
+  elif in_lang == lang_JS:
+    pass
+  elif in_lang == lang_LUA:
+    pass
+  elif in_lang == lang_QML:
+    pass
+  elif in_lang == lang_PERL:
+    pass
+  elif in_lang == lang_PHP:
+    pass
+  elif in_lang == lang_R:
+    pass
+  elif in_lang == lang_PYTHON:
+    pass
+  elif in_lang == lang_RUBY:
+    pass
+  elif in_lang == lang_SWIFT:
+    pass
+  return False
 

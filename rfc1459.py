@@ -682,6 +682,8 @@ class PyLayerIRC(irciot_shared_):
  def ident_server_(self):
    if not self.is_ip_address_(self.ident_ip):
      return
+   if not self.is_ip_port_(self.ident_port):
+     return
    while (self.ident_run):
      try:
        if self.is_ipv4_address_(self.ident_ip):
@@ -713,8 +715,8 @@ class PyLayerIRC(irciot_shared_):
                my_port = "%s" % self.irc_port
                if my_split[0] == "" or my_split[1] != my_port:
                  break
-               if self.irc_local_port != 0:
-                 my_port = "%s" % self.irc_local_port
+               if self.is_ip_port_(self.irc_local_port):
+                 my_port = "%d" % self.irc_local_port
                  if my_split[0] != my_port:
                    my_ok = False
                my_out = "%s , %s : " % (my_split[0], my_split[1])

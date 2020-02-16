@@ -113,9 +113,14 @@ class PyLayerUDPb(irciot_shared_):
   pass
 
  def udpb_send_(self, in_data):
-  # sock.sendto(in_data, ('<broadcast>', self.udpb_port))
+  if self.udpb_sock == None:
+    return
+  if not self.is_ip_port_(self.udpb_port):
+    return
+  self.udpb_sock.sendto(in_data, ('<broadcast>', self.udpb_port))
   sleep(self.CONST.udpb_micro_wait)
 
+ # incomplete
  def udpb_process_(self):
    #
    try:

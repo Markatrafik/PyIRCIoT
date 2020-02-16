@@ -42,3 +42,10 @@ class irciot_shared_(object):
      return True
    return False
 
+ def is_ip_port_(self, in_ip_port):
+   if not isinstance(in_ip_port, int):
+     return False
+   if in_ip_port < 1 or in_ip_port > 65535:
+     return False
+   return True
+

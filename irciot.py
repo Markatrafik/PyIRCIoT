@@ -1114,6 +1114,8 @@ class PyLayerIRCIoT(object):
 
  def irciot_blockchain_key_publication_(self, in_public_key, \
    in_ot, in_vuid = None):
+  if not isinstance(in_public_key, object):
+    return
   if self.mid_method == self.CONST.tag_mid_ED25519:
     my_key = in_public_key.encode( \
       encoder = self.crypt_NACE.HexEncoder )
@@ -1139,10 +1141,10 @@ class PyLayerIRCIoT(object):
 
  def irciot_encryption_key_publication_(self, in_public_key, \
    in_ot, in_vuid = None):
+  if not isinstance(in_public_key, object):
+    return
   my_key_string = ""
   if self.crypt_algo == self.CONST.crypto_RSA:
-    if not isinstance(in_public_key, object):
-      return
     my_key_bytes = in_public_key.exportKey(format='DER')
     my_key_string = self.irciot_crypto_hash_to_str_(my_key_bytes)
   else:

@@ -5,9 +5,12 @@ import os
 import time
 import json
 # For keypress handling:
-import termios
-import fcntl
-import select
+if os.name == "nt":
+  import msvcrt
+elif os.name == "posix"
+  import termios
+  import fcntl
+  import select
 
 from irciot_router import PyIRCIoT_router
 from rfc1459 import PyLayerIRC
@@ -50,13 +53,14 @@ def main():
 
   print("Starting IRC, press any key to exit", "\r")
 
-  stdin_fd = sys.stdin.fileno()
-  old_term = termios.tcgetattr(stdin_fd)
-  new_attr = old_term[:]
-  new_attr[3] = new_attr[3] & ~termios.ICANON & ~termios.ECHO
-  termios.tcsetattr(stdin_fd, termios.TCSANOW, new_attr)
-  old_flag = fcntl.fcntl(stdin_fd, fcntl.F_GETFL)
-  fcntl.fcntl(stdin_fd, fcntl.F_SETFL, old_flag | os.O_NONBLOCK)
+  if os.name == "posix":
+    stdin_fd = sys.stdin.fileno()
+    old_term = termios.tcgetattr(stdin_fd)
+    new_attr = old_term[:]
+    new_attr[3] = new_attr[3] & ~termios.ICANON & ~termios.ECHO
+    termios.tcsetattr(stdin_fd, termios.TCSANOW, new_attr)
+    old_flag = fcntl.fcntl(stdin_fd, fcntl.F_GETFL)
+    fcntl.fcntl(stdin_fd, fcntl.F_SETFL, old_flag | os.O_NONBLOCK)
 
   irc_vuid = "c0" # Bot itself
 
@@ -88,15 +92,21 @@ def main():
            irc1out_message, irc2_wait, irc2_vuid)
 
     sys.stdout.flush()
-          
-    key_a, key_b, key_c = select.select([stdin_fd], [], [], 0.0001)
+
+    key_a = None
+    if os.name == "nt":
+      if msvcrt.kbhit():
+        key_a = True
+    elif os.name == "posix":
+      key_a, key_b, key_c = select.select([stdin_fd], [], [], 0.0001)
     if key_a:
        print("[Key pressed]")
        break
 
   finally:
-    termios.tcsetattr(stdin_fd, termios.TCSAFLUSH, old_term)
-    fcntl.fcntl(stdin_fd, fcntl.F_SETFL, old_flag)
+    if os.name == "posix":
+      termios.tcsetattr(stdin_fd, termios.TCSAFLUSH, old_term)
+      fcntl.fcntl(stdin_fd, fcntl.F_SETFL, old_flag)
 
   ircbot1.irc_run = False
   ircbot2.irc_run = False
