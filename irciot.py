@@ -39,7 +39,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.31'
   #
-  irciot_library_version  = '0.0.178'
+  irciot_library_version  = '0.0.179'
   #
   # IRC-IoT characters
   #
@@ -2453,7 +2453,7 @@ class PyLayerIRCIoT(object):
       return False
   return True
 
- def is_irciot_address_(self, in_address):
+ def is_irciot_address_(self, in_addr):
   if not isinstance(in_addr, str):
     return False
   if in_addr == "":

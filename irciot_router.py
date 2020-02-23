@@ -27,9 +27,12 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   #
   irciot_router_protocol_version = '0.3.31'
   #
-  irciot_router_library_version = '0.0.178'
+  irciot_router_library_version = '0.0.179'
   #
-  default_detect_dup_messages = 128
+  default_maximal_detect_dup_messages = 128
+  #
+  default_maximal_connection_tracking = 8192 # items
+  default_timeout_connection_tracking = 3600 # seconds
   #
   dir_in   = 'i' # input traffic direction
   dir_out  = 'o' # output traffic direction
@@ -84,13 +87,19 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   # of output messages at an external level outside of this
   # IRC-IoT router class
   #
-  self.connections_tracking = []
+  self.connections_tracking = {}
   #
   self.dup_detect_pipeline = []
   #
   super(PyIRCIoT_router, self).__init__()
   #
-  self.detect_dup_messages = self.CONST.default_detect_dup_messages
+  self.maximal_detect_dup_messages \
+    = self.CONST.default_maximal_detect_dup_messages
+  #
+  self.maximal_connection_tracking \
+    = self.CONST.default_maximal_connection_tracking
+  self.timeout_connection_tracking \
+    = self.CONST.default_timeout_connection_tracking
   #
   self.irciot_crc16_init_()
   #
@@ -155,7 +164,8 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
         return False
   return True
 
- def do_router_graph_(self, in_datum, in_graph, in_vuid = None):
+ def do_router_graph_(self, in_datum, in_graph, \
+    in_direction, in_vuid = None):
   if not isinstance(in_datum, dict):
     return None
   if not self.is_router_graph_(in_graph):
@@ -163,12 +173,12 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   if not self.is_irciot_datum_(in_datum, None, None, None):
     return None
   ( my_function_, my_params ) = in_graph
-  my_keys = my_function_( None, self.CONST.rgn_REQUEST_PARAMS )
+  my_keys = my_function_( None, self.CONST.rgn_REQUEST_PARAMS, None )
   for my_key in my_keys:
     if not my_key in my_params.keys():
       self.irciot_error_(self.CONST.err_MISSING_PARAMETER, 0)
       return None
-  return my_function_( in_datum, my_params, in_vuid )
+  return my_function_( in_datum, my_params, in_direction, in_vuid )
 
  def do_router_route_(self, in_datum, in_route, in_vuid = None):
   if not isinstance(in_datum, dict):
@@ -179,7 +189,8 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
     return None
   return in_datum
 
- def do_router_graphs_(self, in_datum, in_graphs, in_vuid = None):
+ def do_router_graphs_(self, in_datum, in_graphs, \
+    in_direction, in_vuid = None):
   if not isinstance(in_datum, dict):
     return None
   if not isinstance(in_graphs, list):
@@ -189,9 +200,11 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
     if isinstance(my_graph, list):
       if my_graph == []:
         return None
-      my_datum = self.do_router_graphs_(my_datum, my_graph, in_vuid)
+      my_datum = self.do_router_graphs_(my_datum, my_graph, \
+        in_derection, in_vuid)
     else:
-      tmp_datum = self.do_router_graph_(my_datum, my_graph, in_vuid)
+      tmp_datum = self.do_router_graph_(my_datum, my_graph, \
+        in_direction, in_vuid)
       if my_index == 0 and isinstance(tmp_datum, bool):
         if not tmp_datum:
           break
@@ -237,7 +250,8 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   for my_datum in my_datums:
     if in_direction in [ self.CONST.dir_in, self.CONST.dir_both ]:
       my_datum = self.do_router_routes_(my_datum, self.input_routes, in_vuid)
-    my_datum = self.do_router_graphs_(my_datum, self.router_graphs, in_vuid)
+    my_datum = self.do_router_graphs_(my_datum, self.router_graphs, \
+      in_direction, in_vuid)
     if in_direction in [ self.CONST.dir_out, self.CONST.dir_both ]:
       my_datum = self.do_router_routes_(my_datum, self.output_routes, in_vuid)
     if my_datum != None:
@@ -255,7 +269,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   #
   # End of PyIRCIoT_router.do_router_()
 
- def dup_detection_(self, in_datum, in_vuid = None):
+ def dup_detection_(self, in_datum, in_direction, in_vuid = None):
   if not isinstance(in_datum, dict):
     return True # Drop invalid messages
   my_datum = deepcopy(in_datum)
@@ -279,26 +293,33 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   if my_string in self.dup_detect_pipeline:
     return True # Drop duplicate messages
   self.dup_detect_pipeline.append(my_string)
-  if len(self.dup_detect_pipeline) > self.detect_dup_messages:
+  if len(self.dup_detect_pipeline) \
+   > self.maximal_detect_dup_messages:
     self.dup_detect_pipeline.pop(0)
   return False
   #
   # End of PyIRCIoT_router.dup_detection_()
 
+ # incomplete
  def local_message_router_(self):
   pass
   #
   # End of PyIRCIoT_router.local_message_router_()
 
+ # incomplete
  def global_message_router_(self):
   pass
   #
   # End of PyIRCIoT_router.global_message_router_()
 
  # incomplete
- def do_router_translation_(self, in_datum, in_params, in_vuid = None):
+ def connections_tracking_cleaner_(self):
+  pass
+
+ # incomplete
+ def do_router_translation_(self, in_datum, in_params, in_direction, in_vuid = None):
   if not isinstance(in_params, dict):
-    if in_params == self.CONST.cmd_REQUEST_PARAMS:
+    if in_params == self.CONST.rgn_REQUEST_PARAMS:
       return [ self.CONST.tag_IN_SCOPE, self.CONST.tag_OUT_SCOPE ]
     return None
   dst_addr = ''
@@ -314,18 +335,43 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
     return None
   in_scope = in_params[ self.CONST.tag_IN_SCOPE ]
   out_scope = in_params[ self.CONST.tag_OUT_SCOPE ]
-  #
-
-  #
   out_datum = in_datum
+  in_scope_len = len(in_scope)
+  src_addr_len = len(src_addr)
+  my_translate = False
+  #
+  if in_direction == self.CONST.dir_in:
+    out_addr = src_addr
+    if src_addr_len >= in_scope_len:
+      if src_addr == in_scope:
+        out_addr = out_scope
+        my_translate == True
+      elif src_addr_len > in_scope_len:
+        if src_addr[:in_scope_len] == in_scope:
+          if src_addr[in_scope_len] == '/':
+            out_addr = out_scope + src_addr[in_scope_len:]
+            my_translate = True
+    if my_translate:
+      my_key = out_addr + '@@' + dst_addr;
+      if my_key in self.connections_tracking.keys():
+        my_translation = self.connections_tracking[ my_key ]
+      else:
+        my_translation = ( time() )
+        self.connections_tracking[ my_key ] = my_translation
+      out_datum[ self.CONST.tag_SRC_ADDR ] = out_addr
+  #
+  elif in_direction == self.CONST.dir_out:
+    pass
+  #
   return out_datum
 
- def do_router_forwarding_(self, in_datum, in_params, in_vuid = None):
+ def do_router_forwarding_(self, in_datum, in_params, \
+    in_direction, in_vuid = None):
   if not isinstance(in_params, dict):
     if in_params == self.CONST.rgn_REQUEST_PARAMS:
       return []
     return None
-  if self.dup_detection_(in_datum):
+  if self.dup_detection_(in_datum, in_direction):
     self.irciot_error_(self.CONST.err_ROUTER_DUP_DETECT, 0)
     return None
   out_datum = in_datum

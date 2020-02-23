@@ -17,7 +17,7 @@ class PyLayerIRCIoT_EL_(object):
   #
   irciot_protocol_version = '0.3.31'
   #
-  irciot_library_version  = '0.0.178'
+  irciot_library_version  = '0.0.179'
   #
   # IRC-IoT Embedded Languages tags:
   #
@@ -90,9 +90,22 @@ class PyLayerIRCIoT_EL_(object):
     self.CONST.irciot_protocol_version, \
     self.CONST.irciot_library_version)
 
+ def irciot_EL_check_lang_(self, in_lang):
+  if not isinstance(in_lang, str):
+    return False
+  if in_lang not in self.CONST_EL_.lang_ALL:
+    return False
+  return True
+
+ # incomplete
+ def irciot_EL_run_code_(self, in_lang, in_code, in_environment):
+  if not self.irciot_EL_check_lang_(in_lang):
+    return None
+  return None
+
  # incomplete
  def irciot_EL_init_language_(self, in_lang):
-  if not isinstance(in_lang, str):
+  if not self.irciot_EL_check_lang_(in_lang):
     return False
   if in_lang == lang_ANSYML:
     pass
