@@ -24,19 +24,21 @@ from irciot_shared import *
 
 import datetime
 
-class PyLayerUDPb(irciot_shared_):
+class PyLayerUDPb( irciot_shared_ ):
 
- class CONST(object):
+ class CONST( irciot_shared_.CONST ):
    #
    irciot_protocol_version = '0.3.31'
    #
-   irciot_library_version  = '0.0.179'
+   irciot_library_version  = '0.0.180'
    #
    udpb_default_debug = False
    #
    udpb_default_port = 12345
    udpb_default_ip   = ""
    # where "" - all IP addresses
+   #
+   udpb_default_size = 1024 # in bytes
    #
    udpb_first_wait = 1
    udpb_micro_wait = 0.1
@@ -49,12 +51,16 @@ class PyLayerUDPb(irciot_shared_):
    #
    self.CONST = self.CONST()
    #
+   super(PyLayerUDPb, self).__init__()
+   #
    self.udpb_task = None
    self.udpb_run = False
    self.udpb_debug = self.CONST.udpb_default_debug
    #
    self.udpb_port = self.CONST.udpb_default_port
    self.udpb_ip   = self.CONST.udpb_default_ip
+   #
+   self.udpb_size = self.CONST.udpb_default_size
    #
    self.udpb_sock = None
    #
@@ -108,17 +114,44 @@ class PyLayerUDPb(irciot_shared_):
   #
   # End of stop_udpb_()
 
- def udpb_receive_(self):
-  # data, addr = sock.recvfrom(1024)
-  pass
+ # incomplete
+ def udpb_get_ip_by_vuid_(in_vuid):
+  return None
 
- def udpb_send_(self, in_data):
+ # incomplete
+ def udpb_receive_(self):
+  try:
+    my_data, my_addr = self.udpb_sock.recvfrom(self.udp_size)
+    ( my_ip, my_port ) = my_addr
+    if my_port != self.udpb_port \
+    or not self.is_ip_address_(my_ip):
+      return None
+    return ( my_data, my_ip )
+  except:
+    return None
+  #
+  # End of udpb_receive_()
+
+ # incomplete
+ def udpb_send_(self, in_data, in_vuid = self.CONST.in_vuid_all):
   if self.udpb_sock == None:
     return
   if not self.is_ip_port_(self.udpb_port):
     return
-  self.udpb_sock.sendto(in_data, ('<broadcast>', self.udpb_port))
+  if not isinstance(in_vuid, str):
+    return
+  if in_vuid[0] not in self.CONST.api_vuid_any:
+    return
+  if in_vuid == '*':
+    my_addr = '<broadcast>'
+  else:
+    my_addr = self.udpb_get_ip_by_vuid_(in_vuid)
+  if my_addr == None:
+    return
+  self.udpb_sock.sendto(in_data, (my_addr, self.udpb_port))
   sleep(self.CONST.udpb_micro_wait)
+  #
+  # End of udpb_send_()
 
  # incomplete
  def udpb_process_(self):

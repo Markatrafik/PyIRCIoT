@@ -5,8 +5,26 @@ import json
 
 class irciot_shared_(object):
 
- def td2ms_(self, td):
-   return td.days * 86400 + td.seconds + td.microseconds / 1000000
+ class CONST(object):
+   #
+   api_vuid_cfg = 'c' # VUID prefix for users from config
+   api_vuid_tmp = 't' # VUID prefix for temporal users
+   api_vuid_srv = 's' # VUID prefix for IRC-IoT Services
+   api_vuid_all = '*' # Means All users VUIDs when sending messages
+   #
+   api_vuid_any = [ api_vuid_cfg, api_vuid_tmp, api_vuid_srv ]
+   #
+   api_vuid_self = 'c0' # Default preconfigured VUID
+   #
+   def __setattr__(self, *_):
+     pass
+
+ def __init__(self):
+   #
+   self.CONST = self.CONST()
+
+ def td2ms_(self, in_td):
+   return in_td.days * 86400 + in_td.seconds + in_td.microseconds / 1000000
 
  def is_json_(self, in_message):
    if not isinstance(in_message, str):

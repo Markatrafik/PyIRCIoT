@@ -44,9 +44,17 @@ def main():
   ircbot2.irc_server = "irc-iot.nsk.ru"
   ircbot2.irc_port = 6667
   ircbot2.irc_channel = '#nskoutput'
-  ircbot2.irc_define_nick_('OutPut')
+  ircbot2.irc_define_nick_('ExtBot')
   ircbot2.irc_debug = True
   ircbot2.irc_talk_with_strangers = True
+
+  # Example of IRC-IoT addresses translation:
+  #
+  # irciot2.router_graphs += [
+  # ( irciot2.do_router_translation_, {
+  #   irciot2.CONST.tag_IN_SCOPE  : 'controller@kitchen',
+  #   irciot2.CONST.tag_OUT_SCOPE : 'server@house'
+  # } )
 
   ircbot1.start_IRC_()
   ircbot2.start_IRC_()
