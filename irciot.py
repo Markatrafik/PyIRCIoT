@@ -39,7 +39,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.31'
   #
-  irciot_library_version  = '0.0.180'
+  irciot_library_version  = '0.0.181'
   #
   # IRC-IoT characters
   #
@@ -2737,6 +2737,7 @@ class PyLayerIRCIoT(object):
           try:
             out_base = base64.b32decode(defrag_buffer)
           except:
+            self.irciot_error_(self.CONST.err_BASE32_DECODING, 0)
             return ""
        else:
           out_base = bytes(defrag_buffer, 'utf-8')
@@ -3028,7 +3029,7 @@ class PyLayerIRCIoT(object):
          return False
        my_json = self.irciot_remove_text_tags_(in_json, \
          [ self.CONST.tag_MESSAGE_ID, self.CONST.tag_CHK_CRC16 ])
-       my_crc16_json = self.irciot_crc16_(bytes(my_json, 'UTF-8'))
+       my_crc16_json = self.irciot_crc16_(bytes(my_json, 'utf-8'))
        del my_json
        if (my_crc16 != my_crc16_json):
          return False
@@ -3039,7 +3040,7 @@ class PyLayerIRCIoT(object):
          return False
        my_json = self.irciot_remove_text_tags_(in_json, \
          [ self.CONST.tag_MESSAGE_ID, self.CONST.tag_CHK_CRC32 ])
-       my_crc32_json = self.irciot_crc32_(bytes(my_json, 'UTF-8'))
+       my_crc32_json = self.irciot_crc32_(bytes(my_json, 'utf-8'))
        del my_json
        if (my_crc32 != my_crc32_json):
          return False
@@ -3459,7 +3460,7 @@ class PyLayerIRCIoT(object):
   elif self.crypt_base == self.CONST.base_BASE85:
      base_big_datum = base64.b85encode(bin_big_datum)
   elif self.crypt_base == self.CONST.base_BASE32:
-     base_big_datum = base32.b32encode(bin_big_datum)
+     base_big_datum = base64.b32encode(bin_big_datum)
   else: # Unknown base encoding
      return ("", 0)
   del bin_big_datum

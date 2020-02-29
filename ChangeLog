@@ -117,3 +117,9 @@
         files: rfc1459.py, rfc2217.py and udpbrcst.py to a class irciot_shared_
         into the new separte file named: irciot_shared.py
 
+2020-02-29 18:59 GMT+7 PyIRCIoT 0.0.181 Alexey Y. Woronov <alexey@woronov.ru>
+         * In this version of the library the basic part of the PyLayerUDPb
+         class has been written that provides transport for the IRC-IoT protocol
+         messages using a UDP dgrams without IRC server, and also in the class
+         PyLayerIRC, added check of user masks for cases when IRC Nick changed.
+

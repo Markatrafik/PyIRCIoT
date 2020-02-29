@@ -20,8 +20,7 @@ class irciot_shared_(object):
      pass
 
  def __init__(self):
-   #
-   self.CONST = self.CONST()
+   pass
 
  def td2ms_(self, in_td):
    return in_td.days * 86400 + in_td.seconds + in_td.microseconds / 1000000

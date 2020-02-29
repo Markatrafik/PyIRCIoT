@@ -37,7 +37,7 @@ class PyLayerIRC(irciot_shared_):
    #
    irciot_protocol_version = '0.3.31'
    #
-   irciot_library_version  = '0.0.180'
+   irciot_library_version  = '0.0.181'
    #
    # Bot specific constants
    #
@@ -706,7 +706,7 @@ class PyLayerIRC(irciot_shared_):
          while (self.ident_run):
            my_ready = select.select([my_socket], [], [], 0)
            if my_ready[0] == []:
-             my_data = my_conn.recv(self.CONST.irc_buffer_size).decode('UTF-8')
+             my_data = my_conn.recv(self.CONST.irc_buffer_size).decode('utf-8')
              if my_data:
                for my_char in [ '\n', '\r', ' ' ]:
                  my_data = my_data.replace(my_char, '')
@@ -724,7 +724,7 @@ class PyLayerIRC(irciot_shared_):
                  my_out += "USERID : UNIX : %s\n" % self.irc_user
                else:
                  my_out += "ERROR : NO-USER\n"
-               my_conn.send(bytes(my_out, 'UTF-8'))
+               my_conn.send(bytes(my_out, 'utf-8'))
                self.ident_run = False
                break
              else:
@@ -1454,7 +1454,7 @@ class PyLayerIRC(irciot_shared_):
        return -1
      if self.irc_debug:
        self.to_log_("Sending to IRC: [" + irc_out + "]")
-     self.irc.send(bytes(irc_out + "\n", 'UTF-8'))
+     self.irc.send(bytes(irc_out + "\n", 'utf-8'))
      sleep(self.CONST.irc_micro_wait)
      irc_out = ""
      return 0
@@ -1493,9 +1493,8 @@ class PyLayerIRC(irciot_shared_):
        delta_time = 0
      if ready[0]:
        irc_input \
-        = self.irc.recv(self.CONST.irc_buffer_size).decode('UTF-8')
-       irc_input = irc_input.strip("\n")
-       irc_input = irc_input.strip("\r")
+        = self.irc.recv(self.CONST.irc_buffer_size).decode('utf-8')
+       irc_input = irc_input.strip("\n").strip("\r")
        if irc_input != "":
          if self.irc_debug:
            self.to_log_("Received from IRC: [" + irc_input + "]")
@@ -1737,6 +1736,15 @@ class PyLayerIRC(irciot_shared_):
    (irc_nick, irc_mask) = self.irc_extract_nick_mask_(in_string)
    if irc_nick == self.irc_nick_base:
      self.irc_check_and_restore_nick_()
+   my_split = in_string.split(':', 3)
+   if len(my_split) > 2:
+     new_nick = my_split[2]
+     if self.is_irc_nick_(new_nick):
+       new_mask = new_nick + irc_mask[len(irc_nick):]
+       # checking the new mask with new nick for belong to the
+       # registered user, and, if necessary, give him rights
+       my_vuid = self.irc_get_vuid_by_mask_(new_mask, self.irc_channel)
+       self.irc_umode_by_nick_mask_(new_nick, new_mask, my_vuid)
    return (in_ret, in_init, self.CONST.irc_default_wait)
 
  def func_fast_nick_(self, in_args):
