@@ -39,7 +39,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.31'
   #
-  irciot_library_version  = '0.0.181'
+  irciot_library_version  = '0.0.183'
   #
   # IRC-IoT characters
   #
@@ -333,7 +333,7 @@ class PyLayerIRCIoT(object):
   api_vuid_GRS = 'sR' # Global Resolving Service
   api_vuid_GTS = 'sT' # Global Time Service
   #
-  api_vuid_RoS = 'sr' # Primary Routing Service
+  api_vuid_PRS = 'sr' # Primary Routing Service
   #
   # IRC-IoT Base Types
   #

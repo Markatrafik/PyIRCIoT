@@ -18,6 +18,7 @@ import datetime
 import threading
 import ssl
 from queue import Queue
+from time import time
 from time import sleep
 from irciot_shared import *
 
@@ -26,76 +27,148 @@ import datetime
 class PyLayerUDPb( irciot_shared_ ):
 
  class CONST( irciot_shared_.CONST ):
-   #
-   irciot_protocol_version = '0.3.31'
-   #
-   irciot_library_version  = '0.0.181'
-   #
-   udpb_default_debug = False
-   #
-   udpb_default_port = 12345
-   udpb_default_ip   = ''
-   # ^ this is must be a Brodacast IP address of Network interface
-   #
-   udpb_queue_input  = 0
-   udpb_queue_output = 1
-   #
-   udpb_default_size = 1024 # in bytes
-   #
-   udpb_first_wait = 1
-   udpb_micro_wait = 0.1
-   udpb_latency_wait = 1
-   udpb_default_wait = 1
-   #
-   udpb_default_talk_with_strangers = True
-   #
-   def __setattr__(self, *_):
-      pass
+  #
+  irciot_protocol_version = '0.3.31'
+  #
+  irciot_library_version  = '0.0.183'
+  #
+  udpb_default_debug = False
+  #
+  udpb_default_port = 12345
+  udpb_default_ip   = ''
+  # ^ this is must be a Brodacast IP address of Network interface
+  #
+  udpb_queue_input  = 0
+  udpb_queue_output = 1
+  #
+  udpb_default_size = 1024 # in bytes
+  #
+  udpb_first_wait = 1
+  udpb_micro_wait = 0.1
+  udpb_latency_wait = 1
+  udpb_default_wait = 1
+  #
+  # 0. Unique User ID
+  # 1. User IP address (IPv4 or IPv6)
+  # 3. Additional User options
+  #
+  udpb_default_users = [
+   (  1, '10.10.10.1',     None ),
+   (  2, '192.168.1.128',  None ),
+   (  3, 'fc00::1',        None )  ]
+  #
+  udpb_default_talk_with_strangers = True
+  #
+  def __setattr__(self, *_):
+    pass
 
  def __init__(self):
-   #
-   self.CONST = self.CONST()
-   #
-   super(PyLayerUDPb, self).__init__()
-   #
-   self.udpb_task = None
-   self.udpb_run = False
-   self.udpb_debug = self.CONST.udpb_default_debug
-   #
-   self.udpb_port = self.CONST.udpb_default_port
-   self.udpb_ip   = self.CONST.udpb_default_ip
-   #
-   self.udpb_size = self.CONST.udpb_default_size
-   #
-   self.udpb_queue = [0, 0]
-   self.udpb_queue[self.CONST.udpb_queue_input  ] = Queue(maxsize=0)
-   self.udpb_queue[self.CONST.udpb_queue_output ] = Queue(maxsize=0)
-   #
-   self.udpb_queue_lock = [0, 0]
-   self.udpb_queue_lock[self.CONST.udpb_queue_input  ] = False
-   self.udpb_queue_lock[self.CONST.udpb_queue_output ] = False
-   #
-   self.udpb_talk_with_strangers \
-     = self.CONST.udpb_default_talk_with_strangers
-   #
-   self.udpb_client_sock = None
-   self.udpb_server_sock = None
-   #
-   # End of PyLayerUDPb.__init__()
+  #
+  self.CONST = self.CONST()
+  #
+  super(PyLayerUDPb, self).__init__()
+  #
+  self.udpb_task = None
+  self.udpb_run = False
+  self.udpb_debug = self.CONST.udpb_default_debug
+  #
+  self.udpb_port = self.CONST.udpb_default_port
+  self.udpb_ip   = self.CONST.udpb_default_ip
+  #
+  self.udpb_size = self.CONST.udpb_default_size
+  #
+  self.udpb_queue = [0, 0]
+  self.udpb_queue[self.CONST.udpb_queue_input  ] = Queue(maxsize=0)
+  self.udpb_queue[self.CONST.udpb_queue_output ] = Queue(maxsize=0)
+  #
+  self.udpb_queue_lock = [0, 0]
+  self.udpb_queue_lock[self.CONST.udpb_queue_input  ] = False
+  self.udpb_queue_lock[self.CONST.udpb_queue_output ] = False
+  #
+  self.udpb_users = self.CONST.udpb_default_users
+  self.udpb_anons = []
+  #
+  self.udpb_talk_with_strangers \
+    = self.CONST.udpb_default_talk_with_strangers
+  #
+  self.udpb_client_sock = None
+  self.udpb_server_sock = None
+  #
+  # End of PyLayerUDPb.__init__()
 
  def __del__(self):
-   self.stop_udpb_()
+  self.stop_udpb_()
 
  def to_log_(self, msg):
-   if not self.udpb_debug:
-     return
-   print(msg)
+  if not self.udpb_debug:
+    return
+  print(msg)
 
  def irciot_protocol_version_(self):
-   return self.CONST.irciot_protocol_version
+  return self.CONST.irciot_protocol_version
 
  def irciot_library_version_(self):
-   return self.CONST.irciot_library_version
+  return self.CONST.irciot_library_version
+
+ def udpb_handler (self, in_compatibility, in_message_pack):
+  # Warning: interface may be changed
+  (in_protocol, in_library) = in_compatibility
+  if not self.irciot_protocol_version_() == in_protocol \
+   or not self.irciot_library_version_() == in_library:
+    return False
+  my_message_pack = in_message_pack
+  if isinstance(in_message_pack, tuple):
+    my_message_pack = [ in_message_pack ]
+  if isinstance(my_message_pack, list):
+    for my_pack in my_message_pack:
+      (my_message, my_vuid) = my_pack
+      self.udpb_add_to_queue_( \
+      self.CONST.udpb_queue_output, my_message, \
+      self.CONST.udpb_micro_wait, my_vuid)
+  return True
+
+ # incomplete
+ def user_handler (self, in_compatibility, in_action, in_vuid, in_params):
+  # Warning: interface may be changed
+  (in_protocol, in_library) = in_compatibility
+  if not self.irciot_protocol_version_() == in_protocol \
+   or not self.irciot_library_version_() == in_library \
+   or not isinstance(in_action, int) \
+   or not isinstance(in_vuid, str) \
+   or not (isinstance(in_params, str) or in_params == None):
+    return (False, None)
+  my_vt = None # VUID Type
+  my_user = None
+  my_anon = None
+  my_opt  = None
+  if in_vuid in [ \
+    self.CONST.api_vuid_cfg, \
+    self.CONST.api_vuid_tmp, \
+    self.CONST.api_vuid_all ]:
+    my_vt = in_vuid
+  else:
+    my_re = re.search("%s(\d+)" \
+      % self.CONST.api_vuid_cfg, in_vuid)
+    if my_re:
+      my_vt = self.CONST.api_vuid_cfg
+      my_user = self.udpb_cfg_get_user_struct_by_vuid_(in_vuid)
+      if my_user != None:
+        my_time = self.CONST.api_epoch_maximal
+        ( my_uid, my_ip, my_opt ) = my_user
+    else:
+      my_re = re.search("%s(\d+)" \
+        % self.CONST.api_vuid_tmp, in_vuid)
+      if my_re:
+        my_vt = self.CONST.api_vuid_tmp
+        my_anon = self.udpb_track_get_anons_by_vuid_(in_vuid)
+        if my_anon != None:
+          ( my_uid, my_ip, my_time ) = my_anon
+      else:
+        return (False, None)
+
+  return (False, None)
+  #
+  # End of user_handler_()
 
  def udpb_setup_(self):
   def my_init_socket_(in_af_inet):
@@ -119,12 +192,12 @@ class PyLayerUDPb( irciot_shared_ ):
   else:
     return
   self.udpb_client_sock = my_init_socket_(my_af_inet)
-  #try:
-  self.udpb_client_sock.bind((self.udpb_ip, self.udpb_port))
-  self.udpb_server_sock = my_init_socket_(my_af_inet)
-  self.udpb_server_sock.settimeout(self.CONST.udpb_default_wait)
-  #except:
-  #  return
+  try:
+    self.udpb_client_sock.bind((self.udpb_ip, self.udpb_port))
+    self.udpb_server_sock = my_init_socket_(my_af_inet)
+    self.udpb_server_sock.settimeout(self.CONST.udpb_default_wait)
+  except:
+    return
   #
   # End of udpb_setup_()
 
@@ -145,14 +218,53 @@ class PyLayerUDPb( irciot_shared_ ):
     pass
   #
   # End of stop_udpb_()
+  
+ def udpb_cfg_get_user_struct_by_vuid_(in_vuid):
+  for my_user in self.udpb_users:
+    ( my_id, my_ip, my_opt ) = my_user
+    if in_vuid == "%c%d" % (self.CONST.aip_vuid_cfg, my_id):
+      return my_user
+  return None
 
- # incomplete
  def udpb_track_get_ip_by_vuid_(self, in_vuid):
+  for my_user in self.udpb_users:
+    ( my_id, my_ip, my_opt ) = my_user
+    if in_vuid == "%c%d" % (self.CONST.api_vuid_cfg, my_id):
+      return my_ip
+  for my_anon in self.udpb_anons:
+    ( my_id, my_ip, my_time ) = my_anon
+    if in_vuid == "%c%d" % (self.CONST.api_vuid_tmp, my_id):
+      return my_ip
   return ""
 
- # incomplete
  def udpb_track_get_vuid_by_ip_(self, in_ip):
-  return self.CONST.api_vuid_all
+  if not self.is_ip_address_(in_ip):
+    return None
+  for my_user in self.udpb_users:
+    ( my_id, my_ip, my_opt ) = my_user
+    if in_ip == my_ip:
+      return "%c%d" % (self.CONST.api_vuid_cfg, my_id)
+  for my_anon in self.udpb_anons:
+    ( my_id, my_ip, my_time ) = my_anon
+    if in_ip == my_ip:
+      return "%c%d" % (self.CONST.api_vuid_tmp, my_id)
+  return None
+
+ def udpb_track_add_vuid_by_ip_(self, in_ip):
+  if not self.is_ip_address_(in_ip):
+    return None
+  new_id = self.CONST.api_first_temporal_vuid
+  for my_anon in self.udpb_anons:
+    ( my_id, my_ip, my_time ) = my_anon
+    if new_id < my_id:
+      new_id = my_id
+  my_time = int(time())
+  self.udpb_anons.append(( new_id, in_ip, my_time ))
+  return "%c%d" % (self.CONST.api_vuid_tmp, new_id)
+
+ # incomplete
+ def udpb_track_clear_anons_(self):
+  pass
 
  def udpb_check_queue_(self, in_queue_id):
   old_queue_lock = self.udpb_queue_lock[in_queue_id]
@@ -262,16 +374,15 @@ class PyLayerUDPb( irciot_shared_ ):
    #
    self.udpb_setup_()
    #
-   try:
-     udpb_init = 0
-     udpb_wait = self.CONST.udpb_first_wait
-     udpb_message = ""
-     udpb_ret = 0
-     udpb_ip = ""
-     udpb_vuid = "%s0" % self.CONST.api_vuid_cfg
-
-     while (self.udpb_run):
-
+   udpb_init = 0
+   udpb_wait = self.CONST.udpb_first_wait
+   udpb_message = ""
+   udpb_ret = 0
+   udpb_ip = ""
+   udpb_vuid = "%s0" % self.CONST.api_vuid_cfg
+   #
+   while (self.udpb_run):
+     try:
        if not self.udpb_client_sock or not self.udpb_server_sock:
          self.udpb_setup_()
          sleep(self.CONST.udpb_default_wait)
@@ -289,12 +400,15 @@ class PyLayerUDPb( irciot_shared_ ):
            = self.udpb_receive_(udpb_wait)
          if self.is_json_(udpb_message):
            udpb_vuid = self.udpb_track_get_vuid_by_ip_( udpb_ip )
-           if (self.udpb_talk_with_strangers \
-            and udpb_vuid[0] == self.CONST.api_vuid_tmp) \
-            or (udpb_vuid[0] in self.CONST.api_vuid_any \
-            and udpb_vuid[0] != self.CONST.api_vuid_tmp):
-             self.udpb_add_to_queue_(self.CONST.udpb_queue_input, \
-               udpb_message, self.CONST.udpb_default_wait, udpb_vuid)
+           if udpb_vuid == None:
+             udpb_vuid = self.udpb_track_add_vuid_by_ip_( udpb_ip )
+           if isinstance(udpb_vuid, str):
+             if (self.udpb_talk_with_strangers \
+              and udpb_vuid[0] == self.CONST.api_vuid_tmp) \
+              or (udpb_vuid[0] in self.CONST.api_vuid_any \
+              and udpb_vuid[0] != self.CONST.api_vuid_tmp):
+               self.udpb_add_to_queue_(self.CONST.udpb_queue_input, \
+                 udpb_message, self.CONST.udpb_default_wait, udpb_vuid)
 
        udpb_wait = self.CONST.udpb_default_wait
 
@@ -314,8 +428,9 @@ class PyLayerUDPb( irciot_shared_ ):
 
        sleep(self.CONST.udpb_micro_wait)
 
-   except socket.error:
-     udpb_init = 0
+     except socket.error:
+       udpb_init = 0
+       sleep(self.CONST.udpb_default_wait)
    #
    # End of udpb_process_()
 

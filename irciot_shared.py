@@ -7,6 +7,20 @@ class irciot_shared_(object):
 
  class CONST(object):
    #
+   api_GET_LMID = 101 # Get last Message ID
+   api_SET_LMID = 102 # Set last Message ID
+   api_GET_OMID = 111 # Get Own last Message ID
+   api_SET_OMID = 112 # Set Own last Message ID
+   api_GET_EKEY = 301 # Get Encryption Key
+   api_SET_EKEY = 302 # Set Encryption Key
+   api_GET_EKTO = 351 # Get Encryption Key Timeout
+   api_SET_EKTO = 352 # Set Encyrption Key Timeout
+   api_GET_BKEY = 501 # Get Blockchain key
+   api_SET_BKEY = 502 # Set Blockchain Key
+   api_GET_BKTO = 551 # Get Blockchain Key Timeout
+   api_SET_BKTO = 552 # Set Blockchain Key Timeout
+   api_GET_VUID = 700 # Get list of Virutal User IDs
+   #
    api_vuid_cfg = 'c' # VUID prefix for users from config
    api_vuid_tmp = 't' # VUID prefix for temporal users
    api_vuid_srv = 's' # VUID prefix for IRC-IoT Services
@@ -15,6 +29,20 @@ class irciot_shared_(object):
    api_vuid_any = [ api_vuid_cfg, api_vuid_tmp, api_vuid_srv ]
    #
    api_vuid_self = 'c0' # Default preconfigured VUID
+   #
+   # Basic IRC-IoT Services
+   #
+   api_vuid_CRS = 'sC' # Cryptographic Repository Service
+   api_vuid_GDS = 'sD' # Global Dictionary Service
+   api_vuid_GRS = 'sR' # Global Resolving Service
+   api_vuid_GTS = 'sT' # Global Time Service
+   #
+   api_vuid_PRS = 'sr' # Primary Routing Service
+   #
+   api_first_temporal_vuid = 1000
+   #
+   # for Python 3.x: 19 Jan 3001 08:00 UTC
+   api_epoch_maximal = 32536799999
    #
    def __setattr__(self, *_):
      pass
@@ -29,7 +57,7 @@ class irciot_shared_(object):
    if not isinstance(in_message, str):
      return False
    try:
-     json_object = json.loads(in_message)
+     my_json = json.loads(in_message)
    except ValueError:
      return False
    return True

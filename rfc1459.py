@@ -31,13 +31,13 @@ if DO_debug_library:
 
 import datetime
 
-class PyLayerIRC(irciot_shared_):
+class PyLayerIRC( irciot_shared_ ):
 
- class CONST(object):
+ class CONST( irciot_shared_.CONST ):
    #
    irciot_protocol_version = '0.3.31'
    #
-   irciot_library_version  = '0.0.181'
+   irciot_library_version  = '0.0.183'
    #
    # Bot specific constants
    #
@@ -99,37 +99,6 @@ class PyLayerIRC(irciot_shared_):
       [ irc_aop, irc_unban ], None, None, None, None, None, None ) ]
    #
    irc_default_talk_with_strangers = False
-   irc_first_temporal_vuid = 1000
-   #
-   api_GET_LMID = 101 # Get last Message ID
-   api_SET_LMID = 102 # Set last Message ID
-   api_GET_OMID = 111 # Get Own last Message ID
-   api_SET_OMID = 112 # Set Own last Message ID
-   api_GET_EKEY = 301 # Get Encryption Key
-   api_SET_EKEY = 302 # Set Encryption Key
-   api_GET_EKTO = 351 # Get Encryption Key Timeout
-   api_SET_EKTO = 352 # Set Encyrption Key Timeout
-   api_GET_BKEY = 501 # Get Blockchain key
-   api_SET_BKEY = 502 # Set Blockchain Key
-   api_GET_BKTO = 551 # Get Blockchain Key Timeout
-   api_SET_BKTO = 552 # Set Blockchain Key Timeout
-   api_GET_VUID = 700 # Get list of Virutal User IDs
-   #
-   api_vuid_cfg = 'c' # VUID prefix for users from config
-   api_vuid_tmp = 't' # VUID prefix for temporal users
-   api_vuid_srv = 's' # VUID prefix for IRC-IoT Services
-   api_vuid_all = '*' # Means All users VUIDs when sending messages
-   #
-   api_vuid_self = 'c0' # Default preconfigured VUID
-   #
-   # Basic IRC-IoT Services
-   #
-   api_vuid_CRS = 'sC' # Cryptographic Repository Service
-   api_vuid_GDS = 'sD' # Global Dictionary Service
-   api_vuid_GRS = 'sR' # Global Resolving Service
-   api_vuid_GTS = 'sT' # Global Time Service
-   #
-   api_vuid_RoS = 'sr' # Primary Routing Service
    #
    irc_queue_input  = 0
    irc_queue_output = 1
@@ -644,7 +613,7 @@ class PyLayerIRC(irciot_shared_):
    self.irc_talk_with_strangers = \
      self.CONST.irc_default_talk_with_strangers
    self.irc_last_temporal_vuid = \
-     self.CONST.irc_first_temporal_vuid
+     self.CONST.api_first_temporal_vuid
    #
    self.irc_queue = [0, 0]
    self.irc_queue[self.CONST.irc_queue_input  ] = Queue(maxsize=0)
@@ -801,17 +770,15 @@ class PyLayerIRC(irciot_shared_):
    if not self.irciot_protocol_version_() == in_protocol \
     or not self.irciot_library_version_() == in_library:
      return False
-   if isinstance(in_message_pack, list):
-     for my_pack in in_message_pack:
+   my_message_pack = in_message_pack
+   if isinstance(in_message_pack, tuple):
+     my_message_pack = [ in_message_pack ]
+   if isinstance(my_message_pack, list):
+     for my_pack in my_message_pack:
        (my_message, my_vuid) = my_pack
        self.irc_add_to_queue_( \
          self.CONST.irc_queue_output, my_message, \
          self.CONST.irc_micro_wait, my_vuid)
-   else:
-     (my_message, my_vuid) = in_message_pack
-     self.irc_add_to_queue_( \
-       self.CONST.irc_queue_output, my_message, \
-       self.CONST.irc_micro_wait, my_vuid)
    return True
 
  def user_handler (self, in_compatibility, in_action, in_vuid, in_params):

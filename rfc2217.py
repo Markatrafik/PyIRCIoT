@@ -25,13 +25,13 @@ from irciot_shared import *
 
 import datetime
 
-class PyLayerCOM(irciot_shared_):
+class PyLayerCOM( irciot_shared_ ):
 
- class CONST(object):
+ class CONST( irciot_shared_.CONST ):
    #
    irciot_protocol_version = '0.3.31'
    #
-   irciot_library_version  = '0.0.181'
+   irciot_library_version  = '0.0.183'
    #
    com_default_debug = False
    #
@@ -42,36 +42,6 @@ class PyLayerCOM(irciot_shared_):
    com_first_wait = 1
    com_micro_wait = 0.1
    com_default_wait = 1
-   #
-   api_GET_LMID = 101 # Get Last Message ID
-   api_SET_LMID = 102 # Set Last Message ID
-   api_GET_OMID = 111 # Get Own last Message ID
-   api_SET_OMID = 112 # Set Own last Message ID
-   api_GET_EKEY = 301 # Get Encryption Key
-   api_SET_EKEY = 302 # Set Encryption Key
-   api_GET_EKTO = 351 # Get Encryption Key Timeout
-   api_SET_EKTO = 352 # Set Encryption Key Timeout
-   api_GET_BKEY = 501 # Get Blockchain key
-   api_SET_BKEY = 502 # Set Blockchain Key
-   api_GET_BKTO = 551 # Get Blockchain Key Timeout
-   api_SET_BKTO = 552 # Set Blockchain Key Timeout
-   api_GET_VUID = 700 # Get list of Virtual User IDs
-   #
-   api_vuid_cfg = 'c' # VUID prefix for users from config
-   api_vuid_tmp = 't' # VUID prefix for temporal users
-   api_vuid_srv = 's' # VUID prefix for IRC-IoT Services
-   api_vuid_all = '*' # Means All users VUIDs when sending messages
-   #
-   api_vuid_self = 'c0' # Default preconfigured VUID
-   #
-   # Basic IRC-IoT Services
-   #
-   api_vuid_CRS = 'sC' # Cryptographic Repository Service
-   api_vuid_GDS = 'sD' # Global Dictionary Service
-   api_vuid_GRS = 'sR' # Global Resolving Service
-   api_vuid_GTS = 'sT' # Global Time Service
-   #
-   api_vuid_PRS = 'sr' # Primary Routing Service
    #
    com_queue_input  = 0
    com_queue_output = 1
