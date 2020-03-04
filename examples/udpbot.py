@@ -54,11 +54,10 @@ def main():
   # don't use port lower 1024 for testing!!!
 
   udpbot.udpb_port   = 12345
-  udpbot.udpb_ip     = ''
   udpbot.udpb_debug  = True
   udpbot.udpb_talk_with_strangers = True
 
-  # udpbot.udpb_init_by_interface_('eth0')
+  udpbot.udpb_init_by_interface_('eth0')
 
   udpbot.start_udpb_()
 
@@ -77,12 +76,12 @@ def main():
     old_flag = fcntl.fcntl(stdin_fd, fcntl.F_GETFL)
     fcntl.fcntl(stdin_fd, fcntl.F_SETFL, old_flag | os.O_NONBLOCK)
 
-  udpb_vuid = "c0" # Bot itself
+  udpb_vuid = udpbot.CONST.api_vuid_all
 
   try:
    while (udpbot.udpb_run):
 
-    if random.randint(1,100) > 0:
+    if random.randint(1,100) > 95:
       my_datum = {
         irciot.CONST.tag_OBJECT_TYPE: 'xtest',
         irciot.CONST.tag_SRC_ADDR:    '',
@@ -90,8 +89,9 @@ def main():
         irciot.CONST.tag_DATE_TIME:
         irciot.irciot_get_current_datetime_()
       }
-      my_pack = irciot.irciot_encap_all_(my_datum, udpb_vuid)
+      my_pack = irciot.irciot_encap_all_(my_datum, None)
       udpbot.udpb_output_all_(my_pack, 1)
+      time.sleep(1)
 
     (udpb_message, udpb_wait, udpb_vuid) \
       = udpbot.udpb_check_queue_(udpbot.CONST.udpb_queue_input)
