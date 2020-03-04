@@ -37,7 +37,7 @@ class PyLayerIRC( irciot_shared_ ):
    #
    irciot_protocol_version = '0.3.31'
    #
-   irciot_library_version  = '0.0.183'
+   irciot_library_version  = '0.0.185'
    #
    # Bot specific constants
    #
@@ -2024,10 +2024,8 @@ class PyLayerIRC( irciot_shared_ ):
    for my_pack in in_messages_packs:
      (my_messages, my_vuid) = my_pack
      if isinstance(my_messages, str):
-       self.irc_add_to_queue_( \
-         self.CONST.irc_queue_output, \
-         my_messages, in_wait, my_vuid)
-     elif isinstance(my_messages, list):
+       my_messages = [ my_messages ]
+     if isinstance(my_messages, list):
        for my_message in my_messages:
          self.irc_add_to_queue_( \
            self.CONST.irc_queue_output, \

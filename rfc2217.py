@@ -31,7 +31,7 @@ class PyLayerCOM( irciot_shared_ ):
    #
    irciot_protocol_version = '0.3.31'
    #
-   irciot_library_version  = '0.0.183'
+   irciot_library_version  = '0.0.185'
    #
    com_default_debug = False
    #

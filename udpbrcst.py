@@ -16,6 +16,7 @@ import select
 import json
 import datetime
 import threading
+import ifaddr
 import ssl
 from queue import Queue
 from time import time
@@ -30,7 +31,7 @@ class PyLayerUDPb( irciot_shared_ ):
   #
   irciot_protocol_version = '0.3.31'
   #
-  irciot_library_version  = '0.0.183'
+  irciot_library_version  = '0.0.185'
   #
   udpb_default_debug = False
   #
@@ -88,11 +89,15 @@ class PyLayerUDPb( irciot_shared_ ):
   self.udpb_users = self.CONST.udpb_default_users
   self.udpb_anons = []
   #
+  self.udpb_local_ip_addresses = []
+  #
   self.udpb_talk_with_strangers \
     = self.CONST.udpb_default_talk_with_strangers
   #
   self.udpb_client_sock = None
   self.udpb_server_sock = None
+  #
+  self.udpb_update_local_ip_addresses_()
   #
   # End of PyLayerUDPb.__init__()
 
@@ -170,6 +175,47 @@ class PyLayerUDPb( irciot_shared_ ):
   #
   # End of user_handler_()
 
+ def udpb_update_local_ip_addresses_(self):
+  new_ip_addresses = []
+  try:
+    my_adapters = ifaddr.get_adapters()
+    for my_adapter in my_adapters:
+      for my_ip in my_adapter.ips:
+        if self.is_ipv4_address_(my_ip.ip):
+          new_ip_addresses += [ my_ip.ip ]
+        elif isinstance(my_ip.ip, tuple):
+          ( my_ipv6, my_ipv6p1, my_ipv6p2 ) = my_ip.ip
+          if self.is_ipv6_address_(my_ipv6):
+            new_ip_addresses += [ my_ipv6 ]
+      if new_ip_addresses != []:
+        self.udpb_local_ip_addresses = new_ip_addresses
+  except:
+    pass
+  #
+  # End of udpb_update_local_ip_addresses_():
+
+ def udpb_init_by_interface_(self, in_interface, in_ipv6 = False):
+  if not isinstance(in_interface, str) \
+  or not isinstance(in_ipv6, bool):
+    return False
+  try:
+    my_adapters = ifaddr.get_adapters()
+    for my_adapter in my_adapters:
+      if my_adapter.name == in_interface:
+        for my_ip in my_adapter.ips:
+          if my_adapter.name == in_interface:
+            if not in_ipv6 and self.is_ipv4_address_(my_ip.ip):
+              break
+            elif in_ipv6 and isinstance(my_ip.ip, tuple):
+              ( my_ipv6, my_ipv6p1, my_ipv6p2 ) = my_ip.ip
+              if self.is_ipv6_address_(my_ipv6):
+                break
+  except:
+    return False
+  return False
+  #
+  # End of udpb_init_by_interface_()
+
  def udpb_setup_(self):
   def my_init_socket_(in_af_inet):
     my_sock = socket.socket(in_af_inet, \
@@ -218,7 +264,7 @@ class PyLayerUDPb( irciot_shared_ ):
     pass
   #
   # End of stop_udpb_()
-  
+
  def udpb_cfg_get_user_struct_by_vuid_(in_vuid):
   for my_user in self.udpb_users:
     ( my_id, my_ip, my_opt ) = my_user
@@ -325,6 +371,8 @@ class PyLayerUDPb( irciot_shared_ ):
       ( my_ip, my_port ) = my_addr
       if not self.is_ip_address_(my_ip) or not self.is_ip_port_(my_port):
         return ( -1, "", 0, "" )
+      if my_ip in self.udpb_local_ip_addresses + [ self.udpb_ip ]:
+        return ( -1, "", delta_time, "" )
       udpb_input = my_data.decode('utf-8')
       udpb_input = udpb_input.strip('\n').strip('\r')
       if udpb_input != "":
@@ -357,7 +405,7 @@ class PyLayerUDPb( irciot_shared_ ):
     return False
   else:
     my_addr = self.udpb_track_get_ip_by_vuid_(in_vuid)
-    if not self.is_ip_address_(my_ip):
+    if not self.is_ip_address_(my_addr):
       return False
   if self.udpb_debug:
     self.to_log_("Sending to UDP(%s:%s): <" \
@@ -368,6 +416,24 @@ class PyLayerUDPb( irciot_shared_ ):
   return True
   #
   # End of udpb_send_()
+
+ def udpb_output_all_(self, in_messages_packs, in_wait = None):
+   if not isinstance(in_messages_packs, list):
+     return
+   if not isinstance(in_wait, int) and \
+      not isinstance(in_wait, float):
+     in_wait = self.CONST.udpb_default_wait
+   for my_pack in in_messages_packs:
+     (my_messages, my_vuid) = my_pack
+     if isinstance(my_messages, str):
+       my_messages = [ my_messages ]
+     if isinstance(my_messages, list):
+       for my_message in my_messages:
+         self.udpb_add_to_queue_( \
+           self.CONST.udpb_queue_output, \
+           my_message, in_wait, my_vuid)
+   #
+   # End of udpb_output_all_()
 
  # incomplete
  def udpb_process_(self):
@@ -389,11 +455,6 @@ class PyLayerUDPb( irciot_shared_ ):
 
        if udpb_init < 2:
          udpb_init += 1
-
-       if udpb_init == 1:
-         if self.udpb_debug:
-           # This is test stuff, must be removed later:
-           self.udpb_send_('{"hello":"world!"}')
 
        if udpb_init > 0:
          ( udpb_ret, udpb_message, self.delta_time, udpb_ip ) \

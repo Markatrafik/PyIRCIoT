@@ -15,14 +15,14 @@ elif os.name == "posix":
 #import subprocess
 
 from pprint import pprint
-#try: # need for development
-from irciot import PyLayerIRCIoT
-from udpbrcst import PyLayerUDPb
-#except:
-#  print("\033[1mWarning: using pip installed libraries\033[0m")
-#  time.sleep(3)
-#  from PyIRCIoT.irciot import PyLayerIRCIoT
-#  from PyIRCIoT.rfc1459 import PyLayerIRC
+try: # need for development
+  from irciot import PyLayerIRCIoT
+  from udpbrcst import PyLayerUDPb
+except:
+  print("\033[1mWarning: using pip installed libraries\033[0m")
+  time.sleep(3)
+  from PyIRCIoT.irciot import PyLayerIRCIoT
+  from PyIRCIoT.udpbrcst import PyLayerUDPb
 
 def main():
 
@@ -47,7 +47,8 @@ def main():
 
   # irciot.udpb_pointer = udpbot.udpb_handler
   # irciot.user_pointer = udpbot.user_handler
-  irciot.ldict_file = "./ldict.json"
+
+  irciot.ldict_file = "ldict.json"
 
   # Warning: Be careful with UDP port number
   # don't use port lower 1024 for testing!!!
@@ -56,6 +57,8 @@ def main():
   udpbot.udpb_ip     = ''
   udpbot.udpb_debug  = True
   udpbot.udpb_talk_with_strangers = True
+
+  # udpbot.udpb_init_by_interface_('eth0')
 
   udpbot.start_udpb_()
 
@@ -79,6 +82,17 @@ def main():
   try:
    while (udpbot.udpb_run):
 
+    if random.randint(1,100) > 0:
+      my_datum = {
+        irciot.CONST.tag_OBJECT_TYPE: 'xtest',
+        irciot.CONST.tag_SRC_ADDR:    '',
+        irciot.CONST.tag_DST_ADDR:    '',
+        irciot.CONST.tag_DATE_TIME:
+        irciot.irciot_get_current_datetime_()
+      }
+      my_pack = irciot.irciot_encap_all_(my_datum, udpb_vuid)
+      udpbot.udpb_output_all_(my_pack, 1)
+
     (udpb_message, udpb_wait, udpb_vuid) \
       = udpbot.udpb_check_queue_(udpbot.CONST.udpb_queue_input)
 
@@ -86,6 +100,7 @@ def main():
        print("udpb_message=[\033[0;44m%s\033[0m]" % udpb_message)
 
        if (irciot.is_irciot_(udpb_message)):
+
           udpb_json = irciot.irciot_deinencap_(udpb_message, udpb_vuid)
           if (udpb_json != ""):
              print("Datumset: [\033[0;41m" + str(udpb_json) + "\033[0m]", "\r")
