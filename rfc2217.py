@@ -19,7 +19,10 @@ import pyserial
 import ssl
 from queue import Queue
 from time import sleep
-from irciot_shared import *
+try: # insecure, but for development
+  from irciot_shared import *
+except:
+  from PyIRCIoT.irciot_shared import *
 
 #from pprint import pprint
 
@@ -31,7 +34,7 @@ class PyLayerCOM( irciot_shared_ ):
    #
    irciot_protocol_version = '0.3.31'
    #
-   irciot_library_version  = '0.0.185'
+   irciot_library_version  = '0.0.187'
    #
    com_default_debug = False
    #
@@ -146,17 +149,14 @@ class PyLayerCOM( irciot_shared_ ):
     or not self.irciot_library_version_() == in_library:
      return False
    try:
+     if isinstance(in_message_pack, tuple):
+       in_message_pack = [ in_message_pack ]
      if isinstance(in_message_pack, list):
        for my_pack in in_message_pack:
          (my_message, my_vuid) = my_pack
          self.com_add_to_queue_( \
            self.CONST.com_queue_output, my_message, \
            self.CONST.com_micro_wait, my_vuid)
-     else:
-       (my_message, my_vuid) = in_message_pack
-       self.com_add_to_queue_( \
-         self.CONST.com_queue_output, my_message, \
-         self.CONST.com_micro_wait, my_vuid)
    except:
      return False
    return True
@@ -302,10 +302,8 @@ class PyLayerCOM( irciot_shared_ ):
    for my_pack in in_messages_packs:
      (my_messages, my_vuid) = my_pack
      if isinstance(my_messages, str):
-       self.com_add_to_queue_( \
-         self.CONST.com_queue_output, \
-         my_messages, in_wait, my_vuid)
-     elif isinstance(my_messages, list):
+       my_messages = [ my_messages ]
+     if isinstance(my_messages, list):
        for my_message in my_messages:
          self.com_add_to_queue_( \
            self.CONST.com_queue_output, \

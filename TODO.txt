@@ -27,7 +27,3 @@
  ............: PendingDeprecationWarning: import 'imp' module;
   Figure out : ResourceWarning: unclosed file 'BufferedReader'
 
-  2020-02-25 : When the BASE32 coding is used, fragmented set
- ............: of the IRC-IoT messages are not defragmented.
-  Fix needed : The method irciot_deinencap_() return nothing.
-

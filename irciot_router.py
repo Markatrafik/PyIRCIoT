@@ -15,7 +15,10 @@
 #
 CAN_debug_library  = False
 
-from irciot import PyLayerIRCIoT
+try: # insecure, but for development
+  from irciot import PyLayerIRCIoT
+except:
+  from PyIRCIoT.irciot import PyLayerIRCIoT
 from copy import deepcopy
 from time import time
 import random
@@ -27,7 +30,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   #
   irciot_router_protocol_version = '0.3.31'
   #
-  irciot_router_library_version = '0.0.185'
+  irciot_router_library_version = '0.0.187'
   #
   default_maximal_detect_dup_messages = 128
   #

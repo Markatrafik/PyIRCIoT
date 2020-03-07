@@ -35,7 +35,7 @@ class PyLayerUDPb( irciot_shared_ ):
   #
   irciot_protocol_version = '0.3.31'
   #
-  irciot_library_version  = '0.0.185'
+  irciot_library_version  = '0.0.187'
   #
   udpb_default_debug = False
   #
@@ -331,9 +331,8 @@ class PyLayerUDPb( irciot_shared_ ):
   self.udpb_anons.append(( new_id, in_ip, my_time ))
   return "%c%d" % (self.CONST.api_vuid_tmp, new_id)
 
- # incomplete
  def udpb_track_clear_anons_(self):
-  pass
+  self.udpb_anons = []
 
  def udpb_check_queue_(self, in_queue_id):
   old_queue_lock = self.udpb_queue_lock[in_queue_id]

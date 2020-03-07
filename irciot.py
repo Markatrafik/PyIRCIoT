@@ -39,7 +39,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.31'
   #
-  irciot_library_version  = '0.0.185'
+  irciot_library_version  = '0.0.187'
   #
   # IRC-IoT characters
   #
@@ -707,34 +707,34 @@ class PyLayerIRCIoT(object):
 
  def irciot_crc16_(self, in_data):
   if not isinstance(in_data, bytes):
-     return None
+    return None
   try:
-     my_crc = 0x0000
-     for my_ch in in_data:
-       my_rot = c_ushort(my_crc >> 8).value
-       my_idx = ((my_crc ^ my_ch) & 0x00ff)
-       my_tab = self.crc16_table[my_idx]
-       my_crc = my_rot ^ int(my_tab, 0)
-     my_crc = my_crc.to_bytes(2,'little')
-     return "%2.2x%2.2x" \
-       % (my_crc[1], my_crc[0])
+    my_crc = 0x0000
+    for my_ch in in_data:
+      my_rot = c_ushort(my_crc >> 8).value
+      my_idx = ((my_crc ^ my_ch) & 0x00ff)
+      my_tab = self.crc16_table[my_idx]
+      my_crc = my_rot ^ int(my_tab, 0)
+    my_crc = my_crc.to_bytes(2,'little')
+    return "%2.2x%2.2x" \
+      % (my_crc[1], my_crc[0])
   except:
-     return None
+    return None
   #
   # End of irciot_crc16_()
 
  def irciot_crc32_(self, in_data):
   if not isinstance(in_data, bytes):
-     return None
+    return None
   try:
-     my_crc = self.crypt_ZLIB.crc32(in_data) & 0xFFFFFFFF
-     my_crc = my_crc.to_bytes(4,'little')
-     my_out = ""
-     for my_idx in range(3, -1, -1):
-       my_out += "%2.2x" % my_crc[my_idx]
-     return my_out
+    my_crc = self.crypt_ZLIB.crc32(in_data) & 0xFFFFFFFF
+    my_crc = my_crc.to_bytes(4,'little')
+    my_out = ""
+    for my_idx in range(3, -1, -1):
+      my_out += "%2.2x" % my_crc[my_idx]
+    return my_out
   except:
-     return None
+    return None
   #
   # End of irciot_crc32_()
 
@@ -2607,6 +2607,13 @@ class PyLayerIRCIoT(object):
   #
   # End of irciot_clear_defrag_chain_()
 
+ def irciot_add_padding_(self, in_buffer, in_padding):
+  my_count = in_padding - (len(in_buffer) % in_padding)
+  if my_count > 0:
+    for my_idx in range(my_count):
+      in_buffer += '='
+  return in_buffer
+
  def irciot_defragmentation_(self, in_enc, in_header, \
    orig_json, in_vuid = None):
   (my_dt, my_ot, my_src, my_dst, \
@@ -2719,10 +2726,7 @@ class PyLayerIRCIoT(object):
        my_base = self.irciot_crypto_get_base_(my_crypt_method)
        if my_base == self.CONST.base_BASE64:
           try:
-            my_count  = 4 - (len(defrag_buffer) % 4)
-            if my_count > 0:
-              for my_idx in range(my_count):
-                defrag_buffer += '='
+            defrag_buffer = self.irciot_add_padding_(defrag_buffer, 4)
             out_base = base64.b64decode(defrag_buffer)
           except:
             self.irciot_error_(self.CONST.err_BASE64_DECODING, 0)
@@ -2735,6 +2739,7 @@ class PyLayerIRCIoT(object):
             return ""
        elif my_base == self.CONST.base_BASE32:
           try:
+            defrag_buffer = self.irciot_add_padding_(defrag_buffer, 8)
             out_base = base64.b32decode(defrag_buffer)
           except:
             self.irciot_error_(self.CONST.err_BASE32_DECODING, 0)

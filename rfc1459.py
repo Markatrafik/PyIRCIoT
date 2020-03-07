@@ -24,7 +24,10 @@ import threading
 import ssl
 from queue import Queue
 from time import sleep
-from irciot_shared import *
+try: # insecure, but for development
+  from irciot_shared import *
+except:
+  from PyIRCIoT.irciot_shared import *
 
 if DO_debug_library:
   from pprint import pprint
@@ -37,7 +40,7 @@ class PyLayerIRC( irciot_shared_ ):
    #
    irciot_protocol_version = '0.3.31'
    #
-   irciot_library_version  = '0.0.185'
+   irciot_library_version  = '0.0.187'
    #
    # Bot specific constants
    #
