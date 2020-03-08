@@ -70,6 +70,8 @@ class PyLayerUDPb( irciot_shared_ ):
 
  def __init__(self):
   #
+  import os
+  #
   self.CONST = self.CONST()
   #
   super(PyLayerUDPb, self).__init__()
@@ -103,6 +105,8 @@ class PyLayerUDPb( irciot_shared_ ):
   #
   self.udpb_client_sock = None
   self.udpb_server_sock = None
+  #
+  self.udpb_os_name = os.name
   #
   self.udpb_update_local_ip_addresses_()
   #
@@ -191,9 +195,9 @@ class PyLayerUDPb( irciot_shared_ ):
       for my_ip in my_adapter.ips:
         if self.is_ipv4_address_(my_ip.ip):
           new_ip_addresses += [ my_ip.ip ]
-          my_net = IPv4Network(my_ip.ip \
+          my_net = ipaddress.IPv4Network(my_ip.ip \
             + '/%d' % my_ip.network_prefix, strict = False)
-          my_boradcast = '%s' % my_net.broadcast_address
+          my_broadcast = '%s' % my_net.broadcast_address
           new_ip_broadcasts += [ my_broadcast ]
           del my_broadcast
           del my_net
@@ -217,21 +221,23 @@ class PyLayerUDPb( irciot_shared_ ):
   try:
     my_adapters = ifaddr.get_adapters()
     for my_adapter in my_adapters:
-      if my_adapter.name == in_interface:
+      my_adapter_name = my_adapter.name
+      if isinstance(my_adapter_name, bytes):
+        my_adapter_name = str(my_adapter_name, 'utf-8')
+      if my_adapter_name == in_interface:
         for my_ip in my_adapter.ips:
-          if my_adapter.name == in_interface:
-            if not in_ipv6 and self.is_ipv4_address_(my_ip.ip):
-              self.udpb_ip = my_ip.ip
-              my_net = ipaddress.IPv4Network(my_ip.ip \
-                + '/%d' % my_ip.network_prefix, strict = False)
-              self.udpb_ip_broadcast \
-                = '%s' % my_net.broadcast_address
+          if not in_ipv6 and self.is_ipv4_address_(my_ip.ip):
+            self.udpb_ip = my_ip.ip
+            my_net = ipaddress.IPv4Network(my_ip.ip \
+              + '/%d' % my_ip.network_prefix, strict = False)
+            self.udpb_ip_broadcast \
+              = '%s' % my_net.broadcast_address
+            break
+          elif in_ipv6 and isinstance(my_ip.ip, tuple):
+            ( my_ipv6, my_ipv6p1, my_ipv6p2 ) = my_ip.ip
+            if self.is_ipv6_address_(my_ipv6):
+              self.udpb_ip = my_ipv6
               break
-            elif in_ipv6 and isinstance(my_ip.ip, tuple):
-              ( my_ipv6, my_ipv6p1, my_ipv6p2 ) = my_ip.ip
-              if self.is_ipv6_address_(my_ipv6):
-                self.udpb_ip = my_ipv6
-                break
   except:
     return False
   return False
@@ -239,11 +245,15 @@ class PyLayerUDPb( irciot_shared_ ):
   # End of udpb_init_by_interface_()
 
  def udpb_setup_(self):
-  def my_init_socket_(in_af_inet):
+  def my_init_socket_(in_af_inet, in_os_name):
     my_sock = socket.socket(in_af_inet, \
       socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-    my_sock.setsockopt(socket.SOL_SOCKET, \
-      socket.SO_REUSEPORT, 1)
+    if in_os_name == 'nt':
+      my_sock.setsockopt(socket.SOL_SOCKET, \
+        socket.SO_REUSEADDR, 1)
+    else:
+      my_sock.setsockopt(socket.SOL_SOCKET, \
+        socket.SO_REUSEPORT, 1)
     my_sock.setsockopt(socket.SOL_SOCKET, \
       socket.SO_BROADCAST, 1)
     return my_sock
@@ -260,10 +270,16 @@ class PyLayerUDPb( irciot_shared_ ):
   else:
     return
   self.udpb_update_local_ip_addresses_()
-  self.udpb_client_sock = my_init_socket_(my_af_inet)
+  self.udpb_client_sock = my_init_socket_(my_af_inet, \
+    self.udpb_os_name)
+  if self.udpb_os_name == 'nt':
+    my_bind_ip = self.udpb_ip
+  else:
+    my_bind_ip = self.udpb_ip_broadcast
   try:
-    self.udpb_client_sock.bind((self.udpb_ip_broadcast, self.udpb_port))
-    self.udpb_server_sock = my_init_socket_(my_af_inet)
+    self.udpb_client_sock.bind((my_bind_ip, self.udpb_port))
+    self.udpb_server_sock = my_init_socket_(my_af_inet, \
+      self.udpb_os_name)
     self.udpb_server_sock.settimeout(self.CONST.udpb_default_wait)
   except:
     return
