@@ -84,8 +84,7 @@ class PyLayerIRC(object):
     w+=1
    if r[0]:
     inp=self.i.recv(self.CONST.i_buf_size).decode('UTF-8')
-    inp=inp.strip('\r')
-    inp=inp.strip('\n')
+    inp=inp.strip('\r').strip('\n')
     return (0,inp,w)
   except:
    return(-1,'',0)
