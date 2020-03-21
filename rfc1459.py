@@ -40,7 +40,7 @@ class PyLayerIRC( irciot_shared_ ):
    #
    irciot_protocol_version = '0.3.31'
    #
-   irciot_library_version  = '0.0.187'
+   irciot_library_version  = '0.0.188'
    #
    # Bot specific constants
    #
@@ -555,11 +555,6 @@ class PyLayerIRC( irciot_shared_ ):
    #
    self.CONST = self.CONST()
    #
-   try:
-     self.irc_host = socket.gethostname()
-   except:
-     self.irc_host = "localhost";
-   #
    self.irc_nick = self.CONST.irc_default_nick
    self.irc_user = self.irc_tolower_(self.CONST.irc_default_nick)
    self.irc_info = self.CONST.irc_default_info
@@ -649,7 +644,24 @@ class PyLayerIRC( irciot_shared_ ):
    self.delta_time = 0
    self.delta_ping = 0
    #
+   self.update_irc_host_()
+   #
    # End of __init__()
+
+ def update_irc_host_(self):
+   try:
+     my_ip = self.get_from_ip_by_ip_(self.irc_server_ip)
+     my_host = self.dns_reverse_resolver_(my_ip)
+     if socket.gethostbyname(my_host) != my_ip:
+       my_host = None
+   except:
+     my_host = None
+   if my_host == None:
+     try:
+       my_host = socket.gethostname()
+     except:
+       my_host = "localhost";
+   self.irc_host = my_host
 
  def ident_server_(self):
    if not self.is_ip_address_(self.ident_ip):
@@ -1485,8 +1497,9 @@ class PyLayerIRC( irciot_shared_ ):
    return ret
 
  def irc_quit_(self):
-   ret = self.irc_send_("%s :%s\r\n" \
+   ret = self.irc_send_("%s :%s\n" \
      % (self.CONST.cmd_QUIT, self.irc_quit))
+   sleep(self.CONST.irc_latency_wait)
    return ret
 
  def irc_umode_(self, in_channel, in_nicks, in_change, in_umode):
@@ -1597,6 +1610,7 @@ class PyLayerIRC( irciot_shared_ ):
      self.to_log_("Cannot create socket for IRC")
      return None
    self.irc_server_ip = my_server_ip
+   self.update_irc_host_()
    return irc_socket
 
  def irc_connect_(self, in_server_ip, in_port):

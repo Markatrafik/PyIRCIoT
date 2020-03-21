@@ -1,7 +1,7 @@
 '''
 '' PyIRCIoT (PyLayerUDPb class)
 ''
-'' Copyright (c) 2019 Alexey Y. Woronov
+'' Copyright (c) 2019-2020 Alexey Y. Woronov
 ''
 '' By using this file, you agree to the terms and conditions set
 '' forth in the LICENSE file which can be found at the top level
@@ -35,7 +35,7 @@ class PyLayerUDPb( irciot_shared_ ):
   #
   irciot_protocol_version = '0.3.31'
   #
-  irciot_library_version  = '0.0.187'
+  irciot_library_version  = '0.0.188'
   #
   udpb_default_debug = False
   #

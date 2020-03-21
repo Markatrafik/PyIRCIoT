@@ -27,3 +27,7 @@
  ............: PendingDeprecationWarning: import 'imp' module;
   Figure out : ResourceWarning: unclosed file 'BufferedReader'
 
+  2020-03-12 : It would be useful to implement another transport
+ ............: level of the IRC-IoT protocol based on the Modbus-
+  ~ Useful ~ : TCP which would allow interconnect infrastructures
+

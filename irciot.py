@@ -39,7 +39,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.31'
   #
-  irciot_library_version  = '0.0.187'
+  irciot_library_version  = '0.0.188'
   #
   # IRC-IoT characters
   #
@@ -3187,6 +3187,20 @@ class PyLayerIRCIoT(object):
 
  def irciot_deinencap_container_(self, in_container, \
    orig_json = None, in_vuid = None):
+  if self.CONST.tag_VERSION in in_container.keys():
+    if in_container[self.CONST.tag_VERSION] == "?":
+      # Protocol Version Reply
+      if self.mid_method == "":
+        self.current_mid += 1
+        my_mid = "%d" % self.current_mid
+        my_message = '{"mid":"%s","%s":"%s"}' % (my_mid, \
+          self.CONST.tag_VERSION, \
+          self.CONST.irciot_protocol_version)
+        if len(in_container) == 2:
+          return my_message
+        else:
+          my_pack = (my_message, in_vuid)
+          self.output_pool.append(my_pack)
   try:
      iot_objects = in_container[self.CONST.tag_OBJECT]
   except:
