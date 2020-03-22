@@ -26,22 +26,13 @@ except:
 
 def main():
 
-  # if (len(sys.argv) == 1): 
-  #  print("Starting iotBot...")
-  #  independent_process = subprocess.Popen(
-  #   ['python3', os.path.expanduser(sys.argv[0]), 'background']
-  #  )
-  #  return
-
-  # sys.stdout = open('./iotBot.log', 'w+')
-
-  # if (len(sys.argv) > 1):
-  #  if (sys.argv[1] != 'background'):
-  #   return  
-
   irciot = PyLayerIRCIoT()
 
   udpbot = PyLayerUDPb()
+
+  # udpbot.bot_name = 'udpBot'
+  # udpbot.bot_background_start_()
+  # udpbot.bot_redirect_output_('./udpBot.log')
   
   random.seed()
 

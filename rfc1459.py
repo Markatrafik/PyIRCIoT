@@ -555,6 +555,8 @@ class PyLayerIRC( irciot_shared_ ):
    #
    self.CONST = self.CONST()
    #
+   super(PyLayerIRC, self).__init__()
+   #
    self.irc_nick = self.CONST.irc_default_nick
    self.irc_user = self.irc_tolower_(self.CONST.irc_default_nick)
    self.irc_info = self.CONST.irc_default_info
@@ -650,7 +652,7 @@ class PyLayerIRC( irciot_shared_ ):
 
  def update_irc_host_(self):
    try:
-     my_ip = self.get_from_ip_by_ip_(self.irc_server_ip)
+     my_ip = self.get_src_ip_by_dst_ip_(self.irc_server_ip)
      my_host = self.dns_reverse_resolver_(my_ip)
      if socket.gethostbyname(my_host) != my_ip:
        my_host = None

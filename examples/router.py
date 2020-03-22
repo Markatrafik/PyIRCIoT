@@ -22,6 +22,10 @@ def main():
 
   irciot2 = PyIRCIoT_router()
   ircbot2 = PyLayerIRC()
+
+  # when many instances, you can use methods from any one:
+  # ircbot1.bot_background_start_()
+  # ircbot1.bot_redirect_output_('./iotBot.log')
   
   irciot1.irc_pointer = ircbot1.irc_handler
   irciot1.user_pointer = ircbot1.user_handler

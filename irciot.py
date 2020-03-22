@@ -1045,8 +1045,7 @@ class PyLayerIRCIoT(object):
   # Copy destination address from last message source address?!
   my_datum[self.CONST.tag_DATE_TIME] \
     = self.irciot_get_current_datetime_()
-  my_messages = self.irciot_encap_all_(my_datum, in_vuid)
-  return my_messages
+  return self.irciot_encap_all_(my_datum, in_vuid)
   #
   # End of irciot_blockchain_request_to_messages_()
 
@@ -1064,8 +1063,7 @@ class PyLayerIRCIoT(object):
   # Copy destination address from last message source address?!
   my_datum[self.CONST.tag_DATE_TIME] \
     = self.irciot_get_current_datetime_()
-  my_messages = self.irciot_encap_all_(my_datum, in_vuid)
-  return my_messages
+  return self.irciot_encap_all_(my_datum, in_vuid)
   #
   # End of irciot_encryption_request_to_messages_()
 
@@ -1083,8 +1081,7 @@ class PyLayerIRCIoT(object):
   my_datum[self.CONST.tag_DST_ADDR] = ""
   my_datum[self.CONST.tag_DATE_TIME] \
     = self.irciot_get_current_datetime_()
-  my_messages = self.irciot_encap_all_(my_datum, in_vuid)
-  return my_messages
+  return self.irciot_encap_all_(my_datum, in_vuid)
   #
   # End of irciot_blockchain_key_to_messages_()
 

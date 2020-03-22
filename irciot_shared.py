@@ -5,11 +5,14 @@ import ifaddr
 import ipaddress
 import datetime
 import json
+import sys
 import os
 
 class irciot_shared_(object):
 
  class CONST(object):
+   #
+   ### IRC-IoT API:
    #
    api_GET_LMID = 101 # Get last Message ID
    api_SET_LMID = 102 # Set last Message ID
@@ -34,7 +37,7 @@ class irciot_shared_(object):
    #
    api_vuid_self = 'c0' # Default preconfigured VUID
    #
-   # Basic IRC-IoT Services
+   ### Basic IRC-IoT Services
    #
    api_vuid_CRS = 'sC' # Cryptographic Repository Service
    api_vuid_GDS = 'sD' # Global Dictionary Service
@@ -48,6 +51,14 @@ class irciot_shared_(object):
    # for Python 3.x: 19 Jan 3001 08:00 UTC
    api_epoch_maximal = 32536799999
    #
+   ### For IoT Bot creation:
+   #
+   default_bot_name = 'iotBot'
+   default_bot_python = 'python3'
+   default_bot_background_parameter = 'background'
+   #
+   ### OS depended:
+   #
    os_linux   = 'Linux'
    #
    os_linux_proc_ipv4_route = '/proc/net/route'
@@ -57,10 +68,22 @@ class irciot_shared_(object):
      pass
 
  def __init__(self):
-   pass
+   #
+   self.bot_name = self.CONST.default_bot_name
+   self.bot_python = self.CONST.default_bot_python
+   self.bot_background_parameter \
+     = self.CONST.default_bot_background_parameter
+   # Only for testing:
+   self.os_override = None
+   self.os_linux_proc_ipv4_route \
+     = self.CONST.os_linux_proc_ipv4_route
+   self.os_linux_proc_ipv6_route \
+     = self.CONST.os_linux_proc_ipv6_route
 
  def td2ms_(self, in_td):
-   return in_td.days * 86400 + in_td.seconds + in_td.microseconds / 1000000
+   return in_td.days * 86400 \
+        + in_td.seconds \
+        + in_td.microseconds / 1000000
 
  def is_json_(self, in_message):
    if not isinstance(in_message, str):
@@ -115,12 +138,14 @@ class irciot_shared_(object):
    return in_server_ip
 
  def get_os_name_(self):
+   if self.os_override != None:
+     return self.os_override
    try:
      return os.uname()[0]
    except:
      return None
 
- def get_ipv6_route_linux_(self,in_server_ip):
+ def get_ipv6_route_linux_(self, in_server_ip):
   def unpack_ipv6_(in_string):
     my_unpack = ''
     for my_idx in range(8):
@@ -128,7 +153,7 @@ class irciot_shared_(object):
         my_unpack += ':'
       my_unpack += in_string[my_idx*4:my_idx*4+4]
     return my_unpack
-  my_proc = self.CONST.os_linux_proc_ipv6_route
+  my_proc = self.os_linux_proc_ipv6_route
   if self.get_os_name_() != self.CONST.os_linux:
     return None
   if not os.path.exists(my_proc):
@@ -179,10 +204,10 @@ class irciot_shared_(object):
   #
   # End of get_ipv6_route_linux_()
 
- def get_ipv4_route_linux_(self,in_server_ip):
+ def get_ipv4_route_linux_(self, in_server_ip):
   def unpack_ipv4_(in_string):
     return socket.inet_ntoa(struct.pack("<L", int(in_string, 16)))
-  my_proc = self.CONST.os_linux_proc_ipv4_route
+  my_proc = self.os_linux_proc_ipv4_route
   if self.get_os_name_() != self.CONST.os_linux:
     return None
   if not os.path.exists(my_proc):
@@ -235,11 +260,11 @@ class irciot_shared_(object):
   #
   # End of get_ipv4_route_linux_()
 
- def get_ipv4_route_(self,in_server_ip):
+ def get_ipv4_route_(self, in_server_ip):
   if not self.is_ipv4_address_(in_server_ip):
     return None
   my_os = self.get_os_name_()
-  if my_os == 'Linux':
+  if my_os == self.CONST.os_linux:
     return self.get_ipv4_route_linux_(in_server_ip)
   # Other OS's methods will be here
   return None
@@ -248,12 +273,12 @@ class irciot_shared_(object):
   if not self.is_ipv6_address_(in_server_ip):
     return None
   my_os = self.get_os_name_()
-  if my_os == 'Linux':
+  if my_os == self.CONST.os_linux:
     return self.get_ipv6_route_linux_(in_server_ip)
   # Other OS's methods will be here
   return None
 
- def get_from_ip_by_ip_(self,in_server_ip):
+ def get_src_ip_by_dst_ip_(self,in_server_ip):
   my_ipv4_route = None
   my_ipv6_route = None
   if self.is_ipv4_address_(in_server_ip):
@@ -309,5 +334,41 @@ class irciot_shared_(object):
                 return my_ipv6
   return my_ip_out
   #
-  # End of get_from_ip_by_ip_()
+  # End of get_src_ip_by_dst_ip_()
+
+ def bot_usage_handler (self):
+  print('%s (based on IRC-IoT demo library)' % self.bot_name)
+  print('\nUsage: %s [<options>]\n' % sys.argv[0])
+
+ def bot_redirect_output_(self, in_filename):
+  if not isinstance(in_filename, str):
+    return
+  try:
+    io_redir = open(in_filename, 'w+')
+  except:
+    return
+  sys.stdout = io_redir
+  sys.stderr = io_redir
+  io_handler1 = io_redir.fileno()
+  os.dup2(io_handler1, 1)
+  os.close(1)
+  io_handler2 = io_redir.fileno()
+  os.dup2(io_handler2, 2)
+  os.close(2)
+
+ def bot_background_start_(self):
+  import subprocess
+  if len(sys.argv) == 0:
+    self.bot_usage_handler ()
+  else:
+    my_list = [ self.bot_python ]
+    my_count = len(sys.argv)
+    for my_idx in range(1, my_count):
+      my_list += [ sys.argv[my_idx] ]
+    if my_list[ my_count - 1 ] != self.bot_background_parameter:
+      my_list  = [ os.path.expanduser(sys.argv[0]) ] + my_list
+      my_list += [ self.bot_background_parameter ]
+      print("Starting %s ..." % self.bot_name)
+      my_process = subprocess.Popen( my_list )
+      sys.exit(0)
 

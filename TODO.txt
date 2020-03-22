@@ -31,3 +31,7 @@
  ............: level of the IRC-IoT protocol based on the Modbus-
   ~ Useful ~ : TCP which would allow interconnect infrastructures
 
+  2020-03-22 : The JSON module included in the installation of
+ ............: the Python language does not support the "bytes"
+ ~ Problem ~ : data type. It may be need to use another module.
+

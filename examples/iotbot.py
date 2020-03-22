@@ -22,22 +22,12 @@ except:
 
 def main():
 
-  # if (len(sys.argv) == 1): 
-  #  print("Starting iotBot...")
-  #  independent_process = subprocess.Popen(
-  #   ['python3', os.path.expanduser(sys.argv[0]), 'background']
-  #  )
-  #  return
-
-  # sys.stdout = open('./iotBot.log', 'w+')
-  
-  # if (len(sys.argv) > 1):
-  #  if (sys.argv[1] != 'background'):
-  #   return  
-
   irciot = PyLayerIRCIoT()
 
   ircbot = PyLayerIRC()
+
+  # ircbot.bot_background_start_()
+  # ircbot.bot_redirect_output_('./iotBot.log')
 
   irciot.irc_pointer = ircbot.irc_handler
   irciot.user_pointer = ircbot.user_handler
@@ -52,6 +42,7 @@ def main():
   ircbot.irc_channel = "#Berdsk"
   ircbot.irc_debug   = True
   ircbot.irc_define_nick_("TestBot")
+
   # ircbot.irc_talk_with_strangers = True
   # ircbot.irc_ident   = True
 
