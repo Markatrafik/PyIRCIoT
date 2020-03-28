@@ -157,10 +157,7 @@ class PyLayerUDPb( irciot_shared_ ):
   my_user = None
   my_anon = None
   my_opt  = None
-  if in_vuid in [ \
-    self.CONST.api_vuid_cfg, \
-    self.CONST.api_vuid_tmp, \
-    self.CONST.api_vuid_all ]:
+  if in_vuid in self.CONST.api_vuid_not_srv:
     my_vt = in_vuid
   else:
     my_re = re.search("%s(\d+)" \

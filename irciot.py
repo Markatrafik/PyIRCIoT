@@ -1188,12 +1188,14 @@ class PyLayerIRCIoT(object):
   #
   # End of irciot_encryption_check_publication_()
 
+ # incomplete
  def irciot_blockchain_place_key_to_repo_(self, in_public_key):
   if in_public_key == None:
     return
   #
   # End of irciot_blockchain_place_key_to_repo_()
 
+ # incomplete
  def irciot_encryption_place_key_to_repo_(self, in_public_key):
   if in_public_key == None:
     return

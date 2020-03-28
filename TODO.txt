@@ -35,3 +35,11 @@
  ............: the Python language does not support the "bytes"
  ~ Problem ~ : data type. It may be need to use another module.
 
+  2020-03-23 : It would be useful to implement another transport
+ ............: level of the IRC-IoT protocol based on the HTTP/x
+  ~ Useful ~ : protocols as it is done for the SOAP or XML-RPC.
+
+  2020-03-25 : The protocol JMAP (JSON Meta Application protocol)
+ ............: can be encapsulated into the IRC-IoT transport, so
+  ~ Useful ~ : its API may be submitted to the Global Dictionary.
+

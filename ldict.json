@@ -520,6 +520,58 @@
       "sections": [],
       "type_id": 2,
       "type_parameters": null
+    },
+    {
+      "child_object_id": null,
+      "default_value": null,
+      "item_id": 41,
+      "item_name": "t",
+      "item_ot": "jmapsess",
+      "method": null,
+      "method_language": null,
+      "parent_item_id": null,
+      "sections": [],
+      "type_id": 103,
+      "type_parameters": null
+    },
+    {
+      "child_object_id": null,
+      "default_value": null,
+      "item_id": 42,
+      "item_name": "capabilities",
+      "item_ot": "jmapsess",
+      "method": null,
+      "method_language": null,
+      "parent_item_id": null,
+      "sections": [],
+      "type_id": 6,
+      "type_parameters": null
+    },
+    {
+      "child_object_id": null,
+      "default_value": null,
+      "item_id": 43,
+      "item_name": "t",
+      "item_ot": "jmapreq",
+      "method": null,
+      "method_language": null,
+      "parent_item_id": null,
+      "sections": [],
+      "type_id": 103,
+      "type_parameters": null
+    },
+    {
+      "child_object_id": null,
+      "default_value": null,
+      "item_id": 44,
+      "item_name": "t",
+      "item_ot": "jmapresp",
+      "method": null,
+      "method_language": null,
+      "parent_item_id": null,
+      "sections": [],
+      "type_id": 103,
+      "type_parameters": null
     }
   ],
   "sections": [],
@@ -586,6 +638,22 @@
       "size_of_array": null,
       "type_id": 5,
       "type_name": "json-boolean",
+      "type_of_type": null
+    },
+    {
+      "encoding": null,
+      "endianness": null,
+      "exponent": null,
+      "interval_maximum": null,
+      "interval_minimum": null,
+      "is_array_dynamically_sized": false,
+      "is_it_array": false,
+      "is_variable_dynamically_sized": true,
+      "precision": null,
+      "size": null,
+      "size_of_array": null,
+      "type_id": 6,
+      "type_name": "json-object",
       "type_of_type": null
     },
     {

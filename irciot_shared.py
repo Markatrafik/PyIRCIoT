@@ -34,6 +34,7 @@ class irciot_shared_(object):
    api_vuid_all = '*' # Means All users VUIDs when sending messages
    #
    api_vuid_any = [ api_vuid_cfg, api_vuid_tmp, api_vuid_srv ]
+   api_vuid_not_srv = [ api_vuid_cfg, api_vuid_tmp, api_vuid_all ]
    #
    api_vuid_self = 'c0' # Default preconfigured VUID
    #

@@ -810,10 +810,7 @@ class PyLayerIRC( irciot_shared_ ):
    my_vt = None # VUID Type
    my_user = None
    my_anon = None
-   if in_vuid in [ \
-     self.CONST.api_vuid_cfg, \
-     self.CONST.api_vuid_tmp, \
-     self.CONST.api_vuid_all ]:
+   if in_vuid in self.CONST.api_vuid_not_srv:
      my_vt = in_vuid
    else:
      my_re = re.search("%s(\d+)" \
@@ -868,10 +865,7 @@ class PyLayerIRC( irciot_shared_ ):
          None, None, None, None, None, None, \
          None, None, in_params)
    elif in_action == self.CONST.api_GET_VUID:
-     if in_vuid in [ \
-       self.CONST.api_vuid_all, \
-       self.CONST.api_vuid_cfg, \
-       self.CONST.api_vuid_tmp ]:
+     if in_vuid in self.COST.api_vuid_not_srv:
        my_vuid_list = []
        for my_nick in self.irc_nicks:
          (in_nick, my_mask, my_vuid, my_info) = my_nick
@@ -879,7 +873,7 @@ class PyLayerIRC( irciot_shared_ ):
            if my_vuid[0] != self.CONST.api_vuid_cfg:
              continue
          if my_vt in [ \
-           self.CONST.api_vuid_cfg,
+           self.CONST.api_vuid_cfg, \
            self.CONST.api_vuid_tmp ]:
            if my_vuid[0] != my_vt:
              continue

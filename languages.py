@@ -55,8 +55,8 @@ class PyLayerIRCIoT_EL_(object):
    err_LANGUAGE_SYNTAX    : "Incorrect syntax for this language"
   }
   #
-  mod_JAVA = 'py4j.java_gateway'
-  mod_LUA  = 'lupa'
+  mod_JRE = 'py4j.java_gateway'
+  mod_LUA = 'lupa'
   #
   def __setattr__(self, *_):
     pass
@@ -103,6 +103,19 @@ class PyLayerIRCIoT_EL_(object):
     return None
   return None
 
+ def irciot_EL_import_(self, in_pointer, in_module_name):
+  if in_pointer == None:
+    import importlib
+    try:
+      my_pointer = importlib.import_module(in_module_name)
+    except ImportError:
+      my_pointer = None
+    return my_pointer
+  else:
+    return in_pointer
+  #
+  # End of irciot_EL_import_()
+
  # incomplete
  def irciot_EL_init_language_(self, in_lang):
   if not self.irciot_EL_check_lang_(in_lang):
@@ -120,11 +133,15 @@ class PyLayerIRCIoT_EL_(object):
   elif in_lang == lang_GO:
     pass
   elif in_lang == lang_JRE:
-    pass
+    self.my_JRE = self.irciot_EL_import_(self.CONST.mod_JRE)
+    if self.my_JRE == None:
+      return False
   elif in_lang == lang_JS:
     pass
   elif in_lang == lang_LUA:
-    pass
+    self.my_LUA = self.irciot_EL_import_(self.CONST.mod_LUA):
+    if self.my_LUA == None:
+      return False
   elif in_lang == lang_QML:
     pass
   elif in_lang == lang_PERL:
