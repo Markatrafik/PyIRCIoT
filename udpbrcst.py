@@ -33,9 +33,9 @@ class PyLayerUDPb( irciot_shared_ ):
 
  class CONST( irciot_shared_.CONST ):
   #
-  irciot_protocol_version = '0.3.31'
+  irciot_protocol_version = '0.3.33'
   #
-  irciot_library_version  = '0.0.188'
+  irciot_library_version  = '0.0.189'
   #
   udpb_default_debug = False
   #

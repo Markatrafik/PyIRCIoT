@@ -37,9 +37,9 @@ class PyLayerIRCIoT(object):
 
  class CONST(object):
   #
-  irciot_protocol_version = '0.3.31'
+  irciot_protocol_version = '0.3.33'
   #
-  irciot_library_version  = '0.0.188'
+  irciot_library_version  = '0.0.189'
   #
   # IRC-IoT characters
   #
@@ -402,6 +402,7 @@ class PyLayerIRCIoT(object):
   err_DEFRAG_DC_EXCEEDED  = 122
   err_DEFRAG_BC_EXCEEDED  = 123
   err_OVERLAP_MISSMATCH   = 131
+  err_DEFRAG_MISSMATCH    = 133
   err_BASE64_DECODING     = 251
   err_BASE32_DECODING     = 252
   err_BASE85_DECODING     = 253
@@ -436,6 +437,7 @@ class PyLayerIRCIoT(object):
    err_DEFRAG_DC_EXCEEDED : "Exceeded 'dc' field value",
    err_DEFRAG_BC_EXCEEDED : "Exceeded 'bc' field value",
    err_OVERLAP_MISSMATCH  : "Overlapping fragments missmatch",
+   err_DEFRAG_MISSMATCH   : "Defragmentation content missmatch",
    err_INVALID_MESSAGE    : "Invalid IRC-IoT message format",
    err_INVALID_ADDRESS    : "Invalid IRC-IoT address format",
    err_COMP_ZLIB_HEADER   : "Invalid Zlib header",
@@ -2649,7 +2651,7 @@ class PyLayerIRCIoT(object):
                if test_enc == in_enc:
                   my_dup = True
                else:
-                  my_err = self.CONST.err_DEFRAG_CONTENT_MISSMATCH
+                  my_err = self.CONST.err_DEFRAG_MISSMATCH
                   break
             else:
                if ((test_dc != None) and (test_dp != None) and \
