@@ -1470,8 +1470,8 @@ class PyLayerIRC( irciot_shared_ ):
      if delta_time_in < 0:
        delta_time = 0
      if ready[0]:
-       irc_input \
-        = self.irc.recv(self.CONST.irc_buffer_size).decode('utf-8')
+       irc_input = self.irc.recv(self.CONST.irc_buffer_size \
+         ).decode('utf-8', 'ignore')
        irc_input = irc_input.strip("\n").strip("\r")
        if irc_input != "":
          if self.irc_debug:

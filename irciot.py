@@ -3151,7 +3151,7 @@ class PyLayerIRCIoT(object):
     my_mids = [ my_newmid, my_hismid ]
     for my_vuid in my_vuid_list:
       if my_vuid == in_vuid:
-        continue # The User Already Checked
+        continue # The User already checked
       if CAN_debug_library:
         print("Checking blockcahin for VUID = '%s' ..." % my_vuid)
       my_newmids = self.irciot_blockchain_get_own_mids_(in_vuid)
@@ -3409,19 +3409,17 @@ class PyLayerIRCIoT(object):
      big_ot = my_bigdatum[self.CONST.tag_OBJECT_TYPE]
      del my_datum[self.CONST.tag_OBJECT_TYPE]
   if isinstance(my_bigdatum, list):
-     my_current = 0
-     for my_datum in my_bigdatum:
-        if my_current == 0:
+     for my_idx, my_datum in enumerate(my_bigdatum):
+        if my_idx == 0:
            big_datum = my_datum
            big_ot = my_datum[self.CONST.tag_OBJECT_TYPE]
            del my_datum[self.CONST.tag_OBJECT_TYPE]
-        my_current += 1
   if big_ot == None:
      return ("", 0)
-  str_big_datum  = json.dumps(big_datum, separators=(',',':'))
+  str_big_datum = json.dumps(big_datum, separators=(',',':'))
   if self.crypt_compress == self.CONST.compress_ZLIB:
      if DO_auto_compress and self.crypt_ZLIB == None:
-       self.irciot_load_compression_methods_(my_crypt_method)
+       self.irciot_load_compression_methods_(self.crypt_method)
      if self.crypt_ZLIB == None:
        return ("", 0)
      bin_big_datum \

@@ -220,7 +220,7 @@ class irciot_shared_(object):
   my_route = None
   my_check = ipaddress.ip_address(in_server_ip)
   # Warning: this method only checks the default routing table,
-  # but it’s more correct to take the desired routing table
+  # but it is more correct to take the desired routing table
   # by the number based on the current table selection rules,
   # which is often used in the routers and in the Android OS
   with open(my_proc) as my_handler:
