@@ -123,6 +123,10 @@
          messages using a UDP dgrams without IRC server, and also in the class
          PyLayerIRC, added check of user masks for cases when IRC Nick changed.
 
+2020-04-12 12:25 GMT+7 PyIRCIoT 0.0.191 Alexey Y. Woronov <alexey@woronov.ru>
+         * In the Global Dictionary ot the IRC-IoT protocol, new objects types
+         are reserved: fusnfo, fusqry, fusreq, fusack, fuspck. These messages
+         are required for the operation of the Firmware Update Service.
 
 
 

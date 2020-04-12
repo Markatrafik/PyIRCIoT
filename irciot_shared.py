@@ -127,6 +127,13 @@ class irciot_shared_(object):
      return False
    return True
 
+ def is_hostname_(self, in_name):
+   try:
+     socket.gethostbyname(in_name)
+     return True
+   except socket.error:
+     return False
+
  def dns_reverse_resolver_(self, in_server_ip):
    if self.is_ip_address_(in_server_ip):
      try:
@@ -359,7 +366,7 @@ class irciot_shared_(object):
 
  def bot_background_start_(self):
   import subprocess
-  if len(sys.argv) == 0:
+  if len(sys.argv) == 1:
     self.bot_usage_handler ()
   else:
     my_list = [ self.bot_python ]

@@ -39,7 +39,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.33'
   #
-  irciot_library_version  = '0.0.189'
+  irciot_library_version  = '0.0.191'
   #
   # IRC-IoT characters
   #
@@ -3037,7 +3037,7 @@ class PyLayerIRCIoT(object):
          [ self.CONST.tag_MESSAGE_ID, self.CONST.tag_CHK_CRC16 ])
        my_crc16_json = self.irciot_crc16_(bytes(my_json, 'utf-8'))
        del my_json
-       if (my_crc16 != my_crc16_json):
+       if my_crc16 != my_crc16_json:
          return False
    elif self.integrity_check == 2:
      if self.CONST.tag_CHK_CRC32 in in_dict.keys():
@@ -3048,7 +3048,7 @@ class PyLayerIRCIoT(object):
          [ self.CONST.tag_MESSAGE_ID, self.CONST.tag_CHK_CRC32 ])
        my_crc32_json = self.irciot_crc32_(bytes(my_json, 'utf-8'))
        del my_json
-       if (my_crc32 != my_crc32_json):
+       if my_crc32 != my_crc32_json:
          return False
    return True
    #

@@ -13,7 +13,7 @@ OK, let's add this Chip to IRC-IoT ecosystem
 > apt-get install picocom # for Debian based Linux
 
 2. Download MicroPython firmware, for example:
-> myfw="esp8266-20190125-v1.10.bin"
+> myfw="esp8266-20191220-v1.12.bin"
 > wget http://micropython.org/resources/firmware/$myfw
 
 3. Write MicroPython firmware to your ESP8266:

@@ -40,7 +40,7 @@ class PyLayerIRC( irciot_shared_ ):
    #
    irciot_protocol_version = '0.3.33'
    #
-   irciot_library_version  = '0.0.189'
+   irciot_library_version  = '0.0.191'
    #
    # Bot specific constants
    #
@@ -1679,14 +1679,14 @@ class PyLayerIRC( irciot_shared_ ):
 
  def func_not_reg_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
-   #if (self.irc_random_nick_(self.irc_nick) == 1):
+   #if self.irc_random_nick_(self.irc_nick) == 1:
    #  return (-1, 0, in_wait)
    return (in_ret, 1, self.CONST.irc_default_wait)
 
  def func_banned_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
    if self.join_retry > 1:
-     if (self.irc_random_nick_(self.irc_nick) == 1):
+     if self.irc_random_nick_(self.irc_nick) == 1:
        self.join_retry += 1
        return (-1, 0, in_wait)
    return (in_ret, 3, self.CONST.irc_default_wait)

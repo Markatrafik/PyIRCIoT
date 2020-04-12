@@ -17,7 +17,7 @@ class PyLayerIRCIoT_EL_(object):
   #
   irciot_protocol_version = '0.3.33'
   #
-  irciot_library_version  = '0.0.189'
+  irciot_library_version  = '0.0.191'
   #
   # IRC-IoT Embedded Languages tags:
   #
@@ -53,10 +53,12 @@ class PyLayerIRCIoT_EL_(object):
    err_UNKNOWN_LANGUAGE   : "Unknown programming langauge"
    err_UNSUPPORTED_YET    : "This language is not yet supported"
    err_LANGUAGE_SYNTAX    : "Incorrect syntax for this language"
+   err_LOADING_MODULES    : "Unable to load required modules"
   }
   #
   mod_JRE = 'py4j.java_gateway'
   mod_LUA = 'lupa'
+  mod_JS  = 'js2py'
   #
   def __setattr__(self, *_):
     pass
@@ -73,9 +75,6 @@ class PyLayerIRCIoT_EL_(object):
     my_descr = self.CONST.err_DESCRIPTIONS[in_error_code]
     if isinstance(in_addon, str):
       my_descr += " (%s)" % in_addon
-  else:
-    return None
-  return my_descr
   #
   # End of irciot_EL_error_()
 
@@ -109,6 +108,7 @@ class PyLayerIRCIoT_EL_(object):
     try:
       my_pointer = importlib.import_module(in_module_name)
     except ImportError:
+      self.irciot_EL_error_(self.CONST.err_LOADING_MODULES, None)
       my_pointer = None
     return my_pointer
   else:
@@ -137,9 +137,11 @@ class PyLayerIRCIoT_EL_(object):
     if self.my_JRE == None:
       return False
   elif in_lang == lang_JS:
-    pass
+    self.my_JS  = self.irciot_EL_import_(self.CONST.mod_JS)
+    if self.my_JS  == None:
+      return False
   elif in_lang == lang_LUA:
-    self.my_LUA = self.irciot_EL_import_(self.CONST.mod_LUA):
+    self.my_LUA = self.irciot_EL_import_(self.CONST.mod_LUA)
     if self.my_LUA == None:
       return False
   elif in_lang == lang_QML:
