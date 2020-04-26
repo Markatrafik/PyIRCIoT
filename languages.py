@@ -159,4 +159,50 @@ class PyLayerIRCIoT_EL_(object):
   elif in_lang == lang_SWIFT:
     pass
   return False
+  # End of irciot_EL_init_language_()
+
+ def irciot_EL_finish_language_(self, in_lang):
+  if not self.irciot_EL_check_lang_(in_lang):
+    return False
+  elif in_lang == lang_BASH:
+    pass
+  elif in_lang == lang_BASIC:
+    pass
+  elif in_lang == lang_CS:
+    pass
+  elif in_lang == lang_CSP:
+    pass
+  elif in_lang == lang_GO:
+    pass
+  elif in_lang == lang_JRE:
+    try:
+      del self.my_JRE
+    except:
+      return False
+  elif in_lang == lang_JS:
+    try:
+      del self.my_JS
+    else:
+      return False
+  elif in_lang == lang_LUA:
+    try:
+      del self.my_LUA
+    except:
+      return False
+  elif in_lang == lang_QML:
+    pass
+  elif in_lang == lang_PERL:
+    pass
+  elif in_lang == lang_PHP:
+    pass
+  elif in_lang == lang_R:
+    pass
+  elif in_lang == lang_PYTHON:
+    pass
+  elif in_lang == lang_RUBY:
+    pass
+  elif in_lang == lang_SWIFT:
+    pass
+  return False
+  # End of irciot_EL_finish_language_()
 

@@ -955,17 +955,17 @@ class PyLayerIRCIoT(object):
   my_password = in_password.encode('utf-8')
   if in_hash_size == 16:
     my_hash = self.crypt_HASH.md5(my_password).digest()
-  if in_hash_size == 20:
+  elif in_hash_size == 20:
     my_hash = self.crypt_HASH.sha1(my_password).digest()
-  if in_hash_size == 28:
+  elif in_hash_size == 28:
     my_hash = self.crypt_HASH.sha224(my_password).digest()
-  if in_hash_size == 32:
+  elif in_hash_size == 32:
     my_hash = self.crypt_HASH.sha256(my_password).digest()
-  if in_hash_size == 48:
+  elif in_hash_size == 48:
     my_hash = self.crypt_HASH.sha384(my_password).digest()
-  if in_hash_size == 64:
+  elif in_hash_size == 64:
     my_hash = self.crypt_HASH.sha512(my_password).digest()
-  if in_hash_size == 160:
+  elif in_hash_size == 160:
     my_hash = self.crypt_HASH.ripemod160(my_password).digest()
   return my_hash
   #
@@ -1033,6 +1033,7 @@ class PyLayerIRCIoT(object):
  def irciot_get_current_datetime_(self):
   return datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
 
+ # incomplete
  def irciot_blockchain_request_to_messages_(self, in_vuid):
   if not isinstance(in_vuid, str):
     return []
@@ -1041,7 +1042,7 @@ class PyLayerIRCIoT(object):
   my_datum[self.CONST.tag_OBJECT_TYPE] = my_ot
   my_datum[self.CONST.tag_DATUM_ID] = random.randint(100, 999)
   my_datum[self.CONST.tag_BCH_METHOD] = self.mid_method
-  # Incomplete code
+
   my_datum[self.CONST.tag_SRC_ADDR] = ""
   my_datum[self.CONST.tag_DST_ADDR] = ""
   # Copy destination address from last message source address?!
@@ -1093,7 +1094,6 @@ class PyLayerIRCIoT(object):
      not isinstance(in_ot, str):
     return []
   my_datum = {}
-  my_ot = self.CONST.ot_ENC_INFO
   my_datum[self.CONST.tag_OBJECT_TYPE] = in_ot
   my_datum[self.CONST.tag_DATUM_ID] = random.randint(100, 999)
   my_datum[self.CONST.tag_ENC_METHOD] = self.crypt_method
@@ -2243,6 +2243,7 @@ class PyLayerIRCIoT(object):
       load_dict = json.loads(load_json)
     except:
       return False
+    load_fd.close()
     if not isinstance(load_dict, dict):
       return False
     if not self.CONST.ldict_VERSION in load_dict.keys():

@@ -36,7 +36,7 @@
  ~ Problem ~ : data type. It may be need to use another module.
 
   2020-03-23 : It would be useful to implement another transport
- ............: level of the IRC-IoT protocol based on the HTTP/x
+ ............: type of the IRC-IoT protocol based on the HTTP/x
   ~ Useful ~ : protocols as it is done for the SOAP or XML-RPC.
 
   2020-03-25 : The protocol JMAP (JSON Meta Application protocol)
