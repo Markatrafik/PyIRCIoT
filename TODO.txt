@@ -43,3 +43,8 @@
  ............: can be encapsulated into the IRC-IoT transport, so
   ~ Useful ~ : its API may be submitted to the Global Dictionary.
 
+  2020-05-01 : For protection services from flood, both directly
+ ............: and through the IRC-IoT routers, using an assigned
+  ~ Useful ~ : task can be used, for example, how it is done in
+ ............: the HashCache. Also, Embedded Languages may used.
+

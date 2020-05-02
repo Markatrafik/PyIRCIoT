@@ -30,7 +30,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   #
   irciot_router_protocol_version = '0.3.33'
   #
-  irciot_router_library_version = '0.0.191'
+  irciot_router_library_version = '0.0.193'
   #
   default_maximal_detect_dup_messages = 128
   #
@@ -343,7 +343,8 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   #
   # End of connections_tracking_cleaner_()
 
- def do_router_translation_(self, in_datum, in_params, in_direction, in_vuid = None):
+ def do_router_translation_(self, in_datum, in_params, \
+   in_direction, in_vuid = None):
   if not isinstance(in_params, dict):
     if in_params == self.CONST.rgn_REQUEST_PARAMS:
       return [ self.CONST.tag_IN_SCOPE, self.CONST.tag_OUT_SCOPE ]
@@ -400,8 +401,14 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   #
   # End of do_router_translation_()
 
+ # incomplete
+ def do_router_hashcache_(self, in_datum, in_params, \
+   in_direction, in_vuid = None):
+  in_datum = out_datum
+  return out_datum
+
  def do_router_forwarding_(self, in_datum, in_params, \
-    in_direction, in_vuid = None):
+   in_direction, in_vuid = None):
   if not isinstance(in_params, dict):
     if in_params == self.CONST.rgn_REQUEST_PARAMS:
       return []

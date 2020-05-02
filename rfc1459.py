@@ -40,7 +40,7 @@ class PyLayerIRC( irciot_shared_ ):
    #
    irciot_protocol_version = '0.3.33'
    #
-   irciot_library_version  = '0.0.191'
+   irciot_library_version  = '0.0.193'
    #
    # Bot specific constants
    #
@@ -1008,7 +1008,11 @@ class PyLayerIRC( irciot_shared_ ):
    str_mask = str_mask.replace("?", ".")
    str_mask = str_mask.replace("*", ".*")
    irc_regexp = re.compile(str_mask, re.IGNORECASE)
-   return irc_regexp.match(str_from)
+   my_result = irc_regexp.match(str_from)
+   if my_result != None:
+     if my_result:
+       return True
+   return False
 
  def irc_track_cleanup_anons_(self):
    for my_anon in self.irc_anons:

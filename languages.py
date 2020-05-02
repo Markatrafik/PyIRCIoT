@@ -17,7 +17,7 @@ class PyLayerIRCIoT_EL_(object):
   #
   irciot_protocol_version = '0.3.33'
   #
-  irciot_library_version  = '0.0.191'
+  irciot_library_version  = '0.0.193'
   #
   # IRC-IoT Embedded Languages tags:
   #
@@ -48,11 +48,12 @@ class PyLayerIRCIoT_EL_(object):
   err_UNKNOWN_LANGUAGE = 1001
   err_UNSUPPORTED_YET  = 1002
   err_LANGUAGE_SYNTAX  = 1007
+  err_LOADING_MODULES  = 1009
   #
   err_DESCRIPTIONS = {
-   err_UNKNOWN_LANGUAGE   : "Unknown programming langauge"
-   err_UNSUPPORTED_YET    : "This language is not yet supported"
-   err_LANGUAGE_SYNTAX    : "Incorrect syntax for this language"
+   err_UNKNOWN_LANGUAGE   : "Unknown programming langauge",
+   err_UNSUPPORTED_YET    : "This language is not yet supported",
+   err_LANGUAGE_SYNTAX    : "Incorrect syntax for this language",
    err_LOADING_MODULES    : "Unable to load required modules"
   }
   #
@@ -66,6 +67,8 @@ class PyLayerIRCIoT_EL_(object):
  def __init__(self):
   #
   self.CONST = self.CONST_EL_()
+  #
+  self.__allowed_EL = []
   #
   # End of PyLayerIRCIoT_EL_.__init__()
 
@@ -100,6 +103,8 @@ class PyLayerIRCIoT_EL_(object):
  def irciot_EL_run_code_(self, in_lang, in_code, in_environment):
   if not self.irciot_EL_check_lang_(in_lang):
     return None
+  if not in_lang in self.__allowed_EL:
+    return None
   return None
 
  def irciot_EL_import_(self, in_pointer, in_module_name):
@@ -116,9 +121,27 @@ class PyLayerIRCIoT_EL_(object):
   #
   # End of irciot_EL_import_()
 
+ def irciot_EL_admit_language_(self, in_lang):
+  if not self.irciot_EL_check_lang_(in_lang):
+    return
+  if not in_lang in self.__allowed_EL:
+    self.__allowed_EL += [ in_lang ]
+
+ def irciot_EL_revoke_language_(self, in_lang):
+  if not self.irciot_EL_check_lang_(in_lang):
+    return
+  if in_lang in self.__allowed_EL:
+    self.irciot_EL_finish_language_(in_lang)
+    self.__allowed_EL.remove(in_lang)
+
+ def irciot_EL_allowed_languages_(self):
+  return self.__allowed_EL
+
  # incomplete
  def irciot_EL_init_language_(self, in_lang):
   if not self.irciot_EL_check_lang_(in_lang):
+    return False
+  if not in_lang in self.__allowed_EL:
     return False
   if in_lang == lang_ANSYML:
     pass
@@ -182,7 +205,7 @@ class PyLayerIRCIoT_EL_(object):
   elif in_lang == lang_JS:
     try:
       del self.my_JS
-    else:
+    except:
       return False
   elif in_lang == lang_LUA:
     try:

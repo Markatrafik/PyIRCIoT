@@ -128,5 +128,8 @@
          are reserved: fusnfo, fusqry, fusreq, fusack, fuspck. These messages
          are required for the operation of the Firmware Update Service.
 
-
+2020-05-02 12:15 GMT+7 PyIRCIoT 0.0.193 Alexey Y. Woronov <alexey@woronov.ru>
+         * Attention! Staring from version 0.0.193 of library some variables in
+         the PyLayerIRCIoT classes will become private, use the appropriate
+         methods instead of directly accessing these variables.
 
