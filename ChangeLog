@@ -133,3 +133,7 @@
          the PyLayerIRCIoT classes will become private, use the appropriate
          methods instead of directly accessing these variables.
 
+2020-05-03 10:05 GMT+7 PyIRCIoT 0.0.195 Alexey Y. Woronov <alexey@woronov.ru>
+         * Since Version 0.0.195: Blockchain signature function with algorithm
+         GOST 34.10-2012 has been added. To run this feature, use the method:
+         irciot_enable_blockchain_(CONST.tag_mid_GOST12) of the PyLayerIRCIoT.

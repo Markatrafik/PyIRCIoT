@@ -39,7 +39,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.33'
   #
-  irciot_library_version  = '0.0.193'
+  irciot_library_version  = '0.0.195'
   #
   # IRC-IoT characters
   #
@@ -228,6 +228,7 @@ class PyLayerIRCIoT(object):
   #
   mid_ED25519_hash_length = 88
   mid_RSA1024_hash_length = 173
+  mid_GOST12_hash_length  = 173
   #
   # Conditional defaults:
   #
@@ -278,6 +279,8 @@ class PyLayerIRCIoT(object):
   crypto_RSA   = 1
   crypto_AES   = 5
   crypto_2FISH = 7
+  #
+  crypto_GOST12_curve = "id-tc26-gost-3410-12-512-paramSetA"
   #
   base_BASE32  = 32
   base_BASE64  = 64
@@ -419,6 +422,8 @@ class PyLayerIRCIoT(object):
   err_LOAD_RSA_MODULE     = 731
   err_LOAD_AES_MODULE     = 732
   err_LOAD_2FISH_MODULE   = 733
+  err_LOAD_GOST_MODULE    = 735
+  err_LOAD_GOSTD_MODULE   = 737
   err_LOAD_USER_SIGN      = 755
   err_LOAD_USER_CRYPT     = 777
   #
@@ -448,12 +453,15 @@ class PyLayerIRCIoT(object):
    err_LOAD_RSA_MODULE    : "Loading RSA module",
    err_LOAD_AES_MODULE    : "Loading AES module",
    err_LOAD_2FISH_MODULE  : "Loading Twofish module",
+   err_LOAD_GOST_MODULE   : "Loading GOST3410 module",
+   err_LOAD_GOSTD_MODULE  : "Loading GOST3411 module",
    err_LOAD_USER_SIGN     : "Loading UserSign module",
    err_LOAD_USER_CRYPT    : "Loading UserCrypt module",
    err_LDICT_VERIFY_OK    : "Local Dictionary verification OK",
    err_LDICT_VERIFY_FAIL  : "Local Dictionary verification failed"
   }
   #
+
   pattern = chr(0) # or "@", chr(255)
   #
   # Default Maximum IRC message size (in bytes)
@@ -484,9 +492,23 @@ class PyLayerIRCIoT(object):
   mod_NACS  = 'nacl.signing'
   mod_2FISH = 'twofish'
   mod_HASH  = 'hashlib'
+  mod_GOST  = 'pygost.gost3410'
+  mod_GOSTD = 'pygost.gost34112012256'
   #
   mod_USERSIGN  = 'irciot-usersign'
   mod_USERCRYPT = 'irciot-usercrypt'
+  #
+  err_LOAD_modules = {
+   mod_ZLIB : err_LOAD_ZLIB_MODULE,
+   mod_BZIP2 : err_LOAD_BZIP2_MODULE,
+   mod_RSA : err_LOAD_RSA_MODULE,
+   mod_AES : err_LOAD_AES_MODULE,
+   mod_2FISH : err_LOAD_2FISH_MODULE,
+   mod_GOST : err_LOAD_GOST_MODULE,
+   mod_GOSTD : err_LOAD_GOSTD_MODULE,
+   mod_USERSIGN : err_LOAD_USER_SIGN,
+   mod_USERCRYPT : err_LOAD_USER_CRYPT
+  }
   #
   # This timeout for automatic unloading of modules
   # when they where automatically loaded (in seconds)
@@ -555,6 +577,8 @@ class PyLayerIRCIoT(object):
   self.__crypt_FISH = None
   self.__crypt_NACS = None
   self.__crypt_NACE = None
+  self.__crypt_GOST = None
+  self.__crypt_GSTD = None
   # Compression modules
   self.__crypt_ZLIB = None
   self.__crypt_BZ2  = None
@@ -776,10 +800,10 @@ class PyLayerIRCIoT(object):
       str(self.current_mid), self.__blockchain_private_key)
   if in_mid_method == self.CONST.tag_mid_ED25519:
     self.mid_hash_length = self.CONST.mid_ED25519_hash_length
-  if in_mid_method == self.CONST.tag_mid_RSA1024:
+  elif in_mid_method == self.CONST.tag_mid_RSA1024:
     self.mid_hash_length = self.CONST.mid_RSA1024_hash_length
-  if in_mid_method == self.CONST.tag_mid_GOST12:
-    pass
+  elif in_mid_method == self.CONST.tag_mid_GOST12:
+    self.mid_hash_length = self.CONST.mid_GOST12_hash_length
   #
   # End of irciot_init_blockchain_method_()
   
@@ -791,23 +815,8 @@ class PyLayerIRCIoT(object):
     except ImportError:
       my_pointer = None
     if my_pointer == None:
-      my_error = None
-      if in_module_name == self.CONST.mod_ZLIB:
-        my_error = self.CONST.err_LOAD_ZLIB_MODULE
-      elif in_module_name == self.CONST.mod_BZIP2:
-        my_error = self.CONST.err_LOAD_BZIP2_MODULE
-      elif in_module_name == self.CONST.mod_RSA:
-        my_error = self.CONST.err_LOAD_RSA_MODULE
-      elif in_module_name == self.CONST.mod_AES:
-        my_error = self.CONST.err_LOAD_AES_MODULE
-      elif in_module_name == self.CONST.mod_2FISH:
-        my_error = self.CONST.err_LOAD_2FISH_MODULE
-      elif in_module_name == self.CONST.mod_USERSIGN:
-        my_error = self.CONST.err_LOAD_USER_SIGN
-      elif in_module_name == self.CONST.mod_USERCRYPT:
-        my_error = self.CONST.err_LOAD_USER_CRYPT
-      if my_error != None:
-        self.irciot_error_(my_error, 0)
+      if in_module_name in self.CONST.err_LOAD_module:
+        self.irciot_error_(self.CONST.err_LOAD_module[in_module_name], 0)
       return in_pointer
     return my_pointer
   else:
@@ -842,7 +851,14 @@ class PyLayerIRCIoT(object):
       self.__crypt_SHA1 = self.import_(self.__crypt_SHA1, \
         self.CONST.mod_SHA)
   elif in_mid_method == self.CONST.tag_mid_GOST12:
-    pass
+    if self.__crypt_GSTD != None and self.__crypt_GOST != None:
+      return False
+    if self.__crypt_GOST == None:
+      self.__crypt_GOST = self.import_(self.__crypt_GOST, \
+        self.CONST.mod_GOST)
+    if self.__crypt_GSTD == None:
+      self.__crypt_GSTD = self.import_(self.__crypt_GSTD, \
+        self.CONST.mod_GOSTD)
   self.irciot_init_blockchain_method_(in_mid_method)
   return True
   #
@@ -1023,7 +1039,13 @@ class PyLayerIRCIoT(object):
       my_private_key = self.__crypt_RSA.generate(1024)
       my_public_key = my_private_key.publickey()
     elif in_mid_method == self.CONST.tag_mid_GOST12:
-      pass
+      if self.__crypt_GOST == None:
+        return (None, None)
+      my_curve = self.__crypt_GOST.CURVES[self.CONST.crypto_GOST12_curve]
+      my_random = bytes(random.getrandbits(8) for my_idx in range(32))
+      my_private_key = self.__crypt_GOST.prv_unmarshal(my_random)
+      (my_int1, my_int2) = self.__crypt_GOST.public_key(my_curve, my_private_key)
+      my_public_key = my_int1.to_bytes(64,'little') + my_int2.to_bytes(64,'little')
   except:
     my_private_key = None
     my_public_key = None
@@ -1124,7 +1146,7 @@ class PyLayerIRCIoT(object):
     my_key_string = self.irciot_crypto_hash_to_str_(in_public_key)
     return
   elif self.mid_method == self.CONST.tag_mid_GOST12:
-    my_key_string = ""
+    my_key_string = self.irciot_crypto_hash_to_str_(in_public_key)
     return
   else:
     return
@@ -1439,7 +1461,10 @@ class PyLayerIRCIoT(object):
       my_sign = my_pkcs.sign(my_hash)
       del my_hash
     elif self.mid_method == self.CONST.tag_mid_GOST12:
-      return ""
+      my_curve = self.__crypt_GOST.CURVES[self.CONST.crypto_GOST12_curve]
+      my_hash = self.__crypt_GSTD.new(my_string).digest()[::-1]
+      my_sign = self.__crypt_GOST.sign(my_curve, in_private_key, my_hash, mode=2012)
+      del my_hash
     else:
       return ""
     my_string = str(self.mid_method)
@@ -1501,10 +1526,24 @@ class PyLayerIRCIoT(object):
       my_pkcs = self.__crypt_PKCS.new(in_public_key)
       if my_pkcs.verify(my_hash, my_sign):
         my_result = True
+      del my_hash
     except:
       pass
   elif my_method == self.CONST.tag_mid_GOST12:
-    pass
+    try:
+      my_curve = self.__crypt_GOST.CURVES[self.CONST.crypto_GOST12_curve]
+      my_int1 = in_public_key[0:64]
+      my_int2 = in_public_key[64:128]
+      my_hash = self.__crypt_GSTD.new(my_string_bin).digest()[::-1]
+      my_public_key = ( \
+        int.from_bytes(my_int1, byteorder='little'),
+        int.from_bytes(my_int2, byteorder='little') )
+      if self.__crypt_GOST.verify(my_curve, my_public_key, \
+        my_hash, my_sign, mode=2012):
+        my_result = True
+      del my_hash
+    except:
+      pass
   self.irciot_blockchain_restore_defaults_(my_save)
   return my_result
   #
@@ -3364,7 +3403,8 @@ class PyLayerIRCIoT(object):
   sign_mid = self.current_mid
   if self.mid_method in [ \
     self.CONST.tag_mid_ED25519, \
-    self.CONST.tag_mid_RSA1024 ]:
+    self.CONST.tag_mid_RSA1024, \
+    self.CONST.tag_mid_GOST12 ]:
     if in_vuid != None:
       my_mids = self.irciot_blockchain_get_last_mids_(in_vuid)
       if isinstance(my_mids, list) and my_mids != []:
@@ -3378,7 +3418,8 @@ class PyLayerIRCIoT(object):
     self.current_mid += 1
   elif self.mid_method in [ \
        self.CONST.tag_mid_ED25519, \
-       self.CONST.tag_mid_RSA1024 ]:
+       self.CONST.tag_mid_RSA1024, \
+       self.CONST.tag_mid_GOST12 ]:
     sign_hash = self.irciot_blockchain_sign_string_( \
       str_for_sign, self.__blockchain_private_key)
     if sign_hash == None:

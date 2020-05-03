@@ -1,8 +1,4 @@
 
-  2019-06-07 : UDP broadcast transport in flat IP / Ethernet
- ............: subnets such as WiFi will be useful for IoT
- ~ Must be ~ : devices without using a dedicated IRC server.
-
   2020-01-08 : Consider the possibility of seralization using
  ............: the Protocol Buffers for direct communication
   ~ Useful ~ : through UDP and when using encryption, in order

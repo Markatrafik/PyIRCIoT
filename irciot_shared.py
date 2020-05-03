@@ -366,11 +366,11 @@ class irciot_shared_(object):
 
  def bot_background_start_(self):
   import subprocess
-  if len(sys.argv) == 1:
+  my_count = len(sys.argv)
+  if my_count == 1:
     self.bot_usage_handler ()
-  else:
+  elif my_count > 1:
     my_list = [ self.bot_python ]
-    my_count = len(sys.argv)
     for my_idx in range(1, my_count):
       my_list += [ sys.argv[my_idx] ]
     if my_list[ my_count - 1 ] != self.bot_background_parameter:
