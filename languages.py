@@ -58,8 +58,8 @@ class PyLayerIRCIoT_EL_(object):
   }
   #
   mod_JRE = 'py4j.java_gateway'
-  mod_LUA = 'lupa'
   mod_JS  = 'js2py'
+  mod_LUA = 'lupa'
   #
   def __setattr__(self, *_):
     pass
@@ -100,36 +100,69 @@ class PyLayerIRCIoT_EL_(object):
   return True
 
  # incomplete
- def irciot_EL_run_code_(self, in_lang, in_code, in_environment):
+ def irciot_EL_check_code_(self, in_lang, in_code):
   if not self.irciot_EL_check_lang_(in_lang):
+    return False
+  if not isinstance(in_code, str):
+    return False
+
+ # incomplete
+ def __irciot_EL_run_JAVA_code_(self, in_code, in_environment):
+
+  return None
+
+ # incomplete
+ def __irciot_EL_run_JS_code_(self, in_code, in_environment):
+
+  return None
+
+ # incomplete
+ def __irciot_EL_run_LUA_code_(self, in_code, in_environment):
+  my_lua = self.__LUA.LuaRuntime()
+  for in_key in in_environment.keys():
+    my_value = in_environment[ in_key ]
+    if isinstance(my_value, str):
+      my_lua.globals()[ in_key ] = my_value
+  my_out = my_lua.eval(in_code)
+  del my_lua
+  return my_out
+
+ # incomplete
+ def irciot_EL_run_code_(self, in_lang, in_code, in_environment = {}):
+  if self.irciot_EL_check_code_(in_lang, in_code):
     return None
-  if not in_lang in self.__allowed_EL:
+  if not isinstance(in_code, str) or not isinstance(in_environment, dict):
+    return None
+  if in_lang == self.CONST.lang_JRE:
+    return self.__irciot_EL_run_JAVA_code_(in_code, in_environment)
+  elif in_lang == self.CONST.lang_JS:
+    return self.__irciot_EL_run_JS_code_(in_code, in_environment)
+  elif in_lang == self.CONST.lang_LUA:
+    return self.__irciot_EL_run_LUA_code_(in_code, in_environment)
+  elif in_lang == self.CONST.lang_PYTHON:
+    return None
+  elif in_lang == self.CONST.lang_RUBY:
     return None
   return None
 
- def irciot_EL_import_(self, in_pointer, in_module_name):
-  if in_pointer == None:
-    import importlib
-    try:
-      my_pointer = importlib.import_module(in_module_name)
-    except ImportError:
-      self.irciot_EL_error_(self.CONST.err_LOADING_MODULES, None)
-      my_pointer = None
-    return my_pointer
-  else:
-    return in_pointer
+ def irciot_EL_import_(self, in_module_name):
+  import importlib
+  try:
+    return importlib.import_module(in_module_name)
+  except ImportError:
+    self.irciot_EL_error_(self.CONST.err_LOADING_MODULES, None)
+    return None
   #
   # End of irciot_EL_import_()
 
  def irciot_EL_admit_language_(self, in_lang):
-  if not self.irciot_EL_check_lang_(in_lang):
-    return
-  if not in_lang in self.__allowed_EL:
-    self.__allowed_EL += [ in_lang ]
+  if in_lang not in self.__allowed_EL:
+    if self.irciot_EL_check_lang_(in_lang):
+      self.__allowed_EL += [ in_lang ]
+      return True
+  return False
 
  def irciot_EL_revoke_language_(self, in_lang):
-  if not self.irciot_EL_check_lang_(in_lang):
-    return
   if in_lang in self.__allowed_EL:
     self.irciot_EL_finish_language_(in_lang)
     self.__allowed_EL.remove(in_lang)
@@ -139,47 +172,45 @@ class PyLayerIRCIoT_EL_(object):
 
  # incomplete
  def irciot_EL_init_language_(self, in_lang):
-  if not self.irciot_EL_check_lang_(in_lang):
+  if in_lang not in self.__allowed_EL:
     return False
-  if not in_lang in self.__allowed_EL:
-    return False
-  if in_lang == lang_ANSYML:
+  if in_lang == self.CONST.lang_ANSYML:
     pass
-  elif in_lang == lang_BASH:
+  elif in_lang == self.CONST.lang_BASH:
     pass
-  elif in_lang == lang_BASIC:
+  elif in_lang == self.CONST.lang_BASIC:
     pass
-  elif in_lang == lang_CS:
+  elif in_lang == self.CONST.lang_CS:
     pass
-  elif in_lang == lang_CSP:
+  elif in_lang == self.CONST.lang_CSP:
     pass
-  elif in_lang == lang_GO:
+  elif in_lang == self.CONST.lang_GO:
     pass
-  elif in_lang == lang_JRE:
-    self.my_JRE = self.irciot_EL_import_(self.CONST.mod_JRE)
-    if self.my_JRE == None:
-      return False
-  elif in_lang == lang_JS:
-    self.my_JS  = self.irciot_EL_import_(self.CONST.mod_JS)
-    if self.my_JS  == None:
-      return False
-  elif in_lang == lang_LUA:
-    self.my_LUA = self.irciot_EL_import_(self.CONST.mod_LUA)
-    if self.my_LUA == None:
-      return False
-  elif in_lang == lang_QML:
+  elif in_lang == self.CONST.lang_JRE:
+    self.__JRE = self.irciot_EL_import_(self.CONST.mod_JRE)
+    if self.__JRE != None:
+      return True
+  elif in_lang == self.CONST.lang_JS:
+    self.__JS  = self.irciot_EL_import_(self.CONST.mod_JS)
+    if self.__JS  != None:
+      return True
+  elif in_lang == self.CONST.lang_LUA:
+    self.__LUA = self.irciot_EL_import_(self.CONST.mod_LUA)
+    if self.__LUA != None:
+      return True
+  elif in_lang == self.CONST.lang_QML:
     pass
-  elif in_lang == lang_PERL:
+  elif in_lang == self.CONST.lang_PERL:
     pass
-  elif in_lang == lang_PHP:
+  elif in_lang == self.CONST.lang_PHP:
     pass
-  elif in_lang == lang_R:
+  elif in_lang == self.CONST.lang_R:
     pass
-  elif in_lang == lang_PYTHON:
+  elif in_lang == self.CONST.lang_PYTHON:
     pass
-  elif in_lang == lang_RUBY:
+  elif in_lang == self.CONST.lang_RUBY:
     pass
-  elif in_lang == lang_SWIFT:
+  elif in_lang == self.CONST.lang_SWIFT:
     pass
   return False
   # End of irciot_EL_init_language_()
@@ -187,45 +218,46 @@ class PyLayerIRCIoT_EL_(object):
  def irciot_EL_finish_language_(self, in_lang):
   if not self.irciot_EL_check_lang_(in_lang):
     return False
-  elif in_lang == lang_BASH:
+  elif in_lang == self.CONST.lang_BASH:
     pass
-  elif in_lang == lang_BASIC:
+  elif in_lang == self.CONST.lang_BASIC:
     pass
-  elif in_lang == lang_CS:
+  elif in_lang == self.CONST.lang_CS:
     pass
-  elif in_lang == lang_CSP:
+  elif in_lang == self.CONST.lang_CSP:
     pass
-  elif in_lang == lang_GO:
+  elif in_lang == self.CONST.lang_GO:
     pass
-  elif in_lang == lang_JRE:
+  elif in_lang == self.CONST.lang_JRE:
     try:
-      del self.my_JRE
+      del self.__JRE
     except:
       return False
-  elif in_lang == lang_JS:
+  elif in_lang == self.CONST.lang_JS:
     try:
-      del self.my_JS
+      del self.__JS
     except:
       return False
-  elif in_lang == lang_LUA:
+  elif in_lang == self.CONST.lang_LUA:
     try:
-      del self.my_LUA
+      del self.__LUA
     except:
       return False
-  elif in_lang == lang_QML:
+  elif in_lang == self.CONST.lang_QML:
     pass
-  elif in_lang == lang_PERL:
+  elif in_lang == self.CONST.lang_PERL:
     pass
-  elif in_lang == lang_PHP:
+  elif in_lang == self.CONST.lang_PHP:
     pass
-  elif in_lang == lang_R:
+  elif in_lang == self.CONST.lang_R:
     pass
-  elif in_lang == lang_PYTHON:
+  elif in_lang == self.CONST.lang_PYTHON:
     pass
-  elif in_lang == lang_RUBY:
+  elif in_lang == self.CONST.lang_RUBY:
     pass
-  elif in_lang == lang_SWIFT:
+  elif in_lang == self.CONST.lang_SWIFT:
     pass
   return False
+  #
   # End of irciot_EL_finish_language_()
 

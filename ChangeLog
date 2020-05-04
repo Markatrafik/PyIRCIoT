@@ -9,7 +9,7 @@
 	beginning with irciot_deinencap*_ a new optional argument is added:
 	in_vuid (Virtual User ID). Also, added maintenance of a database of
 	Virtual Users at the level of the IRC protocol. The database is
-	consist	of two parts: Preconfigured users, and previously unknown
+	consist of two parts: Preconfigured users, and previously unknown
 	users appeared on IRC. To work with unknown users, you must set the
 	key irc_talk_with_stranges to True. The processing of service IRC-IoT
 	messages with the object type "bchnfo" (Blockchain Informational msg.)
@@ -17,123 +17,123 @@
 	Users database has been added.
 
 2019-04-26 19:30 GMT+7 PyIRCIoT 0.0.107 Alexey Y. Woronov <alexey@woronov.ru>
-        * Since Version 0.0.107 in all methods of PyLayerIRCIoT new optional
-        parameter has been added: in_vuid (Virtual User ID), by default: None
-        In API beetwen PyLayerIRCIoT and any transport class new method added:
-        with index api_GET_VUID = 700, and optional parameters 'in_vuid':
-        'c': get configured VUIDs, 't': get temporal VUIDs, '*': get all VUIDs
-        Also, the new transport class PyLayerCOM added in the file rfc2217.py
+	* Since Version 0.0.107 in all methods of PyLayerIRCIoT new optional
+	parameter has been added: in_vuid (Virtual User ID), by default: None
+	In API beetwen PyLayerIRCIoT and any transport class new method added:
+	with index api_GET_VUID = 700, and optional parameters 'in_vuid':
+	'c': get configured VUIDs, 't': get temporal VUIDs, '*': get all VUIDs
+	Also, the new transport class PyLayerCOM added in the file rfc2217.py
 
 2019-04-27 12:30 GMT+7 PyIRCIoT 0.0.108 Alexey Y. Woronov <alexey@woronov.ru>
-        * Since Version 0.0.108; Previously PyLayerIRCIoT.irciot_encap_all_()
-        method returned an array (list) of strings, now it returns array of
-        touples containing string and VUID. Similar changes were made to the
-        parameters of PyLayerIRC.irc_handler_(). Please make the corrections.
+	* Since Version 0.0.108; Previously PyLayerIRCIoT.irciot_encap_all_()
+	method returned an array (list) of strings, now it returns array of
+	touples containing string and VUID. Similar changes were made to the
+	parameters of PyLayerIRC.irc_handler_(). Please make the corrections.
 
 2019-05-01 15:00 GMT+7 PyIRCIoT 0.0.112 Alexey Y. Woronov <alexey@woronov.ru>
-        * In API beetwen PyLayerIRCIoT and transport classes new methods has
-        been added: api_GET_OMID = 111, and api_SET_OMID = 112, argument: VUID
-        Methods api_GET_LMID, api_GET_OMID now returns the set, not a single
-        Message ID. In the PyLayerIRC class, a pipeline of Message IDs created
-        separately own, and taken from other robots. The size of the pipeline
-        is set by the constant: PyLayerIRC.CONST.irc_default_mid_pipeline_size
+	* In API beetwen PyLayerIRCIoT and transport classes new methods has
+	been added: api_GET_OMID = 111, and api_SET_OMID = 112, argument: VUID
+	Methods api_GET_LMID, api_GET_OMID now returns the set, not a single
+	Message ID. In the PyLayerIRC class, a pipeline of Message IDs created
+	separately own, and taken from other robots. The size of the pipeline
+	is set by the constant: PyLayerIRC.CONST.irc_default_mid_pipeline_size
 
 2019-05-12 12:05 GMT+7 PyIRCIoT 0.0.117 Alexey Y. Woronov <alexey@woronov.ru>
-        * The protocol version was changed to 0.3.27. The "item_name" field
-        was added to the structure of the Local Dictionary items, which may
-        contain the name of a variable in the structure, it may be useful to
-        generate JSON, or SQL queries.
+	* The protocol version was changed to 0.3.27. The "item_name" field
+	was added to the structure of the Local Dictionary items, which may
+	contain the name of a variable in the structure, it may be useful to
+	generate JSON, or SQL queries.
 
 2019-05-17 09:30 GMT+7 PyIRCIoT 0.0.119 Alexey Y. Woronov <alexey@woronov.ru>
-        * The protocol version was changed to 0.3.28. Changes in the structure
-        of the Local Dictionary: field name was changed to "precision" and a
-        new numeric field "exponent" was added meaning the size of the number,
-        which is the degree of base 10, expressed in bits.
+	* The protocol version was changed to 0.3.28. Changes in the structure
+	of the Local Dictionary: field name was changed to "precision" and a
+	new numeric field "exponent" was added meaning the size of the number,
+	which is the degree of base 10, expressed in bits.
 
 2019-06-01 21:45 GMT+7 PyIRCIoT 0.0.123 Alexey Y. Woronov <alexey@woronov.ru>
-        * Added a first simplified version of library worked on MicroPython
-        for uploading it to IoT devices such as ESP8266 by Espressif Systems.
+	* Added a first simplified version of library worked on MicroPython
+	for uploading it to IoT devices such as ESP8266 by Espressif Systems.
 
 2019-08-15 09:05 GMT+7 PyIRCIoT 0.0.133 Alexey Y. Woronov <alexey@woronov.ru>
-        * Changes have been made to the PyLayerIRC class: if the NickName of
-        the robot is occupied, it tryies to return its NickName, periodically
-        and when another user release the Nick. Warning! Instead of assigning
-        a NickName to a variable irc_nick, use method irc_define_nick_(string)
+	* Changes have been made to the PyLayerIRC class: if the NickName of
+	the robot is occupied, it tryies to return its NickName, periodically
+	and when another user release the Nick. Warning! Instead of assigning
+	a NickName to a variable irc_nick, use method irc_define_nick_(string)
 
 2019-08-25 21:00 GMT+7 PyIRCIoT 0.0.135 Alexey Y. Woronov <alexey@woronov.ru>
-        * The protocol version was changed to 0.3.29. Introduced versioning of
-        the IRC-IoT protocol, the interaction for determining the used version
-        on the remote side is defined.
+	* The protocol version was changed to 0.3.29. Introduced versioning of
+	the IRC-IoT protocol, the interaction for determining the used version
+	on the remote side is defined.
 
 2019-09-07 22:45 GMT+7 PyIRCIoT 0.0.137 Alexey Y. Woronov <alexey@woronov.ru>
-        * User options has been added for preconfigured users. First option is
-        PyLayerIRC.CONST.irc_aop to automatically assign IRC channel operator.
-        PyLayerIRCIoT.irciot_deinencap_() method now always returns values
-        enclosed in square brackets. Value "[]" this means no values.
+	* User options has been added for preconfigured users. First option is
+	PyLayerIRC.CONST.irc_aop to automatically assign IRC channel operator.
+	PyLayerIRCIoT.irciot_deinencap_() method now always returns values
+	enclosed in square brackets. Value "[]" this means no values.
 
 2019-12-07 19:57 GMT+7 PyIRCIoT 0.0.145 Alexey Y. Woronov <alexey@woronov.ru>
-        * The function PyLayerIRCIoT.is_ii_() for validation an unencrypted
-        IRC-IoT object in the irciotmini library (MicroPython) is implemented.
+	* The function PyLayerIRCIoT.is_ii_() for validation an unencrypted
+	IRC-IoT object in the irciotmini library (MicroPython) is implemented.
 
 2019-12-08 19:45 GMT+7 PyIRCIoT 0.0.147 Alexey Y. Woronov <alexey@woronov.ru>
-        * The PyLayerIRCIoT.ii_deinencap_() function was implemented in the
-        irciotmini library (MicroPython) to deinencapsulate datums from the
-        stream of unencrypted messages of the IRC-IoT protocol.
+	* The PyLayerIRCIoT.ii_deinencap_() function was implemented in the
+	irciotmini library (MicroPython) to deinencapsulate datums from the
+	stream of unencrypted messages of the IRC-IoT protocol.
 
 2019-12-20 18:05 GMT+7 Today the Service Name "irc-iot" and TXT-key "_irc-iot"
-        for DNS has been registered by the IANA. Unfortunately, the IANA did
-        not agree to allocate the port from the base port range, and recom-
-        mending using the ports of the IRC protocol like 6667/TCP or the free
-        range of ports: 49152-65535 without registration.
+	for DNS has been registered by the IANA. Unfortunately, the IANA did
+	not agree to allocate the port from the base port range, and recom-
+	mending using the ports of the IRC protocol like 6667/TCP or the free
+	range of ports: 49152-65535 without registration.
 
 2019-12-27 10:05 GMT+7 PyIRCIoT 0.0.153 Alexey Y. Woronov <alexey@woronov.ru>
-        The new class PyIRCIoT_router has been added into file irciot_router.py
+	The new class PyIRCIoT_router has been added into file irciot_router.py
 
 2020-01-06 13:07 GMT+7 PyIRCIoT 0.0.167 Alexey Y. Woronov <alexey@woronov.ru>
-        * An IDENT server (RFC 1413) has been added to the class PyLayerIRC.
-        In order for the IDENT server to be started, before calling the
-        PyLayerIRC.start_IRC_() method, you must set the irc_ident = True.
+	* An IDENT server (RFC 1413) has been added to the class PyLayerIRC.
+	In order for the IDENT server to be started, before calling the
+	PyLayerIRC.start_IRC_() method, you must set the irc_ident = True.
 
 2020-01-25 23:05 GMT+7 PyIRCIoT 0.0.170 Alexey Y. Woronov <alexey@woronov.ru>
-        * The protocol version was changed to 0.3.31. Error codes was added.
-        PyLayerIRC.is_irciot_address_() method has been added. Removed some
-        non-ASCII characters from the sources, that impeded work in MacOS.
+	* The protocol version was changed to 0.3.31. Error codes was added.
+	PyLayerIRC.is_irciot_address_() method has been added. Removed some
+	non-ASCII characters from the sources, that impeded work in MacOS.
 
 2020-02-01 19:15 GMT+7 PyIRCIoT 0.0.173 Alexey Y. Woronov <alexey@woronov.ru>
-        * The methods irciot_crc16_() and irciot_crc32_() in the PyLayerIRCIoT
-        class are debugged. To select the method used, you need to setup the
-        variable integrity_check, where 1 is for CRC16, 2 for CRC32, before
-        using Integrity Check you need to call the appropriate Init function.
+	* The methods irciot_crc16_() and irciot_crc32_() in the PyLayerIRCIoT
+	class are debugged. To select the method used, you need to setup the
+	variable integrity_check, where 1 is for CRC16, 2 for CRC32, before
+	using Integrity Check you need to call the appropriate Init function.
 
 2020-02-08 12:15 GMT+7 PyIRCIoT 0.0.175 Alexey Y. Woronov <alexey@woronov.ru>
-        * Starting with this version it is possible to use the PyCryptodome
-        library instead of PyCrypto for message encryption. In addition, changes
-        were made to the PyIRCIoT_router class: each function of the graph node
-        will return a list of parameters necessary for it's operation.
+	* Starting with this version it is possible to use the PyCryptodome
+	library instead of PyCrypto for message encryption. In addition, changes
+	were made to the PyIRCIoT_router class: each function of the graph node
+	will return a list of parameters necessary for it's operation.
 
 2020-02-15 12:00 GMT+7 PyIRCIoT 0.0.177 Alexey Y. Woronov <alexey@woronov.ru>
-        * All simple methods that are repeated in the network transport classes
-        PyLayerIRC(), PyLayerCOM() and PyLayerUDPb(), moved from corresponding
-        files: rfc1459.py, rfc2217.py and udpbrcst.py to a class irciot_shared_
-        into the new separte file named: irciot_shared.py
+	* All simple methods that are repeated in the network transport classes
+	PyLayerIRC(), PyLayerCOM() and PyLayerUDPb(), moved from corresponding
+	files: rfc1459.py, rfc2217.py and udpbrcst.py to a class irciot_shared_
+	into the new separte file named: irciot_shared.py
 
 2020-02-29 18:59 GMT+7 PyIRCIoT 0.0.181 Alexey Y. Woronov <alexey@woronov.ru>
-         * In this version of the library the basic part of the PyLayerUDPb
-         class has been written that provides transport for the IRC-IoT protocol
-         messages using a UDP dgrams without IRC server, and also in the class
-         PyLayerIRC, added check of user masks for cases when IRC Nick changed.
+	 * In this version of the library the basic part of the PyLayerUDPb
+	 class has been written that provides transport for the IRC-IoT protocol
+	 messages using a UDP dgrams without IRC server, and also in the class
+	 PyLayerIRC, added check of user masks for cases when IRC Nick changed.
 
 2020-04-12 12:25 GMT+7 PyIRCIoT 0.0.191 Alexey Y. Woronov <alexey@woronov.ru>
-         * In the Global Dictionary of the IRC-IoT protocol, new objects types
-         are reserved: fusnfo, fusqry, fusreq, fusack, fuspck. These messages
-         are required for the operation of the Firmware Update Service.
+	 * In the Global Dictionary of the IRC-IoT protocol, new objects types
+	 are reserved: fusnfo, fusqry, fusreq, fusack, fuspck. These messages
+	 are required for the operation of the Firmware Update Service.
 
 2020-05-02 12:15 GMT+7 PyIRCIoT 0.0.193 Alexey Y. Woronov <alexey@woronov.ru>
-         * Attention! Staring from version 0.0.193 of library some variables in
-         the PyLayerIRCIoT classes will become private, use the appropriate
-         methods instead of directly accessing these variables.
+	 * Attention! Staring from version 0.0.193 of library some variables in
+	 the PyLayerIRCIoT classes will become private, use the appropriate
+	 methods instead of directly accessing these variables.
 
 2020-05-03 10:05 GMT+7 PyIRCIoT 0.0.195 Alexey Y. Woronov <alexey@woronov.ru>
-         * Since Version 0.0.195: Blockchain signature function with algorithm
-         GOST 34.10-2012 has been added. To run this feature, use the method:
-         irciot_enable_blockchain_(CONST.tag_mid_GOST12) of the PyLayerIRCIoT.
+	 * Since Version 0.0.195: Blockchain signature function with algorithm
+	 GOST 34.10-2012 has been added. To run this feature, use the method:
+	 irciot_enable_blockchain_(CONST.tag_mid_GOST12) of the PyLayerIRCIoT.

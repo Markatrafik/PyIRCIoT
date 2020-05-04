@@ -1532,13 +1532,10 @@ class PyLayerIRCIoT(object):
   elif my_method == self.CONST.tag_mid_GOST12:
     try:
       my_curve = self.__crypt_GOST.CURVES[self.CONST.crypto_GOST12_curve]
-      my_int1 = in_public_key[0:64]
-      my_int2 = in_public_key[64:128]
+      my_int1 = int.from_bytes(in_public_key[0:64], byteorder='little')
+      my_int2 = int.from_bytes(in_public_key[64:128], byteorder='little')
       my_hash = self.__crypt_GSTD.new(my_string_bin).digest()[::-1]
-      my_public_key = ( \
-        int.from_bytes(my_int1, byteorder='little'),
-        int.from_bytes(my_int2, byteorder='little') )
-      if self.__crypt_GOST.verify(my_curve, my_public_key, \
+      if self.__crypt_GOST.verify(my_curve, ( my_int1, my_int2 ), \
         my_hash, my_sign, mode=2012):
         my_result = True
       del my_hash

@@ -557,12 +557,12 @@ class PyLayerIRC( irciot_shared_ ):
    #
    super(PyLayerIRC, self).__init__()
    #
-   self.irc_nick = self.CONST.irc_default_nick
+   self.__irc_nick = self.CONST.irc_default_nick
    self.irc_user = self.irc_tolower_(self.CONST.irc_default_nick)
    self.irc_info = self.CONST.irc_default_info
    self.irc_quit = self.CONST.irc_default_quit
-   self.irc_nick_old = self.irc_nick
-   self.irc_nick_base = self.irc_nick
+   self.irc_nick_old = self.__irc_nick
+   self.irc_nick_base = self.__irc_nick
    self.irc_nick_try = ""
    #
    self.irc_nick_length = self.CONST.irc_max_nick_length
@@ -994,7 +994,7 @@ class PyLayerIRC( irciot_shared_ ):
  def irc_define_nick_(self, in_nick):
    if not self.is_irc_nick_(in_nick):
      return
-   self.irc_nick = in_nick
+   self.__irc_nick = in_nick
    self.irc_nick_old = in_nick
    self.irc_nick_base = in_nick
    if self.irc_run:
@@ -1179,7 +1179,7 @@ class PyLayerIRC( irciot_shared_ ):
  def irc_track_add_nick_(self, in_nick, in_mask, in_vuid, in_info):
    if not self.is_irc_nick_(in_nick):
      return
-   if in_nick == self.irc_nick:
+   if in_nick == self.__irc_nick:
      return
    my_struct = self.irc_track_get_nick_struct_by_nick_(in_nick)
    if my_struct == None:
@@ -1192,7 +1192,7 @@ class PyLayerIRC( irciot_shared_ ):
  def irc_track_update_nick_(self, in_nick, in_mask, in_vuid, in_info):
    if not self.is_irc_nick_(in_nick):
      return
-   if in_nick == self.irc_nick:
+   if in_nick == self.__irc_nick:
      return
    for my_index, my_struct in enumerate(self.irc_nicks):
      (my_nick, my_mask, my_vuid, my_info) = my_struct
@@ -1590,8 +1590,8 @@ class PyLayerIRC( irciot_shared_ ):
    ret = self.irc_send_(self.CONST.cmd_NICK + " " + irc_nick)
    self.irc_nick_try = irc_nick
    if ret == 0:
-     self.irc_nick_old = self.irc_nick
-     self.irc_nick = irc_nick
+     self.irc_nick_old = self.__irc_nick
+     self.__irc_nick = irc_nick
    return ret
    #
    # End of irc_random_nick_()
@@ -1651,11 +1651,11 @@ class PyLayerIRC( irciot_shared_ ):
    self.irc_queue_lock[in_queue_id] = old_queue_lock
 
  def irc_check_and_restore_nick_(self):
-   if self.irc_nick != self.irc_nick_base:
+   if self.__irc_nick != self.irc_nick_base:
      if self.irc_send_(self.CONST.cmd_NICK \
       + " " + self.irc_nick_base) != -1:
-      self.irc_nick_old = self.irc_nick
-      self.irc_nick = self.irc_nick_base
+      self.irc_nick_old = self.__irc_nick
+      self.__irc_nick = self.irc_nick_base
 
  def irc_umode_by_nick_mask_(self, in_nick, in_mask, in_vuid):
    if self.irc_get_vuid_type_(in_vuid) == self.CONST.api_vuid_cfg:
@@ -1678,19 +1678,19 @@ class PyLayerIRC( irciot_shared_ ):
 
  def func_restore_nick_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
-   self.irc_nick = self.irc_nick_old
+   self.__irc_nick = self.irc_nick_old
    return (in_ret, 3, in_wait)
 
  def func_not_reg_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
-   #if self.irc_random_nick_(self.irc_nick) == 1:
+   #if self.irc_random_nick_(self.__irc_nick) == 1:
    #  return (-1, 0, in_wait)
    return (in_ret, 1, self.CONST.irc_default_wait)
 
  def func_banned_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
    if self.join_retry > 1:
-     if self.irc_random_nick_(self.irc_nick) == 1:
+     if self.irc_random_nick_(self.__irc_nick) == 1:
        self.join_retry += 1
        return (-1, 0, in_wait)
    return (in_ret, 3, self.CONST.irc_default_wait)
@@ -1855,7 +1855,7 @@ class PyLayerIRC( irciot_shared_ ):
          if ((my_change == self.CONST.irc_mode_add) \
            and (my_char == self.CONST.irc_umode_ban)):
            my_mask_array = my_mask.split("!")
-           my_pseudo  = self.irc_nick + '!'
+           my_pseudo  = self.__irc_nick + '!'
            my_pseudo += my_mask_array[1]
            if self.irc_check_mask_(my_pseudo, my_mask):
              my_nick = True
@@ -1896,7 +1896,7 @@ class PyLayerIRC( irciot_shared_ ):
                   self.CONST.irc_mode_del, \
                   self.CONST.irc_umode_ban, my_mask))
        if my_nick:
-         self.irc_random_nick_(self.irc_nick, True)
+         self.irc_random_nick_(self.__irc_nick, True)
        if my_nick or my_unban:
          return (in_ret, in_init, 0)
    except:
@@ -2090,7 +2090,7 @@ class PyLayerIRC( irciot_shared_ ):
          if self.irc_password:
            self.irc_send_(self.CONST.cmd_PASS \
             + " " + self.irc_password)
-         self.irc_user = self.irc_tolower_(self.irc_nick)
+         self.irc_user = self.irc_tolower_(self.__irc_nick)
          if self.irc_send_(self.CONST.cmd_USER \
           + " " + self.irc_user \
           + " " + self.irc_host + " 1 :" \
@@ -2100,7 +2100,7 @@ class PyLayerIRC( irciot_shared_ ):
        elif irc_init == 3:
          self.join_retry = 0
          if self.irc_send_(self.CONST.cmd_NICK \
-          + " " + self.irc_nick) == -1:
+          + " " + self.__irc_nick) == -1:
            irc_init = 0
 
        elif irc_init == 4:
