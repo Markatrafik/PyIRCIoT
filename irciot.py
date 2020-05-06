@@ -27,6 +27,10 @@ import json
 import random
 import base64
 import datetime
+try:
+ import json
+except:
+ import simplejson as json
 
 from ctypes import c_ushort
 

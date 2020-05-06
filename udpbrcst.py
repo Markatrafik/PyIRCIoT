@@ -13,19 +13,22 @@
 
 import socket
 import select
-import json
 import datetime
 import threading
 import ipaddress
 import ifaddr
 import ssl
+try:
+ import json
+except:
+ import simplejson as json
 from queue import Queue
 from time import time
 from time import sleep
 try: # insecure, but for development
-  from irciot_shared import *
+ from irciot_shared import *
 except:
-  from PyIRCIoT.irciot_shared import *
+ from PyIRCIoT.irciot_shared import *
 
 import datetime
 

@@ -16,13 +16,16 @@
 CAN_debug_library  = False
 
 try: # insecure, but for development
-  from irciot import PyLayerIRCIoT
+ from irciot import PyLayerIRCIoT
 except:
-  from PyIRCIoT.irciot import PyLayerIRCIoT
+ from PyIRCIoT.irciot import PyLayerIRCIoT
 from copy import deepcopy
 from time import time
 import random
-import json
+try:
+ import json
+except:
+ import simplejson as json
 
 class PyIRCIoT_router( PyLayerIRCIoT ):
 

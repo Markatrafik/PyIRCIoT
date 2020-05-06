@@ -4,9 +4,12 @@ import struct
 import ifaddr
 import ipaddress
 import datetime
-import json
 import sys
 import os
+try:
+ import json
+except:
+ import simplejson as json
 
 class irciot_shared_(object):
 
