@@ -547,15 +547,12 @@ class PyLayerIRCIoT(object):
   self.current_mid = '0' # Message ID
   self.current_oid =  0  # Object ID
   self.current_did =  0  # Datum ID
-  self.mid_lock = 0
-  self.oid_lock = 0
-  self.did_lock = 0
   #
   self.defrag_pool = []
-  self.defrag_lock = False
+  self.__defrag_lock = False
   #
   self.output_pool = []
-  self.output_lock = False
+  self.__output_lock = False
   #
   self.virtual_lmid = [] # Virtual Last Message IDs pipeline
   self.virtual_omid = [] # Virtual Own Message IDs pipeline
@@ -564,7 +561,7 @@ class PyLayerIRCIoT(object):
   self.ldict_types = []
   self.ldict_sections = []
   self.ldict_file  = None
-  self.ldict_lock  = False
+  self.__ldict_lock = False
   #
   self.mid_method  = self.CONST.tag_mid_default
   self.oid_method  = 0
@@ -605,7 +602,7 @@ class PyLayerIRCIoT(object):
     if self.crypt_compress != self.CONST.compress_NONE:
       self.irciot_load_compression_methods_(self.crypt_method)
   #
-  self.crypt_cache = None
+  self.__crypt_cache = None
   #
   # 0 is autoincrement
   #
@@ -637,7 +634,7 @@ class PyLayerIRCIoT(object):
   #
   self.irciot_init_encryption_method_(self.crypt_method)
   #
-  self.message_mtu = self.CONST.default_mtu
+  self.__message_mtu = self.CONST.default_mtu
   #
   self.integrity_check = self.CONST.default_integrity_check
   self.integrity_stamp = self.CONST.default_integrity_stamp
@@ -1777,9 +1774,9 @@ class PyLayerIRCIoT(object):
       return None
   my_size = len(in_raw_data)
   my_hash = self.irciot_crypto_hasher_(str(in_raw_data), 16)
-  if self.crypt_cache != None:
+  if self.__crypt_cache != None:
     ( my_size_cached, my_hash_cached, my_encrypted ) \
-      = self.crypt_cache
+      = self.__crypt_cache
     if ((my_size == my_size_cached) \
     and (my_hash == my_hash_cached)):
       return my_encrypted
@@ -1804,7 +1801,7 @@ class PyLayerIRCIoT(object):
     return None
   if my_encrypted == bytes():
     return None
-  self.crypt_cache = ( my_size, my_hash, my_encrypted )
+  self.__crypt_cache = ( my_size, my_hash, my_encrypted )
   return my_encrypted
   #
   # End of irciot_crypto_RSA_encrypt_()
@@ -2313,11 +2310,17 @@ class PyLayerIRCIoT(object):
           return False
     else:
       my_ldict_sections = []
-    if not self.ldict_lock:
+    my_lock = 0
+    while self.__ldict_lock and my_lock < 8:
+      random.seed()
+      my_lock += 1
+    if self.__ldict_lock:
       return False
-    self.ldict          = my_ldict_items
-    self.ldict_types    = my_ldict_types
+    self.ldict_lock  = True
+    self.ldict       = my_ldict_items
+    self.ldict_types = my_ldict_types
     self.ldict_sections = my_ldict_sections
+    self.ldict_lock  = False
   return True
   #
   # End of irciot_ldict_load_from_file_()
@@ -2361,7 +2364,10 @@ class PyLayerIRCIoT(object):
     return
   if in_mtu < 128:
     return
-  self.message_mtu = in_mtu
+  self.__message_mtu = in_mtu
+
+ def irciot_get_mtu_(self):
+  return self.__message_mtu
 
  def is_irciot_ldict_type_(self, in_variable, in_type_id):
   my_type = self.irciot_ldict_get_type_by_id_(in_type_id)
@@ -2634,19 +2640,19 @@ class PyLayerIRCIoT(object):
 
  def irciot_clear_defrag_chain_(self, in_did):
   try:
-    if self.defrag_lock:
-       return
-    self.defrag_lock = True
+    if self.__defrag_lock:
+      return
+    self.__defrag_lock = True
     for my_item in self.defrag_pool:
-       (test_enc, test_header, test_json) = my_item
-       (test_dt, test_ot, test_src, test_dst, \
-        test_dc, test_dp, test_bc, test_bp, test_did) = test_header
-       if in_did == test_did:
-          self.defrag_pool.remove(my_item)
-          break
-    self.defrag_lock = False
+      (test_enc, test_header, test_json) = my_item
+      (test_dt, test_ot, test_src, test_dst, \
+       test_dc, test_dp, test_bc, test_bp, test_did) = test_header
+      if in_did == test_did:
+         self.defrag_pool.remove(my_item)
+         break
   except:
-    self.defrag_lock = False
+    pass
+  self.__defrag_lock = False
   #
   # End of irciot_clear_defrag_chain_()
 
@@ -2748,9 +2754,9 @@ class PyLayerIRCIoT(object):
     return ""
   if my_new:
     my_item = (in_enc, in_header, orig_json)
-    self.defrag_lock = True
+    self.__defrag_lock = True
     self.defrag_pool.append(my_item)
-    self.defrag_lock = False
+    self.__defrag_lock = False
   if my_ok > 0:
     if my_ok == 1:
        pass
@@ -3376,7 +3382,7 @@ class PyLayerIRCIoT(object):
      if my_datums_cnt > 1:
         my_irciot = "[" + my_irciot + "]"
      my_irciot = '"' + self.CONST.tag_DATUM + '":' + my_irciot
-  if isinstance(my_datums, dict):
+  elif isinstance(my_datums, dict):
      if self.CONST.tag_OBJECT_TYPE in my_datums.keys():
         my_ot  = my_datums[self.CONST.tag_OBJECT_TYPE]
         if self.CONST.tag_ENC_DATUM in my_datums.keys():
@@ -3553,7 +3559,7 @@ class PyLayerIRCIoT(object):
   out_head += len(self.CONST.tag_DATUM_BC)
   out_head += len(str(my_part)) + 4 #"":,#
   out_head += len(self.CONST.tag_DATUM_BP)
-  out_skip += out_head - self.message_mtu
+  out_skip += out_head - self.__message_mtu
   out_big_datum = '{'
   out_big_datum += '"' + self.CONST.tag_OBJECT_TYPE + '":"' + big_ot
   out_big_datum += '","' + self.CONST.tag_DATUM_ID
@@ -3561,7 +3567,7 @@ class PyLayerIRCIoT(object):
   out_big_datum += '","' + self.CONST.tag_DATUM_BC + '":' + str(my_bc)
   out_big_datum += ',"' + self.CONST.tag_DATUM_BP + '":' + str(my_part)
   out_big_datum += ',"' + self.CONST.tag_ENC_DATUM + '":"'
-  my_okay = self.message_mtu - out_head - 43 # Must be calculated
+  my_okay = self.__message_mtu - out_head - 43 # Must be calculated
   my_size = my_bc - my_part
   if my_size > my_okay:
      my_size = my_okay
@@ -3649,7 +3655,7 @@ class PyLayerIRCIoT(object):
      del my_datums_obj
      del my_datums_cnt
   my_irciot = self.irciot_encap_internal_(my_datums_set, in_vuid)
-  if (len(my_irciot) > self.message_mtu) or my_encrypt:
+  if (len(my_irciot) > self.__message_mtu) or my_encrypt:
      if in_skip == 0:
         self.current_mid = save_mid # mid rollback
      my_datums = json.loads(my_datums_set)
@@ -3658,7 +3664,7 @@ class PyLayerIRCIoT(object):
         my_datums_total = len(my_datums)
         if my_datums_total > 1:
            my_datums_skip = my_datums_total
-           while (len(my_irciot) > self.message_mtu) \
+           while (len(my_irciot) > self.__message_mtu) \
              and (my_datums_skip <= my_datums_total):
               part_datums = []
               my_datums_cnt = 0
@@ -3671,7 +3677,7 @@ class PyLayerIRCIoT(object):
               str_part_datums = json.dumps(part_datums, separators=(',',':'))
               self.current_mid = save_mid # mid rollback
               my_irciot = self.irciot_encap_internal_(str_part_datums, in_vuid)
-              if len(my_irciot) <= self.message_mtu:
+              if len(my_irciot) <= self.__message_mtu:
                 my_skip_out = in_skip + my_datums_skip
                 if my_skip_out >= my_total:
                    my_skip_out = 0
@@ -3699,7 +3705,7 @@ class PyLayerIRCIoT(object):
     in_skip = 0
     my_datums_skip = 0
     if CAN_encrypt_datum and my_datums_part == 0:
-      self.crypt_cache = None
+      self.__crypt_cache = None
   return my_irciot, in_skip + my_datums_skip, my_datums_part
   #
   # End of irciot_encap_()
