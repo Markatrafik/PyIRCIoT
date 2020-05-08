@@ -44,3 +44,8 @@
   ~ Useful ~ : task can be used, for example, how it is done in
  ............: the HashCache. Also, Embedded Languages may used.
 
+  2020-05-08 : The PyBasic package is being developed on the net
+ ............: under GNU GPL license, it is the BASIC interpreter
+  ~ Useful ~ : written in the Python language, it will be useful
+ ............: to connect it to the PyLayerIRCIoT_EL_ class.
+

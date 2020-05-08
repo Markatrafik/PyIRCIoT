@@ -624,7 +624,8 @@ class PyLayerIRCIoT(object):
        self.CONST.tag_mid_GOST12 ]:
      self.irciot_load_blockchain_methods_(self.__mid_method)
      self.irciot_init_blockchain_method_(self.__mid_method)
-  self.mid_hash_length = len(str(self.current_mid))
+  self.mid_hash_length \
+   = self.irciot_get_blockchain_hash_length_(self.__mid_method)
   #
   if self.__oid_method == 0:
      self.current_oid = random.randint(  1000,  9999)
@@ -785,26 +786,33 @@ class PyLayerIRCIoT(object):
   #
   # End of irciot_init_encryption_method_()
 
+ def irciot_get_blockchain_hash_length_(self, in_mid_method):
+  if in_mid_method == self.CONST.tag_mid_ED25519:
+    return self.CONST.mid_ED25519_hash_length
+  elif in_mid_method == self.CONST.tag_mid_RSA1024:
+    return self.CONST.mid_RSA1024_hash_length
+  elif in_mid_method == self.CONST.tag_mid_GOST12:
+    return self.CONST.mid_GOST12_hash_length
+  else:
+    return len(str(self.current_mid))
+
  def irciot_init_blockchain_method_(self, in_mid_method):
   if not in_mid_method in [ \
     self.CONST.tag_mid_ED25519, \
-    self.CONST.tag_mid_RSA1024,
+    self.CONST.tag_mid_RSA1024, \
     self.CONST.tag_mid_GOST12 ]:
-    return
+    return False
   (self.__blockchain_private_key, \
    self.__blockchain_public_key) \
     = self.irciot_blockchain_generate_keys_(in_mid_method)
   if not isinstance(self.__blockchain_private_key, object):
-    return
+    return False
   self.current_mid \
     = self.irciot_blockchain_sign_string_( \
       str(self.current_mid), self.__blockchain_private_key)
-  if in_mid_method == self.CONST.tag_mid_ED25519:
-    self.mid_hash_length = self.CONST.mid_ED25519_hash_length
-  elif in_mid_method == self.CONST.tag_mid_RSA1024:
-    self.mid_hash_length = self.CONST.mid_RSA1024_hash_length
-  elif in_mid_method == self.CONST.tag_mid_GOST12:
-    self.mid_hash_length = self.CONST.mid_GOST12_hash_length
+  self.mid_hash_length \
+    = self.irciot_get_blockchain_hash_length_(in_mid_method)
+  return True
   #
   # End of irciot_init_blockchain_method_()
   
@@ -860,8 +868,9 @@ class PyLayerIRCIoT(object):
     if self.__crypt_GSTD == None:
       self.__crypt_GSTD = self.import_(self.__crypt_GSTD, \
         self.CONST.mod_GOSTD)
-  self.irciot_init_blockchain_method_(in_mid_method)
-  return True
+  if self.irciot_init_blockchain_method_(in_mid_method):
+    return True
+  return False
   #
   # End of irciot_load_blockchian_methods_()
 
@@ -2742,9 +2751,9 @@ class PyLayerIRCIoT(object):
                         my_new = True
                else: # Combo fragmentation method
                   pass                  
-         else:
-            my_err = self.CONST.err_DEFRAG_INVALID_DID
-            break
+      else:
+         my_err = self.CONST.err_DEFRAG_INVALID_DID
+         break
   if self.defrag_pool == []:
     if len(in_enc) == my_bc:
        defrag_buffer = in_enc

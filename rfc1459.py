@@ -154,6 +154,11 @@ class PyLayerIRC( irciot_shared_ ):
      = irc_change_modes \
      + irc_all_modes
    #
+   irc_nick_regexp = "^[" + irc_ascii_letters \
+     + "_`\^\\\[\]\{\}][" + irc_ascii_letters \
+     + irc_ascii_digits + "\-_`\^\\\[\]\{\}]{1,12}$"
+   irc_channel_regexp = "^#[" + irc_ascii_letters \
+     + irc_ascii_digits + "\-_\^\[\]\{\}]{1,24}$"
    #
    irc_default_draft   = "Undernet"
    #
@@ -560,6 +565,11 @@ class PyLayerIRC( irciot_shared_ ):
    #
    super(PyLayerIRC, self).__init__()
    #
+   self.__irc_nick_matcher \
+    = re.compile(self.CONST.irc_nick_regexp, re.IGNORECASE)
+   self.__irc_channel_matcher \
+    = re.compile(self.CONST.irc_channel_regexp, re.IGNORECASE)
+   #
    self.__irc_nick = self.CONST.irc_default_nick
    self.irc_user = self.irc_tolower_(self.CONST.irc_default_nick)
    self.irc_info = self.CONST.irc_default_info
@@ -964,19 +974,12 @@ class PyLayerIRC( irciot_shared_ ):
      return False
    if len(in_nick) > self.CONST.irc_max_nick_length:
      return False
-   str_mask = "^[" + self.CONST.irc_ascii_letters \
-    + "_`\^\\\[\]\{\}][" + self.CONST.irc_ascii_letters \
-    + self.CONST.irc_ascii_digits + "\-_`\^\\\[\]\{\}]{1,12}$"
-   irc_regexp = re.compile(str_mask, re.IGNORECASE)
-   return irc_regexp.match(in_nick)
+   return self.__irc_nick_matcher.match(in_nick)
 
  def is_irc_channel_(self, in_channel):
    if not isinstance(in_channel, str):
      return False
-   str_mask = "^#[" + self.CONST.irc_ascii_letters \
-    + self.CONST.irc_ascii_digits + "\-_\^\[\]\{\}]{1,24}$"
-   irc_regexp = re.compile(str_mask, re.IGNORECASE)
-   return irc_regexp.match(in_channel)
+   return self.__irc_channel_matcher.match(in_channel)
 
  def irc_compare_channels_(self, ref_channel, cmp_channel):
    if not self.is_irc_channel_(ref_channel):

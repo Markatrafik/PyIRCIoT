@@ -11,6 +11,11 @@
 ''  Alexey Y. Woronov <alexey@woronov.ru>
 '''
 
+# Those Global options override default behavior and memory usage
+#
+CAN_debug_library  = True
+
+import re
 try:
  import json
 except:
@@ -41,6 +46,7 @@ class PyLayerIRCIoT_EL_(object):
   lang_PYTHON = 'py'  # Python
   lang_R      = 'r'   # GNU R
   lang_RUBY   = 'rb'  # Ruby
+  lang_SMTLK  = 'st'  # SmallTalk
   lang_SWIFT  = 'swt' # Apple Swift
   #
   lang_ALL = [
@@ -53,6 +59,8 @@ class PyLayerIRCIoT_EL_(object):
   err_UNKNOWN_LANGUAGE = 1001
   err_UNSUPPORTED_YET  = 1002
   err_BAD_ENVIRONMENT  = 1003
+  err_COMMON_FILTER    = 1004
+  err_LANGUAGE_FILTER  = 1005
   err_LANGUAGE_SYNTAX  = 1007
   err_LOADING_MODULES  = 1009
   #
@@ -61,7 +69,9 @@ class PyLayerIRCIoT_EL_(object):
    err_UNSUPPORTED_YET  : "This language is not yet supported",
    err_LANGUAGE_SYNTAX  : "Incorrect syntax for this language",
    err_LOADING_MODULES  : "Unable to load required modules",
-   err_BAD_ENVIRONMENT  : "Invalid language environment"
+   err_BAD_ENVIRONMENT  : "Invalid language environment",
+   err_COMMON_FILTER    : "Code denied by common filter",
+   err_LANGUAGE_FILTER  : "Code denied by language filter"
   }
   #
   mod_ANSVAR = 'ansible.vars.manager'
@@ -71,6 +81,10 @@ class PyLayerIRCIoT_EL_(object):
   mod_JS  = 'js2py'
   mod_LUA = 'lupa'
   #
+  common_filter_regexps = [
+   '.*\\\\\\.*', '.*\\\\\'.*', '.*\\\\\".*' # Disable some escaping
+  ]
+  #
   def __setattr__(self, *_):
     pass
 
@@ -79,15 +93,21 @@ class PyLayerIRCIoT_EL_(object):
   self.CONST = self.CONST_EL_()
   #
   self.__allowed_EL = []
+  self.__common_filter_matchers = []
+  for my_regexp in self.CONST.common_filter_regexps:
+    self.__common_filter_matchers += [ re.compile(my_regexp) ]
   #
   # End of PyLayerIRCIoT_EL_.__init__()
 
  def irciot_EL_error_(self, in_error_code, in_addon):
-  my_message = ""
   if in_error_code in self.CONST.err_DESCRIPTIONS.keys():
     my_descr = self.CONST.err_DESCRIPTIONS[in_error_code]
     if isinstance(in_addon, str):
       my_descr += " (%s)" % in_addon
+  else:
+    return
+  if CAN_debug_library:
+    print("EL error (%d):" % in_error_code, my_descr)
   #
   # End of irciot_EL_error_()
 
@@ -127,6 +147,12 @@ class PyLayerIRCIoT_EL_(object):
     return False
   if not isinstance(in_code, str):
     return False
+  # Common filters:
+  for my_re in self.__common_filter_matchers:
+    if my_re.match(in_code):
+      self.irciot_EL_error_(self.CONST.err_COMMON_FILTER, '%s' % my_re)
+      return False
+  # Language-specific filters:
 
   return True
 
@@ -250,7 +276,7 @@ class PyLayerIRCIoT_EL_(object):
   elif in_lang == self.CONST.lang_BASH:
     self.irciot_EL_error_(self.CONST.err_UNSUPPORTED_YET, None)
   elif in_lang == self.CONST.lang_BASIC:
-    pass
+    self.irciot_EL_error_(self.CONST.err_UNSUPPORTED_YET, None)
   elif in_lang == self.CONST.lang_CS:
     pass
   elif in_lang == self.CONST.lang_CSP:
@@ -276,7 +302,7 @@ class PyLayerIRCIoT_EL_(object):
   elif in_lang == self.CONST.lang_PHP:
     pass
   elif in_lang == self.CONST.lang_R:
-    pass
+    self.irciot_EL_error_(self.CONST.err_UNSUPPORTED_YET, None)
   elif in_lang == self.CONST.lang_PYTHON:
     pass
   elif in_lang == self.CONST.lang_RUBY:
@@ -292,6 +318,7 @@ class PyLayerIRCIoT_EL_(object):
   try:
     if in_lang == self.CONST.lang_ANSYML:
       del self.__ANSVAR
+      del self.__ANSINV
       del self.__ANSYML
     elif in_lang == self.CONST.lang_BASH:
       pass
