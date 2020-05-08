@@ -43,7 +43,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.33'
   #
-  irciot_library_version  = '0.0.195'
+  irciot_library_version  = '0.0.197'
   #
   # IRC-IoT characters
   #
@@ -563,9 +563,9 @@ class PyLayerIRCIoT(object):
   self.ldict_file  = None
   self.__ldict_lock = False
   #
-  self.mid_method  = self.CONST.tag_mid_default
-  self.oid_method  = 0
-  self.did_method  = 0
+  self.__mid_method  = self.CONST.tag_mid_default
+  self.__oid_method  = 0
+  self.__did_method  = 0
   #
   self.__crypt_HASH = None
   self.__crypt_RSA  = None
@@ -616,20 +616,20 @@ class PyLayerIRCIoT(object):
   self.__encryption_public_key = None
   self.__encryption_key_published = 0
   #
-  if self.mid_method == "":
+  if self.__mid_method == "":
     self.current_mid = random.randint( 10000, 99999)
-  elif self.mid_method in [ \
+  elif self.__mid_method in [ \
        self.CONST.tag_mid_ED25519, \
        self.CONST.tag_mid_RSA1024, \
        self.CONST.tag_mid_GOST12 ]:
-     self.irciot_load_blockchain_methods_(self.mid_method)
-     self.irciot_init_blockchain_method_(self.mid_method)
+     self.irciot_load_blockchain_methods_(self.__mid_method)
+     self.irciot_init_blockchain_method_(self.__mid_method)
   self.mid_hash_length = len(str(self.current_mid))
   #
-  if self.oid_method == 0:
+  if self.__oid_method == 0:
      self.current_oid = random.randint(  1000,  9999)
   #
-  if self.did_method == 0:
+  if self.__did_method == 0:
      self.current_did = random.randint(   100,   999)
   #
   self.irciot_init_encryption_method_(self.crypt_method)
@@ -924,7 +924,7 @@ class PyLayerIRCIoT(object):
  def irciot_enable_blockchain_(self, in_mid_method):
   if not self.irciot_load_blockchain_methods_(in_mid_method):
     self.irciot_init_blockchain_method_(in_mid_method)
-  self.mid_method = in_mid_method
+  self.__mid_method = in_mid_method
   self.__blockchain_key_published = 0
   #
   # End of irciot_enable_blockchain_()
@@ -947,7 +947,7 @@ class PyLayerIRCIoT(object):
   # End of irciot_enable_encryption_()
 
  def irciot_disable_blockchain_(self):
-  self.mid_method = ""
+  self.__mid_method = ""
   self.__blockchain_key_published = self.CONST.BCHT
   self.current_mid = random.randint( 10000, 99999)
 
@@ -960,7 +960,7 @@ class PyLayerIRCIoT(object):
     return None
   if in_password in [ None, "" ] or \
    not (self.crypt_model != self.CONST.crypt_NO_ENCRYPTION \
-     or self.mid_method != ""):
+     or self.__mid_method != ""):
     my_RHASH = ""
     my_ASCII = ''.join([chr(my_idx) \
       for my_idx in range(0, 127)])
@@ -1065,7 +1065,7 @@ class PyLayerIRCIoT(object):
   my_ot = self.CONST.ot_BCH_REQUEST
   my_datum[self.CONST.tag_OBJECT_TYPE] = my_ot
   my_datum[self.CONST.tag_DATUM_ID] = random.randint(100, 999)
-  my_datum[self.CONST.tag_BCH_METHOD] = self.mid_method
+  my_datum[self.CONST.tag_BCH_METHOD] = self.__mid_method
 
   my_datum[self.CONST.tag_SRC_ADDR] = ""
   my_datum[self.CONST.tag_DST_ADDR] = ""
@@ -1102,7 +1102,7 @@ class PyLayerIRCIoT(object):
   my_datum = {}
   my_datum[self.CONST.tag_OBJECT_TYPE] = in_ot
   my_datum[self.CONST.tag_DATUM_ID] = random.randint(100, 999)
-  my_datum[self.CONST.tag_BCH_METHOD] = self.mid_method
+  my_datum[self.CONST.tag_BCH_METHOD] = self.__mid_method
   my_datum[self.CONST.tag_BCH_PUBKEY] = in_key_string
   my_datum[self.CONST.tag_SRC_ADDR] = ""
   my_datum[self.CONST.tag_DST_ADDR] = ""
@@ -1139,16 +1139,15 @@ class PyLayerIRCIoT(object):
    in_ot, in_vuid = None):
   if not isinstance(in_public_key, object):
     return
-  if self.mid_method == self.CONST.tag_mid_ED25519:
+  if self.__mid_method == self.CONST.tag_mid_ED25519:
     my_key = in_public_key.encode( \
       encoder = self.__crypt_NACE.HexEncoder )
     my_key_string = my_key.decode('utf-8')
-  elif self.mid_method == self.CONST.tag_mid_RSA1024:
+  elif self.__mid_method == self.CONST.tag_mid_RSA1024:
     my_key_string = self.irciot_crypto_hash_to_str_(in_public_key)
     return
-  elif self.mid_method == self.CONST.tag_mid_GOST12:
+  elif self.__mid_method == self.CONST.tag_mid_GOST12:
     my_key_string = self.irciot_crypto_hash_to_str_(in_public_key)
-    return
   else:
     return
   my_packs = self.irciot_blockchain_key_to_messages_( \
@@ -1188,7 +1187,7 @@ class PyLayerIRCIoT(object):
     return
   if not isinstance(self.__blockchain_public_key, object):
     return
-  if not self.mid_method in [ \
+  if not self.__mid_method in [ \
     self.CONST.tag_mid_ED25519, \
     self.CONST.tag_mid_RSA1024, \
     self.CONST.tag_mid_GOST12 ]:
@@ -1213,6 +1212,12 @@ class PyLayerIRCIoT(object):
   self.CONST.ot_ENC_INFO)
   #
   # End of irciot_encryption_check_publication_()
+
+ def irciot_blockchain_is_key_published_(self):
+  return (self.__blockchain_key_published > 0)
+
+ def irciot_encryption_is_key_published_(self):
+  return (self.__encryption_key_published > 0)
 
  # incomplete
  def irciot_blockchain_place_key_to_repo_(self, in_public_key):
@@ -1262,7 +1267,7 @@ class PyLayerIRCIoT(object):
     return None
   if in_vuid == self.CONST.api_vuid_self:
     try:
-      if self.mid_method == self.CONST.tag_mid_ED25519:
+      if self.__mid_method == self.CONST.tag_mid_ED25519:
         my_key = self.__blockchain_public_key.encode( \
           encoder = self.__crypt_NACE.HexEncoder )
         my_key_string = my_key.decode('utf-8')
@@ -1453,22 +1458,22 @@ class PyLayerIRCIoT(object):
     return ""
   try:
     my_string = in_string.encode('utf-8')
-    if self.mid_method == self.CONST.tag_mid_ED25519:
+    if self.__mid_method == self.CONST.tag_mid_ED25519:
       my_signed = in_private_key.sign(my_string)
       my_sign = my_signed[:-len(my_string)]
-    elif self.mid_method == self.CONST.tag_mid_RSA1024:
+    elif self.__mid_method == self.CONST.tag_mid_RSA1024:
       my_hash = self.__crypt_SHA1.new(my_string)
       my_pkcs = self.__crypt_PKCS.new(in_private_key)
       my_sign = my_pkcs.sign(my_hash)
       del my_hash
-    elif self.mid_method == self.CONST.tag_mid_GOST12:
+    elif self.__mid_method == self.CONST.tag_mid_GOST12:
       my_curve = self.__crypt_GOST.CURVES[self.CONST.crypto_GOST12_curve]
       my_hash = self.__crypt_GSTD.new(my_string).digest()[::-1]
       my_sign = self.__crypt_GOST.sign(my_curve, in_private_key, my_hash, mode=2012)
       del my_hash
     else:
       return ""
-    my_string = str(self.mid_method)
+    my_string = str(self.__mid_method)
     my_string += self.irciot_crypto_hash_to_str_(my_sign)
   except:
     my_siring = None
@@ -1477,7 +1482,7 @@ class PyLayerIRCIoT(object):
   # End of irciot_blockchain_sign_string_()
 
  def irciot_blockchain_save_defaults_(self):
-  return (self.mid_method, \
+  return (self.__mid_method, \
    self.__blockchain_private_key, \
    self.__blockchain_public_key)
 
@@ -1487,7 +1492,7 @@ class PyLayerIRCIoT(object):
    self.__encryption_public_key)
 
  def irciot_blockchain_restore_defaults_(self, in_defaults):
-  (self.mid_method, \
+  (self.__mid_method, \
    self.__blockchain_private_key, \
    self.__blockchain_public_key) = in_defaults
 
@@ -1510,7 +1515,7 @@ class PyLayerIRCIoT(object):
   my_save = self.irciot_blockchain_save_defaults_()
   my_result = False
   if my_method == self.CONST.tag_mid_ED25519:
-    self.mid_method = my_method
+    self.__mid_method = my_method
     if DO_auto_blockchain:
       self.irciot_load_blockchain_methods_(my_method)
     try:
@@ -1519,7 +1524,7 @@ class PyLayerIRCIoT(object):
     except:
       pass
   elif my_method == self.CONST.tag_mid_RSA1024:
-    self.mid_method = my_method
+    self.__mid_method = my_method
     if DO_auto_blockchain:
       self.irciot_load_blockchain_methods_(my_method)
     try:
@@ -2943,7 +2948,7 @@ class PyLayerIRCIoT(object):
       if not my_key in in_datum.keys():
         return
     my_method = in_datum[self.CONST.tag_BCH_METHOD]
-    if my_method != self.mid_method and DO_auto_blockchain:
+    if my_method != self.__mid_method and DO_auto_blockchain:
       self.irciot_load_blockchain_methods_(my_method)
     my_public_key = in_datum[self.CONST.tag_BCH_PUBKEY]
     if not isinstance(my_public_key, str):
@@ -3239,7 +3244,7 @@ class PyLayerIRCIoT(object):
   if self.CONST.tag_VERSION in in_container.keys():
     if in_container[self.CONST.tag_VERSION] == "?":
       # Protocol Version Reply
-      if self.mid_method == "":
+      if self.__mid_method == "":
         self.current_mid += 1
         my_mid = "%d" % self.current_mid
         my_message = '{"mid":"%s","%s":"%s"}' % (my_mid, \
@@ -3408,7 +3413,7 @@ class PyLayerIRCIoT(object):
      str_object += '":"' + my_dst + '",'
   save_mid = self.current_mid
   sign_mid = self.current_mid
-  if self.mid_method in [ \
+  if self.__mid_method in [ \
     self.CONST.tag_mid_ED25519, \
     self.CONST.tag_mid_RSA1024, \
     self.CONST.tag_mid_GOST12 ]:
@@ -3419,11 +3424,11 @@ class PyLayerIRCIoT(object):
   str_container = '{"' + self.CONST.tag_MESSAGE_ID + '":"'
   str_for_sign  = str_container + str(sign_mid)
   str_for_sign += '",' + str_object + my_irciot + "}}"
-  if self.mid_method == "": # Default mid method
+  if self.__mid_method == "": # Default mid method
     if not isinstance(self.current_mid, int):
       self.current_mid = random.randint( 10000, 99999)
     self.current_mid += 1
-  elif self.mid_method in [ \
+  elif self.__mid_method in [ \
        self.CONST.tag_mid_ED25519, \
        self.CONST.tag_mid_RSA1024, \
        self.CONST.tag_mid_GOST12 ]:
@@ -3545,7 +3550,7 @@ class PyLayerIRCIoT(object):
   self.current_mid = save_mid # mid rollback
   out_skip  = len(my_irciot)
   out_head  = len(big_ot)
-  if self.mid_method in [ \
+  if self.__mid_method in [ \
      self.CONST.tag_mid_ED25519, \
      self.CONST.tag_mid_RSA1024, \
      self.CONST.tag_mid_GOST12 ]:

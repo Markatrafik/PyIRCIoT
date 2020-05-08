@@ -81,7 +81,7 @@ def main():
              sys.stdout.flush()
 
     key_a = None
-    if os.name == "nt";
+    if os.name == "nt":
       if msvcrt.kbhit():
         key_a = True
     elif os.name == "posix":

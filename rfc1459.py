@@ -43,7 +43,7 @@ class PyLayerIRC( irciot_shared_ ):
    #
    irciot_protocol_version = '0.3.33'
    #
-   irciot_library_version  = '0.0.195'
+   irciot_library_version  = '0.0.197'
    #
    # Bot specific constants
    #
@@ -868,7 +868,7 @@ class PyLayerIRC( irciot_shared_ ):
          None, None, None, None, None, None, \
          None, None, in_params)
    elif in_action == self.CONST.api_GET_VUID:
-     if in_vuid in self.COST.api_vuid_not_srv:
+     if in_vuid in self.CONST.api_vuid_not_srv:
        my_vuid_list = []
        for my_nick in self.irc_nicks:
          (in_nick, my_mask, my_vuid, my_info) = my_nick
@@ -1002,6 +1002,9 @@ class PyLayerIRC( irciot_shared_ ):
    self.irc_nick_base = in_nick
    if self.irc_run:
      self.irc_send_(self.CONST.cmd_NICK + " " + in_nick)
+
+ def irc_get_nick_(self):
+   return self.__irc_nick
 
  def irc_check_mask_(self, in_from, in_mask):
    str_from = self.irc_tolower_(in_from)

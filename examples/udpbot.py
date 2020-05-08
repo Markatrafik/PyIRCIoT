@@ -12,7 +12,6 @@ elif os.name == "posix":
   import termios
   import fcntl
   import select
-#import subprocess
 
 from pprint import pprint
 try: # need for development
