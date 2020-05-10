@@ -16,10 +16,13 @@
 CAN_debug_library  = True
 
 import re
+import ast
 try:
  import json
 except:
  import simplejson as json
+from io import StringIO
+import contextlib
 
 class PyLayerIRCIoT_EL_(object):
 
@@ -63,6 +66,7 @@ class PyLayerIRCIoT_EL_(object):
   err_LANGUAGE_FILTER  = 1005
   err_LANGUAGE_SYNTAX  = 1007
   err_LOADING_MODULES  = 1009
+  err_CODE_EXECUTION   = 1010
   #
   err_DESCRIPTIONS = {
    err_UNKNOWN_LANGUAGE : "Unknown programming langauge",
@@ -71,7 +75,8 @@ class PyLayerIRCIoT_EL_(object):
    err_LOADING_MODULES  : "Unable to load required modules",
    err_BAD_ENVIRONMENT  : "Invalid language environment",
    err_COMMON_FILTER    : "Code denied by common filter",
-   err_LANGUAGE_FILTER  : "Code denied by language filter"
+   err_LANGUAGE_FILTER  : "Code denied by language filter",
+   err_CODE_EXECUTION   : "Problems while executing the code"
   }
   #
   mod_ANSVAR = 'ansible.vars.manager'
@@ -84,6 +89,11 @@ class PyLayerIRCIoT_EL_(object):
   common_filter_regexps = [
    '.*\\\\\\.*', '.*\\\\\'.*', '.*\\\\\".*' # Disable some escaping
   ]
+  #
+  lang_filter_PYTHON_types = set([ 'Assign', 'Module', 'Expr', 'Store', 'For', 'If', \
+   'Else', 'Tuple', 'List', 'Load', 'Str', 'Num', 'BinOp', 'Mult' ])
+  lang_filter_PYTHON_funcs = set([ 'abs', 'max', 'min', 'range', 'xrange', 'print' ])
+  lang_filter_PYTHON_names = set([ 'True', 'False', 'None', 'print' ])
   #
   def __setattr__(self, *_):
     pass
@@ -142,6 +152,57 @@ class PyLayerIRCIoT_EL_(object):
   return True
 
  # incomplete
+ def irciot_LE_check_Java_code_(self, in_code):
+
+  return True
+
+ # incomplete
+ def irciot_EL_check_LUA_code_(self, in_code):
+
+  return True
+
+ # incomplete
+ def irciot_EL_check_Python_code_(self, in_code):
+  class Python_checker_(ast.NodeVisitor):
+    def check(self, in_code):
+      self.visit(ast.parse(in_code))
+    def visit_Call(self, in_node):
+      if in_node.func.id in self.CONST.lang_filter_PYTHON_funcs:
+        ast.NodeVisitor.generic_visit(self, in_node)
+      else:
+        raise SyntaxError("function '%s' is not allowed" % in_node.func.id)
+    def visit_Name(self, in_node):
+      try:
+        eval(in_node.id)
+      except NameError:
+        ast.NodeVisitor.generic_visit(self, in_node)
+      else:
+        if in_node.id in self.CONST.lang_filter_PYTHON_names:
+          ast.NodeVisitor.generic_visit(self, in_node)
+        else:
+          raise SyntaxError("name '%s' is reserved" % in_node.id)
+    def visit_Import(self, in_node):
+      SyntaxError("import statement is not allowed")
+    def visit_ImportFrom(self, in_node):
+      SyntaxError("import from statement is not allowed")
+    def generic_visit(self, in_node):
+      if type(in_node).__name__ in self.CONST.lang_filter_PYTHON_types:
+        ast.NodeVisitor.generic_visit(self, in_node)
+      else:
+        raise SyntaxError("type '%s' is not allowed" % type(in_node).__name__)
+  my_check = Python_checker_();
+  my_check.CONST = self.CONST
+  try:
+    for my_line in re.split(r'[\r\n#;]', in_code):
+      my_check.check(my_line)
+  except Exception as my_ex:
+    self.irciot_EL_error_(self.CONST.err_LANGUAGE_SYNTAX, str(my_ex))
+    return False
+  return True
+  #
+  # End of irciot_EL_check_Python_code_()
+
+ # incomplete
  def irciot_EL_check_code_(self, in_lang, in_code):
   if not self.irciot_EL_check_lang_(in_lang):
     return False
@@ -153,6 +214,12 @@ class PyLayerIRCIoT_EL_(object):
       self.irciot_EL_error_(self.CONST.err_COMMON_FILTER, '%s' % my_re)
       return False
   # Language-specific filters:
+  if in_lang == self.CONST.lang_JRE:
+    return self.irciot_EL_check_Java_code_(in_code)
+  elif in_lang == self.CONST.lang_LUA:
+    return self.irciot_EL_check_LUA_code_(in_code)
+  elif in_lang == self.CONST.lang_PYTHON:
+    return self.irciot_EL_check_Python_code_(in_code)
 
   return True
 
@@ -182,9 +249,34 @@ class PyLayerIRCIoT_EL_(object):
     my_value = in_environment[ in_key ]
     if isinstance(my_value, str):
       my_lua.globals()[ in_key ] = my_value
-  my_out = my_lua.eval(in_code)
+  try:
+    my_out = my_lua.eval(in_code)
+  except Exception as my_ex:
+    self.irciot_EL_error_(self.CONST.err_CODE_EXECUTION, str(my_ex))
   del my_lua
   return my_out
+
+ # incomplete
+ def __irciot_EL_run_Python_code_(self, in_code, in_environment):
+  @contextlib.contextmanager
+  def Python_stdout_(in_stdout = None):
+    import sys
+    old_stdout = sys.stdout
+    old_stderr = sys.stderr
+    if in_stdout == None:
+      in_stdout = StringIO()
+    sys.stdout = in_stdout
+    sys.stderr = None
+    yield in_stdout
+    sys.stdout = old_stdout
+    sys.stderr = old_stderr
+  try:
+    with Python_stdout_() as my_out:
+      exec(in_code)
+  except Exception as my_ex:
+    self.irciot_EL_error_(self.CONST.err_CODE_EXECUTION, str(my_ex))
+    return ""
+  return my_out.getvalue()
 
  # incomplete
  def irciot_EL_run_code_(self, in_lang, in_code, in_environment = {}):
@@ -220,7 +312,7 @@ class PyLayerIRCIoT_EL_(object):
     elif in_lang == self.CONST.lang_R:
       pass
     elif in_lang == self.CONST.lang_PYTHON:
-      pass
+      return self.__irciot_EL_run_Python_code_(in_code, in_environment)
     elif in_lang == self.CONST.lang_RUBY:
       pass
     elif in_lang == self.CONST.lang_SWIFT:
@@ -304,7 +396,7 @@ class PyLayerIRCIoT_EL_(object):
   elif in_lang == self.CONST.lang_R:
     self.irciot_EL_error_(self.CONST.err_UNSUPPORTED_YET, None)
   elif in_lang == self.CONST.lang_PYTHON:
-    pass
+    return True
   elif in_lang == self.CONST.lang_RUBY:
     pass
   elif in_lang == self.CONST.lang_SWIFT:

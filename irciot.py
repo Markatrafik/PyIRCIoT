@@ -465,7 +465,6 @@ class PyLayerIRCIoT(object):
    err_LDICT_VERIFY_FAIL  : "Local Dictionary verification failed"
   }
   #
-
   pattern = chr(0) # or "@", chr(255)
   #
   # Default Maximum IRC message size (in bytes)
@@ -640,7 +639,7 @@ class PyLayerIRCIoT(object):
   self.integrity_check = self.CONST.default_integrity_check
   self.integrity_stamp = self.CONST.default_integrity_stamp
   #
-  self.crc16_table = []
+  self.__crc16_table = []
   #
   # End of PyLayerIRCIoT.__init__()
 
@@ -722,7 +721,7 @@ class PyLayerIRCIoT(object):
         my_crc = my_tab ^ self.CONST.crc16_poly
       else:
         my_crc = my_tab
-    self.crc16_table.append(hex(my_crc))
+    self.__crc16_table.append(hex(my_crc))
   #
   # End of irciot_crc16_init_()
 
@@ -741,7 +740,7 @@ class PyLayerIRCIoT(object):
     for my_ch in in_data:
       my_rot = c_ushort(my_crc >> 8).value
       my_idx = ((my_crc ^ my_ch) & 0x00ff)
-      my_tab = self.crc16_table[my_idx]
+      my_tab = self.__crc16_table[my_idx]
       my_crc = my_rot ^ int(my_tab, 0)
     my_crc = my_crc.to_bytes(2,'little')
     return "%2.2x%2.2x" \

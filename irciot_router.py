@@ -100,7 +100,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   #
   self.connections_tracking = {}
   #
-  self.dup_detect_pipeline = []
+  self.__dup_detection_pipeline = []
   #
   super(PyIRCIoT_router, self).__init__()
   #
@@ -304,12 +304,12 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   my_string += "%s" % self.irciot_crc32_(my_bytes)
   del my_bytes
   my_string += "%s" % my_dt
-  if my_string in self.dup_detect_pipeline:
+  if my_string in self.__dup_detection_pipeline:
     return True # Drop duplicate messages
-  self.dup_detect_pipeline.append(my_string)
-  if len(self.dup_detect_pipeline) \
+  self.__dup_detection_pipeline.append(my_string)
+  if len(self.__dup_detection_pipeline) \
    > self.maximal_detect_dup_messages:
-    self.dup_detect_pipeline.pop(0)
+    self.__dup_detection_pipeline.pop(0)
   return False
   #
   # End of PyIRCIoT_router.dup_detection_()
