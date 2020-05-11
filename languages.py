@@ -90,10 +90,12 @@ class PyLayerIRCIoT_EL_(object):
    '.*\\\\\\.*', '.*\\\\\'.*', '.*\\\\\".*' # Disable some escaping
   ]
   #
-  lang_filter_PYTHON_types = set([ 'Assign', 'Module', 'Expr', 'Store', 'For', 'If', \
-   'Else', 'Tuple', 'List', 'Load', 'Str', 'Num', 'BinOp', 'Mult' ])
-  lang_filter_PYTHON_funcs = set([ 'abs', 'max', 'min', 'range', 'xrange', 'print' ])
-  lang_filter_PYTHON_names = set([ 'True', 'False', 'None', 'print' ])
+  lang_filter_PYTHON_types = set([ 'Assign', 'Module', 'Expr', 'Store', 'For', \
+   'If', 'Else', 'Tuple', 'List', 'Load', 'Str', 'Num', 'UnaryOp', 'BinOp', \
+   'Mod', 'Sub', 'Add', 'Div', 'Mult', 'USub', 'UAdd', 'keyword' ])
+  lang_filter_PYTHON_funcs = set([ 'abs', 'max', 'min', 'int', 'range', 'print' ])
+  lang_filter_PYTHON_names = set([ 'True', 'False', 'None' ])
+  lang_filter_PYTHON_names = { *lang_filter_PYTHON_names, *lang_filter_PYTHON_funcs }
   #
   def __setattr__(self, *_):
     pass
@@ -193,8 +195,8 @@ class PyLayerIRCIoT_EL_(object):
   my_check = Python_checker_();
   my_check.CONST = self.CONST
   try:
-    for my_line in re.split(r'[\r\n#;]', in_code):
-      my_check.check(my_line)
+    my_line = in_code.replace(r'[\r\n]', ';')
+    my_check.check(my_line)
   except Exception as my_ex:
     self.irciot_EL_error_(self.CONST.err_LANGUAGE_SYNTAX, str(my_ex))
     return False
@@ -245,10 +247,10 @@ class PyLayerIRCIoT_EL_(object):
  # incomplete
  def __irciot_EL_run_LUA_code_(self, in_code, in_environment):
   my_lua = self.__LUA.LuaRuntime()
-  for in_key in in_environment.keys():
-    my_value = in_environment[ in_key ]
+  for my_key in in_environment.keys():
+    my_value = in_environment[ my_key ]
     if isinstance(my_value, str):
-      my_lua.globals()[ in_key ] = my_value
+      my_lua.globals()[ my_key ] = my_value
   try:
     my_out = my_lua.eval(in_code)
   except Exception as my_ex:
@@ -261,28 +263,41 @@ class PyLayerIRCIoT_EL_(object):
   @contextlib.contextmanager
   def Python_stdout_(in_stdout = None):
     import sys
+    def restore_io_(in_out, in_err):
+      sys.stdout = in_out
+      sys.stderr = in_err
     old_stdout = sys.stdout
     old_stderr = sys.stderr
     if in_stdout == None:
       in_stdout = StringIO()
     sys.stdout = in_stdout
     sys.stderr = None
-    yield in_stdout
-    sys.stdout = old_stdout
-    sys.stderr = old_stderr
-  try:
-    with Python_stdout_() as my_out:
-      exec(in_code)
-  except Exception as my_ex:
-    self.irciot_EL_error_(self.CONST.err_CODE_EXECUTION, str(my_ex))
-    return ""
+    my_ex = None
+    try:
+      yield in_stdout
+    except Exception as my_ex:
+      restore_io_(old_stdout, old_stderr)
+      raise Exception(my_ex)
+    restore_io_(old_stdout, old_stderr)
+  my_dict = {}
+  for my_name in self.CONST.lang_filter_PYTHON_funcs:
+    my_dict[ my_name ] = eval(compile(my_name, '<str>', 'eval'))
+  for my_key in in_environment.keys():
+    my_value = in_environment[ my_key ]
+    if isinstance(my_value, str):
+      my_dict[ my_key ] = my_value
+  with Python_stdout_() as my_out:
+    exec(in_code, { '__builtins__': None }, my_dict)
   return my_out.getvalue()
+  #
+  # End of __irciot_EL_run_Python_code_()
 
  # incomplete
  def irciot_EL_run_code_(self, in_lang, in_code, in_environment = {}):
   if not self.irciot_EL_check_code_(in_lang, in_code):
     return None
   if not self.irciot_EL_check_environment_(in_lang, in_environment):
+    self.irciot_EL_error_(self.CONST.err_BAD_ENVIRONMENT, None)
     return None
   try:
     if in_lang == self.CONST.lang_ANSYML:
@@ -317,8 +332,8 @@ class PyLayerIRCIoT_EL_(object):
       pass
     elif in_lang == self.CONST.lang_SWIFT:
       pass
-  except:
-    pass
+  except Exception as my_ex:
+    self.irciot_EL_error_(self.CONST.err_CODE_EXECUTION, str(my_ex))
   return None
   #
   # End of irciot_EL_run_code_()
