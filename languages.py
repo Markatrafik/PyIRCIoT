@@ -90,11 +90,13 @@ class PyLayerIRCIoT_EL_(object):
    '.*\\\\\\.*', '.*\\\\\'.*', '.*\\\\\".*' # Disable some escaping
   ]
   #
-  lang_filter_PYTHON_types = set([ 'Assign', 'Module', 'Expr', 'Store', 'For', \
-   'If', 'Else', 'Tuple', 'List', 'Load', 'Str', 'Num', 'UnaryOp', 'BinOp', \
-   'Mod', 'Sub', 'Add', 'Div', 'Mult', 'USub', 'UAdd', 'keyword' ])
-  lang_filter_PYTHON_funcs = set([ 'abs', 'max', 'min', 'int', 'range', 'print' ])
-  lang_filter_PYTHON_names = set([ 'True', 'False', 'None' ])
+  lang_filter_PYTHON_types = {  'Add', 'And', 'Assign', 'BinOp', 'BitAnd', 'BitOr', \
+   'BitXor', 'BoolOp', 'Dict', 'Div', 'Else', 'Expr', 'For', 'If', 'Index', \
+   'keyword', 'List', 'Load', 'Mod', 'Module', 'Mult', 'NameConstant', 'Not', \
+   'Num', 'Or', 'Set', 'Store', 'Str', 'Sub', 'Subscript', 'Tuple',  'UAdd', \
+   'UnaryOp', 'USub' }
+  lang_filter_PYTHON_funcs = { 'abs', 'max', 'min', 'int', 'range', 'set', 'print' }
+  lang_filter_PYTHON_names = { 'True', 'False', 'None' }
   lang_filter_PYTHON_names = { *lang_filter_PYTHON_names, *lang_filter_PYTHON_funcs }
   #
   def __setattr__(self, *_):
@@ -272,7 +274,6 @@ class PyLayerIRCIoT_EL_(object):
       in_stdout = StringIO()
     sys.stdout = in_stdout
     sys.stderr = None
-    my_ex = None
     try:
       yield in_stdout
     except Exception as my_ex:
@@ -349,7 +350,9 @@ class PyLayerIRCIoT_EL_(object):
   # End of irciot_EL_import_()
 
  def irciot_EL_admit_language_(self, in_lang):
-  if in_lang not in self.__allowed_EL:
+  if in_lang in self.__allowed_EL:
+    return True
+  else:
     if self.irciot_EL_check_lang_(in_lang):
       self.__allowed_EL += [ in_lang ]
       return True
