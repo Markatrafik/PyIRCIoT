@@ -63,11 +63,16 @@ class irciot_shared_(object):
    #
    ### OS depended:
    #
+   os_aix     = 'AIX'
    os_freebsd = 'FreeBSD'
+   os_hpux    = 'HP-UX'
+   os_hurd    = 'GNU'
    os_linux   = 'Linux'
    os_macosx  = 'Darwin'
+   os_netbsd  = 'NetBSD'
    os_solaris = 'SunOS'
    os_windows = 'WindowsNT'
+   os_qnx     = 'QNX'
    #
    os_linux_proc_ipv4_route = '/proc/net/route'
    os_linux_proc_ipv6_route = '/proc/net/ipv6_route'

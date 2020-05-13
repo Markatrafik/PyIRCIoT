@@ -69,6 +69,7 @@ class PyLayerIRCIoT_EL_(object):
   err_COMMON_FILTER    = 1004
   err_LANGUAGE_FILTER  = 1005
   err_LANGUAGE_SYNTAX  = 1007
+  err_CODE_SIZE_LIMIT  = 1008
   err_LOADING_MODULES  = 1009
   err_CODE_EXECUTION   = 1010
   #
@@ -80,6 +81,7 @@ class PyLayerIRCIoT_EL_(object):
    err_BAD_ENVIRONMENT  : "Invalid language environment",
    err_COMMON_FILTER    : "Code denied by common filter",
    err_LANGUAGE_FILTER  : "Code denied by language filter",
+   err_CODE_SIZE_LIMIT  : "Code size limit exceeded",
    err_CODE_EXECUTION   : "Problems while executing the code"
   }
   #
@@ -91,19 +93,23 @@ class PyLayerIRCIoT_EL_(object):
   mod_LUA = 'lupa'
   #
   common_filter_regexps = [
-   '.*\\\\\\.*', '.*\\\\\'.*', '.*\\\\\".*' # Disable some escaping
+   '.*\\\\\\.*', '.*\\\\\'.*', '.*\\\\\".*', # Disable some escaping
+   '.*\_\_\s*.\s*\_\_.*'
   ]
   #
-  lang_filter_PYTHON_types = {  'Add', 'And', 'Assign', 'BinOp', 'BitAnd', 'BitOr', \
-   'BitXor', 'BoolOp', 'Dict', 'Div', 'Else', 'Expr', 'For', 'If', 'Index', \
-   'keyword', 'List', 'Load', 'Mod', 'Module', 'Mult', 'NameConstant', 'Not', \
-   'Num', 'Or', 'Set', 'Store', 'Str', 'Sub', 'Subscript', 'Tuple',  'UAdd', \
-   'UnaryOp', 'USub', 'While' }
-  lang_filter_PYTHON_funcs = { 'abs', 'max', 'min', 'int', 'range', 'set', 'print' }
+  lang_filter_PYTHON_types = {  'Add', 'And', 'Assign', 'Attribute', \
+   'BinOp', 'BitAnd', 'BitOr', 'BitXor', 'BoolOp', 'Dict', 'Div', 'Else', \
+   'Expr', 'For', 'If', 'Index', 'keyword', 'List', 'Load', 'Mod', 'Module', \
+   'Mult', 'NameConstant', 'Not', 'Num', 'Or', 'Set', 'Store', 'Str', 'Sub', \
+   'Subscript', 'Tuple',  'UAdd', 'UnaryOp', 'USub', 'While' }
+  lang_filter_PYTHON_funcs = { 'abs', 'max', 'min', 'int', 'float', 'range', \
+   'set', 'print' }
   lang_filter_PYTHON_names = { 'True', 'False', 'None' }
   lang_filter_PYTHON_names = { *lang_filter_PYTHON_names, *lang_filter_PYTHON_funcs }
   #
   default_execution_timeout = 3 # in seconds
+  default_maximal_code_size = 4096 # bytes
+  default_maximal_mem_usage = 1048576 # bytes
   #
   def __setattr__(self, *_):
     pass
@@ -117,6 +123,8 @@ class PyLayerIRCIoT_EL_(object):
   for my_regexp in self.CONST.common_filter_regexps:
     self.__common_filter_matchers += [ re.compile(my_regexp) ]
   self.__execution_timeout = self.CONST.default_execution_timeout
+  self.__maximal_code_size = self.CONST.default_maximal_code_size
+  self.__maximal_memory_usage = self.CONST.default_maximal_mem_usage
   #
   # End of PyLayerIRCIoT_EL_.__init__()
 
@@ -154,6 +162,11 @@ class PyLayerIRCIoT_EL_(object):
   if not isinstance(in_timeout, int):
     return
   self.__execution_timeout = in_timeout
+
+ def irciot_EL_set_code_size_(in_size):
+  if not isinstance(in_size, int):
+    return
+  self.__maximal_code_size = in_size
 
  # incomplete
  def irciot_EL_check_environment_(self, in_lang, in_environment):
@@ -230,10 +243,13 @@ class PyLayerIRCIoT_EL_(object):
     return False
   if not isinstance(in_code, str):
     return False
+  if len(in_code) > self.__maximal_code_size:
+    self.irciot_EL_error_(self.CONST.err_CODE_SIZE_LIMIT, \
+      '+%d bytes' % int(len(in_code) - self.__maximal_code_size))
   # Common filters:
   for my_re in self.__common_filter_matchers:
     if my_re.match(in_code):
-      self.irciot_EL_error_(self.CONST.err_COMMON_FILTER, '%s' % my_re)
+      self.irciot_EL_error_(self.CONST.err_COMMON_FILTER, None)
       return False
   # Language-specific filters:
   if in_lang == self.CONST.lang_ANSYML:
@@ -336,11 +352,12 @@ class PyLayerIRCIoT_EL_(object):
   if not self.irciot_EL_check_environment_(in_lang, in_environment):
     self.irciot_EL_error_(self.CONST.err_BAD_ENVIRONMENT, None)
     return None
+  my_out = None
   signal.signal(signal.SIGALRM, timeout_signal_)
   signal.alarm(self.__execution_timeout)
   try:
     if in_lang == self.CONST.lang_ANSYML:
-      return self.__irciot_EL_run_ANSYML_code_(in_code, in_environment)
+      my_out = self.__irciot_EL_run_ANSYML_code_(in_code, in_environment)
     elif in_lang == self.CONST.lang_BASH:
       pass
     elif in_lang == self.CONST.lang_BASIC:
@@ -352,11 +369,11 @@ class PyLayerIRCIoT_EL_(object):
     elif in_lang == self.CONST.lang_GO:
       pass
     elif in_lang == self.CONST.lang_JRE:
-      return self.__irciot_EL_run_JAVA_code_(in_code, in_environment)
+      my_out = self.__irciot_EL_run_JAVA_code_(in_code, in_environment)
     elif in_lang == self.CONST.lang_JS:
-      return self.__irciot_EL_run_JS_code_(in_code, in_environment)
+      my_out = self.__irciot_EL_run_JS_code_(in_code, in_environment)
     elif in_lang == self.CONST.lang_LUA:
-      return self.__irciot_EL_run_LUA_code_(in_code, in_environment)
+      my_out = self.__irciot_EL_run_LUA_code_(in_code, in_environment)
     elif in_lang == self.CONST.lang_QML:
       pass
     elif in_lang == self.CONST.lang_PERL:
@@ -366,14 +383,19 @@ class PyLayerIRCIoT_EL_(object):
     elif in_lang == self.CONST.lang_R:
       pass
     elif in_lang == self.CONST.lang_PYTHON:
-      return self.__irciot_EL_run_Python_code_(in_code, in_environment)
+      my_out = self.__irciot_EL_run_Python_code_(in_code, in_environment)
     elif in_lang == self.CONST.lang_RUBY:
       pass
     elif in_lang == self.CONST.lang_SWIFT:
       pass
   except Exception as my_ex:
     self.irciot_EL_error_(self.CONST.err_CODE_EXECUTION, str(my_ex))
-  return None
+  signal.alarm(0)
+  if my_out == None:
+    my_out = ""
+  elif not isinstance(my_out, str):
+    my_out = str(my_out)
+  return my_out
   #
   # End of irciot_EL_run_code_()
 
