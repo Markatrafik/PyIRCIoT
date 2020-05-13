@@ -23,6 +23,7 @@ except:
  import simplejson as json
 from io import StringIO
 import contextlib
+import signal
 
 class PyLayerIRCIoT_EL_(object):
 
@@ -52,12 +53,15 @@ class PyLayerIRCIoT_EL_(object):
   lang_SMTLK  = 'st'  # SmallTalk
   lang_SWIFT  = 'swt' # Apple Swift
   #
-  lang_ALL = [
-   lang_ANSYML, lang_BASH, lang_BASIC,  lang_CS,   lang_CSP,
-   lang_GO,     lang_JRE,  lang_JS,     lang_LUA,  lang_QML,
-   lang_PERL,   lang_PHP,  lang_PYTHON, lang_RUBY, lang_R,
-   lang_SWIFT
-  ]
+  if not CAN_debug_library:
+    lang_ALL = [ lang_PYTHON ]
+  else:
+    lang_ALL = [
+     lang_ANSYML, lang_BASH, lang_BASIC,  lang_CS,   lang_CSP,
+     lang_GO,     lang_JRE,  lang_JS,     lang_LUA,  lang_QML,
+     lang_PERL,   lang_PHP,  lang_PYTHON, lang_RUBY, lang_R,
+     lang_SWIFT
+    ]
   #
   err_UNKNOWN_LANGUAGE = 1001
   err_UNSUPPORTED_YET  = 1002
@@ -94,10 +98,12 @@ class PyLayerIRCIoT_EL_(object):
    'BitXor', 'BoolOp', 'Dict', 'Div', 'Else', 'Expr', 'For', 'If', 'Index', \
    'keyword', 'List', 'Load', 'Mod', 'Module', 'Mult', 'NameConstant', 'Not', \
    'Num', 'Or', 'Set', 'Store', 'Str', 'Sub', 'Subscript', 'Tuple',  'UAdd', \
-   'UnaryOp', 'USub' }
+   'UnaryOp', 'USub', 'While' }
   lang_filter_PYTHON_funcs = { 'abs', 'max', 'min', 'int', 'range', 'set', 'print' }
   lang_filter_PYTHON_names = { 'True', 'False', 'None' }
   lang_filter_PYTHON_names = { *lang_filter_PYTHON_names, *lang_filter_PYTHON_funcs }
+  #
+  default_execution_timeout = 3 # in seconds
   #
   def __setattr__(self, *_):
     pass
@@ -110,6 +116,7 @@ class PyLayerIRCIoT_EL_(object):
   self.__common_filter_matchers = []
   for my_regexp in self.CONST.common_filter_regexps:
     self.__common_filter_matchers += [ re.compile(my_regexp) ]
+  self.__execution_timeout = self.CONST.default_execution_timeout
   #
   # End of PyLayerIRCIoT_EL_.__init__()
 
@@ -143,6 +150,11 @@ class PyLayerIRCIoT_EL_(object):
     return False
   return True
 
+ def irciot_EL_set_timeout_(in_timeout):
+  if not isinstance(in_timeout, int):
+    return
+  self.__execution_timeout = in_timeout
+
  # incomplete
  def irciot_EL_check_environment_(self, in_lang, in_environment):
   if not self.irciot_EL_check_lang_(in_lang):
@@ -156,13 +168,19 @@ class PyLayerIRCIoT_EL_(object):
   return True
 
  # incomplete
- def irciot_LE_check_Java_code_(self, in_code):
+ def irciot_EL_check_Ansible_code_(self, in_code):
+  return True
 
+ # incomplete
+ def irciot_EL_check_Java_code_(self, in_code):
+  return True
+
+ # incomplete
+ def irciot_EL_check_JS_code_(self, in_code):
   return True
 
  # incomplete
  def irciot_EL_check_LUA_code_(self, in_code):
-
   return True
 
  # incomplete
@@ -218,8 +236,12 @@ class PyLayerIRCIoT_EL_(object):
       self.irciot_EL_error_(self.CONST.err_COMMON_FILTER, '%s' % my_re)
       return False
   # Language-specific filters:
-  if in_lang == self.CONST.lang_JRE:
+  if in_lang == self.CONST.lang_ANSYML:
+    return self.irciot_EL_check_Ansible_code_(in_code)
+  elif in_lang == self.CONST.lang_JRE:
     return self.irciot_EL_check_Java_code_(in_code)
+  elif in_lang == self.CONST.lang_JS:
+    return self.irciot_EL_check_JS_code_(in_code)
   elif in_lang == self.CONST.lang_LUA:
     return self.irciot_EL_check_LUA_code_(in_code)
   elif in_lang == self.CONST.lang_PYTHON:
@@ -243,8 +265,19 @@ class PyLayerIRCIoT_EL_(object):
 
  # incomplete
  def __irciot_EL_run_JS_code_(self, in_code, in_environment):
-
-  return None
+  my_context = self.__JS.EvalJs()
+  my_code = 'var output;document={write:function(value){output=value;}};'
+  my_code += in_code
+  try:
+    my_context.execute(my_code)
+  except Exception as my_ex:
+    self.irciot_EL_error_(self.CONST.err_CODE_EXECUTION, str(my_ex))
+  try:
+    my_out = str(my_context.output)
+  except:
+    my_out = None
+  del my_context
+  return my_out
 
  # incomplete
  def __irciot_EL_run_LUA_code_(self, in_code, in_environment):
@@ -295,11 +328,16 @@ class PyLayerIRCIoT_EL_(object):
 
  # incomplete
  def irciot_EL_run_code_(self, in_lang, in_code, in_environment = {}):
+  def timeout_signal_(in_signal, in_frame):
+    raise Exception('Execution timed out: %s sec.' \
+      % self.__execution_timeout)
   if not self.irciot_EL_check_code_(in_lang, in_code):
     return None
   if not self.irciot_EL_check_environment_(in_lang, in_environment):
     self.irciot_EL_error_(self.CONST.err_BAD_ENVIRONMENT, None)
     return None
+  signal.signal(signal.SIGALRM, timeout_signal_)
+  signal.alarm(self.__execution_timeout)
   try:
     if in_lang == self.CONST.lang_ANSYML:
       return self.__irciot_EL_run_ANSYML_code_(in_code, in_environment)

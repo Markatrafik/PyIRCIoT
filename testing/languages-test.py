@@ -32,7 +32,10 @@ class PyLayerIRCIoT_EL_Test(unittest.TestCase):
   def test101_test_simple_Python_(self):
     self.assertEqual(EL_test_simple_Python_(), True)
 
-  def test102_test_Python_for_range_(self):
+  def test102_test_simple_JS_(self):
+    self.assertEqual(EL_test_simple_JavaScript_(), True)
+
+  def test103_test_Python_for_range_(self):
     self.assertEqual(EL_test_Python_for_range_(), True)
 
 _log_mode = 0
@@ -66,11 +69,17 @@ def EL_test_(in_code, in_check, in_lang):
 def EL_LUA_(in_code, in_check):
   return EL_test_(in_code, in_check, EL.CONST.lang_LUA)
 
+def EL_JS_(in_code, in_check):
+  return EL_test_(in_code, in_check, EL.CONST.lang_JS)
+
 def EL_python_(in_code, in_check):
   return EL_test_(in_code, in_check, EL.CONST.lang_PYTHON)
 
 def EL_test_simple_LUA_():
   return EL_LUA_("assert(os.setlocale('C'))", "C")
+
+def EL_test_simple_JavaScript_():
+  return EL_JS_("document.write('hello')", "hello")
 
 def EL_test_simple_Python_():
   return EL_python_("print('hello',end='')", "hello")
@@ -102,6 +111,8 @@ def main():
 
  if (my_command == 'lua'):
    EL_test_simple_LUA_()
+ if (my_command == 'js'):
+   EL_test_simple_JavaScript_()
  if (my_command == 'python'):
    EL_test_simple_Python_()
  if (my_command == 'pyrangefor'):

@@ -63,7 +63,11 @@ class irciot_shared_(object):
    #
    ### OS depended:
    #
+   os_freebsd = 'FreeBSD'
    os_linux   = 'Linux'
+   os_macosx  = 'Darwin'
+   os_solaris = 'SunOS'
+   os_windows = 'WindowsNT'
    #
    os_linux_proc_ipv4_route = '/proc/net/route'
    os_linux_proc_ipv6_route = '/proc/net/ipv6_route'
@@ -154,6 +158,8 @@ class irciot_shared_(object):
    try:
      return os.uname()[0]
    except:
+     if os.name == 'nt':
+       return self.CONST.os_windows
      return None
 
  def get_ipv6_route_linux_(self, in_server_ip):
