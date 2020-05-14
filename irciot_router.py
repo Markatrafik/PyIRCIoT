@@ -56,15 +56,29 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   err_INVALID_PARAMETER = 10507
   err_INVALID_DIRECTION = 10508
   #
+  err_LMR_INCORRECT_VER  = 10601
+  err_LMR_INVALID_PARAM  = 10602
+  err_LMR_AUTHENTICATION = 10604
+  err_LMR_COMPATIBILITY  = 10605
+  err_LMR_LOOP_DETECTED  = 10611
+  #
+  err_GMR_INCORRECT_VER  = 10701
+  err_GMR_INVALID_PARAM  = 10702
+  err_GMR_BAD_INTERACTOR = 10703
+  err_GMR_AUTHENTICATION = 10704
+  err_GMR_COMPATIBILITY  = 10705
+  err_GMR_LOOP_DETECTED  = 10711
+  err_GMR_INVALID_ORIGIN = 10712
+  err_GMR_INVALID_PATH   = 10713
+  err_GMR_INVALID_ATTR   = 10714
+  #
   err_DESCRIPTIONS = PyLayerIRCIoT.CONST.err_DESCRIPTIONS
-  err_DESCRIPTIONS[ err_ROUTER_DUP_DETECT ] = \
-   'Router detected a duplicate while forwarding the message'
-  err_DESCRIPTIONS[ err_MISSING_PARAMETER ] = \
-   "Missing required parameter for routing graph node"
-  err_DESCRIPTIONS[ err_INVALID_PARAMETER ] = \
-   "Invalid required parameter for routing graph node"
-  err_DESCRIPTIONS[ err_INVALID_DIRECTION ] = \
-   "Invalid direction parameter for routing graph node"
+  err_DESCRIPTIONS.update({
+   err_ROUTER_DUP_DETECT: "Router detected a duplicate while forwarding the message",
+   err_MISSING_PARAMETER: "Missing required parameter for routing graph node",
+   err_INVALID_PARAMETER: "Invalid required parameter for routing graph node",
+   err_INVALID_DIRECTION: "Invalid direction parameter for routing graph node"
+  })
   #
   # End of PyIRCIoT_router.CONST()
 
@@ -325,6 +339,38 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   pass
   #
   # End of PyIRCIoT_router.global_message_router_()
+
+ # incomplete
+ def init_LMR_(self):
+  pass
+
+ # incomplete
+ def init_GMR_(self):
+  pass
+
+ # incomplete
+ def start_LMR_(self):
+  pass
+
+ # incomplete
+ def start_GMR_(self):
+  pass
+
+ # incomplete
+ def pause_LMR_(self):
+  pass
+
+ # incomplete
+ def pause_GMR_(self):
+  pass
+
+ # incomplete
+ def stop_LMR_(self):
+  pass
+
+ # incomplete
+ def stop_GMR_(self):
+  pass
 
  def connections_tracking_cleaner_(self):
   current_time = time()

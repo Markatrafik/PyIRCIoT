@@ -22,6 +22,7 @@ try:
 except:
  import simplejson as json
 from io import StringIO
+import tracemalloc
 import contextlib
 import signal
 
@@ -50,7 +51,7 @@ class PyLayerIRCIoT_EL_(object):
   lang_PYTHON = 'py'  # Python
   lang_R      = 'r'   # GNU R
   lang_RUBY   = 'rb'  # Ruby
-  lang_SMTLK  = 'st'  # SmallTalk
+  lang_SMTLK  = 'st'  # GNU SmallTalk
   lang_SWIFT  = 'swt' # Apple Swift
   #
   if not CAN_debug_library:
@@ -110,6 +111,7 @@ class PyLayerIRCIoT_EL_(object):
   default_execution_timeout = 3 # in seconds
   default_maximal_code_size = 4096 # bytes
   default_maximal_mem_usage = 1048576 # bytes
+  default_maximal_cpu_usage = 5 # percent of one core
   #
   def __setattr__(self, *_):
     pass
@@ -124,7 +126,8 @@ class PyLayerIRCIoT_EL_(object):
     self.__common_filter_matchers += [ re.compile(my_regexp) ]
   self.__execution_timeout = self.CONST.default_execution_timeout
   self.__maximal_code_size = self.CONST.default_maximal_code_size
-  self.__maximal_memory_usage = self.CONST.default_maximal_mem_usage
+  self.__maximal_mem_usage = self.CONST.default_maximal_mem_usage
+  self.__maximal_cpu_usage = self.CONST.default_maximal_cpu_usage
   #
   # End of PyLayerIRCIoT_EL_.__init__()
 
@@ -288,10 +291,12 @@ class PyLayerIRCIoT_EL_(object):
     my_context.execute(my_code)
   except Exception as my_ex:
     self.irciot_EL_error_(self.CONST.err_CODE_EXECUTION, str(my_ex))
+  my_out = None
   try:
-    my_out = str(my_context.output)
+    if my_context.output != None:
+      my_out = str(my_context.output)
   except:
-    my_out = None
+    pass
   del my_context
   return my_out
 
