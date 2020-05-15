@@ -32,13 +32,16 @@ def irciot_get_common_error_descriptions_(in_human_language):
    755: "Проблема при загрузке модуля UserSign",
    777: "Проблема при загрузке модуля UserCrypt",
    811: "Подтверждено по Локальному Словарю",
-   812: "Ошибка проверки по Локального Словарю"
+   812: "Ошибка проверки по Локальному Словарю"
   }
  elif in_human_language == "DE": # Deutsch
   return {
    101: "Nicht übereinstimmende protokollversion",
    102: "Nicht übereinstimmende bibliotheksversion",
-   303: "Unvollständiger Zlib block"
+   303: "Unvollständiger Zlib block",
+   351: "Falsches RSA schlüsselformat",
+   501: "Falsches IRC-IoT nachrichtenformat",
+   503: "Falsches IRC-IoT adressformat"
   }
  return {}
 

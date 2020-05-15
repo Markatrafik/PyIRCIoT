@@ -43,7 +43,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.33'
   #
-  irciot_library_version  = '0.0.197'
+  irciot_library_version  = '0.0.198'
   #
   # IRC-IoT characters
   #
@@ -1904,18 +1904,19 @@ class PyLayerIRCIoT(object):
      my_method_lang, my_sections ) = in_ldict_item_pack
   except:
     return
-  my_item = {}
-  my_item.update({self.CONST.ldict_ITEM_ID : my_id })
-  my_item.update({self.CONST.ldict_ITEM_OT : my_ot })
-  my_item.update({self.CONST.ldict_ITEM_NAME : my_name })
-  my_item.update({self.CONST.ldict_ITEM_PARENT : my_parent_id })
-  my_item.update({self.CONST.ldict_ITEM_TYPEID : my_type_id })
-  my_item.update({self.CONST.ldict_ITEM_TYPEPR : my_type_param })
-  my_item.update({self.CONST.ldict_ITEM_DEFVAL : my_default })
-  my_item.update({self.CONST.ldict_ITEM_CHILD  : my_child_obj_id })
-  my_item.update({self.CONST.ldict_ITEM_METHOD : my_method })
-  my_item.update({self.CONST.ldict_ITEM_LANG   : my_method_lang })
-  my_item.update({self.CONST.ldict_ITEM_SECTS  : my_sections })
+  my_item = {
+    self.CONST.ldict_ITEM_ID : my_id,
+    self.CONST.ldict_ITEM_OT : my_ot,
+    self.CONST.ldict_ITEM_NAME : my_name,
+    self.CONST.ldict_ITEM_PARENT : my_parent_id,
+    self.CONST.ldict_ITEM_TYPEID : my_type_id,
+    self.CONST.ldict_ITEM_TYPEPR : my_type_param,
+    self.CONST.ldict_ITEM_DEFVAL : my_default,
+    self.CONST.ldict_ITEM_CHILD  : my_child_obj_id,
+    self.CONST.ldict_ITEM_METHOD : my_method,
+    self.CONST.ldict_ITEM_LANG   : my_method_lang,
+    self.CONST.ldict_ITEM_SECTS  : my_sections
+  }
   #
   # print('adding to ldict: ot="%s", field="%s"' % (my_ot, my_name))
   if not self.irciot_ldict_check_item_(my_item):
@@ -1995,12 +1996,13 @@ class PyLayerIRCIoT(object):
       my_method, my_method_laguage ) = in_ldict_sect
   except:
     return
-  my_sect = {}
-  my_sect.update({ self.CONST.ldict_SECT_ID : my_id })
-  my_sect.update({ self.CONST.ldict_SECT_ITEMS : my_items_ids })
-  my_sect.update({ self.CONST.ldict_SECT_CHECKS : my_check_values })
-  my_sect.update({ self.CONST.ldict_SECT_METHOD : my_method })
-  my_sect.update({ self.CONST.ldict_SECT_LANG : my_method_language })
+  my_sect = {
+    self.CONST.ldict_SECT_ID : my_id,
+    self.CONST.ldict_SECT_ITEMS : my_items_ids,
+    self.CONST.ldict_SECT_CHECKS : my_check_values,
+    self.CONST.ldict_SECT_METHOD : my_method,
+    self.CONST.ldict_SECT_LANG : my_method_language
+  }
   #
   # Checks will be here
   my_max_id = self.irciot_ldict_get_sect_max_id_()
@@ -2020,21 +2022,22 @@ class PyLayerIRCIoT(object):
       = in_ldict_type_pack
   except:
     return
-  my_type = {}
-  my_type.update({ self.CONST.ldict_TYPE_ID : my_id })
-  my_type.update({ self.CONST.ldict_TYPE_NAME : my_name })
-  my_type.update({ self.CONST.ldict_TYPE_TYPE : my_type_type })
-  my_type.update({ self.CONST.ldict_TYPE_ARR : my_is_array })
-  my_type.update({ self.CONST.ldict_TYPE_DYNSIZE : my_is_dynamic })
-  my_type.update({ self.CONST.ldict_TYPE_DYNARR : my_is_dynarray })
-  my_type.update({ self.CONST.ldict_TYPE_ARRSIZE : my_array_size })
-  my_type.update({ self.CONST.ldict_TYPE_SIZE : my_size })
-  my_type.update({ self.CONST.ldict_TYPE_MIN : my_min })
-  my_type.update({ self.CONST.ldict_TYPE_MAX : my_max })
-  my_type.update({ self.CONST.ldict_TYPE_PRECIS : my_precision })
-  my_type.update({ self.CONST.ldict_TYPE_EXPSIZE : my_expsize })
-  my_type.update({ self.CONST.ldict_TYPE_ENDIAN : my_endianness })
-  my_type.update({ self.CONST.ldict_TYPE_ENCODE : my_encoding })
+  my_type = {
+    self.CONST.ldict_TYPE_ID : my_id,
+    self.CONST.ldict_TYPE_NAME : my_name,
+    self.CONST.ldict_TYPE_TYPE : my_type_type,
+    self.CONST.ldict_TYPE_ARR : my_is_array,
+    self.CONST.ldict_TYPE_DYNSIZE : my_is_dynamic,
+    self.CONST.ldict_TYPE_DYNARR : my_is_dynarray,
+    self.CONST.ldict_TYPE_ARRSIZE : my_array_size,
+    self.CONST.ldict_TYPE_SIZE : my_size,
+    self.CONST.ldict_TYPE_MIN : my_min,
+    self.CONST.ldict_TYPE_MAX : my_max,
+    self.CONST.ldict_TYPE_PRECIS : my_precision,
+    self.CONST.ldict_TYPE_EXPSIZE : my_expsize,
+    self.CONST.ldict_TYPE_ENDIAN : my_endianness,
+    self.CONST.ldict_TYPE_ENCODE : my_encoding
+  }
   #
   if not self.irciot_ldict_check_type_(my_type):
     return
@@ -2341,15 +2344,12 @@ class PyLayerIRCIoT(object):
  def irciot_ldict_dump_to_file_(self, in_filename):
   if not isinstance(in_filename, str):
     return False
-  my_ldict = {}
-  my_ldict.update({self.CONST.ldict_VERSION \
-    : self.CONST.irciot_protocol_version });
-  my_ldict.update({self.CONST.ldict_ITEMS_TABLE \
-    : self.ldict });
-  my_ldict.update({self.CONST.ldict_TYPES_TABLE \
-    : self.ldict_types });
-  my_ldict.update({self.CONST.ldict_SECTS_TABLE \
-    : self.ldict_sections });
+  my_ldict = {
+    self.CONST.ldict_VERSION : self.CONST.irciot_protocol_version,
+    self.CONST.ldict_ITEMS_TABLE : self.ldict,
+    self.CONST.ldict_TYPES_TABLE : self.ldict_types,
+    self.CONST.ldict_SECTS_TABLE : self.ldict_sections
+  }
   my_json = json.dumps(my_ldict, separators=(',',':'))
   del my_ldict
   try:

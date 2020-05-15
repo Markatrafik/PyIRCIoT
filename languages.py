@@ -32,7 +32,7 @@ class PyLayerIRCIoT_EL_(object):
   #
   irciot_protocol_version = '0.3.33'
   #
-  irciot_library_version  = '0.0.197'
+  irciot_library_version  = '0.0.198'
   #
   # IRC-IoT Embedded Languages tags:
   #
@@ -53,6 +53,7 @@ class PyLayerIRCIoT_EL_(object):
   lang_RUBY   = 'rb'  # Ruby
   lang_SMTLK  = 'st'  # GNU SmallTalk
   lang_SWIFT  = 'swt' # Apple Swift
+  lang_TCL    = 'tcl' # TCL Script
   #
   if not CAN_debug_library:
     lang_ALL = [ lang_PYTHON ]
@@ -61,7 +62,7 @@ class PyLayerIRCIoT_EL_(object):
      lang_ANSYML, lang_BASH, lang_BASIC,  lang_CS,   lang_CSP,
      lang_GO,     lang_JRE,  lang_JS,     lang_LUA,  lang_QML,
      lang_PERL,   lang_PHP,  lang_PYTHON, lang_RUBY, lang_R,
-     lang_SWIFT
+     lang_SWIFT,  lang_TCL
     ]
   #
   err_UNKNOWN_LANGUAGE = 1001
@@ -473,16 +474,18 @@ class PyLayerIRCIoT_EL_(object):
   elif in_lang == self.CONST.lang_QML:
     self.irciot_EL_error_(self.CONST.err_UNSUPPORTED_YET, None)
   elif in_lang == self.CONST.lang_PERL:
-    pass
+    self.irciot_EL_error_(self.CONST.err_UNSUPPORTED_YET, None)
   elif in_lang == self.CONST.lang_PHP:
-    pass
+    self.irciot_EL_error_(self.CONST.err_UNSUPPORTED_YET, None)
   elif in_lang == self.CONST.lang_R:
     self.irciot_EL_error_(self.CONST.err_UNSUPPORTED_YET, None)
   elif in_lang == self.CONST.lang_PYTHON:
     return True
   elif in_lang == self.CONST.lang_RUBY:
-    pass
+    self.irciot_EL_error_(self.CONST.err_UNSUPPORTED_YET, None)
   elif in_lang == self.CONST.lang_SWIFT:
+    self.irciot_EL_error_(self.CONST.err_UNSUPPORTED_YET, None)
+  elif in_lang == self.CONST.lang_TCL:
     self.irciot_EL_error_(self.CONST.err_UNSUPPORTED_YET, None)
   return False
   # End of irciot_EL_init_language_()
@@ -524,6 +527,8 @@ class PyLayerIRCIoT_EL_(object):
     elif in_lang == self.CONST.lang_RUBY:
       pass
     elif in_lang == self.CONST.lang_SWIFT:
+      pass
+    elif in_lang == self.CONST.lang_TCL:
       pass
   except:
     return False
