@@ -11,6 +11,10 @@
 ''  Alexey Y. Woronov <alexey@woronov.ru>
 '''
 
+# Those Global options override default behavior and memory usage
+#
+DO_debug_library = False
+
 import socket
 import select
 import threading
@@ -27,7 +31,8 @@ try: # insecure, but for development
 except:
  from PyIRCIoT.irciot_shared import *
 
-#from pprint import pprint
+if DO_debug_library:
+ from pprint import pprint
 
 import datetime
 
@@ -37,9 +42,9 @@ class PyLayerCOM( irciot_shared_ ):
    #
    irciot_protocol_version = '0.3.33'
    #
-   irciot_library_version  = '0.0.198'
+   irciot_library_version  = '0.0.199'
    #
-   com_default_debug = False
+   com_default_debug = DO_debug_library
    #
    com_default_server = "serial.nsk.ru"
    com_default_tcp_port = 2217
@@ -72,6 +77,8 @@ class PyLayerCOM( irciot_shared_ ):
  def __init__(self):
    #
    self.CONST = self.CONST()
+   #
+   super(PyLayerUDPb, self).__init__()
    #
    self.com_host = socket.gethostname()
    #

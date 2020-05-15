@@ -52,5 +52,5 @@
   2020-05-14 : Since encryption algorithms with a Secret Key are
  ............: faster than Symmetric algorithms, it is necessary
  ~ Must be ~ : to implement a two-stage encryption mechanism,
- ............: for example: RSA + AES and RSA + TwoFish, etc.
+ ............: for example: RSA + AES and RSA + Twofish, etc.
 

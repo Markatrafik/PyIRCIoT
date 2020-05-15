@@ -41,7 +41,16 @@ def irciot_get_common_error_descriptions_(in_human_language):
    303: "Unvollständiger Zlib block",
    351: "Falsches RSA schlüsselformat",
    501: "Falsches IRC-IoT nachrichtenformat",
-   503: "Falsches IRC-IoT adressformat"
+   503: "Falsches IRC-IoT adressformat",
+   701: "Problem beim Laden des Moduls Zlib",
+   702: "Problem beim Laden des Moduls BZIP2",
+   731: "Problem beim Laden des Moduls RSA",
+   732: "Problem beim Laden des Moduls AES",
+   733: "Problem beim Laden des Moduls Twofish",
+   735: "Problem beim Laden des Moduls GOST3410",
+   737: "Problem beim Laden des Moduls GOST3411",
+   755: "Problem beim Laden des Moduls UserSign",
+   777: "Problem beim Laden des Moduls UserCrypt"
   }
  return {}
 

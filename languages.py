@@ -32,7 +32,7 @@ class PyLayerIRCIoT_EL_(object):
   #
   irciot_protocol_version = '0.3.33'
   #
-  irciot_library_version  = '0.0.198'
+  irciot_library_version  = '0.0.199'
   #
   # IRC-IoT Embedded Languages tags:
   #
@@ -189,6 +189,10 @@ class PyLayerIRCIoT_EL_(object):
   return True
 
  # incomplete
+ def irciot_EL_check_BASIC_code_(self, in_code):
+  return True
+
+ # incomplete
  def irciot_EL_check_Java_code_(self, in_code):
   return True
 
@@ -258,6 +262,8 @@ class PyLayerIRCIoT_EL_(object):
   # Language-specific filters:
   if in_lang == self.CONST.lang_ANSYML:
     return self.irciot_EL_check_Ansible_code_(in_code)
+  elif in_lang == self.CONST.lang_BASIC:
+    return self.irciot_EL_check_BASIC_code_(in_code)
   elif in_lang == self.CONST.lang_JRE:
     return self.irciot_EL_check_Java_code_(in_code)
   elif in_lang == self.CONST.lang_JS:
@@ -393,6 +399,8 @@ class PyLayerIRCIoT_EL_(object):
     elif in_lang == self.CONST.lang_RUBY:
       pass
     elif in_lang == self.CONST.lang_SWIFT:
+      pass
+    elif in_lang == self.CONST.lang_TCL:
       pass
   except Exception as my_ex:
     self.irciot_EL_error_(self.CONST.err_CODE_EXECUTION, str(my_ex))
