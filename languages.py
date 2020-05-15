@@ -93,6 +93,7 @@ class PyLayerIRCIoT_EL_(object):
   mod_JRE = 'py4j.java_gateway'
   mod_JS  = 'js2py'
   mod_LUA = 'lupa'
+  mod_TCL = 'tkinter'
   #
   common_filter_regexps = [
    '.*\\\\\\.*', '.*\\\\\'.*', '.*\\\\\".*', # Disable some escaping
@@ -320,11 +321,23 @@ class PyLayerIRCIoT_EL_(object):
     my_value = in_environment[ my_key ]
     if isinstance(my_value, str):
       my_lua.globals()[ my_key ] = my_value
+  my_out = None
   try:
     my_out = my_lua.eval(in_code)
   except Exception as my_ex:
     self.irciot_EL_error_(self.CONST.err_CODE_EXECUTION, str(my_ex))
   del my_lua
+  return my_out
+
+ # incomplete
+ def __irciot_EL_run_TCL_code_(self, in_code, in_environment):
+  my_tcl = self.__TCL.Tcl();
+  my_out = None
+  try:
+    my_out = my_tcl.eval(in_code);
+  except Exception as my_ex:
+    self.irciot_EL_error_(self.CONST.err_CODE_EXECUTION, str(my_ex))
+  del my_tcl
   return my_out
 
  # incomplete
@@ -407,7 +420,7 @@ class PyLayerIRCIoT_EL_(object):
     elif in_lang == self.CONST.lang_SWIFT:
       pass
     elif in_lang == self.CONST.lang_TCL:
-      pass
+      my_out = self.__irciot_EL_run_TCL_code_(in_code, in_environment)
   except Exception as my_ex:
     self.irciot_EL_error_(self.CONST.err_CODE_EXECUTION, str(my_ex))
   signal.alarm(0)
@@ -500,7 +513,10 @@ class PyLayerIRCIoT_EL_(object):
   elif in_lang == self.CONST.lang_SWIFT:
     self.irciot_EL_error_(self.CONST.err_UNSUPPORTED_YET, None)
   elif in_lang == self.CONST.lang_TCL:
-    self.irciot_EL_error_(self.CONST.err_UNSUPPORTED_YET, None)
+    self.__TCL = self.irciot_EL_import_(self.CONST.mod_TCL)
+    if self.__TCL != None:
+      return True
+  self.irciot_EL_finish_language_(in_lang)
   return False
   # End of irciot_EL_init_language_()
 
@@ -543,7 +559,7 @@ class PyLayerIRCIoT_EL_(object):
     elif in_lang == self.CONST.lang_SWIFT:
       pass
     elif in_lang == self.CONST.lang_TCL:
-      pass
+      del self.__TCL
   except:
     return False
   return True

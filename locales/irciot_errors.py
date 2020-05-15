@@ -4,7 +4,7 @@ def irciot_get_common_error_descriptions_(in_human_language):
   return {
    101: "Несоответствие версии протокола",
    102: "Несоответствие версии библиотеки",
-   103: "Недопустимый поля 'dp' при дефрагментации",
+   103: "Недопустимое значение поля 'dp' при дефрагментации",
    104: "Несоответствие содержания",
    111: "Нет тега 'op' при дефрагментации",
    112: "Нет тега 'dp' при дефрагментации",
@@ -38,17 +38,25 @@ def irciot_get_common_error_descriptions_(in_human_language):
   }
  elif in_human_language == "DE": # Deutsch
   return {
-   101: "Nicht übereinstimmende protokollversion",
-   102: "Nicht übereinstimmende bibliotheksversion",
+   101: "Nicht übereinstimmende Protokollversion",
+   102: "Nicht übereinstimmende Bibliotheksversion",
+   103: "Falscher 'dp'-Feldwert während der Defragmentierung",
+   104: "Inhaltliche Inkonsistenz",
+   111: "Es gibt keinen 'op'-Tag für die Defragmentierung",
+   112: "Es gibt keinen 'dp'-Tag für die Defragmentierung",
+   113: "Es gibt keinen 'bp'-Tag für die Defragmentierung",
+   121: "Feldwert 'oc' überschritten",
+   122: "Feldwert 'dc' überschritten",
+   123: "Feldwert 'bc' überschritten",
    251: "Problem beim dekodieren von BASE64",
    252: "Problem beim dekodieren von BASE32",
    253: "Problem beim dekodieren von BASE85",
    254: "Problem beim dekodieren von BASE122",
    300: "Verschlüsselungsmethode nicht implementiert",
-   303: "Unvollständiger Zlib block",
-   351: "Falsches RSA schlüsselformat",
-   501: "Falsches IRC-IoT nachrichtenformat",
-   503: "Falsches IRC-IoT adressformat",
+   303: "Unvollständiger Zlib Block",
+   351: "Falsches RSA Schlüsselformat",
+   501: "Falsches IRC-IoT Nachrichtenformat",
+   503: "Falsches IRC-IoT Adressformat",
    701: "Problem beim Laden des Moduls Zlib",
    702: "Problem beim Laden des Moduls BZIP2",
    731: "Problem beim Laden des Moduls RSA",
@@ -57,7 +65,9 @@ def irciot_get_common_error_descriptions_(in_human_language):
    735: "Problem beim Laden des Moduls GOST3410",
    737: "Problem beim Laden des Moduls GOST3411",
    755: "Problem beim Laden des Moduls UserSign",
-   777: "Problem beim Laden des Moduls UserCrypt"
+   777: "Problem beim Laden des Moduls UserCrypt",
+   811: "Bestätigt mit dem Lokalen Wörterbuch",
+   812: "Validierungsfehler mit dem Lokalen Wörterbuch"
   }
  return {}
 
@@ -67,10 +77,19 @@ def irciot_get_router_error_descriptions_(in_human_language):
    10015: "Маршрутизатор обнаружил дубликат при пересылке сообщения",
    10505: "Отсутствует обязательный параметр для узла в графе маршрутизации",
    10507: "Недопустимое значение обязательного параметра для узла в графе маршрутизации",
-   10508: "Неверный параметр направления для узла в графе маршрутизации",
+   10508: "Неверный параметр направления для узла в графе маршрутизации"
   }
  if in_human_language == "DE": # Deutsch
   return {
- }
+   10015: "Der Router hat beim Weiterleiten der Nachricht ein Duplikat entdeckt",
+   10505: "Fehlender erforderlicher Parameter für den Knoten in der Routing-Graph",
+   10507: "Unzulässiger Wert eines obligatorischen Parameters für einen Knoten in der Routing-Graph"
+   10508: "Flascher Richtungsparameter für einen Knoten in der Routing-Graph"
+  }
  return {}
+
+def irciot_get_all_error_descriptions_(in_human_langauge):
+ my_dict = irciot_get_common_error_descriptions_(in_human_language)
+ my_dict.append(irciot_get_router_error_descriptions_(in_human_lagugage)
+ return my_dict
 

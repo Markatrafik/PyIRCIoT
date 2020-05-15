@@ -11,6 +11,10 @@
 ''  Alexey Y. Woronov <alexey@woronov.ru>
 '''
 
+# Those Global options override default behavior and memory usage
+#
+DO_debug_library = False
+
 import socket
 import select
 import datetime
@@ -32,6 +36,9 @@ except:
 
 import datetime
 
+if DO_debug_library:
+ from pprint import pprint
+
 class PyLayerUDPb( irciot_shared_ ):
 
  class CONST( irciot_shared_.CONST ):
@@ -40,7 +47,7 @@ class PyLayerUDPb( irciot_shared_ ):
   #
   irciot_library_version  = '0.0.199'
   #
-  udpb_default_debug = False
+  udpb_default_debug = DO_debug_library
   #
   udpb_default_port = 12345
   udpb_default_ip   = ''
@@ -109,7 +116,7 @@ class PyLayerUDPb( irciot_shared_ ):
   self.udpb_client_sock = None
   self.udpb_server_sock = None
   #
-  self.udpb_os_name = os.name
+  self.udpb_os_name = self.get_os_name_()
   #
   self.udpb_update_local_ip_addresses_()
   #
@@ -248,7 +255,7 @@ class PyLayerUDPb( irciot_shared_ ):
   def my_init_socket_(in_af_inet, in_os_name):
     my_sock = socket.socket(in_af_inet, \
       socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-    if in_os_name == 'nt':
+    if in_os_name == self.CONST.os_windows:
       my_sock.setsockopt(socket.SOL_SOCKET, \
         socket.SO_REUSEADDR, 1)
     else:
@@ -272,7 +279,7 @@ class PyLayerUDPb( irciot_shared_ ):
   self.udpb_update_local_ip_addresses_()
   self.udpb_client_sock = my_init_socket_(my_af_inet, \
     self.udpb_os_name)
-  if self.udpb_os_name == 'nt':
+  if self.udpb_os_name == self.CONST.os_windows:
     my_bind_ip = self.udpb_ip
   else:
     my_bind_ip = self.udpb_ip_broadcast
