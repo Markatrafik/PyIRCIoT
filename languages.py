@@ -205,6 +205,10 @@ class PyLayerIRCIoT_EL_(object):
   return True
 
  # incomplete
+ def irciot_EL_check_TCL_code_(self, in_code):
+  return True
+
+ # incomplete
  def irciot_EL_check_Python_code_(self, in_code):
   class Python_checker_(ast.NodeVisitor):
     def check(self, in_code):
@@ -272,6 +276,8 @@ class PyLayerIRCIoT_EL_(object):
     return self.irciot_EL_check_LUA_code_(in_code)
   elif in_lang == self.CONST.lang_PYTHON:
     return self.irciot_EL_check_Python_code_(in_code)
+  elif in_lang == self.CONST.lang_TCL:
+    return self.irciot_EL_check_TCL_code_(in_code)
 
   return True
 

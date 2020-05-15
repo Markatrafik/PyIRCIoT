@@ -126,6 +126,13 @@ class PyLayerIRCIoT(object):
   tag_ENC_B64_USER  = 'b64u'
   tag_ENC_B85_USER  = 'b85u'
   #
+  # Basecoding + Two Stage Encryption:
+  #
+  tag_ENC_B64_RSA_AES   = '6ra'
+  tag_ENC_B85_RSA_AES   = '8ra'
+  tag_ENC_B64_RSA_2FISH = '6r2'
+  tag_ENC_B85_RSA_2FISH = '8r2'
+  #
   # Basecoding + Encryption + Compression:
   #
   tag_ENC_B64Z_RSA  = 'b64Z'
@@ -136,6 +143,13 @@ class PyLayerIRCIoT(object):
   tag_ENC_B85Z_2FISH = 'b85F'
   tag_ENC_B64Z_USER = 'b64U'
   tag_ENC_B85Z_USER = 'b85U'
+  #
+  # Basecoding + Two Stage Encryption + Compression:
+  #
+  tag_ENC_B64Z_RSA_AES   = '6raZ'
+  tag_ENC_B85Z_RSA_AES   = '8raZ'
+  tag_ENC_B64Z_RSA_2FISH = '6r2Z'
+  tag_ENC_B85Z_RSA_2FISH = '8r2Z'
   #
   tag_ALL_BASE32_ENC = [ \
     tag_ENC_BASE32, \
@@ -151,16 +165,26 @@ class PyLayerIRCIoT(object):
     tag_ENC_B64_RSA, \
     tag_ENC_B64Z_RSA, \
     tag_ENC_B64_2FISH, \
-    tag_ENC_B64Z_2FISH ]
+    tag_ENC_B64Z_2FISH, \
+    tag_ENC_B64_RSA_AES, \
+    tag_ENC_B64Z_RSA_AES, \
+    tag_ENC_B64_RSA_2FISH, \
+    tag_ENC_B64Z_RSA_2FISH ]
   #
   tag_ALL_BASE85_ENC = [ \
     tag_ENC_BASE85, \
-    tag_ENC_B85_ZLIB, \
-    tag_ENC_B85_BZIP2, \
     tag_ENC_B85_AES, \
     tag_ENC_B85Z_AES, \
+    tag_ENC_B85_ZLIB, \
+    tag_ENC_B85_BZIP2, \
+    tag_ENC_B85_RSA, \
+    tag_ENC_B85Z_RSA, \
     tag_ENC_B85_2FISH, \
-    tag_ENC_B85Z_2FISH ]
+    tag_ENC_B85Z_2FISH, \
+    tag_ENC_B85_RSA_AES, \
+    tag_ENC_B85Z_RSA_AES, \
+    tag_ENC_B85_RSA_2FISH, \
+    tag_ENC_B85Z_RSA_2FISH ]
   #
   tag_ALL_BASE122_ENC = [ \
     tag_ENC_BASE122 ]
@@ -175,7 +199,11 @@ class PyLayerIRCIoT(object):
     tag_ENC_B64_AES, \
     tag_ENC_B85_AES, \
     tag_ENC_B64_2FISH, \
-    tag_ENC_B85_2FISH ]
+    tag_ENC_B85_2FISH, \
+    tag_ENC_B64_RSA_AES, \
+    tag_ENC_B85_RSA_AES, \
+    tag_ENC_B64_RSA_2FISH, \
+    tag_ENC_B85_RSA_2FISH ]
   #
   tag_ALL_ZLIB_ENC = [ \
     tag_ENC_B64_ZLIB, \
@@ -185,7 +213,11 @@ class PyLayerIRCIoT(object):
     tag_ENC_B64Z_AES, \
     tag_ENC_B85Z_AES, \
     tag_ENC_B64Z_2FISH, \
-    tag_ENC_B85Z_2FISH ]
+    tag_ENC_B85Z_2FISH, \
+    tag_ENC_B64Z_RSA_AES, \
+    tag_ENC_B85Z_RSA_AES, \
+    tag_ENC_B64Z_RSA_2FISH, \
+    tag_ENC_B85Z_RSA_2FISH ]
   #
   tag_ALL_BZIP2_ENC = [ \
     tag_ENC_B32_BZIP2, \
@@ -196,19 +228,35 @@ class PyLayerIRCIoT(object):
     tag_ENC_B64_RSA, \
     tag_ENC_B85_RSA, \
     tag_ENC_B64Z_RSA, \
-    tag_ENC_B85Z_RSA ]
+    tag_ENC_B85Z_RSA, \
+    tag_ENC_B64_RSA_AES, \
+    tag_ENC_B85_RSA_AES, \
+    tag_ENC_B64Z_RSA_AES, \
+    tag_ENC_B85Z_RSA_AES, \
+    tag_ENC_B64_RSA_2FISH, \
+    tag_ENC_B85_RSA_2FISH, \
+    tag_ENC_B64Z_RSA_2FISH, \
+    tag_ENC_B85Z_RSA_2FISH ]
   #
   tag_ALL_AES_ENC = [ \
     tag_ENC_B64_AES, \
     tag_ENC_B85_AES, \
     tag_ENC_B64Z_AES, \
-    tag_ENC_B85Z_AES ]
+    tag_ENC_B85Z_AES,
+    tag_ENC_B64_RSA_AES, \
+    tag_ENC_B85_RSA_AES, \
+    tag_ENC_B64Z_RSA_AES, \
+    tag_ENC_B85Z_RSA_AES, ]
   #
   tag_ALL_2FISH_ENC = [ \
     tag_ENC_B64_2FISH, \
     tag_ENC_B85_2FISH, \
     tag_ENC_B64Z_2FISH, \
-    tag_ENC_B85Z_2FISH ]
+    tag_ENC_B85Z_2FISH, \
+    tag_ENC_B64_RSA_2FISH, \
+    tag_ENC_B85_RSA_2FISH, \
+    tag_ENC_B64Z_RSA_2FISH, \
+    tag_ENC_B85Z_RSA_2FISH ]
   #
   tag_ALL_nocrypt_ENC = [ \
     tag_ENC_BASE32, \
@@ -221,6 +269,16 @@ class PyLayerIRCIoT(object):
     tag_ENC_B32_BZIP2, \
     tag_ENC_B64_BZIP2, \
     tag_ENC_B85_BZIP2 ]
+  #
+  tag_ALL_two_stage_ENC = [ \
+    tag_ENC_B64_RSA_AES, \
+    tag_ENC_B85_RSA_AES, \
+    tag_ENC_B64_RSA_2FISH, \
+    tag_ENC_B85_RSA_2FISH, \
+    tag_ENC_B64Z_RSA_AES, \
+    tag_ENC_B85Z_RSA_AES, \
+    tag_ENC_B64Z_RSA_2FISH, \
+    tag_ENC_B85Z_RSA_2FISH ]
   #
   # Blockchain signing methods:
   #
@@ -398,45 +456,49 @@ class PyLayerIRCIoT(object):
   #
   # IRC-IoT Errors
   #
-  err_PROTO_VER_MISMATCH  = 101
-  err_LIB_VER_MISMATCH    = 102
-  err_DEFRAG_INVALID_DID  = 103
-  err_CONTENT_MISSMATCH   = 104
-  err_DEFRAG_OP_MISSING   = 111
-  err_DEFRAG_DP_MISSING   = 112
-  err_DEFRAG_BP_MISSING   = 113
-  err_DEFRAG_OC_EXCEEDED  = 121
-  err_DEFRAG_DC_EXCEEDED  = 122
-  err_DEFRAG_BC_EXCEEDED  = 123
-  err_OVERLAP_MISSMATCH   = 131
-  err_DEFRAG_MISSMATCH    = 133
-  err_BASE64_DECODING     = 251
-  err_BASE32_DECODING     = 252
-  err_BASE85_DECODING     = 253
-  err_COMP_ZLIB_HEADER    = 301
-  err_COMP_ZLIB_INCOMP    = 303
-  err_RSA_KEY_FORMAT      = 351
-  err_INVALID_MESSAGE     = 501
-  err_INVALID_ADDRESS     = 503
-  err_LDICT_VERIFY_OK     = 811
-  err_LDICT_VERIFY_FAIL   = 812
+  err_PROTO_VER_MISMATCH = 101
+  err_LIB_VER_MISMATCH   = 102
+  err_DEFRAG_INVALID_DID = 103
+  err_CONTENT_MISSMATCH  = 104
+  err_DEFRAG_OP_MISSING  = 111
+  err_DEFRAG_DP_MISSING  = 112
+  err_DEFRAG_BP_MISSING  = 113
+  err_DEFRAG_OC_EXCEEDED = 121
+  err_DEFRAG_DC_EXCEEDED = 122
+  err_DEFRAG_BC_EXCEEDED = 123
+  err_OVERLAP_MISSMATCH  = 131
+  err_DEFRAG_MISSMATCH   = 133
+  err_BASE64_DECODING    = 251
+  err_BASE32_DECODING    = 252
+  err_BASE85_DECODING    = 253
+  err_BASE122_DECODING   = 254
+  err_ENC_UNIMPLEMENTED  = 300
+  err_COMP_ZLIB_HEADER   = 301
+  err_COMP_ZLIB_INCOMP   = 303
+  err_RSA_KEY_FORMAT     = 351
+  err_INVALID_MESSAGE    = 501
+  err_INVALID_ADDRESS    = 503
+  err_LDICT_VERIFY_OK    = 811
+  err_LDICT_VERIFY_FAIL  = 812
   #
-  err_LOAD_ZLIB_MODULE    = 701
-  err_LOAD_BZIP2_MODULE   = 702
-  err_LOAD_RSA_MODULE     = 731
-  err_LOAD_AES_MODULE     = 732
-  err_LOAD_2FISH_MODULE   = 733
-  err_LOAD_GOST_MODULE    = 735
-  err_LOAD_GOSTD_MODULE   = 737
-  err_LOAD_USER_SIGN      = 755
-  err_LOAD_USER_CRYPT     = 777
+  err_LOAD_ZLIB_MODULE   = 701
+  err_LOAD_BZIP2_MODULE  = 702
+  err_LOAD_RSA_MODULE    = 731
+  err_LOAD_AES_MODULE    = 732
+  err_LOAD_2FISH_MODULE  = 733
+  err_LOAD_GOST_MODULE   = 735
+  err_LOAD_GOSTD_MODULE  = 737
+  err_LOAD_USER_SIGN     = 755
+  err_LOAD_USER_CRYPT    = 777
   #
   err_DESCRIPTIONS = {
    err_PROTO_VER_MISMATCH : "Protocol version mismatch",
    err_LIB_VER_MISMATCH   : "Library version mismatch",
-   err_BASE64_DECODING    : "BASE64 decoding",
-   err_BASE85_DECODING    : "BASE85 decoding",
-   err_BASE32_DECODING    : "BASE32 decoding",
+   err_BASE64_DECODING    : "BASE64 decoding problem",
+   err_BASE85_DECODING    : "BASE85 decoding problem",
+   err_BASE32_DECODING    : "BASE32 decoding problem",
+   err_BASE122_DECODING   : "BASE122 decoding problem",
+   err_ENC_UNIMPLEMENTED  : "This encryption not implemented",
    err_DEFRAG_INVALID_DID : "Invalid 'dp' when defragmenting",
    err_CONTENT_MISSMATCH  : "Content missmatch",
    err_DEFRAG_OP_MISSING  : "No tag 'op' when defragmenting",
@@ -766,22 +828,26 @@ class PyLayerIRCIoT(object):
   # End of irciot_crc32_()
 
  def irciot_init_encryption_method_(self, in_crypt_method):
+  if in_crypt_method in self.CONST.tag_ALL_two_stage_ENC:
+    self.irciot_error_(self.CONST.err_ENC_UNIMPLEMENTED, in_crypt_method)
+    return False
   my_algo = self.irciot_crypto_get_algorithm_(in_crypt_method)
   if my_algo == self.CONST.crypto_RSA:
     self.crypto_RSA_KEY_SIZE = self.CONST.crypto_RSA_KEY_SIZE
   elif my_algo == self.CONST.crypto_AES:
     if self.__crypt_AES == None:
-      return
+      return False
     self.crypto_AES_BLOCK_SIZE = self.__crypt_AES.block_size
     self.crypto_AES_iv = self.irciot_crypto_hasher_(None, \
     self.crypto_AES_BLOCK_SIZE )
   elif my_algo == self.CONST.crypto_2FISH:
-    pass
+    self.irciot_error_(self.CONST.err_ENC_UNIMPLEMENTED, in_crypt_method)
   (self.__encryption_private_key, \
    self.__encryption_public_key) \
     = self.irciot_encryption_generate_keys_(in_crypt_method)
   if not isinstance(self.__encryption_private_key, object):
-     return
+     return False
+  return True
   #
   # End of irciot_init_encryption_method_()
 

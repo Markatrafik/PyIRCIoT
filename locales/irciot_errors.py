@@ -17,6 +17,8 @@ def irciot_get_common_error_descriptions_(in_human_language):
    251: "Проблема декодирования BASE64",
    252: "Проблема декодирования BASE32",
    253: "Проблема декодирования BASE85",
+   254: "Проблема декодирования BASE122",
+   300: "Метод шифрования ещё не реализован",
    301: "Неверный заголовок Zlib",
    303: "Неполный блок Zlib",
    351: "Неверный формат ключа RSA",
@@ -38,6 +40,11 @@ def irciot_get_common_error_descriptions_(in_human_language):
   return {
    101: "Nicht übereinstimmende protokollversion",
    102: "Nicht übereinstimmende bibliotheksversion",
+   251: "Problem beim dekodieren von BASE64",
+   252: "Problem beim dekodieren von BASE32",
+   253: "Problem beim dekodieren von BASE85",
+   254: "Problem beim dekodieren von BASE122",
+   300: "Verschlüsselungsmethode nicht implementiert",
    303: "Unvollständiger Zlib block",
    351: "Falsches RSA schlüsselformat",
    501: "Falsches IRC-IoT nachrichtenformat",
@@ -62,5 +69,8 @@ def irciot_get_router_error_descriptions_(in_human_language):
    10507: "Недопустимое значение обязательного параметра для узла в графе маршрутизации",
    10508: "Неверный параметр направления для узла в графе маршрутизации",
   }
+ if in_human_language == "DE": # Deutsch
+  return {
+ }
  return {}
 
