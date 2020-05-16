@@ -54,3 +54,10 @@
  ~ Must be ~ : to implement a two-stage encryption mechanism,
  ............: for example: RSA + AES and RSA + Twofish, etc.
 
+  2020-05-16 : When IRC-IoT nodes exchanging messages thru IRC
+ ............: with a maximum fixed MTU, problems with triming
+ ~ Urgent! ~ : the tails of messages appears, this depends on
+ ............: the length of the Nickname, the hostname and on
+ the server settings. The MTU negotiation algorithm is required.
+ To workaround problem, the default MTU is reduced to 440 bytes.
+

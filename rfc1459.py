@@ -113,7 +113,7 @@ class PyLayerIRC( irciot_shared_ ):
    #
    irc_input_buffer = ""
    #
-   irc_buffer_size  = 2048
+   irc_buffer_size  = 2560
    #
    irc_layer_modes  = [ "CLIENT", "SERVICE", "SERVER" ]
    #
@@ -175,7 +175,7 @@ class PyLayerIRC( irciot_shared_ ):
    #
    default_mtu = 480
    if irc_default_draft == 'Undernet':
-     default_mtu = 450
+     default_mtu = 440
    #
    code_WELCOME            = "001"
    code_YOURHOST           = "002"

@@ -531,7 +531,7 @@ class PyLayerIRCIoT(object):
   #
   # Default Maximum IRC message size (in bytes)
   #
-  default_mtu = 450 # Undernet IRCd at 2019
+  default_mtu = 440 # Undernet IRCd at 2019
   #
   # Fragmented Message Delete Timeout (in seconds)
   #
@@ -2816,9 +2816,9 @@ class PyLayerIRCIoT(object):
                         my_new = True
                else: # Combo fragmentation method
                   pass                  
-      else:
-         my_err = self.CONST.err_DEFRAG_INVALID_DID
-         break
+         #else:
+         #   my_err = self.CONST.err_DEFRAG_INVALID_DID
+         #   break
   if self.defrag_pool == []:
     if len(in_enc) == my_bc:
        defrag_buffer = in_enc
