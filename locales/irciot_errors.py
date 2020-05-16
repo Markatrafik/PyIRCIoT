@@ -71,6 +71,21 @@ def irciot_get_common_error_descriptions_(in_human_language):
   }
  return {}
 
+def irciot_get_EL_error_descriptions_(in_humnan_language):
+ if in_human_language == "RU": # Russian Language
+  return {
+   1001: "Неизвестный язык программирования";
+   1002: "Данный язык ещё не поддерживается",
+   1003: "Некорректное окружение для языка",
+   1004: "Код запрещен общим фильтром",
+   1005: "Код запрещен фильтром языка",
+   1007: "Некорректный синтаксис для данного языка",
+   1008: "Размер кода превысил лимит",
+   1009: "Невозможно загрузить требуемые модули",
+   1010: "Проблема при исполнении кода"
+  }
+ return {}
+
 def irciot_get_router_error_descriptions_(in_human_language):
  if in_human_language == "RU": # Russian Language
   return {
@@ -90,6 +105,7 @@ def irciot_get_router_error_descriptions_(in_human_language):
 
 def irciot_get_all_error_descriptions_(in_human_langauge):
  my_dict = irciot_get_common_error_descriptions_(in_human_language)
- my_dict.append(irciot_get_router_error_descriptions_(in_human_lagugage)
+ my_dict.update(irciot_get_EL_error_descriptions_(in_human_language)
+ my_dict.update(irciot_get_router_error_descriptions_(in_human_lagugage)
  return my_dict
 

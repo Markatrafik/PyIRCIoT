@@ -130,8 +130,8 @@ class PyLayerIRCIoT(object):
   #
   tag_ENC_B64_RSA_AES   = '6ra'
   tag_ENC_B85_RSA_AES   = '8ra'
-  tag_ENC_B64_RSA_2FISH = '6r2'
-  tag_ENC_B85_RSA_2FISH = '8r2'
+  tag_ENC_B64_RSA_2FISH = '6rf'
+  tag_ENC_B85_RSA_2FISH = '8rf'
   #
   # Basecoding + Encryption + Compression:
   #
@@ -146,10 +146,10 @@ class PyLayerIRCIoT(object):
   #
   # Basecoding + Two Stage Encryption + Compression:
   #
-  tag_ENC_B64Z_RSA_AES   = '6raZ'
-  tag_ENC_B85Z_RSA_AES   = '8raZ'
-  tag_ENC_B64Z_RSA_2FISH = '6r2Z'
-  tag_ENC_B85Z_RSA_2FISH = '8r2Z'
+  tag_ENC_B64Z_RSA_AES   = '6raz'
+  tag_ENC_B85Z_RSA_AES   = '8raz'
+  tag_ENC_B64Z_RSA_2FISH = '6rfz'
+  tag_ENC_B85Z_RSA_2FISH = '8rfz'
   #
   tag_ALL_BASE32_ENC = [ \
     tag_ENC_BASE32, \
@@ -1428,14 +1428,14 @@ class PyLayerIRCIoT(object):
   try:
     (my_status, my_answer) = my_result
   except:
-    return [ str(self.virtual_mid) ]
+    return [ str(self.current_mid) ]
   if not my_status:
-    return [ str(self.virtual_mid) ]
+    return [ str(self.current_mid) ]
   if isinstance(my_answer, list):
     return my_answer
-  return [ str(self.virtual_mid) ]
+  return [ str(self.current_mid) ]
   #
-  # End of irciot_blockchain_get_own_mid_()
+  # End of irciot_blockchain_get_own_mids_()
 
  def irciot_get_vuid_list_(self, in_vuid_mask):
   if not isinstance(in_vuid_mask, str):
@@ -3190,9 +3190,8 @@ class PyLayerIRCIoT(object):
     my_message = in_json.replace( \
       '"' + self.CONST.tag_MESSAGE_ID + '":"' + in_mesmid + '"', \
       '"' + self.CONST.tag_MESSAGE_ID + '":"' + in_newmid + '"')
-    my_result = self.irciot_blockchain_verify_string_( \
+    return self.irciot_blockchain_verify_string_( \
       my_message, in_mesmid, in_key)
-    return my_result
     #
     # End of irciot_check_container:irciot_check_blockchain_()
 
@@ -3253,8 +3252,8 @@ class PyLayerIRCIoT(object):
     # Not implemented yet
     return False
   elif my_hismid_method == self.CONST.tag_mid_GOST12:
-    # Not implemented yet
-    return False
+    my_verify_key = my_bkey
+    # return False
   self.irciot_blockchain_update_last_mid_(in_vuid, my_hismid)
   if my_hismid == None:
     return True
@@ -3710,7 +3709,7 @@ class PyLayerIRCIoT(object):
   ''' Public part of encapsulator with per-"Datum" fragmentation '''
   self.irciot_blockchain_check_publication_()
   self.irciot_encryption_check_publication_()
-  #my_encrypt = CAN_encrypt_datum and DO_always_encrypt
+  # my_encrypt = CAN_encrypt_datum and DO_always_encrypt
   my_encrypt = False
   my_datums_set  = in_datumset
   my_datums_skip = 0

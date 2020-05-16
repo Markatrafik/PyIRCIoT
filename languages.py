@@ -45,7 +45,6 @@ class PyLayerIRCIoT_EL_(object):
   lang_JRE    = 'jre' # Java (Runtime Enivronment)
   lang_JS     = 'js'  # JavaScript
   lang_LUA    = 'lua' # Lua Script
-  lang_QML    = 'qml' # Qt Meta Language
   lang_PERL   = 'pl'  # Perl
   lang_PHP    = 'php' # PHP
   lang_PYTHON = 'py'  # Python
@@ -59,10 +58,10 @@ class PyLayerIRCIoT_EL_(object):
     lang_ALL = [ lang_PYTHON ]
   else:
     lang_ALL = [
-     lang_ANSYML, lang_BASH, lang_BASIC,  lang_CS,   lang_CSP,
-     lang_GO,     lang_JRE,  lang_JS,     lang_LUA,  lang_QML,
-     lang_PERL,   lang_PHP,  lang_PYTHON, lang_RUBY, lang_R,
-     lang_SWIFT,  lang_TCL
+     lang_ANSYML, lang_BASH,   lang_BASIC, lang_CS,  lang_CSP,
+     lang_GO,     lang_JRE,    lang_JS,    lang_LUA, lang_PERL,
+     lang_PHP,    lang_PYTHON, lang_RUBY,  lang_R,   lang_SWIFT,
+     lang_TCL
     ]
   #
   err_UNKNOWN_LANGUAGE = 1001
@@ -333,6 +332,8 @@ class PyLayerIRCIoT_EL_(object):
  def __irciot_EL_run_TCL_code_(self, in_code, in_environment):
   my_tcl = self.__TCL.Tcl();
   my_out = None
+  # N.B. there is a problem with the interruption
+  # of the interpreter by the SIGALARM signal
   try:
     my_out = my_tcl.eval(in_code);
   except Exception as my_ex:
@@ -405,8 +406,6 @@ class PyLayerIRCIoT_EL_(object):
       my_out = self.__irciot_EL_run_JS_code_(in_code, in_environment)
     elif in_lang == self.CONST.lang_LUA:
       my_out = self.__irciot_EL_run_LUA_code_(in_code, in_environment)
-    elif in_lang == self.CONST.lang_QML:
-      pass
     elif in_lang == self.CONST.lang_PERL:
       pass
     elif in_lang == self.CONST.lang_PHP:
@@ -498,8 +497,6 @@ class PyLayerIRCIoT_EL_(object):
     self.__LUA = self.irciot_EL_import_(self.CONST.mod_LUA)
     if self.__LUA != None:
       return True
-  elif in_lang == self.CONST.lang_QML:
-    self.irciot_EL_error_(self.CONST.err_UNSUPPORTED_YET, None)
   elif in_lang == self.CONST.lang_PERL:
     self.irciot_EL_error_(self.CONST.err_UNSUPPORTED_YET, None)
   elif in_lang == self.CONST.lang_PHP:
@@ -544,8 +541,6 @@ class PyLayerIRCIoT_EL_(object):
       del self.__JS
     elif in_lang == self.CONST.lang_LUA:
       del self.__LUA
-    elif in_lang == self.CONST.lang_QML:
-      pass
     elif in_lang == self.CONST.lang_PERL:
       pass
     elif in_lang == self.CONST.lang_PHP:
