@@ -850,7 +850,7 @@ class PyLayerIRC( irciot_shared_ ):
              an_ekto, an_bkto, an_omid ) = my_anon
        else:
          return (False, None)
-   if   in_action == self.CONST.api_GET_LMID:
+   if in_action == self.CONST.api_GET_LMID:
      if my_vt == self.CONST.api_vuid_cfg:
        if my_user != None:
          return (True, my_lmid)

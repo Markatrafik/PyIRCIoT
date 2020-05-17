@@ -11,6 +11,11 @@
 ''  Alexey Y. Woronov <alexey@woronov.ru>
 '''
 
+# ATTENTION!!! THIS CLASS WAS TESTED ONLY ON LINUX, WHILE ON THE
+# OTHER OS'ES IT DOES NOT WORK YET. ALSO, USING THIS CLASS IS
+# DANGEROUS, BECAUSE A POTENTIAL ATTACKER CAN GAIN REMOTE CONTROL
+# ON YOUR SYSTEM. USE IT IF YOU KNOW WHAT ARE YOU DOING!
+
 # Those Global options override default behavior and memory usage
 #
 CAN_debug_library  = True
@@ -55,7 +60,7 @@ class PyLayerIRCIoT_EL_(object):
   lang_TCL    = 'tcl' # TCL Script
   #
   if not CAN_debug_library:
-    lang_ALL = [ lang_PYTHON ]
+    lang_ALL = [ lang_PYTHON ] # More safer but still dangerous
   else:
     lang_ALL = [
      lang_ANSYML, lang_BASH,   lang_BASIC, lang_CS,  lang_CSP,
@@ -96,18 +101,23 @@ class PyLayerIRCIoT_EL_(object):
   #
   common_filter_regexps = [
    '.*\\\\\\.*', '.*\\\\\'.*', '.*\\\\\".*', # Disable some escaping
-   '.*\_\_\s*.\s*\_\_.*'
+   '.*\_\_\s*\.\s*\_\_.*'
   ]
   #
+  lang_filter_BASIC_regexps  = []
+  lang_filter_PYTHON_regexps = []
   lang_filter_PYTHON_types = {  'Add', 'And', 'Assign', 'Attribute', \
    'BinOp', 'BitAnd', 'BitOr', 'BitXor', 'BoolOp', 'Dict', 'Div', 'Else', \
    'Expr', 'For', 'If', 'Index', 'keyword', 'List', 'Load', 'Mod', 'Module', \
    'Mult', 'NameConstant', 'Not', 'Num', 'Or', 'Set', 'Store', 'Str', 'Sub', \
-   'Subscript', 'Tuple',  'UAdd', 'UnaryOp', 'USub', 'While' }
+   'Subscript', 'Tuple',  'UAdd', 'UnaryOp', 'USub', 'While', 'Compare', 'Eq' }
   lang_filter_PYTHON_funcs = { 'abs', 'max', 'min', 'int', 'float', 'range', \
    'set', 'print' }
   lang_filter_PYTHON_names = { 'True', 'False', 'None' }
   lang_filter_PYTHON_names = { *lang_filter_PYTHON_names, *lang_filter_PYTHON_funcs }
+  lang_filter_LUA_regexps  = []
+  lang_filter_TCL_regexps  = [ '.*package\s*require.*' ]
+  lang_filter_JS_regexps   = []
   #
   default_execution_timeout = 3 # in seconds
   default_maximal_code_size = 4096 # bytes
@@ -281,6 +291,31 @@ class PyLayerIRCIoT_EL_(object):
 
   return True
 
+ @contextlib.contextmanager
+ def python_stdout_(self, in_stdout = None):
+   import sys
+   def restore_io_(in_out, in_err):
+     sys.stdout = in_out
+     sys.stderr = in_err
+   old_stdout = sys.stdout
+   old_stderr = sys.stderr
+   if in_stdout == None:
+     in_stdout = StringIO()
+   sys.stdout = in_stdout
+   sys.stderr = None
+   try:
+     yield in_stdout
+   except Exception as my_ex:
+     restore_io_(old_stdout, old_stderr)
+     raise Exception(my_ex)
+   restore_io_(old_stdout, old_stderr)
+ #
+ # End of python_stdout_()
+
+ def timeout_termination_(self):
+   raise Exception('Execution timed out: %s sec.' \
+     % self.__execution_timeout)
+
  # incomplete
  def __irciot_EL_run_ANSYML_code_(self, in_code, in_environment):
   my_inventory = self.__ANSINV.manager.InventoryManager()
@@ -331,15 +366,12 @@ class PyLayerIRCIoT_EL_(object):
  # incomplete
  def __irciot_EL_run_TCL_code_(self, in_code, in_environment):
   my_tcl = self.__TCL.Tcl();
+  my_tcl.after(self.__execution_timeout * 1000, self.timeout_termination_)
   my_out = None
   for my_key in in_environment.keys():
     my_var = self.__TCL.StringVar(my_tcl)
-    my_var.set( in_environment[ my_key ] )
-    del my_var
-  # N.B. there is a problem with the interruption
-  # of the interpreter by the SIGALARM signal
   try:
-    my_out = my_tcl.eval(in_code);
+    my_out = my_tcl.eval(in_code)
   except Exception as my_ex:
     self.irciot_EL_error_(self.CONST.err_CODE_EXECUTION, str(my_ex))
   del my_tcl
@@ -347,24 +379,6 @@ class PyLayerIRCIoT_EL_(object):
 
  # incomplete
  def __irciot_EL_run_Python_code_(self, in_code, in_environment):
-  @contextlib.contextmanager
-  def Python_stdout_(in_stdout = None):
-    import sys
-    def restore_io_(in_out, in_err):
-      sys.stdout = in_out
-      sys.stderr = in_err
-    old_stdout = sys.stdout
-    old_stderr = sys.stderr
-    if in_stdout == None:
-      in_stdout = StringIO()
-    sys.stdout = in_stdout
-    sys.stderr = None
-    try:
-      yield in_stdout
-    except Exception as my_ex:
-      restore_io_(old_stdout, old_stderr)
-      raise Exception(my_ex)
-    restore_io_(old_stdout, old_stderr)
   my_dict = {}
   for my_name in self.CONST.lang_filter_PYTHON_funcs:
     my_dict[ my_name ] = eval(compile(my_name, '<str>', 'eval'))
@@ -372,7 +386,7 @@ class PyLayerIRCIoT_EL_(object):
     my_value = in_environment[ my_key ]
     if isinstance(my_value, str):
       my_dict[ my_key ] = my_value
-  with Python_stdout_() as my_out:
+  with self.python_stdout_() as my_out:
     exec(in_code, { '__builtins__': None }, my_dict)
   return my_out.getvalue()
   #
@@ -381,8 +395,7 @@ class PyLayerIRCIoT_EL_(object):
  # incomplete
  def irciot_EL_run_code_(self, in_lang, in_code, in_environment = {}):
   def timeout_signal_(in_signal, in_frame):
-    raise Exception('Execution timed out: %s sec.' \
-      % self.__execution_timeout)
+    self.timeout_termination_()
   if not self.irciot_EL_check_code_(in_lang, in_code):
     return None
   if not self.irciot_EL_check_environment_(in_lang, in_environment):
@@ -462,6 +475,12 @@ class PyLayerIRCIoT_EL_(object):
  def irciot_EL_allowed_languages_(self):
   return self.__allowed_EL
 
+ def __irciot_EL_matchers_(self, in_regexps):
+  my_matchers = []
+  for my_regexp in in_regexps:
+    my_matchers += [ re.compile(my_regexp) ]
+  return my_matchers
+
  # incomplete
  def irciot_EL_init_language_(self, in_lang):
   if in_lang not in self.__allowed_EL:
@@ -494,10 +513,14 @@ class PyLayerIRCIoT_EL_(object):
     if self.__JRE != None:
       return True
   elif in_lang == self.CONST.lang_JS:
+    self.__JS_filter_matchers = \
+     self.__irciot_EL_matchers_(self.CONST.lang_filter_JS_regexps)
     self.__JS  = self.irciot_EL_import_(self.CONST.mod_JS)
     if self.__JS  != None:
       return True
   elif in_lang == self.CONST.lang_LUA:
+    self.__LUA_filter_matchers = \
+     self.__irciot_EL_matchers_(self.CONST.lang_filter_LUA_regexps)
     self.__LUA = self.irciot_EL_import_(self.CONST.mod_LUA)
     if self.__LUA != None:
       return True
@@ -508,12 +531,16 @@ class PyLayerIRCIoT_EL_(object):
   elif in_lang == self.CONST.lang_R:
     self.irciot_EL_error_(self.CONST.err_UNSUPPORTED_YET, None)
   elif in_lang == self.CONST.lang_PYTHON:
+    self.__PYTHON_filter_matchers = \
+     self.__irciot_EL_matchers_(self.CONST.lang_filter_PYTHON_regexps)
     return True
   elif in_lang == self.CONST.lang_RUBY:
     self.irciot_EL_error_(self.CONST.err_UNSUPPORTED_YET, None)
   elif in_lang == self.CONST.lang_SWIFT:
     self.irciot_EL_error_(self.CONST.err_UNSUPPORTED_YET, None)
   elif in_lang == self.CONST.lang_TCL:
+    self.__TCL_filter_matchers = \
+     self.__irciot_EL_matchers_(self.CONST.lang_filter_TCL_regexps)
     self.__TCL = self.irciot_EL_import_(self.CONST.mod_TCL)
     if self.__TCL != None:
       return True
@@ -543,8 +570,10 @@ class PyLayerIRCIoT_EL_(object):
       del self.__JRE
     elif in_lang == self.CONST.lang_JS:
       del self.__JS
+      del self.__JS_filter_matchers
     elif in_lang == self.CONST.lang_LUA:
       del self.__LUA
+      del self.__LUA_filter_matchers
     elif in_lang == self.CONST.lang_PERL:
       pass
     elif in_lang == self.CONST.lang_PHP:
@@ -552,13 +581,14 @@ class PyLayerIRCIoT_EL_(object):
     elif in_lang == self.CONST.lang_R:
       pass
     elif in_lang == self.CONST.lang_PYTHON:
-      pass
+      del self.__PYTHON_filter_matchers
     elif in_lang == self.CONST.lang_RUBY:
       pass
     elif in_lang == self.CONST.lang_SWIFT:
       pass
     elif in_lang == self.CONST.lang_TCL:
       del self.__TCL
+      del self.__TCL_filter_matchers
   except:
     return False
   return True

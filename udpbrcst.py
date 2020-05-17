@@ -190,7 +190,8 @@ class PyLayerUDPb( irciot_shared_ ):
           ( my_uid, my_ip, my_time ) = my_anon
       else:
         return (False, None)
-
+  if in_action == self.CONST.api_GET_iMTU:
+    return (True, self.CONST.udpb_default_mtu)
   return (False, None)
   #
   # End of user_handler_()
