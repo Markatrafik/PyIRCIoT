@@ -145,3 +145,12 @@
          bool irciot_{blockchain,encryption}_is_key_published_(), use instead
          of direct access to the PyLayerIRCIoT.__blockchain_key_published.
 
+2019-05-17 18:30 GMT+7 PyIRCIoT 0.0.200 Alexey Y. Woronov <alexey@woronov.ru>
+	* Since Version 0.0.200 in API beetwen PyLayerIRCIoT class and any
+        transport class new method with index api_GET_iMTU = 600 has been
+        added. Each transport class, such as PyLayerIRC, PyLayerCOM, etc.,
+        can have its own value of the initial MTU, which will be requested
+        after the first need. If the parameter cannot be requested from the
+        associated transport class, the default value will be taken from
+        the PyLayerIRCIoT.CONST class. Now the default value is 440 bytes.
+

@@ -45,7 +45,7 @@ class PyLayerUDPb( irciot_shared_ ):
   #
   irciot_protocol_version = '0.3.33'
   #
-  irciot_library_version  = '0.0.199'
+  irciot_library_version  = '0.0.200'
   #
   udpb_default_debug = DO_debug_library
   #
@@ -57,12 +57,14 @@ class PyLayerUDPb( irciot_shared_ ):
   udpb_queue_input  = 0
   udpb_queue_output = 1
   #
-  udpb_default_size = 1024 # in bytes
+  udpb_default_size = 2048 # in bytes
   #
   udpb_first_wait = 1
   udpb_micro_wait = 0.1
   udpb_latency_wait = 1
   udpb_default_wait = 1
+  #
+  udpb_default_mtu = 1000 # in bytes
   #
   # 0. Unique User ID
   # 1. User IP address (IPv4 or IPv6)

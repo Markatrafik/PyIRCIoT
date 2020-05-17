@@ -42,7 +42,7 @@ class PyLayerCOM( irciot_shared_ ):
    #
    irciot_protocol_version = '0.3.33'
    #
-   irciot_library_version  = '0.0.199'
+   irciot_library_version  = '0.0.200'
    #
    com_default_debug = DO_debug_library
    #
@@ -61,11 +61,13 @@ class PyLayerCOM( irciot_shared_ ):
    #
    com_input_buffer = ""
    #
-   com_buffer_size  = 2048
+   com_buffer_size  = 2560
    #
    com_modes = [ "CLIENT", "SERVER" ]
    #
    com_default_mid_pipeline_size = 16
+   #
+   com_default_MTU = 500
    #
    # According RFC 2217
    #
@@ -226,6 +228,8 @@ class PyLayerCOM( irciot_shared_ ):
      if isinstance(jn_params, int):
        self.ekto = in_params
      return (True, None)
+   elif in_action == self.CONST.api_GET_iMTU:
+     return (True, self.CONST.com_default_mtu)
    return (False, None)
    #
    # End of user_handler_()

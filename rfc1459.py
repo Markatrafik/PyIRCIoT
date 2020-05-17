@@ -43,7 +43,7 @@ class PyLayerIRC( irciot_shared_ ):
    #
    irciot_protocol_version = '0.3.33'
    #
-   irciot_library_version  = '0.0.199'
+   irciot_library_version  = '0.0.200'
    #
    # Bot specific constants
    #
@@ -133,8 +133,8 @@ class PyLayerIRC( irciot_shared_ ):
      irc_ascii_uppercase + "[]\\^",
      irc_ascii_lowercase + "{}|~")
    irc_transmocker = "".maketrans( \
-     "aAoOBEGgIlSsT-_",
-     "4400836911557_-" )
+     "aAoOBEGgIlSsT-_05891",
+     "4400836911557_-OSBgl" )
    irc_mode_add = "+"
    irc_mode_del = "-"
    irc_change_modes \
@@ -957,6 +957,8 @@ class PyLayerIRC( irciot_shared_ ):
        self.irc_track_update_anons_by_vuid_(in_vuid, \
          None, None, None, None, None, \
          None, None, in_params,  None)
+   elif in_action == self.CONST.api_GET_iMTU:
+     return (True, self.CONST.default_mtu)
    return (False, None)
    #
    # End of user_handler_()

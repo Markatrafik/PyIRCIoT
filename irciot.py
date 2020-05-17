@@ -43,7 +43,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.33'
   #
-  irciot_library_version  = '0.0.199'
+  irciot_library_version  = '0.0.200'
   #
   # IRC-IoT characters
   #
@@ -382,6 +382,7 @@ class PyLayerIRCIoT(object):
   api_SET_BKEY = 502 # Set Blockchain Key
   api_GET_BKTO = 551 # Get Blockchain Key Timeout
   api_SET_BKTO = 552 # Set Blockchain Key Timeout
+  api_GET_iMTU = 600 # Get initial Maximum Transmission Unit
   api_GET_VUID = 700 # Get list of Virtual User IDs
   #
   api_vuid_cfg = 'c' # VUID prefix for users from config
@@ -696,6 +697,7 @@ class PyLayerIRCIoT(object):
   #
   self.irciot_init_encryption_method_(self.crypt_method)
   #
+  self.__initial_mtu = None
   self.__message_mtu = self.CONST.default_mtu
   #
   self.integrity_check = self.CONST.default_integrity_check
@@ -729,6 +731,8 @@ class PyLayerIRCIoT(object):
     return (True, self.virtual_omid)
   elif in_action == self.CONST.api_GET_VUID:
     return (True, [ self.CONST.api_vuid_self ])
+  elif in_action == self.CONST.api_GET_iMTU:
+    return (True, self.CONST.default_mtu)
   return (False, None)
 
  def irciot_error_(self, in_error_code, in_mid, \
@@ -773,6 +777,27 @@ class PyLayerIRCIoT(object):
   return ( \
     self.CONST.irciot_protocol_version, \
     self.CONST.irciot_library_version)
+
+ def irciot_check_mtu_(self):
+  if isinstance(self.__initial_mtu, int):
+    return
+  my_status = False
+  my_compat = self.irciot_compatibility_()
+  my_result = self.user_pointer (my_compat, \
+    self.CONST.api_GET_iMTU, self.CONST.api_vuid_self, None)
+  try:
+    (my_status, my_answer) = my_result
+  except:
+    pass
+  if my_status:
+    if isinstance(my_answer, int):
+      if my_answer > 128:
+        self.__initial_mtu = my_answer
+        self.__message_mtu = my_answer
+        return
+  self.__initial_mtu = self.CONST.default_mtu
+  #
+  # End of irciot_check_mtu_()
 
  def irciot_crc16_init_(self):
   for my_idx1 in range(0, 256):
@@ -2440,13 +2465,20 @@ class PyLayerIRCIoT(object):
 
  def irciot_set_mtu_(self, in_mtu):
   if not isinstance(in_mtu, int):
-    return
+    return False
   if in_mtu < 128:
-    return
+    return False
+  if isinstance(self.__initial_mtu, int):
+    if in_mtu > self.__initial_mtu:
+      return False
   self.__message_mtu = in_mtu
+  return True
 
  def irciot_get_mtu_(self):
   return self.__message_mtu
+
+ def irciot_get_imtu(self):
+  return self.__initial_mtu
 
  def is_irciot_ldict_type_(self, in_variable, in_type_id):
   my_type = self.irciot_ldict_get_type_by_id_(in_type_id)
@@ -3359,6 +3391,7 @@ class PyLayerIRCIoT(object):
 
  def irciot_deinencap_(self, in_json, in_vuid = None):
   ''' First/simple implementation of IRC-IoT "Datum" deinencapsulator '''
+  self.irciot_check_mtu_()
   self.irciot_blockchain_check_publication_()
   self.irciot_encryption_check_publication_()
   try:
@@ -3658,6 +3691,7 @@ class PyLayerIRCIoT(object):
   # End of irciot_encap_bigdatum_()
 
  def irciot_encap_all_(self, in_datumset, in_vuid = None):
+  self.irciot_check_mtu_()
   if not in_vuid in [ \
     self.CONST.api_vuid_all, \
     self.CONST.api_vuid_cfg, \
@@ -3707,6 +3741,7 @@ class PyLayerIRCIoT(object):
  def irciot_encap_(self, in_datumset, in_skip, in_part, \
    in_vuid = None):
   ''' Public part of encapsulator with per-"Datum" fragmentation '''
+  self.irciot_check_mtu_()
   self.irciot_blockchain_check_publication_()
   self.irciot_encryption_check_publication_()
   # my_encrypt = CAN_encrypt_datum and DO_always_encrypt

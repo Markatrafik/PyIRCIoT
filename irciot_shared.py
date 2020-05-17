@@ -29,6 +29,7 @@ class irciot_shared_(object):
    api_SET_BKEY = 502 # Set Blockchain Key
    api_GET_BKTO = 551 # Get Blockchain Key Timeout
    api_SET_BKTO = 552 # Set Blockchain Key Timeout
+   api_GET_iMTU = 600 # Get initial Maximum Transmission Unit
    api_GET_VUID = 700 # Get list of Virutal User IDs
    #
    api_vuid_cfg = 'c' # VUID prefix for users from config
