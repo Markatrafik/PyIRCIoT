@@ -84,6 +84,18 @@ def irciot_get_EL_error_descriptions_(in_humnan_language):
    1009: "Невозможно загрузить требуемые модули",
    1010: "Проблема при исполнении кода"
   }
+ if in_human_langauge == "DE": # Deutsch
+  return {
+   1001: "Unbekannte Programmiersprache",
+   1002: "Diese Sprache wird noch nicht unterstützt",
+   1003: "Falsche Umgebung für Programmiersprache",
+   1004: "Code durch allgemeinen Filter abgelehnt",
+   1005: "Code durch Sprachenfilter abgelehnt",
+   1007: "Falsche Syntax für diese Programmiersprache",
+   1008: "Die Codegröße hat das Limit überschritten",
+   1009: "Problem beim Laden der erforderlichen Module",
+   1010: "Es gab ein Problem, als der Code ausgeführt wurde"
+  }
  return {}
 
 def irciot_get_router_error_descriptions_(in_human_language):

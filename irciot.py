@@ -13,7 +13,6 @@
 
 # Those Global options override default behavior and memory usage
 #
-CAN_debug_library  = False
 CAN_mid_blockchain = False # Creating a chain of cryptographic signatures
 CAN_encrypt_datum  = False # Ability to encrypt and decrypt of "Datums"
 CAN_compress_datum = True  # Ability to compress and decompress "Datums"
@@ -22,6 +21,7 @@ DO_always_encrypt  = False # Always encrypt "Datums" in IRC-IoT messages
 DO_auto_encryption = False # Automatic loading of modules for encryption
 DO_auto_blockchain = False # Automatic loading of modules for Block Chain
 DO_auto_compress   = False # Automatic loading of modules for compression
+DO_debug_library   = False # Issuing debug messages to console and other
 
 import json
 import random
@@ -34,8 +34,8 @@ except:
 
 from ctypes import c_ushort
 
-if CAN_debug_library:
-  from pprint import pprint
+if DO_debug_library:
+ from pprint import pprint
 
 class PyLayerIRCIoT(object):
 
@@ -2841,7 +2841,7 @@ class PyLayerIRCIoT(object):
        pass
     elif my_ok == 2:
        self.irciot_clear_defrag_chain_(my_did)
-       if CAN_debug_library:
+       if DO_debug_library:
          print("\033[1;42m DEFRAGMENTATION COMPLETED \033[0m")
        my_crypt_method = self.crypt_method
        if my_ot in [ \
@@ -2901,7 +2901,7 @@ class PyLayerIRCIoT(object):
             out_compress = str(self.__crypt_ZLIB.decompress(out_base))
             del out_base
           except self.__crypt_ZLIB.error as zlib_error:
-            if CAN_debug_library:
+            if DO_debug_library:
               print("\033[1;41m ZLIB ENCRIPION FAILED \33[0m")
               print("\033[1;35m" + str(zlib_error) + "\033[0m")
             if zlib_error.args[0].startswith("Error -3 "):
@@ -3230,7 +3230,7 @@ class PyLayerIRCIoT(object):
      self.CONST.ot_BCH_INFO, \
      self.CONST.ot_BCH_REQUEST, \
      self.CONST.ot_BCH_ACK ]:
-    if CAN_debug_library:
+    if DO_debug_library:
       print("\033[1;33mBLOCKCHAIN TEST SKIPPED OT '%s' \033[0m" % my_ot)
     self.irciot_blockchain_update_last_mid_(in_vuid, my_hismid)
     return True
@@ -3257,7 +3257,7 @@ class PyLayerIRCIoT(object):
   self.irciot_blockchain_update_last_mid_(in_vuid, my_hismid)
   if my_hismid == None:
     return True
-  if CAN_debug_library:
+  if DO_debug_library:
     print('MAIN BLOCKCHAIN CHECK')
   my_newmids = self.irciot_blockchain_get_own_mids_(in_vuid)
   my_result  = False
@@ -3270,7 +3270,7 @@ class PyLayerIRCIoT(object):
       if my_result:
         break
   if not my_result:
-    if CAN_debug_library:
+    if DO_debug_library:
       print("ALTERNATIVE BLOCKCHAIN CHECK")
     my_vuid_list = self.irciot_get_vuid_list_(self.CONST.api_vuid_all)
     my_vuid_list.append(self.CONST.api_vuid_self)
@@ -3278,7 +3278,7 @@ class PyLayerIRCIoT(object):
     for my_vuid in my_vuid_list:
       if my_vuid == in_vuid:
         continue # The User already checked
-      if CAN_debug_library:
+      if DO_debug_library:
         print("Checking blockcahin for VUID = '%s' ..." % my_vuid)
       my_newmids = self.irciot_blockchain_get_own_mids_(in_vuid)
       if isinstance(my_newmids, list):
@@ -3303,7 +3303,7 @@ class PyLayerIRCIoT(object):
           break
         my_mids += my_newmids
     del my_mids
-  if CAN_debug_library:
+  if DO_debug_library:
     if my_result:
       print("\033[1;45m BLOCKCHAIN VERIFICATION OK \033[0m")
     else:

@@ -80,10 +80,10 @@ class PyLayerIRCIoT_EL_(object):
    err_LANGUAGE_SYNTAX  : "Incorrect syntax for this language",
    err_LOADING_MODULES  : "Unable to load required modules",
    err_BAD_ENVIRONMENT  : "Invalid language environment",
-   err_COMMON_FILTER    : "Code denied by common filter",
-   err_LANGUAGE_FILTER  : "Code denied by language filter",
+   err_COMMON_FILTER    : "Code declined by common filter",
+   err_LANGUAGE_FILTER  : "Code declined by language filter",
    err_CODE_SIZE_LIMIT  : "Code size limit exceeded",
-   err_CODE_EXECUTION   : "Problems while executing the code"
+   err_CODE_EXECUTION   : "Problem while executing the code"
   }
   #
   mod_ANSVAR = 'ansible.vars.manager'
@@ -332,6 +332,10 @@ class PyLayerIRCIoT_EL_(object):
  def __irciot_EL_run_TCL_code_(self, in_code, in_environment):
   my_tcl = self.__TCL.Tcl();
   my_out = None
+  for my_key in in_environment.keys():
+    my_var = self.__TCL.StringVar(my_tcl)
+    my_var.set( in_environment[ my_key ] )
+    del my_var
   # N.B. there is a problem with the interruption
   # of the interpreter by the SIGALARM signal
   try:

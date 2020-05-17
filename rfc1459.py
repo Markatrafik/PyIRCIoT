@@ -132,6 +132,9 @@ class PyLayerIRC( irciot_shared_ ):
    irc_translation = "".maketrans( \
      irc_ascii_uppercase + "[]\\^",
      irc_ascii_lowercase + "{}|~")
+   irc_transmocker = "".maketrans( \
+     "aAoOBEGgIlSsT-_",
+     "4400836911557_-" )
    irc_mode_add = "+"
    irc_mode_del = "-"
    irc_change_modes \
@@ -961,6 +964,9 @@ class PyLayerIRC( irciot_shared_ ):
  def irc_tolower_(self, in_input):
    return in_input.translate(self.CONST.irc_translation)
 
+ def irc_tomock_(self, in_input):
+   return in_input.translate(self.CONST.irc_transmocker)
+
  def irc_get_list_(self, in_input):
    if in_input == None:
      return []
@@ -1589,7 +1595,9 @@ class PyLayerIRC( irciot_shared_ ):
    if not self.is_irc_nick_(in_nick):
      return -1
    random.seed()
-   irc_nick = in_nick + "%d" % random.randint(0, 999)
+   irc_nick = self.irc_tomock_(in_nick)
+   if irc_nick == in_nick:
+     irc_nick = in_nick + "%d" % random.randint(0, 999)
    if (self.join_retry > 2) or in_force:
      nick_length = random.randint(2, self.irc_nick_length)
      irc_nick = random.choice(self.CONST.irc_nick_first_char)
