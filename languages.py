@@ -117,7 +117,11 @@ class PyLayerIRCIoT_EL_(object):
   lang_filter_PYTHON_names = { *lang_filter_PYTHON_names, *lang_filter_PYTHON_funcs }
   lang_filter_LUA_regexps  = []
   lang_filter_TCL_regexps  = [ '.*package\s*require.*', '.*vwait.*' ]
+  lang_filter_JAVA_regexps = []
   lang_filter_JS_regexps   = []
+  #
+  environment_first_chars  = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+  environment_second_chars = environment_first_chars + "0123456789_"
   #
   default_execution_timeout = 3 # in seconds
   default_maximal_code_size = 4096 # bytes
@@ -189,12 +193,24 @@ class PyLayerIRCIoT_EL_(object):
   if not isinstance(in_environment, dict):
     return False
   for my_key in in_environment.keys():
-    if not isinstance(in_environment[my_key], str):
+    if not isinstance(my_key, str):
+      return False
+    if my_key == "":
+      return False
+    if my_key[0] not in self.CONST.environment_first_chars:
+      return False
+    for my_char in my_key:
+      if my_char not in self.CONST.environment_second_chars:
+        return False
+    my_item = in_environment[my_key]
+    if not isinstance(my_item, str):
       return False
 
   return True
 
  def irciot_EL_check_matchers_(self, in_code, in_matchers):
+  if not isinstance(in_matchers, list):
+    return True
   for my_re in in_matchers:
     if my_re.match(in_code):
       self.irciot_EL_error_(self.CONST.err_LANGUAGE_FILTER, None)
@@ -207,10 +223,14 @@ class PyLayerIRCIoT_EL_(object):
 
  # incomplete
  def irciot_EL_check_BASIC_code_(self, in_code):
+  if not self.irciot_EL_check_matchers_(in_code, self.__BASIC_filter_matchers):
+    return False
   return True
 
  # incomplete
  def irciot_EL_check_Java_code_(self, in_code):
+  if not self.irciot_EL_check_matchers_(in_code, self.__JAVA_filter_matchers):
+    return False
   return True
 
  # incomplete
@@ -382,7 +402,8 @@ class PyLayerIRCIoT_EL_(object):
   my_tcl.after(self.__execution_timeout * 1000, self.timeout_termination_)
   my_out = None
   for my_key in in_environment.keys():
-    my_var = self.__TCL.StringVar(my_tcl)
+    my_str = in_environment[ my_key ].replace('"', '\\"')
+    my_tcl.eval('set %s "%s"' % (my_key, my_str))
   try:
     my_out = my_tcl.eval(in_code)
   except Exception as my_ex:
@@ -522,6 +543,8 @@ class PyLayerIRCIoT_EL_(object):
   elif in_lang == self.CONST.lang_GO:
     pass
   elif in_lang == self.CONST.lang_JRE:
+    self.__JAVA_filter_matchers = \
+     self.__irciot_EL_matchers_(self.CONST.lang_filter_JAVA_regexps)
     self.__JRE = self.irciot_EL_import_(self.CONST.mod_JRE)
     if self.__JRE != None:
       return True
@@ -570,7 +593,7 @@ class PyLayerIRCIoT_EL_(object):
       del self.__ANSINV
       del self.__ANSYML
     elif in_lang == self.CONST.lang_BASH:
-      pass
+      del self.__BASIC_filter_matchers
     elif in_lang == self.CONST.lang_BASIC:
       pass
     elif in_lang == self.CONST.lang_CS:
@@ -581,6 +604,7 @@ class PyLayerIRCIoT_EL_(object):
       pass
     elif in_lang == self.CONST.lang_JRE:
       del self.__JRE
+      del self.__JAVA_filter_matchers
     elif in_lang == self.CONST.lang_JS:
       del self.__JS
       del self.__JS_filter_matchers

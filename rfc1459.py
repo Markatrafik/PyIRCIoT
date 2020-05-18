@@ -119,6 +119,8 @@ class PyLayerIRC( irciot_shared_ ):
    #
    irc_default_nick_retry = 3600 # in seconds
    #
+   irc_default_network_tag = "IRC-IoT"
+   #
    # According RFC 1459
    #
    irc_ascii_lowercase = "abcdefghijklmnopqrstuvwxyz"
@@ -176,8 +178,8 @@ class PyLayerIRC( irciot_shared_ ):
    irc_max_nick_length = 15
    if irc_default_draft == 'Undernet':
      irc_max_nick_length = 12
-   #
    irc_max_topic_length = 160
+   irc_max_network_name_length = 80
    #
    default_mtu = 480
    if irc_default_draft == 'Undernet':
@@ -630,6 +632,7 @@ class PyLayerIRC( irciot_shared_ ):
    # and you want to use the IP, put its text value into self.irc_server
    self.irc_server_ip = None
    self.irc_local_port = 0
+   self.irc_network_name = None
    #
    self.irc_proxy = None
    if self.CONST.irc_default_proxy != None:
@@ -1746,6 +1749,19 @@ class PyLayerIRC( irciot_shared_ ):
 
  # CLIENT Hooks:
 
+ def func_feature_network_(self, in_args):
+   (in_string, in_ret, in_init, in_wait) = in_args
+   if in_string not in [ "", None ]:
+     my_string = in_string
+     my_max = self.CONST.irc_max_network_name_length
+     if len(in_string) > my_max:
+       my_string = in_string[:my_max]
+     if not self.CONST.irc_default_network_tag in my_string:
+       self.to_log_("Warning! not an IRC-IoT network, " \
+        + "name: '%s'" % my_string)
+     self.irc_network_name = my_string
+   return (in_ret, in_init, in_wait)
+
  def func_feature_topiclen_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
    try:
@@ -1780,14 +1796,19 @@ class PyLayerIRC( irciot_shared_ ):
        my_feature = my_split[0]
        if len(my_split) == 2:
          my_param = my_split[1]
-       for irc_feature_pack in self.irc_features:
-         (irc_feature, feature_type, irc_function)  = irc_feature_pack
+       for irc_pack in self.irc_features:
+         (irc_feature, featt_type, irc_function)  = irc_pack
          if irc_function != None:
            if my_feature == irc_feature:
-             if self.irc_debug:
-               print("FOUND FEATURE [\033[1m%s\033[0m] " % my_feature, end='')
-               print("WITH PARAM [\033[1m%s\033[0m]" % my_param)
-               print("RUN FUNCTION [%s]" % irc_function)
+             if featt_type == self.CONST.featt_EMPTY \
+              and my_param != "":
+               continue
+             if featt_type == self.CONST.featt_NUMBER \
+              and not my_param.isdigit():
+               continue
+             if featt_type in [ self.CONST.featt_STRING, \
+              self.CONST.featt_FLAGS ] and my_param == "":
+               continue
              irc_args = (my_param, in_ret, in_init, in_wait)
              (in_ret, in_init, in_wait) = irc_function(irc_args)
    return (in_ret, in_init, in_wait)
@@ -2172,7 +2193,7 @@ class PyLayerIRC( irciot_shared_ ):
       (C.feature_MAXCHANS,    C.featt_NUMBER, None),
       (C.feature_MAXBNANS,    C.featt_NUMBER, None),
       (C.feature_MAXNICKLEN,  C.featt_NUMBER, self.func_feature_nicklen_),
-      (C.feature_NETWORK,     C.featt_STRING, None),
+      (C.feature_NETWORK,     C.featt_STRING, self.func_feature_network_),
       (C.feature_SILENCE,     C.featt_NUMBER, None),
       (C.feature_STATUSMSG,   C.featt_FLAGS,  None),
       (C.feature_TOPICLEN,    C.featt_NUMBER, self.func_feature_topiclen_),
