@@ -147,6 +147,10 @@ class irciot_shared_(object):
    except socket.error:
      return False
 
+ # incomplete
+ def is_local_ip_address_(self, in_ip):
+   return False
+
  def dns_reverse_resolver_(self, in_server_ip):
    if self.is_ip_address_(in_server_ip):
      try:

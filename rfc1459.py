@@ -757,12 +757,13 @@ class PyLayerIRC( irciot_shared_ ):
    self.ident_run = False
    sleep(self.CONST.irc_micro_wait)
    self.irc_disconnect_()
-   #
-   try:
-     if self.irc_task != None:
+   self.stop_ident_()
+   if self.irc_task != None:
+     sleep(self.CONST.irc_micro_wait)
+     try:
        self.irc_task.join()
-   except:
-     pass
+     except:
+       pass
    #
    # End of stop_IRC_()
 
@@ -777,11 +778,12 @@ class PyLayerIRC( irciot_shared_ ):
  def stop_ident_(self):
    #
    self.ident_run = False
-   try:
-     if self.ident_task != None:
+   if self.ident_task != None:
+     sleep(self.CONST.irc_micro_wait)
+     try:
        self.ident_task.join()
-   except:
-     pass
+     except:
+       pass
 
  def __del__(self):
    self.stop_IRC_()
@@ -1452,7 +1454,8 @@ class PyLayerIRC( irciot_shared_ ):
      if irc_out == "":
        return -1
      if self.irc_debug:
-       self.to_log_("Sending to IRC: [" + irc_out + "]")
+       self.to_log_("Sending to IRC: [" \
+         + irc_out.replace('\r','\\r').replace('\n','\\n') + "]")
      self.irc.send(bytes(irc_out + "\n", 'utf-8'))
      sleep(self.CONST.irc_micro_wait)
      irc_out = ""
@@ -1493,10 +1496,10 @@ class PyLayerIRC( irciot_shared_ ):
      if ready[0]:
        irc_input = self.irc.recv(self.CONST.irc_buffer_size \
          ).decode('utf-8', 'ignore')
-       irc_input = irc_input.strip("\n").strip("\r")
        if irc_input != "":
          if self.irc_debug:
-           self.to_log_("Received from IRC: [" + irc_input + "]")
+           self.to_log_("Received from IRC: [" \
+             + irc_input.replace('\r',"\\r").replace('\n',"\\n\n") + "]")
          return (0, irc_input, delta_time)
        return (-1, "", delta_time)
      return (0, "", delta_time)
@@ -1688,6 +1691,41 @@ class PyLayerIRC( irciot_shared_ ):
        self.irc_voice_(self.irc_channel, in_nick)
 
  # CLIENT Hooks:
+
+ # incomplete
+ def func_featurelist_(self, in_args):
+   (in_string, in_ret, in_init, in_wait) = in_args
+   if self.irc_debug:
+     print('@\033[1m%s\033[0m@' % in_string)
+   #
+   # *** commonly used: ***
+   # CASEMAPPING=rfc1459|ascii
+   # CHANMODES=b,AkU,l,imnpstrDd
+   # CHANTYPES=#&
+   # NICKLEN=12
+   # PREFIX=(ov)@+
+   #
+   # **** in Undernet: ****
+   # AWAYLEN=160
+   # CHANNELLEN=200
+   # CNOTICE
+   # CPRIVMSG
+   # KICKLEN=160
+   # MODES=6
+   # MAXCHANNELS=10
+   # MAXBANS=45
+   # MAXNICKLEN=15
+   # MAXCHANNELLEN=200
+   # NETWORK=IRC-IoT
+   # SILENCE=15
+   # STATUSMSG=@+
+   # TOPICLEN=160
+   # USERIP
+   # WALLCHOPS
+   # WALLVOICES
+   # WHOX
+   #
+   return (in_ret, in_init, in_wait)
 
  def func_nick_in_use_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
@@ -1946,6 +1984,7 @@ class PyLayerIRC( irciot_shared_ ):
     (C.code_BANNEDFROMCHAN,   "BANNEDFROMCHAN",   self.func_banned_), \
     (C.code_NICKCHANGETOOFAST,"NICKCHANGETOOFAST",self.func_fast_nick_), \
     (C.code_NAMREPLY,         "NAMREPLY",         self.func_chan_nicks_), \
+    (C.code_FEATURELIST,      "FEATURELIST",      self.func_featurelist_), \
     (C.code_WHOISUSER,        "WHOISUSER",        self.func_whois_user_), \
     (C.code_ENDOFNAMES,       "ENDOFNAMES",       self.func_end_nicks_), \
     (C.code_WHOREPLY,         "WHOREPLY",         self.func_who_user_), \
@@ -2156,10 +2195,11 @@ class PyLayerIRC( irciot_shared_ ):
          irc_init = 0
          self.irc = self.irc_socket_(self.irc_server)
 
-       irc_prefix = ":" + self.irc_server + " "
-       irc_prefix_len = len(irc_prefix)
-
        for irc_input_split in re.split(r'[\r\n]', irc_input_buffer):
+
+         if irc_input_split == "":
+           irc_input_buff = ""
+           continue
 
          if irc_input_split[:5] == self.CONST.cmd_PING + " ":
            self.delta_ping \
@@ -2176,8 +2216,7 @@ class PyLayerIRC( irciot_shared_ ):
          except:
            irc_input_cmd = ""
 
-         if irc_input_split[:irc_prefix_len] == irc_prefix:
-           # Parse codes only from valid server
+         if irc_input_split[0] == ':':
            for irc_cod_pack in self.irc_codes:
              (irc_code, code_name, irc_function)  = irc_cod_pack
              if irc_function != None:

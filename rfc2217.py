@@ -131,12 +131,14 @@ class PyLayerCOM( irciot_shared_ ):
 
  def stop_COM_(self):
    self.com_run = False
-   sleep(self.CONST.com_micro_wait)
+   #sleep(self.CONST.com_micro_wait)
    #self.com_disconnect_()
-   try:
-     self.com_task.join()
-   except:
-     pass
+   if self.com_task != None:
+     sleep(self.CONST.com_micro_wait)
+     try:
+       self.com_task.join()
+     except:
+       pass
    #
    # End of stop_COM_()
 

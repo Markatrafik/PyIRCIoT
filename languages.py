@@ -116,7 +116,7 @@ class PyLayerIRCIoT_EL_(object):
   lang_filter_PYTHON_names = { 'True', 'False', 'None' }
   lang_filter_PYTHON_names = { *lang_filter_PYTHON_names, *lang_filter_PYTHON_funcs }
   lang_filter_LUA_regexps  = []
-  lang_filter_TCL_regexps  = [ '.*package\s*require.*' ]
+  lang_filter_TCL_regexps  = [ '.*package\s*require.*', '.*vwait.*' ]
   lang_filter_JS_regexps   = []
   #
   default_execution_timeout = 3 # in seconds
@@ -194,6 +194,13 @@ class PyLayerIRCIoT_EL_(object):
 
   return True
 
+ def irciot_EL_check_matchers_(self, in_code, in_matchers):
+  for my_re in in_matchers:
+    if my_re.match(in_code):
+      self.irciot_EL_error_(self.CONST.err_LANGUAGE_FILTER, None)
+      return False
+  return True
+
  # incomplete
  def irciot_EL_check_Ansible_code_(self, in_code):
   return True
@@ -208,14 +215,20 @@ class PyLayerIRCIoT_EL_(object):
 
  # incomplete
  def irciot_EL_check_JS_code_(self, in_code):
+  if not self.irciot_EL_check_matchers_(in_code, self.__JS_filter_matchers):
+    return False
   return True
 
  # incomplete
  def irciot_EL_check_LUA_code_(self, in_code):
+  if not self.irciot_EL_check_matchers_(in_code, self.__LUA_filter_matchers):
+    return False
   return True
 
  # incomplete
  def irciot_EL_check_TCL_code_(self, in_code):
+  if not self.irciot_EL_check_matchers_(in_code, self.__TCL_filter_matchers):
+    return False
   return True
 
  # incomplete

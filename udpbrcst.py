@@ -305,12 +305,14 @@ class PyLayerUDPb( irciot_shared_ ):
 
  def stop_udpb_(self):
   self.udpb_run  = False
-  sleep(self.CONST.udpb_micro_wait)
+  #sleep(self.CONST.udpb_micro_wait)
   #self.udpb_disconnect_()
-  try:
-    self.udpb_task.join()
-  except:
-    pass
+  if self.udpb_task != None:
+    sleep(self.CONST.udpb_micro_wait)
+    try:
+      self.udpb_task.join()
+    except:
+      pass
   #
   # End of stop_udpb_()
 
