@@ -172,9 +172,12 @@ class PyLayerIRC( irciot_shared_ ):
    # "aspIRCd", "pure",      "Rubl",   "ConfRoom",
    # "ngl",     "pircd",     "PyIRCIoT"
    #
+   #
    irc_max_nick_length = 15
    if irc_default_draft == 'Undernet':
      irc_max_nick_length = 12
+   #
+   irc_max_topic_length = 160
    #
    default_mtu = 480
    if irc_default_draft == 'Undernet':
@@ -556,6 +559,39 @@ class PyLayerIRC( irciot_shared_ ):
      cmd_WALLUSERS = "WALLUSERS"
      cmd_WALLVOICE = "WALLVOICE"
    #
+   if irc_default_draft == 'Undernet':
+     feature_AWAYLEN    = "AWAYLEN"
+   feature_CASEMAPPING  = "CAEMAPPING"
+   if irc_default_draft == 'Undernet':
+     feature_CHANNELLEN = "CHANNELLEN"
+   feature_CHANMODES    = "CHANMODES"
+   feature_CHANTYPES    = "CHANTYPES"
+   if irc_default_draft == 'Undernet':
+     feature_CNOTICE    = "CNOTICE"
+     feature_CPRIVMSG   = "CPRIVMSG"
+     feature_MAXCHANLEN = "MAXCHANNELLEN"
+     feature_KICKLEN    = "KICKLEN"
+     feature_MODES      = "MODES"
+     feature_MAXCHANS   = "MAXCHANNELS"
+     feature_MAXBNANS   = "MAXBANS"
+     feature_MAXNICKLEN = "MAXNICKLEN"
+     feature_NETWORK    = "NETWORK"
+   feature_NICKLEN      = "NICKLEN"
+   feature_PREFIX       = "PREFIX"
+   if irc_default_draft == 'Undernet':
+     feature_SILENCE    = "SILENCE"
+     feature_STATUSMSG  = "STATUSMSG"
+     feature_TOPICLEN   = "TOPICLEN"
+     feature_USERIP     = "USERIP"
+     feature_WALLCHOPS  = "WALLCHOPS"
+     feature_WALLVOICES = "WALLVOICES"
+     feature_WHOX       = "WHOX"
+   #
+   featt_EMPTY  = 0
+   featt_FLAGS  = 1
+   featt_STRING = 2
+   featt_NUMBER = 3
+   #
    ident_default_ip   = '0.0.0.0'
    ident_default_port = 113
    #
@@ -582,6 +618,7 @@ class PyLayerIRC( irciot_shared_ ):
    self.irc_nick_try = ""
    #
    self.irc_nick_length = self.CONST.irc_max_nick_length
+   self.irc_topic_length = self.CONST.irc_max_topic_length
    #
    self.irc_server = self.CONST.irc_default_server
    self.irc_port = self.CONST.irc_default_port
@@ -641,6 +678,7 @@ class PyLayerIRC( irciot_shared_ ):
    #
    self.irc_commands = []
    self.irc_codes    = []
+   self.irc_features = []
    #
    self.irc_layer_mode \
      = self.CONST.irc_layer_modes[0]
@@ -1584,6 +1622,22 @@ class PyLayerIRC( irciot_shared_ ):
    except:
      return None
 
+ def irc_extract_code_params_(self, in_string):
+   try:
+     my_out = ""
+     my_idx = 0
+     for my_item in in_string.split(' '):
+      if my_idx == 1 and len(my_item) != 3:
+        return None
+      if my_idx > 2:
+        if my_out != "":
+          my_out += " "
+        my_out += my_item
+      my_idx += 1
+     return my_out
+   except:
+     return None
+
  def irc_whois_nick_(self, in_nick):
    if not self.is_irc_nick_(in_nick):
      return -1
@@ -1692,39 +1746,50 @@ class PyLayerIRC( irciot_shared_ ):
 
  # CLIENT Hooks:
 
+ def func_feature_topiclen_(self, in_args):
+   (in_string, in_ret, in_init, in_wait) = in_args
+   try:
+     my_len = int(in_string)
+     if my_len > 0 and my_len < self.CONST.irc_max_topic_length:
+       self.irc_topic_length = my_len
+   except:
+     pass
+   return (in_ret, in_init, in_wait)
+
+ def func_feature_nicklen_(self, in_args):
+   (in_string, in_ret, in_init, in_wait) = in_args
+   try:
+     my_len = int(in_string)
+     if my_len > 0 and my_len < self.CONST.irc_max_nick_length:
+       self.irc_nick_length = my_len
+   except:
+     pass
+   return (in_ret, in_init, in_wait)
+
  # incomplete
  def func_featurelist_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
-   if self.irc_debug:
-     print('@\033[1m%s\033[0m@' % in_string)
-   #
-   # *** commonly used: ***
-   # CASEMAPPING=rfc1459|ascii
-   # CHANMODES=b,AkU,l,imnpstrDd
-   # CHANTYPES=#&
-   # NICKLEN=12
-   # PREFIX=(ov)@+
-   #
-   # **** in Undernet: ****
-   # AWAYLEN=160
-   # CHANNELLEN=200
-   # CNOTICE
-   # CPRIVMSG
-   # KICKLEN=160
-   # MODES=6
-   # MAXCHANNELS=10
-   # MAXBANS=45
-   # MAXNICKLEN=15
-   # MAXCHANNELLEN=200
-   # NETWORK=IRC-IoT
-   # SILENCE=15
-   # STATUSMSG=@+
-   # TOPICLEN=160
-   # USERIP
-   # WALLCHOPS
-   # WALLVOICES
-   # WHOX
-   #
+   my_string = self.irc_extract_code_params_(in_string)
+   if my_string == None:
+     return (in_ret, in_init, in_wait)
+   my_string = my_string.split(':')[0]
+   for my_item in my_string.split(' '):
+     if my_item != "":
+       my_split = my_item.split('=')
+       my_param = ""
+       my_feature = my_split[0]
+       if len(my_split) == 2:
+         my_param = my_split[1]
+       for irc_feature_pack in self.irc_features:
+         (irc_feature, feature_type, irc_function)  = irc_feature_pack
+         if irc_function != None:
+           if my_feature == irc_feature:
+             if self.irc_debug:
+               print("FOUND FEATURE [\033[1m%s\033[0m] " % my_feature, end='')
+               print("WITH PARAM [\033[1m%s\033[0m]" % my_param)
+               print("RUN FUNCTION [%s]" % irc_function)
+             irc_args = (my_param, in_ret, in_init, in_wait)
+             (in_ret, in_init, in_wait) = irc_function(irc_args)
    return (in_ret, in_init, in_wait)
 
  def func_nick_in_use_(self, in_args):
@@ -2087,6 +2152,34 @@ class PyLayerIRC( irciot_shared_ ):
       (C.cmd_PUBMSG,  None), (C.cmd_PUBNOTICE,  None), \
       (C.cmd_NOTICE,  None), (C.cmd_PRIVNOTICE, None), \
       (C.cmd_ISON,    None), (C.cmd_REHASH,     None) ]
+   #
+   self.irc_features = [ \
+      (C.feature_CASEMAPPING, C.featt_STRING, None),
+      (C.feature_CHANMODES,   C.featt_FLAGS,  None),
+      (C.feature_CHANTYPES,   C.featt_FLAGS,  None),
+      (C.feature_NICKLEN,     C.featt_NUMBER, self.func_feature_nicklen_),
+      (C.feature_PREFIX,      C.featt_FLAGS,  None) ]
+
+   if self.CONST.irc_default_draft == 'Undernet':
+     self.irc_features.extend( [ \
+      (C.feature_AWAYLEN,     C.featt_NUMBER, None),
+      (C.feature_CHANNELLEN,  C.featt_NUMBER, None),
+      (C.feature_CNOTICE,     C.featt_EMPTY,  None),
+      (C.feature_CPRIVMSG,    C.featt_EMPTY,  None),
+      (C.feature_MAXCHANLEN,  C.featt_NUMBER, None),
+      (C.feature_KICKLEN,     C.featt_NUMBER, None),
+      (C.feature_MODES,       C.featt_NUMBER, None),
+      (C.feature_MAXCHANS,    C.featt_NUMBER, None),
+      (C.feature_MAXBNANS,    C.featt_NUMBER, None),
+      (C.feature_MAXNICKLEN,  C.featt_NUMBER, self.func_feature_nicklen_),
+      (C.feature_NETWORK,     C.featt_STRING, None),
+      (C.feature_SILENCE,     C.featt_NUMBER, None),
+      (C.feature_STATUSMSG,   C.featt_FLAGS,  None),
+      (C.feature_TOPICLEN,    C.featt_NUMBER, self.func_feature_topiclen_),
+      (C.feature_USERIP,      C.featt_EMPTY,  None),
+      (C.feature_WALLCHOPS,   C.featt_EMPTY,  None),
+      (C.feature_WALLVOICES,  C.featt_EMPTY,  None),
+      (C.feature_WHOX,        C.featt_EMPTY,  None) ] )
    #
    # End of init_rfc1459_()
 
