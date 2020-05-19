@@ -115,6 +115,7 @@ class PyLayerIRCIoT_EL_(object):
    'set', 'print' }
   lang_filter_PYTHON_names = { 'True', 'False', 'None' }
   lang_filter_PYTHON_names = { *lang_filter_PYTHON_names, *lang_filter_PYTHON_funcs }
+  lang_filter_RUBY_regexps = []
   lang_filter_LUA_regexps  = []
   lang_filter_TCL_regexps  = [ '.*package\s*require.*', '.*vwait.*' ]
   lang_filter_JAVA_regexps = []
@@ -427,6 +428,14 @@ class PyLayerIRCIoT_EL_(object):
   # End of __irciot_EL_run_Python_code_()
 
  # incomplete
+ def __irciot_EL_run_Ruby_code_(self, in_code, in_environment):
+  my_out = ""
+
+  return my_out
+  #
+  # End of __irciot_EL_run_Ruby_code_()
+
+ # incomplete
  def irciot_EL_run_code_(self, in_lang, in_code, in_environment = {}):
   def timeout_signal_(in_signal, in_frame):
     self.timeout_termination_()
@@ -466,7 +475,7 @@ class PyLayerIRCIoT_EL_(object):
     elif in_lang == self.CONST.lang_PYTHON:
       my_out = self.__irciot_EL_run_Python_code_(in_code, in_environment)
     elif in_lang == self.CONST.lang_RUBY:
-      pass
+      my_out = self.__irciot_EL_run_Ruby_code_(in_code, in_environment)
     elif in_lang == self.CONST.lang_SWIFT:
       pass
     elif in_lang == self.CONST.lang_TCL:

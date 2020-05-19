@@ -399,7 +399,7 @@ class PyLayerUDPb( irciot_shared_ ):
     time_in_recv = datetime.datetime.now()
     ready = select.select([self.udpb_client_sock], [], [], 0)
     my_timerest = recv_timeout
-    while ready[0] == [] and my_timerest > 0:
+    while ready[0] == [] and my_timerest > 0 and self.udpb_run:
       my_timeout = my_timerest % self.CONST.udpb_latency_wait
       if my_timeout == 0:
         my_timeout = self.CONST.udpb_latency_wait
@@ -416,7 +416,7 @@ class PyLayerUDPb( irciot_shared_ ):
       delta_time = recv_timeout - delta_time_in
     if delta_time_in < 0:
       delta_time = 0
-    if ready[0]:
+    if ready[0] and self.udpb_run:
       my_data, my_addr = self.udpb_client_sock.recvfrom(self.udpb_size)
       ( my_ip, my_port ) = my_addr
       if not self.is_ip_address_(my_ip) or not self.is_ip_port_(my_port):
