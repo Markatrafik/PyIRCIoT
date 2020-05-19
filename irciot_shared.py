@@ -394,7 +394,7 @@ class irciot_shared_(object):
     os.kill(os.getpid(), signal.SIGKILL)
 
  def bot_process_kill_timeout_(self, in_timeout):
-  if not isinstance(in_timeout, int):
+  if type(in_timeout) not in [ int, float ]:
     return
   if self.get_os_name_() in self.CONST.os_all_UNIX \
    and in_timeout > 0:

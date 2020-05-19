@@ -44,12 +44,13 @@ class PyLayerIRC( irciot_shared_ ):
    #
    irciot_protocol_version = '0.3.33'
    #
-   irciot_library_version  = '0.0.200'
+   irciot_library_version  = '0.0.201'
    #
    # Bot specific constants
    #
    irc_first_wait = 28
    irc_micro_wait = 0.12
+   irc_ident_wait = 8
    irc_default_wait = 28
    irc_latency_wait = 1
    #
@@ -330,10 +331,16 @@ class PyLayerIRC( irciot_shared_ ):
    code_NOTOPIC            = "331"
    code_CURRENTTOPIC       = "332"
    code_TOPICINFO          = "333"
-   if irc_default_draft == "Undernet":
+   if irc_default_draft in [ "Undernet", "ircu", "snircd" ]:
      code_LISTUSAGE        = "334"
+   if irc_default_draft == "Bahamut":
+     code_COMMANDSYNTAX    = "334"
    if irc_default_draft == "Unreal":
+     code_LISTSYNTAX       = "334"
      code_WHOISBOT         = "335"
+   code_WHOISACTUALLY      = "338"
+   if irc_default_draft in [ "Unreal", "ircu", "snircd" ]:
+     code_RPL_USERIP       = "340"
    code_INVITING           = "341"
    code_SUMMONING          = "342"
    if irc_default_draft == "Unreal":
@@ -501,6 +508,10 @@ class PyLayerIRC( irciot_shared_ ):
      code_RPL_DUMPING      = "640"
      code_RPL_DUMPRPL      = "641"
      code_RPL_EODUMP       = "642"
+   if irc_default_draft == "Charybdis":
+     code_RPL_SASLMECHS    = "908"
+   if irc_default_draft in [ "Unreal", "plexus" ]:
+     code_CANNOTDOCOMMAND  = "972"
    if irc_default_draft == "Bahamut":
      code_NUMERICERROR     = "999"
    #
@@ -748,6 +759,12 @@ class PyLayerIRC( irciot_shared_ ):
    self.irc_host = my_host
 
  def ident_server_(self):
+   def ident_ok_():
+     if not self.irc_run:
+       self.irc_ident = False
+     if not self.irc_ident:
+       return False
+     return True
    if not self.is_ip_address_(self.ident_ip):
      return
    if not self.is_ip_port_(self.ident_port):
@@ -759,21 +776,29 @@ class PyLayerIRC( irciot_shared_ ):
        else:
          my_af_inet = socket.AF_INET6
        my_socket = socket.socket(my_af_inet, socket.SOCK_STREAM)
+       my_socket.settimeout(self.CONST.irc_ident_wait)
        my_socket.bind((self.ident_ip, self.ident_port))
        my_socket.listen(1)
      except:
        my_socket.close()
        sleep(self.CONST.irc_default_wait)
+       if not ident_ok_():
+         break
        continue
-     while (self.ident_run):
+     while (ident_ok_()):
        try:
-         my_conn, my_addr = my_socket.accept()
+         try:
+           my_conn, my_addr = my_socket.accept()
+         except:
+           break
+         if not ident_ok_():
+           break
          if not my_addr[0] in [ self.irc_server_ip, '127.0.0.1', '::1' ]:
            my_conn.close()
            break
-         while (self.ident_run):
+         while (ident_ok_()):
            my_ready = select.select([my_socket], [], [], 0)
-           if my_ready[0] == []:
+           if my_ready[0] == [] and ident_ok_():
              my_data = my_conn.recv(self.CONST.irc_buffer_size).decode('utf-8')
              if my_data:
                for my_char in [ '\n', '\r', ' ' ]:
@@ -796,7 +821,7 @@ class PyLayerIRC( irciot_shared_ ):
                self.ident_run = False
                break
              else:
-               break;
+               break
            else:
              sleep(self.CONST.irc_micro_wait)
          my_conn.close()
@@ -804,7 +829,10 @@ class PyLayerIRC( irciot_shared_ ):
        except:
          my_conn.close()
        sleep(self.CONST.irc_micro_wait)
-     my_socket.close()
+     try:
+       my_socket.close()
+     except:
+       pass
      sleep(self.CONST.irc_micro_wait)
    #
    # End of ident_server_()
@@ -821,6 +849,7 @@ class PyLayerIRC( irciot_shared_ ):
    #
    self.irc_run = False
    self.ident_run = False
+   self.irc_debug = False
    sleep(self.CONST.irc_micro_wait)
    self.irc_disconnect_()
    self.stop_ident_()
@@ -853,6 +882,11 @@ class PyLayerIRC( irciot_shared_ ):
 
  def __del__(self):
    self.stop_IRC_()
+   try:
+     import signal
+     signal.alarm(0)
+   except:
+     pass
 
  def to_log_(self, msg):
    if not self.irc_debug:
@@ -1521,7 +1555,7 @@ class PyLayerIRC( irciot_shared_ ):
        return -1
      if self.irc_debug:
        self.to_log_("Sending to IRC: [" \
-         + irc_out.replace('\r','\\r').replace('\n','\\n') + "]")
+         + irc_out.replace('\r','\\r').replace('\n','\\n') + "\\n]")
      self.irc.send(bytes(irc_out + "\n", 'utf-8'))
      sleep(self.CONST.irc_micro_wait)
      irc_out = ""
@@ -1542,11 +1576,13 @@ class PyLayerIRC( irciot_shared_ ):
      time_in_recv = datetime.datetime.now()
      ready = select.select([self.irc], [], [], 0)
      my_timerest = recv_timeout
-     while ready[0] == [] and my_timerest > 0:
+     while ready[0] == [] and my_timerest > 0 and self.irc_run:
        my_timeout = my_timerest % self.CONST.irc_latency_wait
        if my_timeout == 0:
          my_timeout = self.CONST.irc_latency_wait
        ready = select.select([self.irc], [], [], my_timeout)
+       if not self.irc_run:
+         return (-1, "", 0)
        if not self.irc_queue[self.CONST.irc_queue_output].empty():
          break
        my_timerest -= my_timeout
@@ -1559,13 +1595,13 @@ class PyLayerIRC( irciot_shared_ ):
        delta_time = recv_timeout - delta_time_in
      if delta_time_in < 0:
        delta_time = 0
-     if ready[0]:
+     if ready[0] and self.irc_run:
        irc_input = self.irc.recv(self.CONST.irc_buffer_size \
          ).decode('utf-8', 'ignore')
        if irc_input != "":
          if self.irc_debug:
            self.to_log_("Received from IRC: [" \
-             + irc_input.replace('\r',"\\r").replace('\n',"\\n\n") + "]")
+             + irc_input.replace('\r',"\\r").replace('\n',"\\n\n").rstrip() + "]")
          return (0, irc_input, delta_time)
        return (-1, "", delta_time)
      return (0, "", delta_time)
@@ -1578,12 +1614,12 @@ class PyLayerIRC( irciot_shared_ ):
 
  def irc_pong_(self, irc_input):
    irc_string = irc_input.split(":")
-   ret = self.irc_send_("%s %s\r\n" \
+   ret = self.irc_send_("%s %s\r" \
      % (self.CONST.cmd_PONG, irc_string[1]))
    return ret
 
  def irc_quit_(self):
-   ret = self.irc_send_("%s :%s\n" \
+   ret = self.irc_send_("%s :%s\r" \
      % (self.CONST.cmd_QUIT, self.irc_quit))
    sleep(self.CONST.irc_latency_wait)
    return ret
@@ -2090,117 +2126,118 @@ class PyLayerIRC( irciot_shared_ ):
    #
    C = self.CONST
    #
-   self.irc_codes = [ \
-    (C.code_NICKNAMEINUSE,    "NICKNAMEINUSE",    self.func_nick_in_use_), \
-    (C.code_NOTREGISTERED,    "NOTREGISTERED",    self.func_not_reg_), \
-    (C.code_BANNEDFROMCHAN,   "BANNEDFROMCHAN",   self.func_banned_), \
-    (C.code_NICKCHANGETOOFAST,"NICKCHANGETOOFAST",self.func_fast_nick_), \
-    (C.code_NAMREPLY,         "NAMREPLY",         self.func_chan_nicks_), \
-    (C.code_FEATURELIST,      "FEATURELIST",      self.func_featurelist_), \
-    (C.code_WHOISUSER,        "WHOISUSER",        self.func_whois_user_), \
-    (C.code_ENDOFNAMES,       "ENDOFNAMES",       self.func_end_nicks_), \
-    (C.code_WHOREPLY,         "WHOREPLY",         self.func_who_user_), \
-    (C.code_NOSUCHNICK,       "NOSUCHNICK",       self.func_no_such_nick_), \
-    (C.code_CHANNELISFULL,    "CHANNELISFULL",    self.func_banned_), \
-    (C.code_BADCHANNELKEY,    "BADCHANNELKEY",    self.func_banned_), \
-    (C.code_ERRONEUSNICKNAME, "ERRONEUSNICKNAME", self.func_nick_in_use_), \
-    (C.code_NOSUCHCHANNEL,    "NOSUCHCHANNEL",    self.func_banned_), \
-    (C.code_NOSUCHSERVER,     "NOSUCHSERVER",     None), \
-    (C.code_CANNOTSENDTOCHAN, "CANNOTSENDTOCHAN", None), \
-    (C.code_TOOMANYCHANNELS,  "TOOMANYCHANNELS",  None), \
-    (C.code_WASNOSUCHNICK,    "WASNOSUCHNICK",    None), \
-    (C.code_TOOMANYTARGETS,   "TOOMANYTARGETS",   None), \
-    (C.code_NOORIGIN,         "NOORIGIN",         None), \
-    (C.code_NORECIPIENT,      "NORECIPIENT",      None), \
-    (C.code_NOTEXTTOSEND,     "NOTEXTTOSEND",     None), \
-    (C.code_NOOPLEVEL,        "NOOPLEVEL",        None), \
-    (C.code_WILDTOPLEVEL,     "WILDTOPLEVEL",     None), \
-    (C.code_UNKNOWNCOMMAND,   "UNKNOWNCOMMAND",   None), \
-    (C.code_NOMOTD,           "NOMOTD",           None), \
-    (C.code_NOADMININFO,      "NOADMININFO",      None), \
-    (C.code_FILEERROR,        "FILEERROR",        None), \
-    (C.code_NONICKNAMEGIVEN,  "NONICKNAMEGIVEN",  None), \
-    (C.code_NICKCOLLISION,    "NICKCOLLISION",    None), \
-    (C.code_UNAVAILRESOURCE,  "UNAVAILRESOURCE",  None), \
-    (C.code_USERNOTINCHANNEL, "USERNOTINCHANNEL", None), \
-    (C.code_NOTONCHANNEL,     "NOTONCHANNEL",     None), \
-    (C.code_NOLOGIN,          "NOLOGIN",          None), \
-    (C.code_SUMMONDISABLED,   "SUMMONDISABLED",   None), \
-    (C.code_USERSDISABLED,    "USERSDISABLED",    None), \
-    (C.code_NEEDMOREPARAMS,   "NEEDMOREPARAMS",   None), \
-    (C.code_USERSDONTMATCH,   "USERSDONTMATCH",   None), \
-    (C.code_ALREADYREGISTERED,"ALREADYREGISTERED",None), \
-    (C.code_PASSWDMISMATCH,   "PASSWDMISMATCH",   None), \
-    (C.code_YOUREBANNEDCREEP, "YOUREBANNEDCREEP", None), \
-    (C.code_YOUWILLBEBANNED,  "YOUWILLBEBANNED",  None), \
-    (C.code_KEYSET,           "KEYSET",           None), \
-    (C.code_UNKNOWNMODE,      "UNKNOWNMODE",      None), \
-    (C.code_INVITEONLYCHAN,   "INVITEONLYCHAN",   None), \
-    (C.code_BADCHANNELMASK,   "BADCHANNELMASK",   None), \
-    (C.code_BANLISTFULL,      "BANLISTFULL",      None), \
-    (C.code_NOPRIVILEGES,     "NOPRIVILEGES",     None), \
-    (C.code_CANTKILLSERVER,   "CANTKILLSERVER",   None), \
-    (C.code_UNIQOPPRIVSNEEDED,"UNIQOPPRIVSNEEDED",None), \
-    (C.code_NOOPERHOST,       "NOOPERHOST",       None), \
-    (C.code_NOSERVICEHOST,    "NOSERVICEHOST",    None), \
+   self.irc_codes = [
+    (C.code_NICKNAMEINUSE,    "NICKNAMEINUSE",    self.func_nick_in_use_),
+    (C.code_NOTREGISTERED,    "NOTREGISTERED",    self.func_not_reg_),
+    (C.code_BANNEDFROMCHAN,   "BANNEDFROMCHAN",   self.func_banned_),
+    (C.code_NICKCHANGETOOFAST,"NICKCHANGETOOFAST",self.func_fast_nick_),
+    (C.code_NAMREPLY,         "NAMREPLY",         self.func_chan_nicks_),
+    (C.code_FEATURELIST,      "FEATURELIST",      self.func_featurelist_),
+    (C.code_WHOISUSER,        "WHOISUSER",        self.func_whois_user_),
+    (C.code_ENDOFNAMES,       "ENDOFNAMES",       self.func_end_nicks_),
+    (C.code_WHOREPLY,         "WHOREPLY",         self.func_who_user_),
+    (C.code_NOSUCHNICK,       "NOSUCHNICK",       self.func_no_such_nick_),
+    (C.code_CHANNELISFULL,    "CHANNELISFULL",    self.func_banned_),
+    (C.code_BADCHANNELKEY,    "BADCHANNELKEY",    self.func_banned_),
+    (C.code_ERRONEUSNICKNAME, "ERRONEUSNICKNAME", self.func_nick_in_use_),
+    (C.code_NOSUCHCHANNEL,    "NOSUCHCHANNEL",    self.func_banned_),
+    (C.code_NOSUCHSERVER,     "NOSUCHSERVER",     None),
+    (C.code_CANNOTSENDTOCHAN, "CANNOTSENDTOCHAN", None),
+    (C.code_TOOMANYCHANNELS,  "TOOMANYCHANNELS",  None),
+    (C.code_WASNOSUCHNICK,    "WASNOSUCHNICK",    None),
+    (C.code_TOOMANYTARGETS,   "TOOMANYTARGETS",   None),
+    (C.code_NOORIGIN,         "NOORIGIN",         None),
+    (C.code_NORECIPIENT,      "NORECIPIENT",      None),
+    (C.code_NOTEXTTOSEND,     "NOTEXTTOSEND",     None),
+    (C.code_NOOPLEVEL,        "NOOPLEVEL",        None),
+    (C.code_WILDTOPLEVEL,     "WILDTOPLEVEL",     None),
+    (C.code_UNKNOWNCOMMAND,   "UNKNOWNCOMMAND",   None),
+    (C.code_NOMOTD,           "NOMOTD",           None),
+    (C.code_NOADMININFO,      "NOADMININFO",      None),
+    (C.code_FILEERROR,        "FILEERROR",        None),
+    (C.code_NONICKNAMEGIVEN,  "NONICKNAMEGIVEN",  None),
+    (C.code_NICKCOLLISION,    "NICKCOLLISION",    None),
+    (C.code_UNAVAILRESOURCE,  "UNAVAILRESOURCE",  None),
+    (C.code_USERNOTINCHANNEL, "USERNOTINCHANNEL", None),
+    (C.code_NOTONCHANNEL,     "NOTONCHANNEL",     None),
+    (C.code_NOLOGIN,          "NOLOGIN",          None),
+    (C.code_SUMMONDISABLED,   "SUMMONDISABLED",   None),
+    (C.code_USERSDISABLED,    "USERSDISABLED",    None),
+    (C.code_NEEDMOREPARAMS,   "NEEDMOREPARAMS",   None),
+    (C.code_USERSDONTMATCH,   "USERSDONTMATCH",   None),
+    (C.code_ALREADYREGISTERED,"ALREADYREGISTERED",None),
+    (C.code_PASSWDMISMATCH,   "PASSWDMISMATCH",   None),
+    (C.code_YOUREBANNEDCREEP, "YOUREBANNEDCREEP", None),
+    (C.code_YOUWILLBEBANNED,  "YOUWILLBEBANNED",  None),
+    (C.code_KEYSET,           "KEYSET",           None),
+    (C.code_UNKNOWNMODE,      "UNKNOWNMODE",      None),
+    (C.code_INVITEONLYCHAN,   "INVITEONLYCHAN",   None),
+    (C.code_BADCHANNELMASK,   "BADCHANNELMASK",   None),
+    (C.code_BANLISTFULL,      "BANLISTFULL",      None),
+    (C.code_NOPRIVILEGES,     "NOPRIVILEGES",     None),
+    (C.code_CANTKILLSERVER,   "CANTKILLSERVER",   None),
+    (C.code_UNIQOPPRIVSNEEDED,"UNIQOPPRIVSNEEDED",None),
+    (C.code_NOOPERHOST,       "NOOPERHOST",       None),
+    (C.code_NOSERVICEHOST,    "NOSERVICEHOST",    None),
     (C.code_UMODEUNKNOWNFLAG, "UMODEUNKNOWNFLAG", None) ]
 
    if self.CONST.irc_default_draft == "Undernet":
-     self.irc_codes.extend( [ \
-      (C.code_BANNICKCHANGE,  "BANNICKCHANGE",    self.func_restore_nick_), \
-      (C.code_USERIP,         "USERIP",           None), \
+     self.irc_codes.extend( [
+      (C.code_BANNICKCHANGE,  "BANNICKCHANGE",    self.func_restore_nick_),
+      (C.code_USERIP,         "USERIP",           None),
       (C.code_INVALIDUSERNAME,"INVALIDUSERNAME",  None) ] )
 
    elif self.CONST.irc_default_draft == "Unreal":
-     self.irc_codes.extend( [ \
-      (C.code_NONICKCHANGE,   "NONICKCHANGE",     self.func_restore_nick_), \
-      (C.code_WHOISBOT,       "WHOISBOT",         None), \
-      (C.code_NOSUCHSERVICE,  "NOSUCHSERVICE",    None), \
-      (C.code_NOINVITE,       "NOINVITE",         None) ] )
+     self.irc_codes.extend( [
+      (C.code_NONICKCHANGE,   "NONICKCHANGE",     self.func_restore_nick_),
+      (C.code_WHOISBOT,       "WHOISBOT",         None),
+      (C.code_NOSUCHSERVICE,  "NOSUCHSERVICE",    None),
+      (C.code_NOINVITE,       "NOINVITE",         None),
+      (C.code_COMMANDSYNTAX,  "COMMANDSYNTAX",    None) ] )
 
    else: # Unknown extending
-     self.irc_codes.extend( [ \
-      (C.code_NOCHANMODES,    "NOCHANMODES",      None), \
+     self.irc_codes.extend( [
+      (C.code_NOCHANMODES,    "NOCHANMODES",      None),
       (C.code_RESTRICTED,     "RESTRICTED",       None) ] )
    #
    if self.irc_layer_mode == self.CONST.irc_layer_modes[0]:
-     self.irc_commands = [ \
-      (C.cmd_INVITE,  None), \
-      (C.cmd_JOIN,    self.func_on_join_), \
-      (C.cmd_KICK,    self.func_on_kick_), \
-      (C.cmd_KILL,    self.func_on_kill_), \
-      (C.cmd_MODE,    self.func_on_mode_), \
-      (C.cmd_NICK,    self.func_on_nick_), \
-      (C.cmd_NOTICE,  None), \
-      (C.cmd_PART,    self.func_on_part_), \
-      (C.cmd_PONG,    None), \
-      (C.cmd_PRIVMSG, None), \
-      (C.cmd_QUIT,    self.func_on_quit_), \
+     self.irc_commands = [
+      (C.cmd_INVITE,  None),
+      (C.cmd_JOIN,    self.func_on_join_),
+      (C.cmd_KICK,    self.func_on_kick_),
+      (C.cmd_KILL,    self.func_on_kill_),
+      (C.cmd_MODE,    self.func_on_mode_),
+      (C.cmd_NICK,    self.func_on_nick_),
+      (C.cmd_NOTICE,  None),
+      (C.cmd_PART,    self.func_on_part_),
+      (C.cmd_PONG,    None),
+      (C.cmd_PRIVMSG, None),
+      (C.cmd_QUIT,    self.func_on_quit_),
       (C.cmd_ERROR,   self.func_on_error_) ]
    #
    else: # RFC 2813
-     self.irc_cmmands = [ \
-      (C.cmd_PASS,    None), (C.cmd_SERVER,     None), \
-      (C.cmd_NICK,    None), (C.cmd_QUIT,       None), \
-      (C.cmd_SQUIT,   None), (C.cmd_JOIN,       None), \
-      (C.cmd_NJOIN,   None), (C.cmd_MODE,       None), \
-      (C.cmd_LINKS,   None), (C.cmd_KILL,       None), \
-      (C.cmd_NAMES,   None), (C.cmd_INVITE,     None), \
-      (C.cmd_STATS,   None), (C.cmd_CONNECT,    None), \
-      (C.cmd_TRACE,   None), (C.cmd_ADMIN,      None), \
-      (C.cmd_WHO,     None), (C.cmd_INFO,       self.func_on_srv_info_), \
-      (C.cmd_WHOIS,   None), (C.cmd_WHOWAS,     None), \
-      (C.cmd_AWAY,    None), (C.cmd_RESTART,    None), \
-      (C.cmd_SUMMON,  None), (C.cmd_USERS,      None), \
-      (C.cmd_WALLOPS, None), (C.cmd_USERHOST,   None), \
-      (C.cmd_TOPIC,   None), (C.cmd_KICK,       None), \
-      (C.cmd_PONG,    None), (C.cmd_PART,       None), \
-      (C.cmd_ERROR,   None), (C.cmd_PRIVMSG,    None), \
-      (C.cmd_PUBMSG,  None), (C.cmd_PUBNOTICE,  None), \
-      (C.cmd_NOTICE,  None), (C.cmd_PRIVNOTICE, None), \
+     self.irc_cmmands = [
+      (C.cmd_PASS,    None), (C.cmd_SERVER,     None),
+      (C.cmd_NICK,    None), (C.cmd_QUIT,       None),
+      (C.cmd_SQUIT,   None), (C.cmd_JOIN,       None),
+      (C.cmd_NJOIN,   None), (C.cmd_MODE,       None),
+      (C.cmd_LINKS,   None), (C.cmd_KILL,       None),
+      (C.cmd_NAMES,   None), (C.cmd_INVITE,     None),
+      (C.cmd_STATS,   None), (C.cmd_CONNECT,    None),
+      (C.cmd_TRACE,   None), (C.cmd_ADMIN,      None),
+      (C.cmd_WHO,     None), (C.cmd_INFO,       self.func_on_srv_info_),
+      (C.cmd_WHOIS,   None), (C.cmd_WHOWAS,     None),
+      (C.cmd_AWAY,    None), (C.cmd_RESTART,    None),
+      (C.cmd_SUMMON,  None), (C.cmd_USERS,      None),
+      (C.cmd_WALLOPS, None), (C.cmd_USERHOST,   None),
+      (C.cmd_TOPIC,   None), (C.cmd_KICK,       None),
+      (C.cmd_PONG,    None), (C.cmd_PART,       None),
+      (C.cmd_ERROR,   None), (C.cmd_PRIVMSG,    None),
+      (C.cmd_PUBMSG,  None), (C.cmd_PUBNOTICE,  None),
+      (C.cmd_NOTICE,  None), (C.cmd_PRIVNOTICE, None),
       (C.cmd_ISON,    None), (C.cmd_REHASH,     None) ]
    #
-   self.irc_features = [ \
+   self.irc_features = [
       (C.feature_CASEMAPPING, C.featt_STRING, None),
       (C.feature_CHANMODES,   C.featt_FLAGS,  None),
       (C.feature_CHANTYPES,   C.featt_FLAGS,  None),
@@ -2208,7 +2245,7 @@ class PyLayerIRC( irciot_shared_ ):
       (C.feature_PREFIX,      C.featt_FLAGS,  None) ]
 
    if self.CONST.irc_default_draft == "Undernet":
-     self.irc_features.extend( [ \
+     self.irc_features.extend( [
       (C.feature_AWAYLEN,     C.featt_NUMBER, None),
       (C.feature_CHANNELLEN,  C.featt_NUMBER, None),
       (C.feature_CNOTICE,     C.featt_EMPTY,  None),
@@ -2305,15 +2342,15 @@ class PyLayerIRC( irciot_shared_ ):
          irc_wait = self.CONST.irc_default_wait
          self.join_retry += 1
          if self.irc_send_(self.CONST.cmd_JOIN \
-          + " " + self.irc_channel + str(" " \
-          + self.irc_chankey if self.irc_chankey else "")) == -1:
+          + " " + self.irc_channel + str(" " + self.irc_chankey \
+           if self.irc_chankey else "")) == -1:
            irc_init = 0
 
        elif irc_init == 5:
          irc_wait = self.CONST.irc_default_wait
          self.join_retry += 1
          if self.irc_send_(self.CONST.cmd_JOIN \
-          + " " + self.irc_channel + "%s\r\n" % str(" " \
+          + " " + self.irc_channel + "%s\r" % str(" " \
           + self.irc_chankey if self.irc_chankey else "")) == -1:
            irc_init = 0
 

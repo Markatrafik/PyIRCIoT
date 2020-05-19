@@ -37,7 +37,7 @@ class PyLayerIRCIoT_EL_(object):
   #
   irciot_protocol_version = '0.3.33'
   #
-  irciot_library_version  = '0.0.200'
+  irciot_library_version  = '0.0.201'
   #
   # IRC-IoT Embedded Languages tags:
   #
@@ -106,12 +106,12 @@ class PyLayerIRCIoT_EL_(object):
   #
   lang_filter_BASIC_regexps  = []
   lang_filter_PYTHON_regexps = []
-  lang_filter_PYTHON_types = {  'Add', 'And', 'Assign', 'Attribute', \
-   'BinOp', 'BitAnd', 'BitOr', 'BitXor', 'BoolOp', 'Dict', 'Div', 'Else', \
-   'Expr', 'For', 'If', 'Index', 'keyword', 'List', 'Load', 'Mod', 'Module', \
-   'Mult', 'NameConstant', 'Not', 'Num', 'Or', 'Set', 'Store', 'Str', 'Sub', \
+  lang_filter_PYTHON_types = {  'Add', 'And', 'Assign', 'Attribute',
+   'BinOp', 'BitAnd', 'BitOr', 'BitXor', 'BoolOp', 'Dict', 'Div', 'Else',
+   'Expr', 'For', 'If', 'Index', 'keyword', 'List', 'Load', 'Mod', 'Module',
+   'Mult', 'NameConstant', 'Not', 'Num', 'Or', 'Set', 'Store', 'Str', 'Sub',
    'Subscript', 'Tuple',  'UAdd', 'UnaryOp', 'USub', 'While', 'Compare', 'Eq' }
-  lang_filter_PYTHON_funcs = { 'abs', 'max', 'min', 'int', 'float', 'range', \
+  lang_filter_PYTHON_funcs = { 'abs', 'max', 'min', 'int', 'float', 'range',
    'set', 'print' }
   lang_filter_PYTHON_names = { 'True', 'False', 'None' }
   lang_filter_PYTHON_names = { *lang_filter_PYTHON_names, *lang_filter_PYTHON_funcs }

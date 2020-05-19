@@ -43,7 +43,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.33'
   #
-  irciot_library_version  = '0.0.200'
+  irciot_library_version  = '0.0.201'
   #
   # IRC-IoT characters
   #
@@ -151,133 +151,133 @@ class PyLayerIRCIoT(object):
   tag_ENC_B64Z_RSA_2FISH = '6rfz'
   tag_ENC_B85Z_RSA_2FISH = '8rfz'
   #
-  tag_ALL_BASE32_ENC = [ \
-    tag_ENC_BASE32, \
-    tag_ENC_B32_ZLIB, \
+  tag_ALL_BASE32_ENC = [
+    tag_ENC_BASE32,
+    tag_ENC_B32_ZLIB,
     tag_ENC_B32_BZIP2 ]
   #
-  tag_ALL_BASE64_ENC = [ \
-    tag_ENC_BASE64, \
-    tag_ENC_B64_AES, \
-    tag_ENC_B64Z_AES, \
-    tag_ENC_B64_ZLIB, \
-    tag_ENC_B64_BZIP2, \
-    tag_ENC_B64_RSA, \
-    tag_ENC_B64Z_RSA, \
-    tag_ENC_B64_2FISH, \
-    tag_ENC_B64Z_2FISH, \
-    tag_ENC_B64_RSA_AES, \
-    tag_ENC_B64Z_RSA_AES, \
-    tag_ENC_B64_RSA_2FISH, \
+  tag_ALL_BASE64_ENC = [
+    tag_ENC_BASE64,
+    tag_ENC_B64_AES,
+    tag_ENC_B64Z_AES,
+    tag_ENC_B64_ZLIB,
+    tag_ENC_B64_BZIP2,
+    tag_ENC_B64_RSA,
+    tag_ENC_B64Z_RSA,
+    tag_ENC_B64_2FISH,
+    tag_ENC_B64Z_2FISH,
+    tag_ENC_B64_RSA_AES,
+    tag_ENC_B64Z_RSA_AES,
+    tag_ENC_B64_RSA_2FISH,
     tag_ENC_B64Z_RSA_2FISH ]
   #
-  tag_ALL_BASE85_ENC = [ \
-    tag_ENC_BASE85, \
-    tag_ENC_B85_AES, \
-    tag_ENC_B85Z_AES, \
-    tag_ENC_B85_ZLIB, \
-    tag_ENC_B85_BZIP2, \
-    tag_ENC_B85_RSA, \
-    tag_ENC_B85Z_RSA, \
-    tag_ENC_B85_2FISH, \
-    tag_ENC_B85Z_2FISH, \
-    tag_ENC_B85_RSA_AES, \
-    tag_ENC_B85Z_RSA_AES, \
-    tag_ENC_B85_RSA_2FISH, \
+  tag_ALL_BASE85_ENC = [
+    tag_ENC_BASE85,
+    tag_ENC_B85_AES,
+    tag_ENC_B85Z_AES,
+    tag_ENC_B85_ZLIB,
+    tag_ENC_B85_BZIP2,
+    tag_ENC_B85_RSA,
+    tag_ENC_B85Z_RSA,
+    tag_ENC_B85_2FISH,
+    tag_ENC_B85Z_2FISH,
+    tag_ENC_B85_RSA_AES,
+    tag_ENC_B85Z_RSA_AES,
+    tag_ENC_B85_RSA_2FISH,
     tag_ENC_B85Z_RSA_2FISH ]
   #
-  tag_ALL_BASE122_ENC = [ \
+  tag_ALL_BASE122_ENC = [
     tag_ENC_BASE122 ]
   #
-  tag_ALL_nocompress_ENC = [ \
-    tag_ENC_BASE32, \
-    tag_ENC_BASE64, \
-    tag_ENC_BASE85, \
-    tag_ENC_BASE122, \
-    tag_ENC_B64_RSA, \
-    tag_ENC_B85_RSA, \
-    tag_ENC_B64_AES, \
-    tag_ENC_B85_AES, \
-    tag_ENC_B64_2FISH, \
-    tag_ENC_B85_2FISH, \
-    tag_ENC_B64_RSA_AES, \
-    tag_ENC_B85_RSA_AES, \
-    tag_ENC_B64_RSA_2FISH, \
+  tag_ALL_nocompress_ENC = [
+    tag_ENC_BASE32,
+    tag_ENC_BASE64,
+    tag_ENC_BASE85,
+    tag_ENC_BASE122,
+    tag_ENC_B64_RSA,
+    tag_ENC_B85_RSA,
+    tag_ENC_B64_AES,
+    tag_ENC_B85_AES,
+    tag_ENC_B64_2FISH,
+    tag_ENC_B85_2FISH,
+    tag_ENC_B64_RSA_AES,
+    tag_ENC_B85_RSA_AES,
+    tag_ENC_B64_RSA_2FISH,
     tag_ENC_B85_RSA_2FISH ]
   #
-  tag_ALL_ZLIB_ENC = [ \
-    tag_ENC_B64_ZLIB, \
-    tag_ENC_B85_ZLIB, \
-    tag_ENC_B64Z_RSA, \
-    tag_ENC_B85Z_RSA, \
-    tag_ENC_B64Z_AES, \
-    tag_ENC_B85Z_AES, \
-    tag_ENC_B64Z_2FISH, \
-    tag_ENC_B85Z_2FISH, \
-    tag_ENC_B64Z_RSA_AES, \
-    tag_ENC_B85Z_RSA_AES, \
-    tag_ENC_B64Z_RSA_2FISH, \
+  tag_ALL_ZLIB_ENC = [
+    tag_ENC_B64_ZLIB,
+    tag_ENC_B85_ZLIB,
+    tag_ENC_B64Z_RSA,
+    tag_ENC_B85Z_RSA,
+    tag_ENC_B64Z_AES,
+    tag_ENC_B85Z_AES,
+    tag_ENC_B64Z_2FISH,
+    tag_ENC_B85Z_2FISH,
+    tag_ENC_B64Z_RSA_AES,
+    tag_ENC_B85Z_RSA_AES,
+    tag_ENC_B64Z_RSA_2FISH,
     tag_ENC_B85Z_RSA_2FISH ]
   #
-  tag_ALL_BZIP2_ENC = [ \
-    tag_ENC_B32_BZIP2, \
-    tag_ENC_B64_BZIP2, \
+  tag_ALL_BZIP2_ENC = [
+    tag_ENC_B32_BZIP2,
+    tag_ENC_B64_BZIP2,
     tag_ENC_B85_BZIP2 ]
   #
-  tag_ALL_RSA_ENC = [ \
-    tag_ENC_B64_RSA, \
-    tag_ENC_B85_RSA, \
-    tag_ENC_B64Z_RSA, \
-    tag_ENC_B85Z_RSA, \
-    tag_ENC_B64_RSA_AES, \
-    tag_ENC_B85_RSA_AES, \
-    tag_ENC_B64Z_RSA_AES, \
-    tag_ENC_B85Z_RSA_AES, \
-    tag_ENC_B64_RSA_2FISH, \
-    tag_ENC_B85_RSA_2FISH, \
-    tag_ENC_B64Z_RSA_2FISH, \
+  tag_ALL_RSA_ENC = [
+    tag_ENC_B64_RSA,
+    tag_ENC_B85_RSA,
+    tag_ENC_B64Z_RSA,
+    tag_ENC_B85Z_RSA,
+    tag_ENC_B64_RSA_AES,
+    tag_ENC_B85_RSA_AES,
+    tag_ENC_B64Z_RSA_AES,
+    tag_ENC_B85Z_RSA_AES,
+    tag_ENC_B64_RSA_2FISH,
+    tag_ENC_B85_RSA_2FISH,
+    tag_ENC_B64Z_RSA_2FISH,
     tag_ENC_B85Z_RSA_2FISH ]
   #
-  tag_ALL_AES_ENC = [ \
-    tag_ENC_B64_AES, \
-    tag_ENC_B85_AES, \
-    tag_ENC_B64Z_AES, \
+  tag_ALL_AES_ENC = [
+    tag_ENC_B64_AES,
+    tag_ENC_B85_AES,
+    tag_ENC_B64Z_AES,
     tag_ENC_B85Z_AES,
-    tag_ENC_B64_RSA_AES, \
-    tag_ENC_B85_RSA_AES, \
-    tag_ENC_B64Z_RSA_AES, \
+    tag_ENC_B64_RSA_AES,
+    tag_ENC_B85_RSA_AES,
+    tag_ENC_B64Z_RSA_AES,
     tag_ENC_B85Z_RSA_AES, ]
   #
-  tag_ALL_2FISH_ENC = [ \
-    tag_ENC_B64_2FISH, \
-    tag_ENC_B85_2FISH, \
-    tag_ENC_B64Z_2FISH, \
-    tag_ENC_B85Z_2FISH, \
-    tag_ENC_B64_RSA_2FISH, \
-    tag_ENC_B85_RSA_2FISH, \
-    tag_ENC_B64Z_RSA_2FISH, \
+  tag_ALL_2FISH_ENC = [
+    tag_ENC_B64_2FISH,
+    tag_ENC_B85_2FISH,
+    tag_ENC_B64Z_2FISH,
+    tag_ENC_B85Z_2FISH,
+    tag_ENC_B64_RSA_2FISH,
+    tag_ENC_B85_RSA_2FISH,
+    tag_ENC_B64Z_RSA_2FISH,
     tag_ENC_B85Z_RSA_2FISH ]
   #
-  tag_ALL_nocrypt_ENC = [ \
-    tag_ENC_BASE32, \
-    tag_ENC_BASE64, \
-    tag_ENC_BASE85, \
-    tag_ENC_BASE122, \
-    tag_ENC_B32_ZLIB, \
-    tag_ENC_B64_ZLIB, \
-    tag_ENC_B85_ZLIB, \
-    tag_ENC_B32_BZIP2, \
-    tag_ENC_B64_BZIP2, \
+  tag_ALL_nocrypt_ENC = [
+    tag_ENC_BASE32,
+    tag_ENC_BASE64,
+    tag_ENC_BASE85,
+    tag_ENC_BASE122,
+    tag_ENC_B32_ZLIB,
+    tag_ENC_B64_ZLIB,
+    tag_ENC_B85_ZLIB,
+    tag_ENC_B32_BZIP2,
+    tag_ENC_B64_BZIP2,
     tag_ENC_B85_BZIP2 ]
   #
-  tag_ALL_two_stage_ENC = [ \
-    tag_ENC_B64_RSA_AES, \
-    tag_ENC_B85_RSA_AES, \
-    tag_ENC_B64_RSA_2FISH, \
-    tag_ENC_B85_RSA_2FISH, \
-    tag_ENC_B64Z_RSA_AES, \
-    tag_ENC_B85Z_RSA_AES, \
-    tag_ENC_B64Z_RSA_2FISH, \
+  tag_ALL_two_stage_ENC = [
+    tag_ENC_B64_RSA_AES,
+    tag_ENC_B85_RSA_AES,
+    tag_ENC_B64_RSA_2FISH,
+    tag_ENC_B85_RSA_2FISH,
+    tag_ENC_B64Z_RSA_AES,
+    tag_ENC_B85Z_RSA_AES,
+    tag_ENC_B64Z_RSA_2FISH,
     tag_ENC_B85Z_RSA_2FISH ]
   #
   # Blockchain signing methods:
@@ -680,9 +680,9 @@ class PyLayerIRCIoT(object):
   #
   if self.__mid_method == "":
     self.current_mid = random.randint( 10000, 99999)
-  elif self.__mid_method in [ \
-       self.CONST.tag_mid_ED25519, \
-       self.CONST.tag_mid_RSA1024, \
+  elif self.__mid_method in [
+       self.CONST.tag_mid_ED25519,
+       self.CONST.tag_mid_RSA1024,
        self.CONST.tag_mid_GOST12 ]:
      self.irciot_load_blockchain_methods_(self.__mid_method)
      self.irciot_init_blockchain_method_(self.__mid_method)
@@ -887,9 +887,9 @@ class PyLayerIRCIoT(object):
     return len(str(self.current_mid))
 
  def irciot_init_blockchain_method_(self, in_mid_method):
-  if not in_mid_method in [ \
-    self.CONST.tag_mid_ED25519, \
-    self.CONST.tag_mid_RSA1024, \
+  if not in_mid_method in [
+    self.CONST.tag_mid_ED25519,
+    self.CONST.tag_mid_RSA1024,
     self.CONST.tag_mid_GOST12 ]:
     return False
   (self.__blockchain_private_key, \
@@ -1286,9 +1286,9 @@ class PyLayerIRCIoT(object):
     return
   if not isinstance(self.__blockchain_public_key, object):
     return
-  if not self.__mid_method in [ \
-    self.CONST.tag_mid_ED25519, \
-    self.CONST.tag_mid_RSA1024, \
+  if not self.__mid_method in [
+    self.CONST.tag_mid_ED25519,
+    self.CONST.tag_mid_RSA1024,
     self.CONST.tag_mid_GOST12 ]:
     return
   self.__blockchain_key_published = self.CONST.BCHT
@@ -2876,10 +2876,10 @@ class PyLayerIRCIoT(object):
        if DO_debug_library:
          print("\033[1;42m DEFRAGMENTATION COMPLETED \033[0m")
        my_crypt_method = self.crypt_method
-       if my_ot in [ \
-         self.CONST.ot_ENC_INFO, self.CONST.ot_ENC_ACK, \
-         self.CONST.ot_BCH_INFO, self.CONST.ot_BCH_ACK, \
-         self.CONST.ot_ENC_REQUEST, \
+       if my_ot in [
+         self.CONST.ot_ENC_INFO, self.CONST.ot_ENC_ACK,
+         self.CONST.ot_BCH_INFO, self.CONST.ot_BCH_ACK,
+         self.CONST.ot_ENC_REQUEST,
          self.CONST.ot_BCH_REQUEST ]:
           my_crypt_method \
             = self.irciot_crypto_wo_encryption_(self.crypt_method)
@@ -3037,19 +3037,20 @@ class PyLayerIRCIoT(object):
     return
   if not isinstance(in_datum, dict):
     return
-  for my_key in [ \
-    self.CONST.tag_DATUM_ID, \
+  for my_key in [
+    self.CONST.tag_DATUM_ID,
     self.CONST.tag_DATE_TIME ]:
     if not my_key in in_datum.keys():
       return
-  if in_ot in [ \
-     self.CONST.ot_BCH_INFO, self.CONST.ot_BCH_ACK ]:
+  if in_ot in [
+     self.CONST.ot_BCH_INFO,
+     self.CONST.ot_BCH_ACK ]:
     if in_ot == self.CONST.ot_BCH_ACK:
       # It is necessary to check whether the request
       # (ot == "bchreq") was, or is it a fake answer
       pass
-    for my_key in [ \
-      self.CONST.tag_BCH_METHOD, \
+    for my_key in [
+      self.CONST.tag_BCH_METHOD,
       self.CONST.tag_BCH_PUBKEY ]:
       if not my_key in in_datum.keys():
         return
@@ -3065,14 +3066,15 @@ class PyLayerIRCIoT(object):
     self.irciot_blockchain_key_publication_( \
     self.__blockchain_public_key, \
     self.CONST.ot_BCH_ACK, in_vuid)
-  elif in_ot in [ \
-     self.CONST.ot_ENC_INFO, self.CONST.ot_ENC_ACK ]:
+  elif in_ot in [
+     self.CONST.ot_ENC_INFO,
+     self.CONST.ot_ENC_ACK ]:
     if in_ot == self.CONST.ot_ENC_ACK:
       # It is necessary to check whether the request
       # (ot == "encreq") was, or is it a fake answer
       pass
-    for my_key in [ \
-      self.CONST.tag_ENC_METHOD, \
+    for my_key in [
+      self.CONST.tag_ENC_METHOD,
       self.CONST.tag_ENC_PUBKEY ]:
       if not my_key in in_datum.keys():
         return
@@ -3252,15 +3254,15 @@ class PyLayerIRCIoT(object):
     my_hismid_method = ""
   else:
     my_hismid_method = my_hismid[:2]
-  if not my_hismid_method in [ \
-     self.CONST.tag_mid_ED25519, \
-     self.CONST.tag_mid_RSA1024, \
+  if not my_hismid_method in [
+     self.CONST.tag_mid_ED25519,
+     self.CONST.tag_mid_RSA1024,
      self.CONST.tag_mid_GOST12 ]:
     self.irciot_blockchain_update_last_mid_(in_vuid, my_hismid)
     return True
-  if my_ot in [ \
-     self.CONST.ot_BCH_INFO, \
-     self.CONST.ot_BCH_REQUEST, \
+  if my_ot in [
+     self.CONST.ot_BCH_INFO,
+     self.CONST.ot_BCH_REQUEST,
      self.CONST.ot_BCH_ACK ]:
     if DO_debug_library:
       print("\033[1;33mBLOCKCHAIN TEST SKIPPED OT '%s' \033[0m" % my_ot)
@@ -3519,9 +3521,9 @@ class PyLayerIRCIoT(object):
      str_object += '":"' + my_dst + '",'
   save_mid = self.current_mid
   sign_mid = self.current_mid
-  if self.__mid_method in [ \
-    self.CONST.tag_mid_ED25519, \
-    self.CONST.tag_mid_RSA1024, \
+  if self.__mid_method in [
+    self.CONST.tag_mid_ED25519,
+    self.CONST.tag_mid_RSA1024,
     self.CONST.tag_mid_GOST12 ]:
     if in_vuid != None:
       my_mids = self.irciot_blockchain_get_last_mids_(in_vuid)
@@ -3534,9 +3536,9 @@ class PyLayerIRCIoT(object):
     if not isinstance(self.current_mid, int):
       self.current_mid = random.randint( 10000, 99999)
     self.current_mid += 1
-  elif self.__mid_method in [ \
-       self.CONST.tag_mid_ED25519, \
-       self.CONST.tag_mid_RSA1024, \
+  elif self.__mid_method in [
+       self.CONST.tag_mid_ED25519,
+       self.CONST.tag_mid_RSA1024,
        self.CONST.tag_mid_GOST12 ]:
     sign_hash = self.irciot_blockchain_sign_string_( \
       str_for_sign, self.__blockchain_private_key)
@@ -3596,10 +3598,10 @@ class PyLayerIRCIoT(object):
      bin_big_datum = bytes(str_big_datum, 'utf-8')
   else: # Unknwon compression
      return ("", 0)
-  if big_ot in [ \
-    self.CONST.ot_ENC_INFO, self.CONST.ot_ENC_ACK, \
-    self.CONST.ot_BCH_INFO, self.CONST.ot_BCH_ACK, \
-    self.CONST.ot_ENC_REQUEST, \
+  if big_ot in [
+    self.CONST.ot_ENC_INFO, self.CONST.ot_ENC_ACK,
+    self.CONST.ot_BCH_INFO, self.CONST.ot_BCH_ACK,
+    self.CONST.ot_ENC_REQUEST,
     self.CONST.ot_BCH_REQUEST ]:
      pass
   elif self.crypt_algo == self.CONST.crypto_RSA:
@@ -3656,9 +3658,9 @@ class PyLayerIRCIoT(object):
   self.current_mid = save_mid # mid rollback
   out_skip  = len(my_irciot)
   out_head  = len(big_ot)
-  if self.__mid_method in [ \
-     self.CONST.tag_mid_ED25519, \
-     self.CONST.tag_mid_RSA1024, \
+  if self.__mid_method in [
+     self.CONST.tag_mid_ED25519,
+     self.CONST.tag_mid_RSA1024,
      self.CONST.tag_mid_GOST12 ]:
     out_head += self.mid_hash_length
   else:
@@ -3692,9 +3694,9 @@ class PyLayerIRCIoT(object):
 
  def irciot_encap_all_(self, in_datumset, in_vuid = None):
   self.irciot_check_mtu_()
-  if not in_vuid in [ \
-    self.CONST.api_vuid_all, \
-    self.CONST.api_vuid_cfg, \
+  if not in_vuid in [
+    self.CONST.api_vuid_all,
+    self.CONST.api_vuid_cfg,
     self.CONST.api_vuid_tmp ]:
     self.irciot_blockchain_check_publication_()
     self.irciot_encryption_check_publication_()
@@ -3703,9 +3705,9 @@ class PyLayerIRCIoT(object):
   if isinstance(in_datumset, dict):
     in_datumset = [ in_datumset ]
   my_datumset = json.dumps(in_datumset, separators=(',',':'))
-  if in_vuid in [ \
-    self.CONST.api_vuid_all, \
-    self.CONST.api_vuid_cfg, \
+  if in_vuid in [
+    self.CONST.api_vuid_all,
+    self.CONST.api_vuid_cfg,
     self.CONST.api_vuid_tmp ]:
     if in_vuid == self.CONST.api_vuid_all \
       and self.crypt_model == self.CONST.crypt_NO_ENCRYPTION:
@@ -3718,8 +3720,8 @@ class PyLayerIRCIoT(object):
     if my_vuid_list == []:
       return result
     for my_vuid in my_vuid_list:
-      if in_vuid in [ \
-        self.CONST.api_vuid_cfg, \
+      if in_vuid in [
+        self.CONST.api_vuid_cfg,
         self.CONST.api_vuid_tmp ]:
         if my_vuid[0] != in_vuid:
           continue
