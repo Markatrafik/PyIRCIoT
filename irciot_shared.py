@@ -75,6 +75,10 @@ class irciot_shared_(object):
    os_windows = 'WindowsNT'
    os_qnx     = 'QNX'
    #
+   os_all_UNIX = [
+    os_aix,    os_hpux,   os_freebsd, os_linux,
+    os_macosx, os_netbsd, os_solaris, os_qnx ]
+   #
    os_linux_proc_ipv4_route = '/proc/net/route'
    os_linux_proc_ipv6_route = '/proc/net/ipv6_route'
    #
@@ -382,6 +386,21 @@ class irciot_shared_(object):
   io_handler2 = io_redir.fileno()
   os.dup2(io_handler2, 2)
   os.close(2)
+
+ def bot_process_kill_(self):
+  if self.get_os_name_() in self.CONST.os_all_UNIX:
+    from time import sleep
+    import signal
+    os.kill(os.getpid(), signal.SIGKILL)
+
+ def bot_process_kill_timeout_(self, in_timeout):
+  if not isinstance(in_timeout, int):
+    return
+  if self.get_os_name_() in self.CONST.os_all_UNIX \
+   and in_timeout > 0:
+    import signal
+    signal.signal(signal.SIGALRM, self.bot_process_kill_)
+    signal.alarm(in_timeout)
 
  def bot_background_start_(self):
   import subprocess
