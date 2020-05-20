@@ -914,8 +914,8 @@ class PyLayerIRCIoT(object):
     except ImportError:
       my_pointer = None
     if my_pointer == None:
-      if in_module_name in self.CONST.err_LOAD_module:
-        self.irciot_error_(self.CONST.err_LOAD_module[in_module_name], 0)
+      if in_module_name in self.CONST.err_LOAD_modules:
+        self.irciot_error_(self.CONST.err_LOAD_modules[in_module_name], 0)
       return in_pointer
     return my_pointer
   else:
@@ -1236,6 +1236,8 @@ class PyLayerIRCIoT(object):
 
  def irciot_blockchain_key_publication_(self, in_public_key, \
    in_ot, in_vuid = None):
+  if in_public_key is None:
+    return
   if not isinstance(in_public_key, object):
     return
   if self.__mid_method == self.CONST.tag_mid_ED25519:
@@ -1262,6 +1264,8 @@ class PyLayerIRCIoT(object):
 
  def irciot_encryption_key_publication_(self, in_public_key, \
    in_ot, in_vuid = None):
+  if in_public_key is None:
+    return
   if not isinstance(in_public_key, object):
     return
   my_key_string = ""

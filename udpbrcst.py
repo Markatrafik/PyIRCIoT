@@ -126,6 +126,11 @@ class PyLayerUDPb( irciot_shared_ ):
 
  def __del__(self):
   self.stop_udpb_()
+  try:
+    import signal
+    signal.alarm(0)
+  except:
+    pass
 
  def to_log_(self, msg):
   if not self.udpb_debug:

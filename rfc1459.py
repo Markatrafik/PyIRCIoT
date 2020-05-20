@@ -240,7 +240,7 @@ class PyLayerIRC( irciot_shared_ ):
      code_STATSBLINE       = "220"
    code_UMODEIS            = "221"
    if irc_default_draft in [ "ircu", "snircd" ]:
-     code_STATSJLINE       = "222"
+     code_RPL_STATSJLINE   = "222"
    if irc_default_draft == "Unreal":
      code_SQLINE_NICK      = "222"
    if irc_default_draft == "Bahamut":
@@ -251,10 +251,13 @@ class PyLayerIRC( irciot_shared_ ):
    if irc_default_draft == "Bahamut":
      code_RPL_STATSCLONE   = "225"
      code_RPL_STATSCOUNT   = "226"
+   if irc_default_draft in [ "ircu", "Hybrid", "plexus", "snircd" ]:
+     code_RPL_STATALINE    = "226"
    if irc_default_draft == "Unreal":
      code_RPL_STATSELINE   = "225"
      code_RPL_STATSNLINE   = "226"
      code_RPL_STATSVLINE   = "227"
+     code_RPL_STATSBANVER  = "228"
    code_SERVICEINFO        = "231"
    code_ENDOFSERVICES      = "232"
    code_RPL_SERVICE        = "233"
@@ -272,7 +275,7 @@ class PyLayerIRC( irciot_shared_ ):
      code_STATSXLINE       = "247"
    if irc_default_draft == "Undernet":
      code_STATSULINE       = "248"
-   code_STATSDEBUG         = "249" # Unknown
+   code_RPL_STATSDEBUG     = "249" # Unknown
    code_LUSERCONNS         = "250"
    code_RPL_LUSERCLIENT    = "251"
    code_RPL_LUSEROP        = "252"
@@ -285,15 +288,19 @@ class PyLayerIRC( irciot_shared_ ):
    code_RPL_ADMINEMAIL     = "259"
    code_TRACELOG           = "261"
    code_ENDOFTRACE         = "262"
-   code_TRYAGAIN           = "263"
+   if irc_default_draft in [ "RFC2812", "IRCNet" ]:
+     code_RPL_TRYAGAIN     = "263"
+   else:
+     code_RPL_LOAD2HI      = "263"
    code_N_LOCAL            = "265"
    code_N_GLOBAL           = "266"
    if irc_default_draft == "Undernet":
      code_SILELIST         = "271"
      code_ENDOFSILELIST    = "272"
      code_STATUSDLINE      = "275"
-     code_GLIST            = "280"
-     code_ENDOFGLIST       = "281"
+   if irc_default_draft in [ "Undernet", "ircu", "snircd" ]:
+     code_RPL_GLIST        = "280"
+     code_RPL_ENDOFGLIST   = "281"
    if irc_default_draft == "Unreal":
      code_RPL_HELPHDR      = "290"
      code_RPL_HELPOP       = "291"
@@ -305,9 +312,9 @@ class PyLayerIRC( irciot_shared_ ):
      code_RPL_DATASTR      = "290"
      code_RPL_ENDOFCHECK   = "291"
    code_NONE               = "300"
-   code_AWAY               = "301"
+   code_RPL_AWAY           = "301"
    code_USERHOST           = "302"
-   code_ISON               = "303"
+   code_RPL_ISON           = "303"
    code_RPL_TEXT           = "304"
    code_UNAWAY             = "305"
    code_NOAWAY             = "306"
@@ -317,7 +324,7 @@ class PyLayerIRC( irciot_shared_ ):
      code_RULESSTART       = "308"
      code_ENDOFRULES       = "309"
    code_WHOISHELP          = "310" # Unknown
-   code_WHOISUSER          = "311"
+   code_RPL_WHOISUSER      = "311"
    code_WHOISSERVER        = "312"
    code_WHOISOPERATOR      = "313"
    code_WHOWASUSER         = "314"
@@ -332,7 +339,9 @@ class PyLayerIRC( irciot_shared_ ):
    code_RPL_LISTEND        = "323"
    code_CHANNELMODEIS      = "324"
    code_CHANNELCREATE      = "329"
-   code_NOTOPIC            = "331"
+   code_RPL_NOTOPIC        = "331"
+   if irc_default_draft == "Insp":
+     code_RPL_NOTOPICSET   = "331"
    code_CURRENTTOPIC       = "332"
    code_TOPICINFO          = "333"
    if irc_default_draft in [ "Undernet", "ircu", "snircd" ]:
@@ -353,16 +362,16 @@ class PyLayerIRC( irciot_shared_ ):
      code_EXCEPTLIST       = "348"
      code_ENDOFEXCEPTLIST  = "349"
    code_VERSION            = "351"
-   code_WHOREPLY           = "352"
-   code_NAMREPLY           = "353"
+   code_RPL_WHOREPLY       = "352"
+   code_RPL_NAMREPLY       = "353"
    if irc_default_draft == "Undernet":
      code_WHOSPCRP1        = "354"
-   code_KILLDONE           = "361"
-   code_CLOSING            = "362"
-   code_CLOSEEND           = "363"
-   code_LINKS              = "364"
-   code_ENDOFLINKS         = "365"
-   code_ENDOFNAMES         = "366"
+   code_RPL_KILLDONE       = "361"
+   code_RPL_CLOSING        = "362"
+   code_RPL_CLOSEEND       = "363"
+   code_RPL_LINKS          = "364"
+   code_RPL_ENDOFLINKS     = "365"
+   code_RPL_ENDOFNAMES     = "366"
    code_BANLIST            = "367"
    code_ENDOFBANLIST       = "368"
    code_ENDOFWHOWAS        = "369"
@@ -392,33 +401,33 @@ class PyLayerIRC( irciot_shared_ ):
    code_USERS              = "393"
    code_ENDOFUSERS         = "394"
    code_NOUSER             = "395"
-   code_NOSUCHNICK         = "401"
-   code_NOSUCHSERVER       = "402"
+   code_ERR_NOSUCHNICK     = "401"
+   code_ERR_NOSUCHSERVER   = "402"
    code_NOSUCHCHANNEL      = "403"
    code_CANNOTSENDTOCHAN   = "404"
    code_TOOMANYCHANNELS    = "405"
-   code_WASNOSUCHNICK      = "406"
+   code_ERR_WASNOSUCHNICK  = "406"
    code_TOOMANYTARGETS     = "407"
    if irc_default_draft == "Unreal":
-     code_NOSUCHSERVICE    = "408"
-   code_NOORIGIN           = "409"
-   code_NORECIPIENT        = "411"
-   code_NOTEXTTOSEND       = "412"
+     code_ERR_NOSUCHSERVICE = "408"
+   code_ERR_NOORIGIN       = "409"
+   code_ERR_NORECIPIENT    = "411"
+   code_ERR_NOTEXTTOSEND   = "412"
    code_NOOPLEVEL          = "413"
-   code_WILDTOPLEVEL       = "414"
+   code_ERR_WILDTOPLEVEL   = "414"
    if irc_default_draft == "Undernet":
      code_QUERYTOOLONG     = "416"
-   code_UNKNOWNCOMMAND     = "421"
-   code_NOMOTD             = "422"
-   code_NOADMININFO        = "423"
+   code_ERR_UNKNOWNCOMMAND = "421"
+   code_ERR_NOMOTD         = "422"
+   code_ERR_NOADMININFO    = "423"
    code_ERR_FILEERROR      = "424"
    if irc_default_draft == "Unreal":
      code_NOOPERMOTD       = "425"
    code_NONICKNAMEGIVEN    = "431"
    code_ERRONEUSNICKNAME   = "432"
-   code_NICKNAMEINUSE      = "433"
+   code_ERR_NICKNAMEINUSE  = "433"
    if irc_default_draft == "Unreal":
-     code_NORULES          = "434"
+     code_ERR_NORULES      = "434"
      code_SERVICECONFUSED  = "435"
    code_NICKCOLLISION      = "436"
    code_UNAVAILRESOURCE    = "437" # Unknown
@@ -431,11 +440,11 @@ class PyLayerIRC( irciot_shared_ ):
    code_USERNOTINCHANNEL   = "441"
    code_NOTONCHANNEL       = "442"
    code_USERONCHANNEL      = "443"
-   code_NOLOGIN            = "444"
-   code_SUMMONDISABLED     = "445"
-   code_USERSDISABLED      = "446"
-   if irc_default_draft == "Unreal":
-     code_NONICKCHANGE     = "447"
+   code_ERR_NOLOGIN        = "444"
+   code_ERR_SUMMONDISABLED = "445"
+   code_ERR_USERSDISABLED  = "446"
+   if irc_default_draft in [ "Unreal", "Insp" ]:
+     code_ERR_NONICKCHANGE = "447"
    code_NOTREGISTERED      = "451"
    if irc_default_draft == "Unreal":
      code_HOSTILENAME      = "455"
@@ -447,23 +456,23 @@ class PyLayerIRC( irciot_shared_ ):
    code_PASSWDMISMATCH     = "464"
    code_YOUREBANNEDCREEP   = "465"
    code_YOUWILLBEBANNED    = "466"
-   code_KEYSET             = "467"
+   code_ERR_KEYSET         = "467"
    if irc_default_draft == "Undernet":
      code_INVALIDUSERNAME  = "468"
    if irc_default_draft == "Unreal":
      code_LINKSET          = "469"
      code_LINKCHANNEL      = "470"
-   code_CHANNELISFULL      = "471"
-   code_UNKNOWNMODE        = "472"
+   code_ERR_CHANNELISFULL  = "471"
+   code_ERR_UNKNOWNMODE    = "472"
    code_INVITEONLYCHAN     = "473"
    code_BANNEDFROMCHAN     = "474"
-   code_BADCHANNELKEY      = "475"
+   code_ERR_BADCHANNELKEY  = "475"
    code_BADCHANNELMASK     = "476"
    if irc_default_draft == "Bahamut":
      code_NEEDREGGEDNICK   = "477"
    else:
      code_NOCHANMODES      = "477" # Unknown
-   code_BANLISTFULL        = "478"
+   code_ERR_BANLISTFULL    = "478"
    if irc_default_draft == "pircd":
      code_SECUREONLYCHANNEL = "479"
    if irc_default_draft == "Unreal":
@@ -477,11 +486,13 @@ class PyLayerIRC( irciot_shared_ ):
    else:
      code_RESTRICTED       = "484" # Unknown
    if irc_default_draft == "Unreal":
-     code_KILLDENY         = "485"
+     code_ERR_KILLDENY     = "485"
      code_HTMDISABLED      = "486"
      code_SECUREONLYCHAN   = "489"
    else:
     code_UNIQOPPRIVSNEEDED = "485" # Unknown
+   if irc_default_draft == "Unreal":
+     code_ERR_NOSWEAR      = "490"
    code_ERR_NOOPERHOST     = "491"
    code_NOSERVICEHOST      = "492"
    code_UMODEUNKNOWNFLAG   = "501"
@@ -493,6 +504,7 @@ class PyLayerIRC( irciot_shared_ ):
      code_ERR_BADPING      = "513"
    code_TOOMANYWATCH       = "512" # Unknown
    if irc_default_draft == "Unreal":
+     code_ERR_NEEDPONG     = "513"
      code_ERR_NOINVITE     = "518"
      code_ERR_ADMONLY      = "519"
      code_ERR_OPERONLY     = "520"
@@ -2193,53 +2205,53 @@ class PyLayerIRC( irciot_shared_ ):
    C = self.CONST
    #
    self.irc_codes = [
-    (C.code_NICKNAMEINUSE,    "NICKNAMEINUSE",    self.func_nick_in_use_),
+    (C.code_ERR_NICKNAMEINUSE,"ERR_NICKNAMEINUSE",self.func_nick_in_use_),
     (C.code_NOTREGISTERED,    "NOTREGISTERED",    self.func_not_reg_),
     (C.code_BANNEDFROMCHAN,   "BANNEDFROMCHAN",   self.func_banned_),
     (C.code_NICKCHANGETOOFAST,"NICKCHANGETOOFAST",self.func_fast_nick_),
-    (C.code_NAMREPLY,         "NAMREPLY",         self.func_chan_nicks_),
+    (C.code_RPL_NAMREPLY,     "RPL_NAMREPLY",     self.func_chan_nicks_),
     (C.code_RPL_ISUPPORT,     "RPL_ISUPPORT",     self.func_featurelist_),
-    (C.code_WHOISUSER,        "WHOISUSER",        self.func_whois_user_),
-    (C.code_ENDOFNAMES,       "ENDOFNAMES",       self.func_end_nicks_),
-    (C.code_WHOREPLY,         "WHOREPLY",         self.func_who_user_),
-    (C.code_NOSUCHNICK,       "NOSUCHNICK",       self.func_no_such_nick_),
-    (C.code_CHANNELISFULL,    "CHANNELISFULL",    self.func_banned_),
-    (C.code_BADCHANNELKEY,    "BADCHANNELKEY",    self.func_banned_),
+    (C.code_RPL_WHOISUSER,    "RPL_WHOISUSER",    self.func_whois_user_),
+    (C.code_RPL_ENDOFNAMES,   "RPL_ENDOFNAMES",   self.func_end_nicks_),
+    (C.code_RPL_WHOREPLY,     "RPL_WHOREPLY",     self.func_who_user_),
+    (C.code_ERR_NOSUCHNICK,   "ERR_NOSUCHNICK",   self.func_no_such_nick_),
+    (C.code_ERR_CHANNELISFULL,"ERR_CHANNELISFULL",self.func_banned_),
+    (C.code_ERR_BADCHANNELKEY,"ERR_BADCHANNELKEY",self.func_banned_),
     (C.code_ERRONEUSNICKNAME, "ERRONEUSNICKNAME", self.func_nick_in_use_),
     (C.code_NOSUCHCHANNEL,    "NOSUCHCHANNEL",    self.func_banned_),
-    (C.code_NOSUCHSERVER,     "NOSUCHSERVER",     None),
+    (C.code_ERR_NOSUCHSERVER, "ERR_NOSUCHSERVER", None),
     (C.code_CANNOTSENDTOCHAN, "CANNOTSENDTOCHAN", None),
     (C.code_TOOMANYCHANNELS,  "TOOMANYCHANNELS",  None),
-    (C.code_WASNOSUCHNICK,    "WASNOSUCHNICK",    None),
+    (C.code_ERR_WASNOSUCHNICK,"ERR_WASNOSUCHNICK",None),
     (C.code_TOOMANYTARGETS,   "TOOMANYTARGETS",   None),
-    (C.code_NOORIGIN,         "NOORIGIN",         None),
-    (C.code_NORECIPIENT,      "NORECIPIENT",      None),
-    (C.code_NOTEXTTOSEND,     "NOTEXTTOSEND",     None),
+    (C.code_ERR_NOORIGIN,     "ERR_NOORIGIN",     None),
+    (C.code_ERR_NORECIPIENT,  "ERR_NORECIPIENT",  None),
+    (C.code_ERR_NOTEXTTOSEND, "ERR_NOTEXTTOSEND", None),
     (C.code_NOOPLEVEL,        "NOOPLEVEL",        None),
-    (C.code_WILDTOPLEVEL,     "WILDTOPLEVEL",     None),
-    (C.code_UNKNOWNCOMMAND,   "UNKNOWNCOMMAND",   None),
-    (C.code_NOMOTD,           "NOMOTD",           None),
-    (C.code_NOADMININFO,      "NOADMININFO",      None),
+    (C.code_ERR_WILDTOPLEVEL, "ERR_WILDTOPLEVEL", None),
+    (C.code_ERR_UNKNOWNCOMMAND,"ERR_UNKNOWNCOMMAND",None),
+    (C.code_ERR_NOMOTD,       "ERR_NOMOTD",       None),
+    (C.code_ERR_NOADMININFO,  "ERR_NOADMININFO",  None),
     (C.code_ERR_FILEERROR,    "ERR_FILEERROR",    None),
     (C.code_NONICKNAMEGIVEN,  "NONICKNAMEGIVEN",  None),
     (C.code_NICKCOLLISION,    "NICKCOLLISION",    None),
     (C.code_UNAVAILRESOURCE,  "UNAVAILRESOURCE",  None),
     (C.code_USERNOTINCHANNEL, "USERNOTINCHANNEL", None),
     (C.code_NOTONCHANNEL,     "NOTONCHANNEL",     None),
-    (C.code_NOLOGIN,          "NOLOGIN",          None),
-    (C.code_SUMMONDISABLED,   "SUMMONDISABLED",   None),
-    (C.code_USERSDISABLED,    "USERSDISABLED",    None),
+    (C.code_ERR_NOLOGIN,      "ERR_NOLOGIN",      None),
+    (C.code_ERR_SUMMONDISABLED,"ERR_SUMMONDISABLED",None),
+    (C.code_ERR_USERSDISABLED,"ERR_USERSDISABLED",None),
     (C.code_NEEDMOREPARAMS,   "NEEDMOREPARAMS",   None),
     (C.code_USERSDONTMATCH,   "USERSDONTMATCH",   None),
     (C.code_ALREADYREGISTERED,"ALREADYREGISTERED",None),
     (C.code_PASSWDMISMATCH,   "PASSWDMISMATCH",   None),
     (C.code_YOUREBANNEDCREEP, "YOUREBANNEDCREEP", None),
     (C.code_YOUWILLBEBANNED,  "YOUWILLBEBANNED",  None),
-    (C.code_KEYSET,           "KEYSET",           None),
-    (C.code_UNKNOWNMODE,      "UNKNOWNMODE",      None),
+    (C.code_ERR_KEYSET,       "ERR_KEYSET",       None),
+    (C.code_ERR_UNKNOWNMODE,  "ERR_UNKNOWNMODE",  None),
     (C.code_INVITEONLYCHAN,   "INVITEONLYCHAN",   None),
     (C.code_BADCHANNELMASK,   "BADCHANNELMASK",   None),
-    (C.code_BANLISTFULL,      "BANLISTFULL",      None),
+    (C.code_ERR_BANLISTFULL,  "ERR_BANLISTFULL",  None),
     (C.code_NOPRIVILEGES,     "NOPRIVILEGES",     None),
     (C.code_CANTKILLSERVER,   "CANTKILLSERVER",   None),
     (C.code_UNIQOPPRIVSNEEDED,"UNIQOPPRIVSNEEDED",None),
@@ -2259,10 +2271,10 @@ class PyLayerIRC( irciot_shared_ ):
 
    elif self.CONST.irc_default_draft == "Unreal":
      self.irc_codes.extend( [
-      (C.code_NONICKCHANGE,   "NONICKCHANGE",     self.func_restore_nick_),
+      (C.code_ERR_NONICKCHANGE,"ERR_NONICKCHANGE",self.func_restore_nick_),
       (C.code_RPL_WHOISBOT,   "RPL_WHOISBOT",     None),
       (C.code_RPL_USERIP,     "RPL_USERIP",       None),
-      (C.code_NOSUCHSERVICE,  "NOSUCHSERVICE",    None),
+      (C.code_ERR_NOSUCHSERVICE,"ERR_NOSUCHSERVICE",None),
       (C.code_ERR_NOINVITE,   "ERR_NOINVITE",     None),
       (C.code_COMMANDSYNTAX,  "COMMANDSYNTAX",    None),
       (C.code_RPL_STARTLS,    "RPL_STARTLS",      None),
