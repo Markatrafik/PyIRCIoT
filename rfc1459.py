@@ -171,7 +171,7 @@ class PyLayerIRC( irciot_shared_ ):
    #
    # "RFC1459",   "RFC2812",    "aspIRCd",  "Bahamut",
    # "Beware",    "Charybdis",  "ConfRoom", "discord",
-   # "Hybrid",    "Inspl",      "IRCNet",   "ircu",
+   # "Hybrid",    "Insp",       "IRCNet",   "ircu",
    # "Nefarious", "ngl",        "plexus",   "pircd",
    # "pure",      "ratbox",     "Rock",     "Rubl",
    # "RusNet",    "seven",      "Shadow",   "snircd",
@@ -250,15 +250,16 @@ class PyLayerIRC( irciot_shared_ ):
      code_STATSTLINE       = "224"
    if irc_default_draft == "Bahamut":
      code_RPL_STATSCLONE   = "225"
+     code_RPL_STATSCOUNT   = "226"
    if irc_default_draft == "Unreal":
-     code_STATSELINE       = "225"
-     code_STATSNLINE       = "226"
-     code_STATSVLINE       = "227"
+     code_RPL_STATSELINE   = "225"
+     code_RPL_STATSNLINE   = "226"
+     code_RPL_STATSVLINE   = "227"
    code_SERVICEINFO        = "231"
    code_ENDOFSERVICES      = "232"
-   code_SERVICE            = "233"
-   code_SERVLIST           = "234"
-   code_SERVLISTEND        = "235"
+   code_RPL_SERVICE        = "233"
+   code_RPL_SERVLIST       = "234"
+   code_RPL_SERVLISTEND    = "235"
    code_STATSLLINE         = "241"
    code_STATSUPTIME        = "242"
    code_STATSOLINE         = "243"
@@ -273,15 +274,15 @@ class PyLayerIRC( irciot_shared_ ):
      code_STATSULINE       = "248"
    code_STATSDEBUG         = "249" # Unknown
    code_LUSERCONNS         = "250"
-   code_LUSERCLIENT        = "251"
-   code_LUSEROP            = "252"
-   code_LUSERUNKNOWN       = "253"
-   code_LUSERCHANNELS      = "254"
-   code_LUSERME            = "255"
-   code_ADMINME            = "256"
-   code_ADMINLOC1          = "257"
-   code_ADMINLOC2          = "258"
-   code_ADMINEMAIL         = "259"
+   code_RPL_LUSERCLIENT    = "251"
+   code_RPL_LUSEROP        = "252"
+   code_RPL_LUSERUNKNOWN   = "253"
+   code_RPL_LUSERCHANNELS  = "254"
+   code_RPL_LUSERME        = "255"
+   code_RPL_ADMINME        = "256"
+   code_RPL_ADMINLOC1      = "257"
+   code_RPL_ADMINLOC2      = "258"
+   code_RPL_ADMINEMAIL     = "259"
    code_TRACELOG           = "261"
    code_ENDOFTRACE         = "262"
    code_TRYAGAIN           = "263"
@@ -294,12 +295,15 @@ class PyLayerIRC( irciot_shared_ ):
      code_GLIST            = "280"
      code_ENDOFGLIST       = "281"
    if irc_default_draft == "Unreal":
-     code_HELPHDR          = "290"
-     code_HELPOP           = "291"
-     code_HELPTLR          = "292"
-     code_HELPHLP          = "293"
-     code_HELPFWD          = "294"
-     code_HELPIGN          = "295"
+     code_RPL_HELPHDR      = "290"
+     code_RPL_HELPOP       = "291"
+     code_RPL_HELPTLR      = "292"
+     code_RPL_HELPHLP      = "293"
+     code_RPL_HELPFWD      = "294"
+     code_RPL_HELPIGN      = "295"
+   if irc_default_draft == "snircd":
+     code_RPL_DATASTR      = "290"
+     code_RPL_ENDOFCHECK   = "291"
    code_NONE               = "300"
    code_AWAY               = "301"
    code_USERHOST           = "302"
@@ -323,20 +327,20 @@ class PyLayerIRC( irciot_shared_ ):
    code_ENDOFWHOIS         = "318"
    code_WHOISCHANNELS      = "319"
    code_WHOISWORLD         = "320" # Unknown
-   code_LISTSTART          = "321"
-   code_LIST               = "322"
-   code_LISTEND            = "323"
+   code_RPL_LISTSTART      = "321"
+   code_RPL_LIST           = "322"
+   code_RPL_LISTEND        = "323"
    code_CHANNELMODEIS      = "324"
    code_CHANNELCREATE      = "329"
    code_NOTOPIC            = "331"
    code_CURRENTTOPIC       = "332"
    code_TOPICINFO          = "333"
    if irc_default_draft in [ "Undernet", "ircu", "snircd" ]:
-     code_LISTUSAGE        = "334"
+     code_RPL_LISTUSAGE    = "334"
    if irc_default_draft == "Bahamut":
      code_COMMANDSYNTAX    = "334"
    if irc_default_draft == "Unreal":
-     code_LISTSYNTAX       = "334"
+     code_RPL_LISTSYNTAX   = "334"
      code_RPL_WHOISBOT     = "335"
    code_WHOISACTUALLY      = "338"
    if irc_default_draft in [ "Unreal", "ircu", "snircd" ]:
@@ -485,15 +489,17 @@ class PyLayerIRC( irciot_shared_ ):
    if irc_default_draft == "Undernet":
      code_SILELISTFULL     = "511"
      code_NOSUCHGLINE      = "513"
-   else:
-     code_BADPING          = "513"
+   if irc_default_draft in [ "ircu", "snircd" ]:
+     code_ERR_BADPING      = "513"
    code_TOOMANYWATCH       = "512" # Unknown
    if irc_default_draft == "Unreal":
      code_ERR_NOINVITE     = "518"
-     code_ADMONLY          = "519"
-     code_OPERONLY         = "520"
-     code_LISTSYTAX        = "521"
-     code_OPERSPVERIFY     = "524"
+     code_ERR_ADMONLY      = "519"
+     code_ERR_OPERONLY     = "520"
+     code_ERR_LISTSYNTAX   = "521"
+     code_ERR_WHOSYNTAX    = "522"
+     code_ERR_WHOLIMEXCEED = "523"
+     code_ERR_OPERSPVERIFY = "524"
      code_RPL_LOGON        = "600"
      code_RPL_LOGOFF       = "601"
      code_RPL_WATCHOFF     = "602"
@@ -544,18 +550,34 @@ class PyLayerIRC( irciot_shared_ ):
      code_RPL_SCANUMODES   = "751"
    if irc_default_draft == "IRCNet":
      code_RPL_ETRACEEND    = "759"
+   if irc_default_draft == "PyIRCIoT":
+     code_RPL_JSON         = "851"
    if irc_default_draft in [ "Unreal", "Charybdis", "seven" ]:
-     code_LOGGEDIN         = "900"
-     code_LOGGEDOUT        = "901"
-     code_NICKLOCKED       = "902"
-     code_SASLSUCCESS      = "903"
-     code_SASLFAIL         = "904"
-     code_SASLTOOLONG      = "905"
-     code_SASLABORTED      = "906"
-   if irc_default_draft == "Charybdis":
+     code_RPL_LOGGEDIN     = "900"
+     code_RPL_LOGGEDOUT    = "901"
+     code_ERR_NICKLOCKED   = "902"
+     code_RPL_SASLSUCCESS  = "903"
+     code_ERR_SASLFAIL     = "904"
+     code_ERR_SASLTOOLONG  = "905"
+     code_ERR_SASLABORTED  = "906"
+     code_ERR_SASLALREADY  = "907"
+   if irc_default_draft in [ "Charybdis", "seven" ]:
      code_RPL_SASLMECHS    = "908"
+   if irc_default_draft == "Insp":
+     code_RPL_AUTOOPLIST      = "910"
+     code_RPL_ENDOFAUTOOPLIST = "911"
+     code_ERR_WORDFILTERED    = "936"
+     code_RPL_SPAMFILTERLIST      = "940"
+     code_ERR_ENDOFSPAMFILTERLIST = "941"
+     code_RPL_EXEMPTCHANOPSLIST   = "953"
+     code_ERR_ENDOFEXEMPTCHANOPSLIST = "954"
    if irc_default_draft in [ "Unreal", "plexus" ]:
-     code_CANNOTDOCOMMAND  = "972"
+     code_ER_CANNOTDOCOMMAND = "972"
+   if irc_default_draft == "Insp":
+     code_ERR_CANTUNLOADMODULE = "972"
+     code_RPL_UNLOADEDMODULE   = "973"
+     code_ERR_CANTLOADMODULE   = "974"
+     code_RPL_LOADEDMODULE     = "975"
    if irc_default_draft == "Bahamut":
      code_NUMERICERROR     = "999"
    #
@@ -2225,7 +2247,11 @@ class PyLayerIRC( irciot_shared_ ):
     (C.code_NOSERVICEHOST,    "NOSERVICEHOST",    None),
     (C.code_UMODEUNKNOWNFLAG, "UMODEUNKNOWNFLAG", None) ]
 
-   if self.CONST.irc_default_draft == "Undernet":
+   if self.CONST.irc_default_draft == "PyIRCIoT":
+     self.irc_codes.extend( [
+      (C.code_RPL_JSON,       "RPL_JSON",         None) ] )
+
+   elif self.CONST.irc_default_draft == "Undernet":
      self.irc_codes.extend( [
       (C.code_BANNICKCHANGE,  "BANNICKCHANGE",    self.func_restore_nick_),
       (C.code_RPL_USERIP,     "RPL_USERIP",       None),

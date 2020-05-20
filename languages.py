@@ -294,6 +294,12 @@ class PyLayerIRCIoT_EL_(object):
   # End of irciot_EL_check_Python_code_()
 
  # incomplete
+ def irciot_EL_check_Ruby_code_(self, in_code):
+  if not self.irciot_EL_check_matchers_(in_code, self.__RUBY_filter_matchers):
+    return False
+  return True
+
+ # incomplete
  def irciot_EL_check_code_(self, in_lang, in_code):
   if not self.irciot_EL_check_lang_(in_lang):
     return False
@@ -320,6 +326,8 @@ class PyLayerIRCIoT_EL_(object):
     return self.irciot_EL_check_LUA_code_(in_code)
   elif in_lang == self.CONST.lang_PYTHON:
     return self.irciot_EL_check_Python_code_(in_code)
+  elif in_lang == self.CONST.lang_RUBY:
+    return self.irciot_EL_check_Ruby_code_(in_code)
   elif in_lang == self.CONST.lang_TCL:
     return self.irciot_EL_check_TCL_code_(in_code)
 
@@ -544,6 +552,8 @@ class PyLayerIRCIoT_EL_(object):
   elif in_lang == self.CONST.lang_BASH:
     self.irciot_EL_error_(self.CONST.err_UNSUPPORTED_YET, None)
   elif in_lang == self.CONST.lang_BASIC:
+    self.__BASIC_filter_matchers = \
+     self.__irciot_EL_matchers_(self.CONST.lang_filter_BASIC_regexps)
     self.irciot_EL_error_(self.CONST.err_UNSUPPORTED_YET, None)
   elif in_lang == self.CONST.lang_CS:
     pass
@@ -580,6 +590,8 @@ class PyLayerIRCIoT_EL_(object):
      self.__irciot_EL_matchers_(self.CONST.lang_filter_PYTHON_regexps)
     return True
   elif in_lang == self.CONST.lang_RUBY:
+    self.__RUBY_filter_matchers = \
+     self.__irciot_EL_matchers_(self.CONST.lang_filter_RUBY_regexps)
     self.irciot_EL_error_(self.CONST.err_UNSUPPORTED_YET, None)
   elif in_lang == self.CONST.lang_SWIFT:
     self.irciot_EL_error_(self.CONST.err_UNSUPPORTED_YET, None)
@@ -629,7 +641,7 @@ class PyLayerIRCIoT_EL_(object):
     elif in_lang == self.CONST.lang_PYTHON:
       del self.__PYTHON_filter_matchers
     elif in_lang == self.CONST.lang_RUBY:
-      pass
+      del self.__RUBY_filter_matchers
     elif in_lang == self.CONST.lang_SWIFT:
       pass
     elif in_lang == self.CONST.lang_TCL:
