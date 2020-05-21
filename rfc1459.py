@@ -44,7 +44,7 @@ class PyLayerIRC( irciot_shared_ ):
    #
    irciot_protocol_version = '0.3.33'
    #
-   irciot_library_version  = '0.0.201'
+   irciot_library_version  = '0.0.203'
    #
    # Bot specific constants
    #
@@ -171,32 +171,38 @@ class PyLayerIRC( irciot_shared_ ):
    #
    #  1. "RFC1459" Internet Relay Chat Protocol '1993
    #  2. "RFC2812" IRC Draft: Client Protocol '2000
-   #  3. "aspIRCd"    --
+   #  3. "asp"        -- AspIRCd (Charybdis fork) '2019
    #  4. "Bahamut"    -- Bahamut, ver. 2.0.7
-   #  5. "Beware"     --
-   #  6. "Charybdis"  --
-   #  7. "ConfRoom"   --
+   #  5. "beware"     -- beware ircd, Delphi based, ver. 2.2.0
+   #  6. "Charybdis"  -- charybdis-ircd, ver. 3.5.0 '2020
+   #  7. "ConfRoom"   -- Conference Room
    #  8. "discord"    --
-   #  9. "Hybrid"     --
-   # 10. "Insp"       -- Inspircd, ver. 2.0
-   # 11. "IRCNet"     --
-   # 12. "ircu"       -- Undernet IRCd, ver. 2.10.12.10
-   # 13. "Nefarious"  --
-   # 14. "ngl"        --
-   # 15. "plexus"     --
-   # 16. "pircd"      --
-   # 17. "pure"       --
-   # 18. "ratbox"     -- ircd-ratbox, ver. 3.0.8
-   # 19. "Rock"       --
-   # 20. "Rubl"       --
-   # 21. "RusNet"     -- ircd RusNet, ver. 1.4.19
-   # 22. "seven"      --
-   # 23. "Shadow"     --
-   # 24. "snircd"     --
-   # 25. "solid"      --
-   # 26. "Synchronet" -- Synchronet IRCd, js based
-   # 27. "Unreal"     --
-   # 28. "PyIRCIoT" (when it works in IRC server mode)
+   #  9. "Elemental"  -- Elemental-IRCd, ver. 6.6.2
+   # 10. "hybrid"     -- ircd-hybrid, @ EFNet, ver. 8.2.29
+   # 11. "Insp"       -- Inspircd, ver. 2.0
+   # 12. "IRCNet"     -- IRCNet ircd, @ IRCNet, ver. 2.12.2
+   # 13. "IRCPlus"    -- IRCPlus, ver. 5.0
+   # 14. "ircu"       -- ircd-ircu aka Undernet IRCd, ver. 2.10.12.10
+   # 15. "miniircd"   -- miniircd, Python based, ver. 1.3 '2003
+   # 16. "Nefarious"  -- Nefarious ircd
+   # 17. "Nefarious2" -- Nefarious IRCu (ircu fork) '2020
+   # 18. "ngi"        -- ngiIRCd
+   # 19. "Oragono"    -- Oragono, Golang based, ver. 2.0.0 '2016
+   # 20. "plexus"     -- PleXusIRCd '2005
+   # 21. "pircd"      --
+   # 22. "pure"       -- pureIRCd, CSharp based '2008
+   # 23. "ratbox"     -- ircd-ratbox, @ EFNet, ver. 3.0.8 '2006
+   # 24. "Rock"       -- rock-ircd aka RockIRCd (UnrealIRCd fork), '2009
+   # 25. "Rubi"       -- RubiIRCd, Ruby based
+   # 26. "RusNet"     -- ircd RusNet, @ RusNet, ver. 1.4.19
+   # 27. "seven"      -- ircd-seven, ver. 1.1.3
+   # 28. "Shadow"     -- ShadowIRCd, ver. 6.3.3 '2003
+   # 29. "snircd"     -- snircd (ircu fork), @ QuakeNet, ver. 1.3.4
+   # 30. "solid"      -- solid-ircd (Bahamut fork), ver. 3.4.8 '2004
+   # 31. "Synchronet" -- Synchronet IRCd, js based
+   # 32. "Unreal"     -- UnrealIRCd, ver. 5.0.4 '2020
+   # 33. "We"         -- WeIRCd
+   # 34. "PyIRCIoT" (when it works in IRC server mode)
    #
    irc_max_nick_length = 15
    if irc_default_draft == "ircu":
@@ -207,6 +213,12 @@ class PyLayerIRC( irciot_shared_ ):
    default_mtu = 480
    if irc_default_draft == "ircu":
      default_mtu = 440
+   #
+   ircd_Ch_se = [ "Charybdis", "seven" ]
+   ircd_Ch_se_ra = [ "Charybdis", "seven", "ratbox" ]
+   ircd_Ch_se_ra_pl = [ "Charybdis", "seven", "ratbox", "plexus" ]
+   ircd_Un_Ch_se = [ "Unreal", "Charybdis", "seven" ]
+   ircd_iu_sn = [ "ircu", "snircd" ]
    #
    code_RPL_WELCOME        = "001"
    code_RPL_YOURHOST       = "002"
@@ -221,13 +233,13 @@ class PyLayerIRC( irciot_shared_ ):
      code_SNOMASK          = "008"
      code_STATMEMTOT       = "009"
      code_STATMEM          = "010"
-   if irc_default_draft in [ "Unreal", "Charybdis", "Hybrid", \
+   if irc_default_draft in [ "Unreal", "Charybdis", "hybrid", \
     "seven", "IRCNet", "plexus", "ratbox" ]:
      code_RPL_REDIR        = "010"
    if irc_default_draft == "IRCNet":
      code_MAPSTART         = "018"
      code_HELLO            = "020"
-   if irc_default_draft in [ "ircu", "snircd" ]:
+   if irc_default_draft in ircd_iu_sn:
      code_APASSWARN_SET    = "030"
      code_APASSWARN_SECRET = "031"
      code_APASSWARN_CLEAR  = "032"
@@ -256,7 +268,7 @@ class PyLayerIRC( irciot_shared_ ):
    code_STATSNLINE         = "214"
    code_STATSILINE         = "215"
    code_STATSKLINE         = "216"
-   if irc_default_draft in [ "ircu", "snircd" ]:
+   if irc_default_draft in ircd_iu_sn:
      code_STATSPLINE       = "217"
    else:
      code_STATSQLINE       = "217"
@@ -265,7 +277,7 @@ class PyLayerIRC( irciot_shared_ ):
    if irc_default_draft == "Unreal":
      code_STATSBLINE       = "220"
    code_UMODEIS            = "221"
-   if irc_default_draft in [ "ircu", "snircd" ]:
+   if irc_default_draft in ircd_iu_sn:
      code_RPL_STATSJLINE   = "222"
    if irc_default_draft == "Unreal":
      code_SQLINE_NICK      = "222"
@@ -277,7 +289,7 @@ class PyLayerIRC( irciot_shared_ ):
    if irc_default_draft == "Bahamut":
      code_RPL_STATSCLONE   = "225"
      code_RPL_STATSCOUNT   = "226"
-   if irc_default_draft in [ "ircu", "Hybrid", "plexus", "snircd" ]:
+   if irc_default_draft in [ "ircu", "hybrid", "plexus", "snircd" ]:
      code_RPL_STATALINE    = "226"
    if irc_default_draft == "Unreal":
      code_RPL_STATSELINE   = "225"
@@ -324,7 +336,10 @@ class PyLayerIRC( irciot_shared_ ):
      code_SILELIST         = "271"
      code_ENDOFSILELIST    = "272"
      code_STATUSDLINE      = "275"
-   if irc_default_draft in [ "ircu", "snircd" ]:
+   if irc_default_draft in [ "Charybdis", "seven", "hybrid", "plexus" ]:
+     code_RPL_WHOISCERTFP  = "276"
+   if irc_default_draft in ircd_iu_sn:
+     code_RPL_STATSRLINE   = "276"
      code_RPL_GLIST        = "280"
      code_RPL_ENDOFGLIST   = "281"
    if irc_default_draft == "Unreal":
@@ -346,7 +361,7 @@ class PyLayerIRC( irciot_shared_ ):
    code_RPL_NOAWAY         = "306"
    if irc_default_draft == "ircu":
      code_RPL_USERIP       = "307"
-   if irc_default_draft in [ "Bahamut", "Hybrid" ]:
+   if irc_default_draft in [ "Bahamut", "hybrid" ]:
      code_RPL_WHOISADMIN   = "308"
    if irc_default_draft == "Unreal":
      code_RPL_RULESSTART   = "308"
@@ -357,9 +372,9 @@ class PyLayerIRC( irciot_shared_ ):
    code_RPL_WHOISOPERATOR  = "313"
    code_WHOWASUSER         = "314"
    code_ENDOFWHO           = "315"
-   code_WHOISCHANOP        = "316"
-   code_WHOISIDLE          = "317"
-   code_ENDOFWHOIS         = "318"
+   code_RPL_WHOISCHANOP    = "316"
+   code_RPL_WHOISIDLE      = "317"
+   code_RPL_ENDOFWHOIS     = "318"
    code_WHOISCHANNELS      = "319"
    code_WHOISWORLD         = "320" # Unknown
    code_RPL_LISTSTART      = "321"
@@ -372,7 +387,7 @@ class PyLayerIRC( irciot_shared_ ):
      code_RPL_NOTOPICSET   = "331"
    code_CURRENTTOPIC       = "332"
    code_TOPICINFO          = "333"
-   if irc_default_draft in [ "ircu", "snircd" ]:
+   if irc_default_draft in ircd_iu_sn:
      code_RPL_LISTUSAGE    = "334"
    if irc_default_draft in [ "Unreal", "Bahamut" ]:
      code_RPL_COMMANDSYNTAX = "334"
@@ -403,8 +418,8 @@ class PyLayerIRC( irciot_shared_ ):
    code_BANLIST            = "367"
    code_ENDOFBANLIST       = "368"
    code_ENDOFWHOWAS        = "369"
-   code_INFO               = "371"
-   code_MOTD               = "372"
+   code_RPL_INFO           = "371"
+   code_RPL_MOTD           = "372"
    code_INFOSTART          = "373"
    code_ENDOFINFO          = "374"
    code_MOTDSTART          = "375"
@@ -559,22 +574,22 @@ class PyLayerIRC( irciot_shared_ ):
      code_RPL_DUMPRPL      = "641"
      code_RPL_EODUMP       = "642"
      code_RPL_SPAMCMDFWD   = "659"
-   if irc_default_draft in [ "Unreal", "Charybdis", "seven" ]:
+   if irc_default_draft in ircd_Un_Ch_se:
      code_RPL_STARTTLS     = "670"
-   if irc_default_draft in [ "Charybdis", "seven", "ratbox", "plexus" ]:
+   if irc_default_draft in ircd_Ch_se_ra_pl:
      code_TESTMASK         = "724"
      code_TESTLINE         = "725"
      code_NOTESTLINE       = "726"
    if irc_default_draft == "plexus":
      code_ISCAPTURED       = "727"
-   if irc_default_draft in [ "Charybdis", "seven", "ratbox" ]:
+   if irc_default_draft in ircd_Ch_se_ra:
      code_TESTMASKGECOS    = "727"
    if irc_default_draft == "plexus":
      code_ISUNCAPTURED     = "728"
-   if irc_default_draft in [ "Charybdis", "seven" ]:
+   if irc_default_draft in ircd_Ch_se:
      code_QUIETLIST        = "728"
      code_ENDOFQUIETLIST   = "729"
-   if irc_default_draft in [ "Charybdis", "seven", "ratbox" ]:
+   if irc_default_draft in ircd_Ch_se_ra:
      code_MONONLINE        = "730"
      code_MONOFFLINE       = "731"
      code_MONLIST          = "732"
@@ -582,9 +597,9 @@ class PyLayerIRC( irciot_shared_ ):
      code_MONLISTFULL      = "734"
      code_RSACHALLENGE2    = "740"
      code_ENDOFRSACHALLNGE2 = "741"
-   if irc_default_draft in [ "Unreal", "Charybdis", "seven" ]:
+   if irc_default_draft in ircd_Un_Ch_se:
      code_MLOCKRESTRICTED  = "742"
-   if irc_default_draft in [ "Charybdis", "seven" ]:
+   if irc_default_draft in ircd_Ch_se:
      code_ERR_INVALIDBAN   = "743"
      code_ERR_TOPICLOCK    = "744"
      code_RPL_SCANMATCHED  = "750"
@@ -593,7 +608,7 @@ class PyLayerIRC( irciot_shared_ ):
      code_RPL_ETRACEEND    = "759"
    if irc_default_draft == "PyIRCIoT":
      code_RPL_JSON         = "851"
-   if irc_default_draft in [ "Unreal", "Charybdis", "seven" ]:
+   if irc_default_draft in ircd_Un_Ch_se:
      code_RPL_LOGGEDIN     = "900"
      code_RPL_LOGGEDOUT    = "901"
      code_ERR_NICKLOCKED   = "902"
@@ -602,7 +617,7 @@ class PyLayerIRC( irciot_shared_ ):
      code_ERR_SASLTOOLONG  = "905"
      code_ERR_SASLABORTED  = "906"
      code_ERR_SASLALREADY  = "907"
-   if irc_default_draft in [ "Charybdis", "seven" ]:
+   if irc_default_draft in ircd_Ch_se:
      code_RPL_SASLMECHS    = "908"
    if irc_default_draft == "Insp":
      code_RPL_AUTOOPLIST      = "910"
@@ -868,8 +883,8 @@ class PyLayerIRC( irciot_shared_ ):
  def ident_server_(self):
    def ident_ok_():
      if not self.irc_run:
-       self.irc_ident = False
-     if not self.irc_ident:
+       self.ident_run = False
+     if not self.ident_run:
        return False
      return True
    if not self.is_ip_address_(self.ident_ip):
