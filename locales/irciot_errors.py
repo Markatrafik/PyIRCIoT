@@ -116,6 +116,8 @@ def irciot_get_router_error_descriptions_(in_human_language):
  return {}
 
 def irciot_get_all_error_descriptions_(in_human_langauge):
+ if not isinstance(in_human_language, str):
+  return {}
  my_dict = irciot_get_common_error_descriptions_(in_human_language)
  my_dict.update(irciot_get_EL_error_descriptions_(in_human_language)
  my_dict.update(irciot_get_router_error_descriptions_(in_human_lagugage)
