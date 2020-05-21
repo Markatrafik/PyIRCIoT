@@ -94,6 +94,8 @@ class PyLayerIRCIoT_EL_(object):
   mod_ANSVAR = 'ansible.vars.manager'
   mod_ANSINV = 'ansible.inventory.manager'
   mod_ANSYML = 'ansible.executor'
+  mod_PHPLEX = 'phply.phplex'
+  mod_PHPPAR = 'phply.phpparse'
   mod_JRE = 'py4j.java_gateway'
   mod_JS  = 'js2py'
   mod_LUA = 'lupa'
@@ -115,6 +117,9 @@ class PyLayerIRCIoT_EL_(object):
    'set', 'print' }
   lang_filter_PYTHON_names = { 'True', 'False', 'None' }
   lang_filter_PYTHON_names = { *lang_filter_PYTHON_names, *lang_filter_PYTHON_funcs }
+  lang_filter_PHP_tokens   = { 'VARIABLE', 'STRING', 'EQUALS', 'LNUMBER', 'SEMI',
+   'PRINT', 'LPAREN', 'RPAREN', 'PLUS', 'MINUS', 'MUL', 'DIV', 'IF', 'COLON', 'ELSE',
+   'IS_GREATER', 'IS_SMALLER', 'LBRACE', 'RBRACE', 'NOT', 'XOR', 'FOR', 'WHILE' }
   lang_filter_PHP_regexps  = []
   lang_filter_RUBY_regexps = []
   lang_filter_LUA_regexps  = []
@@ -251,6 +256,26 @@ class PyLayerIRCIoT_EL_(object):
  def irciot_EL_check_PHP_code_(self, in_code):
   if not self.irciot_EL_check_matchers_(in_code, self.__PHP_filter_matchers):
     return False
+  # Warning: This code is only for testing of phply library... will be removed
+  my_lexer = self.__PHP_lexer.lexer.clone()
+  my_lexer.input("<?php " + in_code + "?>")
+  my_error = None
+  while True:
+    try:
+      my_tok = my_lexer.token()
+      if not my_tok:
+        break
+    except:
+      my_error = "lexical analysis failed"
+      break
+    if my_tok.type not in self.CONST.lang_filter_PHP_tokens:
+      my_error = "ivalid " + str(my_tok)
+      break
+  if my_error != None:
+    self.irciot_EL_error_(self.CONST.err_LANGUAGE_SYNTAX, my_error)
+    # It's not a syntax it's lexic, but we could say so ...
+    return False
+
   return True
 
  # incomplete
@@ -597,6 +622,10 @@ class PyLayerIRCIoT_EL_(object):
   elif in_lang == self.CONST.lang_PHP:
     self.__PHP_filter_matchers = \
      self.__irciot_EL_matchers_(self.CONST.lang_filter_PHP_regexps)
+    self.__PHP_lexer = self.irciot_EL_import_(self.CONST.mod_PHPLEX)
+    if self.__PHP_lexer != None:
+
+      return True
     self.irciot_EL_error_(self.CONST.err_UNSUPPORTED_YET, None)
   elif in_lang == self.CONST.lang_R:
     self.irciot_EL_error_(self.CONST.err_UNSUPPORTED_YET, None)
@@ -650,6 +679,7 @@ class PyLayerIRCIoT_EL_(object):
     elif in_lang == self.CONST.lang_PERL:
       pass
     elif in_lang == self.CONST.lang_PHP:
+      del self.__PHP_lexer
       del self.__PHP_filter_matchers
     elif in_lang == self.CONST.lang_R:
       pass
