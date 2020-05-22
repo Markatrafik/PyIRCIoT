@@ -218,7 +218,9 @@ class PyLayerIRC( irciot_shared_ ):
    ircd_Ch_se_ra = [ "Charybdis", "seven", "ratbox" ]
    ircd_Ch_se_ra_pl = [ "Charybdis", "seven", "ratbox", "plexus" ]
    ircd_Un_Ch_se = [ "Unreal", "Charybdis", "seven" ]
+   ircd_Un_Ba = [ "Unreal", "Bahamut" ]
    ircd_iu_sn = [ "ircu", "snircd" ]
+   ircd_iu_Un_sn = [ "ircu", "Unreal", "snircd" ]
    #
    code_RPL_WELCOME        = "001"
    code_RPL_YOURHOST       = "002"
@@ -238,7 +240,7 @@ class PyLayerIRC( irciot_shared_ ):
      code_RPL_REDIR        = "010"
    if irc_default_draft == "IRCNet":
      code_MAPSTART         = "018"
-     code_HELLO            = "020"
+     code_RPL_HELLO        = "020"
    if irc_default_draft in ircd_iu_sn:
      code_APASSWARN_SET    = "030"
      code_APASSWARN_SECRET = "031"
@@ -262,13 +264,12 @@ class PyLayerIRC( irciot_shared_ ):
      code_RPL_STATSHELP    = "210"
    else:
      code_RPL_TRACERECONNECT = "210"
-   code_STATSLINKINFO      = "211"
-   code_STATSCOMMANDS      = "212"
-   code_STATSCLINE         = "213"
-
-   code_STATSNLINE         = "214"
-   code_STATSILINE         = "215"
-   code_STATSKLINE         = "216"
+   code_RPL_STATSLINKINFO  = "211"
+   code_RPL_STATSCOMMANDS  = "212"
+   code_RPL_STATSCLINE     = "213"
+   code_RPL_STATSNLINE     = "214"
+   code_RPL_STATSILINE     = "215"
+   code_RPL_STATSKLINE     = "216"
    if irc_default_draft in ircd_iu_sn:
      code_STATSPLINE       = "217"
    else:
@@ -341,7 +342,7 @@ class PyLayerIRC( irciot_shared_ ):
    if irc_default_draft in [ "ircu", "Unreal", "Bahamut", "snircd" ]:
      code_RPL_SILELIST     = "271"
      code_RPL_ENDOFSILELIST = "272"
-   if irc_default_draft in [ "ircu", "Unreal", "snircd" ]:
+   if irc_default_draft in ircd_iu_Un_sn:
      code_RPL_STATUSDLINE  = "275"
    if irc_default_draft == "Bahamut":
      code_RPL_USIGNSSL     = "275"
@@ -404,13 +405,13 @@ class PyLayerIRC( irciot_shared_ ):
    code_TOPICINFO          = "333"
    if irc_default_draft in ircd_iu_sn:
      code_RPL_LISTUSAGE    = "334"
-   if irc_default_draft in [ "Unreal", "Bahamut" ]:
+   if irc_default_draft in ircd_Un_Ba:
      code_RPL_COMMANDSYNTAX = "334"
    if irc_default_draft == "Unreal":
      code_RPL_LISTSYNTAX   = "334"
      code_RPL_WHOISBOT     = "335"
-   code_WHOISACTUALLY      = "338"
-   if irc_default_draft in [ "ircu", "Unreal", "snircd" ]:
+   code_RPL_WHOISACTUALLY  = "338"
+   if irc_default_draft in ircd_iu_Un_sn:
      code_RPL_USERIP       = "340"
    code_RPL_INVITING       = "341"
    code_RPL_SUMMONING      = "342"
@@ -448,8 +449,10 @@ class PyLayerIRC( irciot_shared_ ):
    code_RPL_REHASHING      = "382"
    if irc_default_draft == "Unreal":
      code_YOURESERVICE     = "383"
-   code_MYPORTIS           = "384"
-   code_NOTOPERANYMORE     = "385" # Unknown
+   code_RPL_MYPORTIS       = "384"
+   if irc_default_draft in [ "Unreal", "Bahamut", "IRCNet", \
+    "Charybdis", "seven", "ratbox" ]:
+     code_RPL_NOTOPERANYMORE = "385"
    if irc_default_draft == "Unreal":
      code_RPL_QLIST        = "386"
      code_RPL_ENDOFQLIST   = "387"
@@ -458,15 +461,15 @@ class PyLayerIRC( irciot_shared_ ):
    code_RPL_TIME           = "391"
    code_RPL_USERSSTART     = "392"
    code_RPL_USERS          = "393"
-   code_ENDOFUSERS         = "394"
-   code_NOUSER             = "395"
+   code_RPL_ENDOFUSERS     = "394"
+   code_RPL_NOUSERS        = "395"
    code_ERR_NOSUCHNICK     = "401"
    code_ERR_NOSUCHSERVER   = "402"
    code_ERR_NOSUCHCHANNEL  = "403"
    code_CANNOTSENDTOCHAN   = "404"
    code_TOOMANYCHANNELS    = "405"
    code_ERR_WASNOSUCHNICK  = "406"
-   code_TOOMANYTARGETS     = "407"
+   code_ERR_TOOMANYTARGETS = "407"
    if irc_default_draft == "Unreal":
      code_ERR_NOSUCHSERVICE = "408"
    code_ERR_NOORIGIN       = "409"
@@ -493,7 +496,9 @@ class PyLayerIRC( irciot_shared_ ):
    if irc_default_draft == "ircu":
      code_ERR_BANNICKCHANGE = "437"
      code_NICKCHANGETOOFAST = "438"
-     code_TARGETTOOFAST    = "439"
+   if irc_default_draft in [ "ircu", "Bahamut", "Unreal", \
+    "plexus", "snircd" ]:
+     code_ERR_TARGETTOOFAST = "439"
    if irc_default_draft == "Bahamut":
      code_SERVICESDOWN     = "440"
    code_USERNOTINCHANNEL   = "441"
@@ -558,10 +563,10 @@ class PyLayerIRC( irciot_shared_ ):
    code_USERSDONTMATCH     = "502"
    if irc_default_draft == "ircu":
      code_SILELISTFULL     = "511"
-   if irc_default_draft in [ "ircu", "snircd" ]:
+   if irc_default_draft in ircd_iu_sn:
      code_ERR_BADPING      = "513"
    else:
-     code_NOSUCHGLINE      = "513"   
+     code_NOSUCHGLINE      = "513"
    code_TOOMANYWATCH       = "512" # Unknown
    if irc_default_draft == "Unreal":
      code_ERR_NEEDPONG     = "513"
@@ -583,7 +588,7 @@ class PyLayerIRC( irciot_shared_ ):
      code_RPL_WATCHLIST    = "606"
      code_RPL_ENDOFWATCHLIST = "607"
      code_MAPMORE          = "610"
-   if irc_default_draft in [ "Unreal", "Bahamut" ]:
+   if irc_default_draft in ircd_Un_Ba:
      code_RPL_DCCSTATUS    = "617"
    if irc_default_draft == "Unreal":
      code_RPL_DUMPING      = "640"
@@ -644,7 +649,7 @@ class PyLayerIRC( irciot_shared_ ):
      code_RPL_EXEMPTCHANOPSLIST   = "953"
      code_ERR_ENDOFEXEMPTCHANOPSLIST = "954"
    if irc_default_draft in [ "Unreal", "plexus" ]:
-     code_ER_CANNOTDOCOMMAND = "972"
+     code_ERR_CANNOTDOCOMMAND  = "972"
    if irc_default_draft == "Insp":
      code_ERR_CANTUNLOADMODULE = "972"
      code_RPL_UNLOADEDMODULE   = "973"
@@ -2283,7 +2288,8 @@ class PyLayerIRC( irciot_shared_ ):
     (C.code_CANNOTSENDTOCHAN, "CANNOTSENDTOCHAN", None),
     (C.code_TOOMANYCHANNELS,  "TOOMANYCHANNELS",  None),
     (C.code_ERR_WASNOSUCHNICK,"ERR_WASNOSUCHNICK",None),
-    (C.code_TOOMANYTARGETS,   "TOOMANYTARGETS",   None),
+    (C.code_ERR_TARGETTOOFAST,"ERR_TARGETTOOFAST",None),
+    (C.code_ERR_TOOMANYTARGETS,"ERR_TOOMANYTARGETS",None),
     (C.code_ERR_NOORIGIN,     "ERR_NOORIGIN",     None),
     (C.code_ERR_NORECIPIENT,  "ERR_NORECIPIENT",  None),
     (C.code_ERR_NOTEXTTOSEND, "ERR_NOTEXTTOSEND", None),
@@ -2525,7 +2531,7 @@ class PyLayerIRC( irciot_shared_ ):
          irc_wait = self.delta_time
        else:
          if irc_init == 6:
-            self.irc_track_clarify_nicks_()
+           self.irc_track_clarify_nicks_()
 
        if irc_ret == -1:
          self.irc_reconnect_()
