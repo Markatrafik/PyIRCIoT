@@ -246,7 +246,7 @@ class PyLayerIRCIoT(object):
     tag_ENC_B64_RSA_AES,
     tag_ENC_B85_RSA_AES,
     tag_ENC_B64Z_RSA_AES,
-    tag_ENC_B85Z_RSA_AES, ]
+    tag_ENC_B85Z_RSA_AES ]
   #
   tag_ALL_2FISH_ENC = [
     tag_ENC_B64_2FISH,

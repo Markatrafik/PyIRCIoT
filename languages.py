@@ -30,10 +30,14 @@ from io import StringIO
 import tracemalloc
 import contextlib
 import signal
+try: # insecure, but for development
+ from irciot_shared import *
+except:
+ from PyIRCIoT.irciot_shared import *
 
-class PyLayerIRCIoT_EL_(object):
+class PyLayerIRCIoT_EL_( irciot_shared_ ):
 
- class CONST_EL_(object):
+ class CONST_EL_( irciot_shared_.CONST ):
   #
   irciot_protocol_version = '0.3.33'
   #
@@ -142,6 +146,8 @@ class PyLayerIRCIoT_EL_(object):
   #
   self.CONST = self.CONST_EL_()
   #
+  super(PyLayerIRCIoT_EL_, self).__init__()
+  #
   self.__allowed_EL = []
   self.__common_filter_matchers = []
   for my_regexp in self.CONST.common_filter_regexps:
@@ -150,6 +156,7 @@ class PyLayerIRCIoT_EL_(object):
   self.__maximal_code_size = self.CONST.default_maximal_code_size
   self.__maximal_mem_usage = self.CONST.default_maximal_mem_usage
   self.__maximal_cpu_usage = self.CONST.default_maximal_cpu_usage
+  self.__os_name = self.get_os_name_()
   #
   # End of PyLayerIRCIoT_EL_.__init__()
 
@@ -491,8 +498,11 @@ class PyLayerIRCIoT_EL_(object):
     self.irciot_EL_error_(self.CONST.err_BAD_ENVIRONMENT, None)
     return None
   my_out = None
-  signal.signal(signal.SIGALRM, timeout_signal_)
-  signal.alarm(self.__execution_timeout)
+  if self.__os_name == self.CONST.os_windows:
+    pass # Need a method to stop the script by timeout in the Windows
+  else:
+    signal.signal(signal.SIGALRM, timeout_signal_)
+    signal.alarm(self.__execution_timeout)
   try:
     if in_lang == self.CONST.lang_ANSYML:
       my_out = self.__irciot_EL_run_ANSYML_code_(in_code, in_environment)
@@ -528,7 +538,8 @@ class PyLayerIRCIoT_EL_(object):
       my_out = self.__irciot_EL_run_TCL_code_(in_code, in_environment)
   except Exception as my_ex:
     self.irciot_EL_error_(self.CONST.err_CODE_EXECUTION, str(my_ex))
-  signal.alarm(0)
+  if self.__os_name != self.CONST.os_windows:
+    signal.alarm(0)
   if my_out == None:
     my_out = ""
   elif not isinstance(my_out, str):
