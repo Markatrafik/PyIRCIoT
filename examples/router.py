@@ -128,11 +128,13 @@ def main():
 
   print("Stopping IRC, please wait for exit")
 
-  del ircbot1
-  del ircbot2
+  ircbot1.ircbot.bot_process_kill_timeout_(5)
 
   del irciot1
   del irciot2
+
+  del ircbot1
+  del ircbot2
 
   sys.exit()
 

@@ -207,16 +207,13 @@ class PyLayerIRC( irciot_shared_ ):
    #
    # Additional drafts extending Internet Relay Chat protocol:
    #  1. "IRC+"       -- IRC+ Services Protocol
+   #  2. "IRCv3"      -- Specification 3.2 build on top of the IRC protocol
    #
    irc_max_nick_length = 15
    if irc_default_draft == "ircu":
      irc_max_nick_length = 12
    irc_max_topic_length = 160
    irc_max_network_name_length = 80
-   #
-   default_mtu = 480
-   if irc_default_draft == "ircu":
-     default_mtu = 440
    #
    ircd_Ch_se = [ "Charybdis", "seven" ]
    ircd_Ch_se_ra = ircd_Ch_se + [ "ratbox" ]
@@ -227,6 +224,16 @@ class PyLayerIRC( irciot_shared_ ):
    ircd_iu_sn = [ "ircu", "snircd" ]
    ircd_iu_Un_sn = ircd_iu_sn + [ "Unreal" ]
    ircd_iu_Un_Ba_sn = ircd_iu_Un_sn + [ "Bahamut" ]
+   #
+   if irc_default_draft in ircd_Un_Ch_se:
+     irc_additional_drafts += [ "IRCv3" ]
+   #
+   default_mtu = 480
+   if irc_default_draft == "ircu":
+     default_mtu = 440
+   if "IRCv3" in irc_additional_drafts:
+     #default_mtu = 1024 (line-length-3.3)
+     pass
    #
    RPL_WELCOME           = "001"
    RPL_YOURHOST          = "002"
@@ -513,6 +520,8 @@ class PyLayerIRC( irciot_shared_ ):
    ERR_WILDTOPLEVEL      = "414"
    if irc_default_draft in ircd_iu_sn:
      ERR_QUERYTOOLONG    = "416"
+   if "IRCv3" in irc_additional_drafts:
+     ERR_INPUTTOOLONG    = "417"
    ERR_UNKNOWNCOMMAND    = "421"
    ERR_NOMOTD            = "422"
    ERR_NOADMININFO       = "423"
@@ -646,7 +655,7 @@ class PyLayerIRC( irciot_shared_ ):
      RPL_DUMPRPL         = "641"
      RPL_EODUMP          = "642"
      RPL_SPAMCMDFWD      = "659"
-   if irc_default_draft in ircd_Un_Ch_se:
+   if "IRCv3" in irc_additional_drafts:
      RPL_STARTTLS        = "670"
    if irc_default_draft in ircd_Ch_se_ra_pl:
      RPL_TESTMASK        = "724"
@@ -710,6 +719,7 @@ class PyLayerIRC( irciot_shared_ ):
      RPL_LOGGEDOUT       = "901"
      ERR_NICKLOCKED      = "902"
      RPL_SASLSUCCESS     = "903"
+   if "IRCv3" in irc_additional_drafts:
      ERR_SASLFAIL        = "904"
      ERR_SASLTOOLONG     = "905"
      ERR_SASLABORTED     = "906"
@@ -815,6 +825,22 @@ class PyLayerIRC( irciot_shared_ ):
      cmd_WALLCHOPS = "WALLCHOPS"
      cmd_WALLUSERS = "WALLUSERS"
      cmd_WALLVOICE = "WALLVOICE"
+   if "IRCv3" in irc_additional_drafts:
+     cmd_ACC       = "ACC"
+     cmd_AUTHENTICATE = "AUTHENTICATE"
+     cmd_BATCH     = "BATCH"
+     cmd_CAP       = "CAP"
+     cmd_FAIL      = "FAIL"
+     #cmd_MAXLINE  = "MAXLINE" (line-length-3.3)
+     cmd_SETNAME   = "SETNAME"
+     cmd_STARTTLS  = "STARTTLS"
+     cmd_TAGMSG    = "TAGMSG"
+     cmd_WARN      = "WARN"
+     cmd_WEBIRC    = "WEBIRC"
+     cmd_MULTILINE_MAX_BYTES = "MULTILINE_MAX_BYTES"
+     cmd_MULTILINE_MAX_LINES = "MULTILINE_MAX_LINES"
+     cmd_MULTILINE_INVALID   = "MULTILINE_INVALID"
+     cmd_MULTILINE_INVALID_TARGET = "MULTILINE_INVALID_TARGET"
    #
    if irc_default_draft == "ircu":
      feature_AWAYLEN    = "AWAYLEN"
@@ -2406,6 +2432,7 @@ class PyLayerIRC( irciot_shared_ ):
 
    elif self.CONST.irc_default_draft == "ircu":
      self.irc_codes.extend( [
+      (C.ERR_BADPING,        "ERR_BADPING",          None),
       (C.ERR_BANNICKCHANGE,  "ERR_BANNICKCHANGE",    self.func_restore_nick_),
       (C.RPL_USERIP,         "RPL_USERIP",           None),
       (C.ERR_INVALIDUSERNAME,"ERR_INVALIDUSERNAME",  None) ] )

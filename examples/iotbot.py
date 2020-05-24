@@ -98,6 +98,7 @@ def main():
   ircbot.irc_run = False
   ircbot.irc_quit_()
   print("Stopping IRC, please wait for exit")
+  ircbot.bot_process_kill_timeout_(5)
   del irciot
   del ircbot
   sys.exit()
