@@ -154,3 +154,7 @@
 	associated transport class, the default value will be taken from
 	the PyLayerIRCIoT.CONST class. Now the default value is 440 bytes.
 
+2020-05-24 23:53 GMT+7 PyIRCIoT 0.0.205 Alexey Y. Woronov <alexey@woronov.ru>
+	The constants with the prefix code_* in the class PyLayerIRC.CONST
+	are renamed to commonly accepted, with the prefixes RPL_* and ERR_*
+

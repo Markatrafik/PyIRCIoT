@@ -44,7 +44,7 @@ class PyLayerIRC( irciot_shared_ ):
    #
    irciot_protocol_version = '0.3.33'
    #
-   irciot_library_version  = '0.0.203'
+   irciot_library_version  = '0.0.205'
    #
    # Bot specific constants
    #
@@ -223,504 +223,516 @@ class PyLayerIRC( irciot_shared_ ):
    ircd_Ch_se_ra_pl = ircd_Ch_se_ra + [ "plexus" ]
    ircd_Un_Ch_se = [ "Unreal", "Charybdis", "seven" ]
    ircd_Un_Ba = [ "Unreal", "Bahamut" ]
+   ircd_iu_Un_Ba = ircd_Un_Ba + [ "ircu" ]
    ircd_iu_sn = [ "ircu", "snircd" ]
    ircd_iu_Un_sn = ircd_iu_sn + [ "Unreal" ]
    ircd_iu_Un_Ba_sn = ircd_iu_Un_sn + [ "Bahamut" ]
    #
-   code_RPL_WELCOME        = "001"
-   code_RPL_YOURHOST       = "002"
-   code_RPL_CREATED        = "003"
-   code_RPL_MYINFO         = "004"
-   code_RPL_ISUPPORT       = "005"
-   if irc_default_draft in [ "ircu", "Unreal" ]:
-     code_MAP              = "005"
-     code_MAPMORE          = "006"
+   RPL_WELCOME           = "001"
+   RPL_YOURHOST          = "002"
+   RPL_CREATED           = "003"
+   RPL_MYINFO            = "004"
+   if irc_default_draft == "RFC2812":
+     RPL_BOUNCE          = "005"
+   else:
+     RPL_ISUPPORT        = "005"
+   if irc_default_draft == "Unreal":
+     RPL_MAP             = "006"
+     RPL_MAPEND          = "007"
    if irc_default_draft == "ircu":
-     code_MAPEND           = "007"
-     code_SNOMASK          = "008"
-     code_STATMEMTOT       = "009"
-     code_STATMEM          = "010"
+     RPL_SNOMASK         = "008"
+     RPL_STATMEMTOT      = "009"
+     RPL_STATMEM         = "010"
    if irc_default_draft in [ "Unreal", "Charybdis", "hybrid", \
     "seven", "IRCNet", "plexus", "ratbox" ]:
-     code_RPL_REDIR        = "010"
+     RPL_REDIR           = "010"
+   if irc_default_draft == "ircu":
+     RPL_MAP             = "015"
+     RPL_MAPMORE         = "016"
+     RPL_MAPEND          = "017"
    if irc_default_draft == "IRCNet":
-     code_MAPSTART         = "018"
-     code_RPL_HELLO        = "020"
+     RPL_MAPSTART        = "018"
+     RPL_HELLO           = "020"
    if irc_default_draft in ircd_iu_sn:
-     code_APASSWARN_SET    = "030"
-     code_APASSWARN_SECRET = "031"
-     code_APASSWARN_CLEAR  = "032"
+     RPL_APASSWARN_SET   = "030"
+     RPL_APASSWARN_SECRET = "031"
+     RPL_APASSWARN_CLEAR = "032"
    if irc_default_draft == "Unreal":
-     code_ERR_REMOTEISUPPORT = "105"
-   code_RPL_TRACELINK      = "200"
-   code_RPL_TRACECONNECTING = "201"
-   code_RPL_TRACEHANDSHAKE = "202"
-   code_RPL_TRACEUNKNOWN   = "203"
-   code_RPL_TRACEOPERATOR  = "204"
-   code_RPL_TRACEUSER      = "205"
-   code_RPL_TRACESERVER    = "206"
+     RPL_YOURID          = "042"
+     ERR_REMOTEISUPPORT  = "105"
+   RPL_TRACELINK         = "200"
+   RPL_TRACECONNECTING   = "201"
+   RPL_TRACEHANDSHAKE    = "202"
+   RPL_TRACEUNKNOWN      = "203"
+   RPL_TRACEOPERATOR     = "204"
+   RPL_TRACEUSER         = "205"
+   RPL_TRACESERVER       = "206"
    if irc_default_draft == "plexus":
-     code_RPL_TRACECAPTURED = "207"
+     RPL_TRACECAPTURED   = "207"
    else:
-     code_RPL_TRACESERVICE = "207"
-   code_RPL_TRACENEWTYPE   = "208"
-   code_RPL_TRACECLASS     = "209"
+     RPL_TRACESERVICE    = "207"
+   RPL_TRACENEWTYPE      = "208"
+   RPL_TRACECLASS        = "209"
    if irc_default_draft == "Unreal":
-     code_RPL_STATSHELP    = "210"
-   else:
-     code_RPL_TRACERECONNECT = "210"
-   code_RPL_STATSLINKINFO  = "211"
-   code_RPL_STATSCOMMANDS  = "212"
-   code_RPL_STATSCLINE     = "213"
-   code_RPL_STATSNLINE     = "214"
-   code_RPL_STATSILINE     = "215"
-   code_RPL_STATSKLINE     = "216"
+     RPL_STATSHELP       = "210"
+   if irc_default_draft == "IRCNet":
+     RPL_TRACERECONNECT  = "210"
+   RPL_STATSLINKINFO     = "211"
+   RPL_STATSCOMMANDS     = "212"
+   RPL_STATSCLINE        = "213"
+   RPL_STATSOLDNLINE     = "214"
+   RPL_STATSILINE        = "215"
+   RPL_STATSKLINE        = "216"
    if irc_default_draft in ircd_iu_sn:
-     code_RPL_STATSPLINE   = "217"
+     RPL_STATSPLINE      = "217"
    else:
-     code_RPL_STATSQLINE   = "217"
-   code_RPL_STATSYLINE     = "218"
-   code_RPL_ENDOFSTATS     = "219"
+     RPL_STATSQLINE      = "217"
+   RPL_STATSYLINE        = "218"
+   RPL_ENDOFSTATS        = "219"
    if irc_default_draft == "Unreal":
-     code_ERR_STATSBLINE   = "220"
-   code_RPL_UMODEIS        = "221"
+     RPL_STATSBLINE      = "220"
+   else:
+     RPL_STATSWLINE      = "220"
+   RPL_UMODEIS           = "221"
    if irc_default_draft in ircd_iu_sn:
-     code_RPL_STATSJLINE   = "222"
+     RPL_STATSJLINE      = "222"
    if irc_default_draft == "Unreal":
-     code_RPL_SQLINE_NICK  = "222"
+     RPL_SQLINE_NICK     = "222"
    if irc_default_draft == "Bahamut":
-     code_RPL_STATSELINE   = "223"
+     RPL_STATSELINE      = "223"
    if irc_default_draft == "Unreal":
-     code_RPL_STATSGLINE   = "223"
-     code_RPL_STATSTLINE   = "224"
+     RPL_STATSGLINE      = "223"
+     RPL_STATSTLINE      = "224"
    if irc_default_draft == "Bahamut":
-     code_RPL_STATSCLONE   = "225"
-     code_RPL_STATSCOUNT   = "226"
+     RPL_STATSCLONE      = "225"
+     RPL_STATSCOUNT      = "226"
    if irc_default_draft in [ "ircu", "hybrid", "plexus", "snircd" ]:
-     code_RPL_STATALINE    = "226"
+     RPL_STATALINE       = "226"
    if irc_default_draft == "Unreal":
-     code_RPL_STATSELINE   = "225"
-     code_RPL_STATSNLINE   = "226"
-     code_RPL_STATSVLINE   = "227"
-     code_RPL_STATSBANVER  = "228"
-   code_RPL_SERVICEINFO    = "231"
-   code_RPL_ENDOFSERVICES  = "232"
-   code_RPL_SERVICE        = "233"
-   code_RPL_SERVLIST       = "234"
-   code_RPL_SERVLISTEND    = "235"
-   code_RPL_STATSLLINE     = "241"
-   code_RPL_STATSUPTIME    = "242"
-   code_RPL_STATSOLINE     = "243"
+     RPL_STATSELINE      = "225"
+     RPL_STATSNLINE      = "226"
+     RPL_STATSVLINE      = "227"
+     RPL_STATSBANVER     = "228"
+   RPL_SERVICEINFO       = "231"
+   RPL_ENDOFSERVICES     = "232"
+   RPL_SERVICE           = "233"
+   RPL_SERVLIST          = "234"
+   RPL_SERVLISTEND       = "235"
+   RPL_STATSLLINE        = "241"
+   RPL_STATSUPTIME       = "242"
+   RPL_STATSOLINE        = "243"
    if irc_default_draft == "RFC2812":
-     code_RPL_STATSSLINE   = "244"
+     RPL_STATSSLINE      = "244"
    else:
-     code_RPL_STATSHLINE   = "244"
+     RPL_STATSHLINE      = "244"
    if irc_default_draft in [ "Unreal", "Bahamut", "Charybdis", \
     "IRCNet", "plexus", "seven", "ratbox" ]:
-     code_RPL_STATSSLINE   = "245"
+     RPL_STATSSLINE      = "245"
    if irc_default_draft == "ircu":
-     code_RPL_STATSTLINE   = "246"
-     code_RPL_STATSGLINE   = "247"
+     RPL_STATSTLINE      = "246"
+     RPL_STATSGLINE      = "247"
    if irc_default_draft == "Unreal":
-     code_RPL_STATSXLINE   = "247"
+     RPL_STATSXLINE      = "247"
    if irc_default_draft == "ircu":
-     code_RPL_STATSULINE   = "248"
-   code_RPL_STATSDEBUG     = "249" # Unknown
-   code_LUSERCONNS         = "250"
-   code_RPL_LUSERCLIENT    = "251"
-   code_RPL_LUSEROP        = "252"
-   code_RPL_LUSERUNKNOWN   = "253"
-   code_RPL_LUSERCHANNELS  = "254"
-   code_RPL_LUSERME        = "255"
-   code_RPL_ADMINME        = "256"
-   code_RPL_ADMINLOC1      = "257"
-   code_RPL_ADMINLOC2      = "258"
-   code_RPL_ADMINEMAIL     = "259"
-   code_RPL_TRACELOG       = "261"
-   code_RPL_ENDOFTRACE     = "262"
+     RPL_STATSULINE      = "248"
+   RPL_STATSDEBUG        = "249" # Unknown
+   RPL_LUSERCONNS        = "250" # '1998
+   RPL_LUSERCLIENT       = "251"
+   RPL_LUSEROP           = "252"
+   RPL_LUSERUNKNOWN      = "253"
+   RPL_LUSERCHANNELS     = "254"
+   RPL_LUSERME           = "255"
+   RPL_ADMINME           = "256"
+   RPL_ADMINLOC1         = "257"
+   RPL_ADMINLOC2         = "258"
+   RPL_ADMINEMAIL        = "259"
+   RPL_TRACELOG          = "261"
+   RPL_ENDOFTRACE        = "262" # '1997
    if irc_default_draft in [ "RFC2812", "IRCNet" ]:
-     code_RPL_TRYAGAIN     = "263"
+     RPL_TRYAGAIN        = "263"
    else:
-     code_RPL_LOAD2HI      = "263"
-   code_N_LOCAL            = "265"
-   code_N_GLOBAL           = "266"
+     RPL_LOAD2HI         = "263"
+   RPL_N_LOCAL           = "265" # '1997 
+   RPL_N_GLOBAL          = "266" # '1997
    if irc_default_draft in ircd_iu_Un_Ba_sn:
-     code_RPL_SILELIST     = "271"
-     code_RPL_ENDOFSILELIST = "272"
+     RPL_SILELIST        = "271"
+     RPL_ENDOFSILELIST   = "272"
    if irc_default_draft in ircd_iu_Un_sn:
-     code_RPL_STATUSDLINE  = "275"
+     RPL_STATUSDLINE     = "275"
    if irc_default_draft == "Bahamut":
-     code_RPL_USIGNSSL     = "275"
+     RPL_USIGNSSL        = "275"
    if irc_default_draft in [ "Charybdis", "seven", "hybrid", "plexus" ]:
-     code_RPL_WHOISCERTFP  = "276"
+     RPL_WHOISCERTFP     = "276"
    if irc_default_draft in ircd_iu_sn:
-     code_RPL_STATSRLINE   = "276"
-     code_RPL_GLIST        = "280"
-     code_RPL_ENDOFGLIST   = "281"
+     RPL_STATSRLINE      = "276"
+     RPL_GLIST           = "280"
+     RPL_ENDOFGLIST      = "281"
    if irc_default_draft == "Unreal":
-     code_RPL_HELPHDR      = "290"
-     code_RPL_HELPOP       = "291"
-     code_RPL_HELPTLR      = "292"
-     code_RPL_HELPHLP      = "293"
-     code_RPL_HELPFWD      = "294"
-     code_RPL_HELPIGN      = "295"
+     RPL_HELPHDR         = "290"
+     RPL_HELPOP          = "291"
+     RPL_HELPTLR         = "292"
+     RPL_HELPHLP         = "293"
+     RPL_HELPFWD         = "294"
+     RPL_HELPIGN         = "295"
    if irc_default_draft == "snircd":
-     code_RPL_DATASTR      = "290"
-     code_RPL_ENDOFCHECK   = "291"
-   code_RPL_NONE           = "300" # Unused?
-   code_RPL_AWAY           = "301"
-   code_RPL_USERHOST       = "302"
-   code_RPL_ISON           = "303"
-   code_RPL_TEXT           = "304"
-   code_RPL_UNAWAY         = "305"
-   code_RPL_NOAWAY         = "306"
+     RPL_DATASTR         = "290"
+     RPL_ENDOFCHECK      = "291"
+   RPL_NONE              = "300" # Unused?
+   RPL_AWAY              = "301"
+   RPL_USERHOST          = "302"
+   RPL_ISON              = "303"
+   RPL_TEXT              = "304"
+   RPL_UNAWAY            = "305"
+   RPL_NOAWAY            = "306"
    if irc_default_draft == "ircu":
-     code_RPL_USERIP       = "307"
+     RPL_USERIP          = "307"
    if irc_default_draft in [ "Bahamut", "hybrid" ]:
-     code_RPL_WHOISADMIN   = "308"
+     RPL_WHOISADMIN      = "308"
    if irc_default_draft == "Unreal":
-     code_RPL_RULESSTART   = "308"
-     code_RPL_ENDOFRULES   = "309"
+     RPL_RULESSTART      = "308"
+     RPL_ENDOFRULES      = "309"
    if irc_default_draft == "Bahamut":
-     code_RPL_WHOISSADMIN  = "309"
+     RPL_WHOISSADMIN     = "309"
    if irc_default_draft == "Unreal":
-     code_RPL_WHOISHELPOP  = "310"
+     RPL_WHOISHELPOP     = "310"
    elif irc_default_draft == "Bahamut":
-     code_RPL_WHOISSVCMSG  = "310"
+     RPL_WHOISSVCMSG     = "310"
    elif irc_default_draft in [ "hybrid", "plexus" ]:
-     code_RPL_WHOISMODES   = "310"
+     RPL_WHOISMODES      = "310"
    else:
-     code_RPL_WHOISHELP    = "310" # Unknown
-   code_RPL_WHOISUSER      = "311"
-   code_RPL_WHOISSERVER    = "312"
-   code_RPL_WHOISOPERATOR  = "313"
-   code_RPL_WHOWASUSER     = "314"
-   code_RPL_ENDOFWHO       = "315"
-   code_RPL_WHOISCHANOP    = "316"
-   code_RPL_WHOISIDLE      = "317"
-   code_RPL_ENDOFWHOIS     = "318"
-   code_RPL_WHOISCHANNELS  = "319"
-   code_RPL_WHOISWORLD     = "320" # Unknown
-   code_RPL_LISTSTART      = "321"
-   code_RPL_LIST           = "322"
-   code_RPL_LISTEND        = "323"
-   code_RPL_CHANNELMODEIS  = "324"
+     RPL_WHOISHELP       = "310" # Unknown
+   RPL_WHOISUSER         = "311"
+   RPL_WHOISSERVER       = "312"
+   RPL_WHOISOPERATOR     = "313"
+   RPL_WHOWASUSER        = "314"
+   RPL_ENDOFWHO          = "315"
+   RPL_WHOISCHANOP       = "316"
+   RPL_WHOISIDLE         = "317"
+   RPL_ENDOFWHOIS        = "318"
+   RPL_WHOISCHANNELS     = "319"
+   RPL_WHOISWORLD        = "320" # Unknown
+   RPL_LISTSTART         = "321"
+   RPL_LIST              = "322"
+   RPL_LISTEND           = "323"
+   RPL_CHANNELMODEIS     = "324"
    if irc_default_draft in ircd_Ch_se:
-     code_RPL_CHANNELMLOCK = "325"
-     code_RPL_CHANNELURL   = "328"
+     RPL_CHANNELMLOCK    = "325"
+     RPL_CHANNELURL      = "328"
    if irc_default_draft == "Insp":
-     code_RPL_CHANNELCREATED = "329"
-   code_RPL_NOTOPIC        = "331"
+     RPL_CHANNELCREATED  = "329"
+   RPL_NOTOPIC           = "331"
    if irc_default_draft == "Insp":
-     code_RPL_NOTOPICSET   = "331"
-   code_RPL_CURRENTTOPIC   = "332"
-   code_RPL_TOPICINFO      = "333"
+     RPL_NOTOPICSET      = "331"
+   RPL_CURRENTTOPIC      = "332"
+   RPL_TOPICINFO         = "333"
    if irc_default_draft in ircd_iu_sn:
-     code_RPL_LISTUSAGE    = "334"
+     RPL_LISTUSAGE       = "334"
    if irc_default_draft in ircd_Un_Ba:
-     code_RPL_COMMANDSYNTAX = "334"
+     RPL_COMMANDSYNTAX   = "334"
    if irc_default_draft == "Unreal":
-     code_RPL_LISTSYNTAX   = "334"
-     code_RPL_WHOISBOT     = "335"
+     RPL_LISTSYNTAX      = "334"
+     RPL_WHOISBOT        = "335"
    if irc_default_draft in [  "Bahamut", "Charybdis", \
     "hybrid", "seven" ]:
-     code_RPL_WHOISTEXT    = "337"
-   code_RPL_WHOISACTUALLY  = "338"
+     RPL_WHOISTEXT       = "337"
+   RPL_WHOISACTUALLY     = "338"
    if irc_default_draft in ircd_iu_Un_sn:
-     code_RPL_USERIP       = "340"
-   code_RPL_INVITING       = "341"
-   code_RPL_SUMMONING      = "342"
+     RPL_USERIP          = "340"
+   RPL_INVITING          = "341"
+   RPL_SUMMONING         = "342"
    if irc_default_draft in [ "Unreal", "ratbox", "seven", \
     "Bahamut", "Charybdis", "hybrid", "plexus" ]:
-     code_RPL_INVITELIST   = "346"
-     code_RPL_ENDOFINVITELIST = "347"
-     code_RPL_EXCEPTLIST   = "348"
-     code_RPL_ENDOFEXCEPTLIST = "349"
-   code_RPL_VERSION        = "351"
-   code_RPL_WHOREPLY       = "352"
-   code_RPL_NAMREPLY       = "353"
+     RPL_INVITELIST      = "346"
+     RPL_ENDOFINVITELIST = "347"
+     RPL_EXCEPTLIST      = "348"
+     RPL_ENDOFEXCEPTLIST = "349"
+   RPL_VERSION           = "351"
+   RPL_WHOREPLY          = "352"
+   RPL_NAMREPLY          = "353"
    if irc_default_draft == "Bahamut":
-     code_RPL_RWHOREPLY    = "354"
+     RPL_RWHOREPLY       = "354"
    if irc_default_draft in [ "ircu", "seven", \
     "Charybdis", "snircd" ]:
-     code_RPL_WHOSPCRPL    = "354"
+     RPL_WHOSPCRPL       = "354"
    if irc_default_draft in ircd_iu_sn:
-     code_RPL_DELNAMREPLY  = "355"
-   code_RPL_KILLDONE       = "361"
-   code_RPL_CLOSING        = "362"
-   code_RPL_CLOSEEND       = "363"
-   code_RPL_LINKS          = "364"
-   code_RPL_ENDOFLINKS     = "365"
-   code_RPL_ENDOFNAMES     = "366"
-   code_RPL_BANLIST        = "367"
-   code_RPL_ENDOFBANLIST   = "368"
-   code_RPL_ENDOFWHOWAS    = "369"
-   code_RPL_INFO           = "371"
-   code_RPL_MOTD           = "372"
-   code_RPL_INFOSTART      = "373"
-   code_RPL_ENDOFINFO      = "374"
-   code_RPL_MOTDSTART      = "375"
-   code_RPL_ENDOFMOTD      = "376"
-   code_RPL_MOTD2          = "377" # Unknown
-   code_RPL_AUSTMOTD       = "378" # Austnet?
+     RPL_DELNAMREPLY     = "355"
+   RPL_KILLDONE          = "361"
+   RPL_CLOSING           = "362"
+   RPL_CLOSEEND          = "363"
+   RPL_LINKS             = "364"
+   RPL_ENDOFLINKS        = "365"
+   RPL_ENDOFNAMES        = "366"
+   RPL_BANLIST           = "367"
+   RPL_ENDOFBANLIST      = "368"
+   RPL_ENDOFWHOWAS       = "369"
+   RPL_INFO              = "371"
+   RPL_MOTD              = "372"
+   RPL_INFOSTART         = "373"
+   RPL_ENDOFINFO         = "374"
+   RPL_MOTDSTART         = "375"
+   RPL_ENDOFMOTD         = "376"
+   RPL_MOTD2             = "377" # Unknown
+   RPL_AUSTMOTD          = "378" # Austnet?
    if irc_default_draft == "Unreal":
-     code_RPL_WHOISMODES   = "379"
-   code_RPL_YOUREOPER      = "381"
-   code_RPL_REHASHING      = "382"
+     RPL_WHOISMODES      = "379"
+   RPL_YOUREOPER         = "381"
+   RPL_REHASHING         = "382"
    if irc_default_draft in [ "Unreal", "IRCNet", "RFC2812" ]:
-     code_RPL_YOURESERVICE = "383"
-   code_RPL_MYPORTIS       = "384"
+     RPL_YOURESERVICE    = "383"
+   RPL_MYPORTIS          = "384"
    if irc_default_draft in [ "Unreal", "Bahamut", "IRCNet", \
     "Charybdis", "seven", "ratbox" ]:
-     code_RPL_NOTOPERANYMORE = "385"
+     RPL_NOTOPERANYMORE  = "385"
    if irc_default_draft == "Unreal":
-     code_RPL_QLIST        = "386"
-     code_RPL_ENDOFQLIST   = "387"
-     code_RPL_ALIST        = "388"
-     code_RPL_ENDOFALIST   = "389"
-   code_RPL_TIME           = "391"
-   code_RPL_USERSSTART     = "392"
-   code_RPL_USERS          = "393"
-   code_RPL_ENDOFUSERS     = "394"
-   code_RPL_NOUSERS        = "395"
-   code_ERR_NOSUCHNICK     = "401"
-   code_ERR_NOSUCHSERVER   = "402"
-   code_ERR_NOSUCHCHANNEL  = "403"
-   code_ERR_CANNOTSENDTOCHAN = "404"
-   code_ERR_TOOMANYCHANNELS = "405"
-   code_ERR_WASNOSUCHNICK  = "406"
-   code_ERR_TOOMANYTARGETS = "407"
+     RPL_QLIST           = "386"
+     RPL_ENDOFQLIST      = "387"
+     RPL_ALIST           = "388"
+     RPL_ENDOFALIST      = "389"
+   RPL_TIME              = "391"
+   RPL_USERSSTART        = "392"
+   RPL_USERS             = "393"
+   RPL_ENDOFUSERS        = "394"
+   RPL_NOUSERS           = "395"
+   ERR_NOSUCHNICK        = "401"
+   ERR_NOSUCHSERVER      = "402"
+   ERR_NOSUCHCHANNEL     = "403"
+   ERR_CANNOTSENDTOCHAN  = "404"
+   ERR_TOOMANYCHANNELS   = "405"
+   ERR_WASNOSUCHNICK     = "406"
+   ERR_TOOMANYTARGETS    = "407"
    if irc_default_draft == "Unreal":
-     code_ERR_NOSUCHSERVICE = "408"
-   code_ERR_NOORIGIN       = "409"
+     ERR_NOSUCHSERVICE   = "408"
+   ERR_NOORIGIN          = "409"
    if irc_default_draft in ircd_iu_sn:
-     code_ERR_UNKNOWNCAPCMD = "410"
+     ERR_UNKNOWNCAPCMD   = "410"
    else:
-     code_ERR_INVALIDCAPCMD = "410"
-   code_ERR_NORECIPIENT    = "411"
-   code_ERR_NOTEXTTOSEND   = "412"
-   code_ERR_NOTOPLEVEL     = "413"
-   code_ERR_WILDTOPLEVEL   = "414"
+     ERR_INVALIDCAPCMD   = "410"
+   ERR_NORECIPIENT       = "411"
+   ERR_NOTEXTTOSEND      = "412"
+   ERR_NOTOPLEVEL        = "413"
+   ERR_WILDTOPLEVEL      = "414"
    if irc_default_draft in ircd_iu_sn:
-     code_ERR_QUERYTOOLONG = "416"
-   code_ERR_UNKNOWNCOMMAND = "421"
-   code_ERR_NOMOTD         = "422"
-   code_ERR_NOADMININFO    = "423"
-   code_ERR_FILEERROR      = "424"
+     ERR_QUERYTOOLONG    = "416"
+   ERR_UNKNOWNCOMMAND    = "421"
+   ERR_NOMOTD            = "422"
+   ERR_NOADMININFO       = "423"
+   ERR_FILEERROR         = "424"
    if irc_default_draft == "Unreal":
-     code_NOOPERMOTD       = "425"
-   code_ERR_NONICKNAMEGIVEN = "431"
-   code_ERR_ERRONEUSNICKNAME = "432"
-   code_ERR_NICKNAMEINUSE  = "433"
+     ERR_NOOPERMOTD      = "425"
+   if irc_default_draft == "Bahamut":
+     ERR_TOOMANYAWAY     = "429"
+   ERR_NONICKNAMEGIVEN   = "431"
+   ERR_ERRONEUSNICKNAME  = "432"
+   ERR_NICKNAMEINUSE     = "433"
    if irc_default_draft == "Unreal":
-     code_ERR_NORULES      = "434"
+     ERR_NORULES         = "434"
    if irc_default_draft in [ "Unreal", "IRCNet" ]:
-     code_ERR_SERVICECONFUSED = "435"
-   code_ERR_NICKCOLLISION  = "436"
+     ERR_SERVICECONFUSED = "435"
+   ERR_NICKCOLLISION     = "436"
    if irc_default_draft in [ "Charybdis", "RFC2812", \
     "hybrid", "IRCNet", "ratbox", "seven" ]:
-     code_ERR_UNAVAILRESOURCE = "437"
+     ERR_UNAVAILRESOURCE = "437"
    if irc_default_draft == "ircu":
-     code_ERR_BANNICKCHANGE = "437"
-     code_ERR_NICKCHANGETOOFAST = "438"
+     ERR_BANNICKCHANGE   = "437"
+     ERR_NICKCHANGETOOFAST = "438"
    if irc_default_draft in [ "Unreal", "Charybdis", \
     "hybrid", "ratbox", "seven", "plexus", "snircd" ]:
-     code_ERR_NICKTOOFAST  = "438"
+     ERR_NICKTOOFAST     = "438"
    if irc_default_draft in [ "ircu", "Bahamut", "Unreal", \
     "plexus", "snircd" ]:
-     code_ERR_TARGETTOOFAST = "439"
+     ERR_TARGETTOOFAST   = "439"
    if irc_default_draft == "Bahamut":
-     code_ERR_SERVICESDOWN = "440"
-   code_ERR_USERNOTINCHANNEL = "441"
-   code_ERR_NOTONCHANNEL   = "442"
-   code_ERR_USERONCHANNEL  = "443"
-   code_ERR_NOLOGIN        = "444"
-   code_ERR_SUMMONDISABLED = "445"
-   code_ERR_USERSDISABLED  = "446"
+     ERR_SERVICESDOWN    = "440"
+   ERR_USERNOTINCHANNEL  = "441"
+   ERR_NOTONCHANNEL      = "442"
+   ERR_USERONCHANNEL     = "443"
+   ERR_NOLOGIN           = "444"
+   ERR_SUMMONDISABLED    = "445"
+   ERR_USERSDISABLED     = "446"
    if irc_default_draft in [ "Unreal", "Insp" ]:
-     code_ERR_NONICKCHANGE = "447"
-   code_ERR_NOTREGISTERED  = "451"
+     ERR_NONICKCHANGE    = "447"
+   ERR_NOTREGISTERED     = "451"
    if irc_default_draft == "Unreal":
-     code_ERR_HOSTILENAME  = "455"
-     code_ERR_NOHIDING     = "459"
-     code_ERR_NOTFORHALFOPS = "460"
-   code_ERR_NEEDMOREPARAMS = "461"
-   code_ERR_ALREADYREGISTERED = "462"
-   code_ERR_NOPERMFORHOST  = "463"
-   code_ERR_PASSWDMISMATCH = "464"
-   code_ERR_YOUREBANNEDCREEP = "465"
-   code_ERR_YOUWILLBEBANNED = "466"
-   code_ERR_KEYSET         = "467"
+     ERR_HOSTILENAME     = "455"
+     ERR_NOHIDING        = "459"
+     ERR_NOTFORHALFOPS   = "460"
+   ERR_NEEDMOREPARAMS    = "461"
+   ERR_ALREADYREGISTERED = "462"
+   ERR_NOPERMFORHOST     = "463"
+   ERR_PASSWDMISMATCH    = "464"
+   ERR_YOUREBANNEDCREEP  = "465"
+   ERR_YOUWILLBEBANNED   = "466"
+   ERR_KEYSET            = "467"
    if irc_default_draft in ircd_iu_sn:
-     code_ERR_INVALIDUSERNAME = "468"
+     ERR_INVALIDUSERNAME = "468"
    if irc_default_draft == "Unreal":
-     code_ERR_LINKSET      = "469"
+     ERR_LINKSET         = "469"
    if irc_default_draft in ircd_Un_Ch_se:
-     code_ERR_LINKCHANNEL  = "470"
-   code_ERR_CHANNELISFULL  = "471"
-   code_ERR_UNKNOWNMODE    = "472"
-   code_ERR_INVITEONLYCHAN = "473"
-   code_ERR_BANNEDFROMCHAN = "474"
-   code_ERR_BADCHANNELKEY  = "475"
-   code_ERR_BADCHANNELMASK = "476"
-   if irc_default_draft == "Bahamut":
-     code_ERR_NEEDREGGEDNICK = "477"
-   else:
-     code_NOCHANMODES      = "477" # Unknown
-   code_ERR_BANLISTFULL    = "478"
+     ERR_LINKCHANNEL     = "470"
+   ERR_CHANNELISFULL     = "471"
+   ERR_UNKNOWNMODE       = "472"
+   ERR_INVITEONLYCHAN    = "473"
+   ERR_BANNEDFROMCHAN    = "474"
+   ERR_BADCHANNELKEY     = "475"
+   ERR_BADCHANNELMASK    = "476"
+   if irc_default_draft in ircd_iu_Un_Ba:
+     ERR_NEEDREGGEDNICK  = "477"
+   if irc_default_draft == "RFC2812":
+     ERR_NOCHANMODES     = "477"
+   ERR_BANLISTFULL       = "478"
    if irc_default_draft == "pircd":
-     code_SECUREONLYCHANNEL = "479"
+     ERR_SECUREONLYCHANNEL = "479"
    if irc_default_draft == "Unreal":
-     code_LINKFULL         = "479"
-     code_ERR_CANNOTKNOCK  = "480"
-   code_ERR_NOPRIVILEGES   = "481"
-   code_ERR_CHANOPRIVSNEEDED = "482"
-   code_ERR_CANTKILLSERVER = "483"
+     ERR_LINKFAIL        = "479"
+     ERR_CANNOTKNOCK     = "480"
+   ERR_NOPRIVILEGES      = "481"
+   ERR_CHANOPRIVSNEEDED  = "482"
+   ERR_CANTKILLSERVER    = "483"
    if irc_default_draft == "ircu":
-     code_ERR_ISCHANSERVICE = "484"
+     ERR_ISCHANSERVICE   = "484"
    if irc_default_draft in [ "RFC2812", "hybrid", "IRCNet" ]:
-     code_ERR_RESTRICTED   = "484"
+     ERR_RESTRICTED      = "484"
    if irc_default_draft == "Unreal":
-     code_ERR_KILLDENY     = "485"
+     ERR_KILLDENY        = "485"
    else:
-     code_ERR_UNIQOPPRIVSNEEDED = "485" # Unknown
+     ERR_UNIQOPPRIVSNEEDED = "485" # Unknown
    if irc_default_draft == "unreal":
-     code_ERR_HTMDISABLED  = "486"
+     ERR_HTMDISABLED     = "486"
    if irc_default_draft == "Bahamut":
-     code_ERR_NOSSL        = "488"
+     ERR_NOSSL           = "488"
    if irc_default_draft == "Unreal":
-     code_ERR_SECUREONLYCHAN = "489"
-     code_ERR_NOSWEAR      = "490"
-   code_ERR_NOOPERHOST     = "491"
-   code_ERR_NOSERVICEHOST  = "492"
-   code_ERR_UMODEUNKNOWNFLAG = "501"
-   code_ERR_USERSDONTMATCH = "502"
+     ERR_SECUREONLYCHAN  = "489"
+     ERR_NOSWEAR         = "490"
+   ERR_NOOPERHOST        = "491"
+   ERR_NOSERVICEHOST     = "492"
+   ERR_UMODEUNKNOWNFLAG  = "501"
+   ERR_USERSDONTMATCH    = "502"
    if irc_default_draft in ircd_iu_Un_Ba_sn:
-     code_ERR_SILELISTFULL = "511"
+     ERR_SILELISTFULL    = "511"
    if irc_default_draft in ircd_iu_sn:
-     code_ERR_NOSUCHGLINE  = "512"
+     ERR_NOSUCHGLINE     = "512"
    else:
-     code_ERR_TOOMANYWATCH = "512" # Unknown
+     ERR_TOOMANYWATCH    = "512" # Unknown
    if irc_default_draft in ircd_iu_sn:
-     code_ERR_BADPING      = "513"
+     ERR_BADPING         = "513"
    else:
-     code_ERR_NOSUCHGLINE  = "513"
+     ERR_NOSUCHGLINE     = "513"
    if irc_default_draft == "Unreal":
-     code_ERR_NEEDPONG     = "513"
-     code_ERR_NOINVITE     = "518"
-     code_ERR_ADMONLY      = "519"
-     code_ERR_OPERONLY     = "520"
-     code_ERR_LISTSYNTAX   = "521"
-     code_ERR_WHOSYNTAX    = "522"
-     code_ERR_WHOLIMEXCEED = "523"
-     code_ERR_OPERSPVERIFY = "524"
+     ERR_NEEDPONG        = "513"
+     ERR_NOINVITE        = "518"
+     ERR_ADMONLY         = "519"
+     ERR_OPERONLY        = "520"
+     ERR_LISTSYNTAX      = "521"
+     ERR_WHOSYNTAX       = "522"
+     ERR_WHOLIMEXCEED    = "523"
+     ERR_OPERSPVERIFY    = "524"
    if irc_default_draft in ircd_Un_Ba:
-     code_RPL_LOGON        = "600"
-     code_RPL_LOGOFF       = "601"
+     RPL_LOGON           = "600"
+     RPL_LOGOFF          = "601"
    if irc_default_draft == "Unreal":
-     code_RPL_WATCHOFF     = "602"
-     code_RPL_WATCHSTAT    = "603"
+     RPL_WATCHOFF        = "602"
+     RPL_WATCHSTAT       = "603"
    if irc_default_draft == "Bahamut":
-     code_RPL_NOWON        = "604"
-     code_RPL_NOWOFF       = "605"
+     RPL_NOWON           = "604"
+     RPL_NOWOFF          = "605"
    if irc_default_draft == "Unreal":
-     code_RPL_WATCHLIST    = "606"
-     code_RPL_ENDOFWATCHLIST = "607"
-     code_MAPMORE          = "610"
+     RPL_WATCHLIST       = "606"
+     RPL_ENDOFWATCHLIST  = "607"
+     RPL_MAPMORE         = "610"
    if irc_default_draft in ircd_Un_Ba:
-     code_RPL_DCCSTATUS    = "617"
+     RPL_DCCSTATUS       = "617"
    if irc_default_draft == "Unreal":
-     code_RPL_DUMPING      = "640"
-     code_RPL_DUMPRPL      = "641"
-     code_RPL_EODUMP       = "642"
-     code_RPL_SPAMCMDFWD   = "659"
+     RPL_DUMPING         = "640"
+     RPL_DUMPRPL         = "641"
+     RPL_EODUMP          = "642"
+     RPL_SPAMCMDFWD      = "659"
    if irc_default_draft in ircd_Un_Ch_se:
-     code_RPL_STARTTLS     = "670"
+     RPL_STARTTLS        = "670"
    if irc_default_draft in ircd_Ch_se_ra_pl:
-     code_RPL_TESTMASK     = "724"
-     code_RPL_TESTLINE     = "725"
-     code_RPL_NOTESTLINE   = "726"
+     RPL_TESTMASK        = "724"
+     RPL_TESTLINE        = "725"
+     RPL_NOTESTLINE      = "726"
    if irc_default_draft == "plexus":
-     code_RPL_ISCAPTURED   = "727"
+     RPL_ISCAPTURED      = "727"
    if irc_default_draft in ircd_Ch_se_ra:
-     code_RPL_TESTMASKGECOS = "727"
+     RPL_TESTMASKGECOS   = "727"
    if irc_default_draft == "plexus":
-     code_RPL_ISUNCAPTURED = "728"
+     RPL_ISUNCAPTURED    = "728"
    if irc_default_draft in ircd_Ch_se:
-     code_RPL_QUIETLIST    = "728"
-     code_RPL_ENDOFQUIETLIST = "729"
+     RPL_QUIETLIST       = "728"
+     RPL_ENDOFQUIETLIST  = "729"
    if irc_default_draft in ircd_Ch_se_ra:
-     code_RPL_MONONLINE    = "730"
-     code_RPL_MONOFFLINE   = "731"
-     code_RPL_MONLIST      = "732"
-     code_RPL_ENDOFMONLIST = "733"
-     code_ERR_MONLISTFULL  = "734"
-     code_RPL_RSACHALLENGE2 = "740"
-     code_RPL_ENDOFRSACHALLNGE2 = "741"
+     RPL_MONONLINE       = "730"
+     RPL_MONOFFLINE      = "731"
+     RPL_MONLIST         = "732"
+     RPL_ENDOFMONLIST    = "733"
+     ERR_MONLISTFULL     = "734"
+     RPL_RSACHALLENGE2   = "740"
+     RPL_ENDOFRSACHALLNGE2 = "741"
    if irc_default_draft in ircd_Un_Ch_se:
-     code_ERR_MLOCKRESTRICTED  = "742"
+     ERR_MLOCKRESTRICTED  = "742"
    if irc_default_draft in ircd_Ch_se:
-     code_ERR_INVALIDBAN   = "743"
-     code_ERR_TOPICLOCK    = "744"
-     code_RPL_SCANMATCHED  = "750"
-     code_RPL_SCANUMODES   = "751"
+     ERR_INVALIDBAN      = "743"
+     ERR_TOPICLOCK       = "744"
+     RPL_SCANMATCHED     = "750"
+     RPL_SCANUMODES      = "751"
    if irc_default_draft == "IRCNet":
-     code_RPL_ETRACEEND    = "759"
+     RPL_ETRACEEND       = "759"
    if "IRC+" in irc_additional_drafts:
-     code_RPL_SERVICES_SUPPORTS_IRCPLUS = "800"
-     code_RPL_SERVICES_NEEDPASS = "801"
-     code_RPL_SERVICES_PASSOK = "802"
-     code_RPL_SERVICES_BADPASS = "803"
-     code_RPL_SERVICES_COMMAND_SUCCESS  = "804"
-     code_RPL_SERVICES_COMMAND_ERROR = "805"
-     code_RPL_SERVICES_INFO = "806"
-     code_RPL_SERVICES_INFO_END = "807"
-     code_RPL_SERVICES_ERROR_NEEDREGISTRATION = "808"
-     code_RPL_SERVICES_NICKSTATUS = "809"
-     code_RPL_SERVICES_MEMO_READ = "810"
-     code_RPL_SERVICES_HELP_START = "811"
-     code_RPL_SERVICES_HELP = "812"
-     code_RPL_SERVICES_HELP_END = "813"
-     code_RPL_SERVICES_LIST_START = "814"
-     code_RPL_SERVICES_LIST = "815"
-     code_RPL_SERVICES_LIST_END = "816"
-     code_RPL_SERVICES_GLIST_START = "817"
-     code_RPL_SERVICES_GLIST = "818"
-     code_RPL_SERVICES_GLIST_END = "819"
-     code_RPL_SERVICES_MEMO_START = "820"
-     code_RPL_SERVICES_MEMO = "821"
-     code_RPL_SERVICES_MEMO_END = "822"
-     code_RPL_SERVICES_CHANSERV_CHANKEY = "823"
+     RPL_SERVICES_SUPPORTS_IRCPLUS = "800"
+     RPL_SERVICES_NEEDPASS = "801"
+     RPL_SERVICES_PASSOK = "802"
+     RPL_SERVICES_BADPASS = "803"
+     RPL_SERVICES_COMMAND_SUCCESS  = "804"
+     RPL_SERVICES_COMMAND_ERROR = "805"
+     RPL_SERVICES_INFO   = "806"
+     RPL_SERVICES_INFO_END = "807"
+     RPL_SERVICES_ERROR_NEEDREGISTRATION = "808"
+     RPL_SERVICES_NICKSTATUS = "809"
+     RPL_SERVICES_MEMO_READ = "810"
+     RPL_SERVICES_HELP_START = "811"
+     RPL_SERVICES_HELP   = "812"
+     RPL_SERVICES_HELP_END = "813"
+     RPL_SERVICES_LIST_START = "814"
+     RPL_SERVICES_LIST   = "815"
+     RPL_SERVICES_LIST_END = "816"
+     RPL_SERVICES_GLIST_START = "817"
+     RPL_SERVICES_GLIST  = "818"
+     RPL_SERVICES_GLIST_END = "819"
+     RPL_SERVICES_MEMO_START = "820"
+     RPL_SERVICES_MEMO   = "821"
+     RPL_SERVICES_MEMO_END = "822"
+     RPL_SERVICES_CHANSERV_CHANKEY = "823"
    if irc_default_draft == "PyIRCIoT":
-     code_RPL_JSON         = "851"
+     RPL_JSON            = "851"
    if irc_default_draft in ircd_Un_Ch_se:
-     code_RPL_LOGGEDIN     = "900"
-     code_RPL_LOGGEDOUT    = "901"
-     code_ERR_NICKLOCKED   = "902"
-     code_RPL_SASLSUCCESS  = "903"
-     code_ERR_SASLFAIL     = "904"
-     code_ERR_SASLTOOLONG  = "905"
-     code_ERR_SASLABORTED  = "906"
-     code_ERR_SASLALREADY  = "907"
+     RPL_LOGGEDIN        = "900"
+     RPL_LOGGEDOUT       = "901"
+     ERR_NICKLOCKED      = "902"
+     RPL_SASLSUCCESS     = "903"
+     ERR_SASLFAIL        = "904"
+     ERR_SASLTOOLONG     = "905"
+     ERR_SASLABORTED     = "906"
+     ERR_SASLALREADY     = "907"
    if irc_default_draft in ircd_Ch_se:
-     code_RPL_SASLMECHS    = "908"
+     RPL_SASLMECHS       = "908"
    if irc_default_draft == "Insp":
-     code_RPL_AUTOOPLIST      = "910"
-     code_RPL_ENDOFAUTOOPLIST = "911"
-     code_ERR_WORDFILTERED    = "936"
-     code_RPL_SPAMFILTERLIST      = "940"
-     code_ERR_ENDOFSPAMFILTERLIST = "941"
-     code_RPL_EXEMPTCHANOPSLIST   = "953"
-     code_ERR_ENDOFEXEMPTCHANOPSLIST = "954"
+     RPL_AUTOOPLIST      = "910"
+     RPL_ENDOFAUTOOPLIST = "911"
+     ERR_WORDFILTERED    = "936"
+     RPL_SPAMFILTERLIST  = "940"
+     ERR_ENDOFSPAMFILTERLIST = "941"
+     RPL_EXEMPTCHANOPSLIST   = "953"
+     ERR_ENDOFEXEMPTCHANOPSLIST = "954"
    if irc_default_draft in [ "Unreal", "plexus" ]:
-     code_ERR_CANNOTDOCOMMAND  = "972"
+     ERR_CANNOTDOCOMMAND = "972"
    if irc_default_draft == "Insp":
-     code_ERR_CANTUNLOADMODULE = "972"
-     code_RPL_UNLOADEDMODULE   = "973"
-     code_ERR_CANTLOADMODULE   = "974"
-     code_RPL_LOADEDMODULE = "975"
+     ERR_CANTUNLOADMODULE = "972"
+     RPL_UNLOADEDMODULE  = "973"
+     ERR_CANTLOADMODULE  = "974"
+     RPL_LOADEDMODULE    = "975"
    if irc_default_draft == "Bahamut":
-     code_ERR_NUMERICERROR = "999"
+     ERR_NUMERICERROR    = "999"
    #
    cmd_ADMIN      = "ADMIN"
    cmd_AWAY       = "AWAY"
@@ -2334,100 +2346,100 @@ class PyLayerIRC( irciot_shared_ ):
    C = self.CONST
    #
    self.irc_codes = [
-    (C.code_ERR_NICKNAMEINUSE, "ERR_NICKNAMEINUSE", self.func_nick_in_use_),
-    (C.code_ERR_NOTREGISTERED, "ERR_NOTREGISTERED", self.func_not_reg_),
-    (C.code_ERR_BANNEDFROMCHAN,"ERR_BANNEDFROMCHAN",self.func_banned_),
-    (C.code_ERR_NICKCHANGETOOFAST,"ERR_NICKCHANGETOOFAST",self.func_fast_nick_),
-    (C.code_RPL_NAMREPLY,      "RPL_NAMREPLY",      self.func_chan_nicks_),
-    (C.code_RPL_ISUPPORT,      "RPL_ISUPPORT",      self.func_featurelist_),
-    (C.code_RPL_WHOISUSER,     "RPL_WHOISUSER",     self.func_whois_user_),
-    (C.code_RPL_ENDOFNAMES,    "RPL_ENDOFNAMES",    self.func_end_nicks_),
-    (C.code_RPL_WHOREPLY,      "RPL_WHOREPLY",      self.func_who_user_),
-    (C.code_ERR_NOSUCHNICK,    "ERR_NOSUCHNICK",    self.func_no_such_nick_),
-    (C.code_ERR_CHANNELISFULL, "ERR_CHANNELISFULL", self.func_banned_),
-    (C.code_ERR_BADCHANNELKEY, "ERR_BADCHANNELKEY", self.func_banned_),
-    (C.code_ERR_ERRONEUSNICKNAME,"ERR_ERRONEUSNICKNAME",self.func_nick_in_use_),
-    (C.code_ERR_NOSUCHCHANNEL, "ERR_NOSUCHCHANNEL", self.func_banned_),
-    (C.code_ERR_NOSUCHSERVER,  "ERR_NOSUCHSERVER",  None),
-    (C.code_ERR_CANNOTSENDTOCHAN,"ERR_CANNOTSENDTOCHAN",None),
-    (C.code_ERR_TOOMANYCHANNELS,"ERR_TOOMANYCHANNELS",None),
-    (C.code_ERR_WASNOSUCHNICK, "ERR_WASNOSUCHNICK", None),
-    (C.code_ERR_TARGETTOOFAST, "ERR_TARGETTOOFAST", None),
-    (C.code_ERR_TOOMANYTARGETS,"ERR_TOOMANYTARGETS",None),
-    (C.code_ERR_NOORIGIN,      "ERR_NOORIGIN",      None),
-    (C.code_ERR_NORECIPIENT,   "ERR_NORECIPIENT",   None),
-    (C.code_ERR_NOTEXTTOSEND,  "ERR_NOTEXTTOSEND",  None),
-    (C.code_ERR_NOTOPLEVEL,    "ERR_NOOPLEVEL",     None),
-    (C.code_ERR_WILDTOPLEVEL,  "ERR_WILDTOPLEVEL",  None),
-    (C.code_ERR_UNKNOWNCOMMAND,"ERR_UNKNOWNCOMMAND",None),
-    (C.code_ERR_NOMOTD,        "ERR_NOMOTD",        None),
-    (C.code_ERR_NOADMININFO,   "ERR_NOADMININFO",   None),
-    (C.code_ERR_FILEERROR,     "ERR_FILEERROR",     None),
-    (C.code_ERR_NONICKNAMEGIVEN,"ERR_NONICKNAMEGIVEN",None),
-    (C.code_ERR_NICKCOLLISION, "ERR_NICKCOLLISION", None),
-    (C.code_ERR_USERNOTINCHANNEL,"ERR_USERNOTINCHANNEL",None),
-    (C.code_ERR_NOTONCHANNEL,  "ERR_NOTONCHANNEL",  None),
-    (C.code_ERR_NOLOGIN,       "ERR_NOLOGIN",       None),
-    (C.code_ERR_SUMMONDISABLED,"ERR_SUMMONDISABLED",None),
-    (C.code_ERR_USERSDISABLED, "ERR_USERSDISABLED", None),
-    (C.code_ERR_NEEDMOREPARAMS,"ERR_NEEDMOREPARAMS",None),
-    (C.code_ERR_USERSDONTMATCH,"ERR_USERSDONTMATCH",None),
-    (C.code_ERR_ALREADYREGISTERED,"ERR_ALREADYREGISTERED",None),
-    (C.code_ERR_PASSWDMISMATCH,"ERR_PASSWDMISMATCH",None),
-    (C.code_ERR_YOUREBANNEDCREEP,"ERR_YOUREBANNEDCREEP",None),
-    (C.code_ERR_YOUWILLBEBANNED,"ERR_YOUWILLBEBANNED",None),
-    (C.code_ERR_KEYSET,        "ERR_KEYSET",        None),
-    (C.code_ERR_UNKNOWNMODE,   "ERR_UNKNOWNMODE",   None),
-    (C.code_ERR_INVITEONLYCHAN,"ERR_INVITEONLYCHAN",None),
-    (C.code_ERR_BADCHANNELMASK,"ERR_BADCHANNELMASK",None),
-    (C.code_ERR_BANLISTFULL,   "ERR_BANLISTFULL",   None),
-    (C.code_ERR_NOPRIVILEGES,  "ERR_NOPRIVILEGES",  None),
-    (C.code_ERR_CANTKILLSERVER,"ERR_CANTKILLSERVER",None),
-    (C.code_ERR_UNIQOPPRIVSNEEDED,"ERR_UNIQOPPRIVSNEEDED",None),
-    (C.code_ERR_NOOPERHOST,    "ERR_NOOPERHOST",    None),
-    (C.code_ERR_NOSERVICEHOST, "ERR_NOSERVICEHOST", None),
-    (C.code_ERR_UMODEUNKNOWNFLAG,"ERR_UMODEUNKNOWNFLAG", None) ]
+    (C.ERR_NICKNAMEINUSE,    "ERR_NICKNAMEINUSE",    self.func_nick_in_use_),
+    (C.ERR_NOTREGISTERED,    "ERR_NOTREGISTERED",    self.func_not_reg_),
+    (C.ERR_BANNEDFROMCHAN,   "ERR_BANNEDFROMCHAN",   self.func_banned_),
+    (C.ERR_NICKCHANGETOOFAST,"ERR_NICKCHANGETOOFAST",self.func_fast_nick_),
+    (C.RPL_NAMREPLY,         "RPL_NAMREPLY",         self.func_chan_nicks_),
+    (C.RPL_ISUPPORT,         "RPL_ISUPPORT",         self.func_featurelist_),
+    (C.RPL_WHOISUSER,        "RPL_WHOISUSER",        self.func_whois_user_),
+    (C.RPL_ENDOFNAMES,       "RPL_ENDOFNAMES",       self.func_end_nicks_),
+    (C.RPL_WHOREPLY,         "RPL_WHOREPLY",         self.func_who_user_),
+    (C.ERR_NOSUCHNICK,       "ERR_NOSUCHNICK",       self.func_no_such_nick_),
+    (C.ERR_CHANNELISFULL,    "ERR_CHANNELISFULL",    self.func_banned_),
+    (C.ERR_BADCHANNELKEY,    "ERR_BADCHANNELKEY",    self.func_banned_),
+    (C.ERR_ERRONEUSNICKNAME, "ERR_ERRONEUSNICKNAME", self.func_nick_in_use_),
+    (C.ERR_NOSUCHCHANNEL,    "ERR_NOSUCHCHANNEL",    self.func_banned_),
+    (C.ERR_NOSUCHSERVER,     "ERR_NOSUCHSERVER",     None),
+    (C.ERR_CANNOTSENDTOCHAN, "ERR_CANNOTSENDTOCHAN", None),
+    (C.ERR_TOOMANYCHANNELS,  "ERR_TOOMANYCHANNELS",  None),
+    (C.ERR_WASNOSUCHNICK,    "ERR_WASNOSUCHNICK",    None),
+    (C.ERR_TARGETTOOFAST,    "ERR_TARGETTOOFAST",    None),
+    (C.ERR_TOOMANYTARGETS,   "ERR_TOOMANYTARGETS",   None),
+    (C.ERR_NOORIGIN,         "ERR_NOORIGIN",         None),
+    (C.ERR_NORECIPIENT,      "ERR_NORECIPIENT",      None),
+    (C.ERR_NOTEXTTOSEND,     "ERR_NOTEXTTOSEND",     None),
+    (C.ERR_NOTOPLEVEL,       "ERR_NOOPLEVEL",        None),
+    (C.ERR_WILDTOPLEVEL,     "ERR_WILDTOPLEVEL",     None),
+    (C.ERR_UNKNOWNCOMMAND,   "ERR_UNKNOWNCOMMAND",   None),
+    (C.ERR_NOMOTD,           "ERR_NOMOTD",           None),
+    (C.ERR_NOADMININFO,      "ERR_NOADMININFO",      None),
+    (C.ERR_FILEERROR,        "ERR_FILEERROR",        None),
+    (C.ERR_NONICKNAMEGIVEN,  "ERR_NONICKNAMEGIVEN",  None),
+    (C.ERR_NICKCOLLISION,    "ERR_NICKCOLLISION",    None),
+    (C.ERR_USERNOTINCHANNEL, "ERR_USERNOTINCHANNEL", None),
+    (C.ERR_NOTONCHANNEL,     "ERR_NOTONCHANNEL",     None),
+    (C.ERR_NOLOGIN,          "ERR_NOLOGIN",          None),
+    (C.ERR_SUMMONDISABLED,   "ERR_SUMMONDISABLED",   None),
+    (C.ERR_USERSDISABLED,    "ERR_USERSDISABLED",    None),
+    (C.ERR_NEEDMOREPARAMS,   "ERR_NEEDMOREPARAMS",   None),
+    (C.ERR_USERSDONTMATCH,   "ERR_USERSDONTMATCH",   None),
+    (C.ERR_ALREADYREGISTERED,"ERR_ALREADYREGISTERED",None),
+    (C.ERR_PASSWDMISMATCH,   "ERR_PASSWDMISMATCH",   None),
+    (C.ERR_YOUREBANNEDCREEP, "ERR_YOUREBANNEDCREEP", None),
+    (C.ERR_YOUWILLBEBANNED,  "ERR_YOUWILLBEBANNED",  None),
+    (C.ERR_KEYSET,           "ERR_KEYSET",           None),
+    (C.ERR_UNKNOWNMODE,      "ERR_UNKNOWNMODE",      None),
+    (C.ERR_INVITEONLYCHAN,   "ERR_INVITEONLYCHAN",   None),
+    (C.ERR_BADCHANNELMASK,   "ERR_BADCHANNELMASK",   None),
+    (C.ERR_BANLISTFULL,      "ERR_BANLISTFULL",      None),
+    (C.ERR_NOPRIVILEGES,     "ERR_NOPRIVILEGES",     None),
+    (C.ERR_CANTKILLSERVER,   "ERR_CANTKILLSERVER",   None),
+    (C.ERR_UNIQOPPRIVSNEEDED,"ERR_UNIQOPPRIVSNEEDED",None),
+    (C.ERR_NOOPERHOST,       "ERR_NOOPERHOST",       None),
+    (C.ERR_NOSERVICEHOST,    "ERR_NOSERVICEHOST",    None),
+    (C.ERR_UMODEUNKNOWNFLAG, "ERR_UMODEUNKNOWNFLAG", None) ]
 
    if self.CONST.irc_default_draft == "PyIRCIoT":
      self.irc_codes.extend( [
-      (C.code_RPL_JSON,        "RPL_JSON",          None) ] )
+      (C.RPL_JSON,           "RPL_JSON",             None) ] )
 
    elif self.CONST.irc_default_draft == "ircu":
      self.irc_codes.extend( [
-      (C.code_ERR_BANNICKCHANGE,"ERR_BANNICKCHANGE",self.func_restore_nick_),
-      (C.code_RPL_USERIP,      "RPL_USERIP",        None),
-      (C.code_ERR_INVALIDUSERNAME,"ERR_INVALIDUSERNAME",None) ] )
+      (C.ERR_BANNICKCHANGE,  "ERR_BANNICKCHANGE",    self.func_restore_nick_),
+      (C.RPL_USERIP,         "RPL_USERIP",           None),
+      (C.ERR_INVALIDUSERNAME,"ERR_INVALIDUSERNAME",  None) ] )
 
    elif self.CONST.irc_default_draft == "Unreal":
      self.irc_codes.extend( [
-      (C.code_ERR_NONICKCHANGE,"ERR_NONICKCHANGE",self.func_restore_nick_),
-      (C.code_RPL_WHOISBOT,    "RPL_WHOISBOT",      None),
-      (C.code_RPL_USERIP,      "RPL_USERIP",        None),
-      (C.code_RPL_REDIR,       "RPL_REDIR",         None)
-      (C.code_ERR_NOSUCHSERVICE,"ERR_NOSUCHSERVICE",None),
-      (C.code_ERR_NOINVITE,    "ERR_NOINVITE",      None),
-      (C.code_RPL_COMMANDSYNTAX,"RPL_COMMANDSYNTAX",None),
-      (C.code_RPL_STARTLS,     "RPL_STARTLS",       None),
-      (C.code_RPL_DCCSTATUS,   "RPL_DCCSTATUS",     None),
-      (C.code_RPL_TEXT,        "RPL_TEXT",          None) ] )
+      (C.ERR_NONICKCHANGE,   "ERR_NONICKCHANGE",     self.func_restore_nick_),
+      (C.RPL_WHOISBOT,       "RPL_WHOISBOT",         None),
+      (C.RPL_USERIP,         "RPL_USERIP",           None),
+      (C.RPL_REDIR,          "RPL_REDIR",            None)
+      (C.ERR_NOSUCHSERVICE,  "ERR_NOSUCHSERVICE",    None),
+      (C.ERR_NOINVITE,       "ERR_NOINVITE",         None),
+      (C.RPL_COMMANDSYNTAX,  "RPL_COMMANDSYNTAX",    None),
+      (C.RPL_STARTLS,        "RPL_STARTLS",          None),
+      (C.RPL_DCCSTATUS,      "RPL_DCCSTATUS",        None),
+      (C.RPL_TEXT,           "RPL_TEXT",             None) ] )
 
    elif self.CONST.irc_default_draft == "Bahamut":
      self.irc_codes.extend( [
-      (C.code_RPL_USIGNSSL,    "RPL_USIGNSSL",      None),
-      (C.code_ERR_NEEDREGGEDNICK,"ERR_NEEDREGGEDNICK",None),
-      (C.code_RPL_STATSCLONE,  "RPL_STATSCLONE",    None),
-      (C.code_RPL_TEXT,        "RPL_TEXT",          None) ] )
+      (C.RPL_USIGNSSL,       "RPL_USIGNSSL",         None),
+      (C.ERR_NEEDREGGEDNICK, "ERR_NEEDREGGEDNICK",   None),
+      (C.RPL_STATSCLONE,     "RPL_STATSCLONE",       None),
+      (C.RPL_TEXT,           "RPL_TEXT",             None) ] )
 
    elif self.CONST.irc_default_draft == "Insp":
      self.irc_codes.extend( [
-      (C.code_RPL_AUTOOPLIST,  "RPL_AUTOOPLIST",    None),
-      (C.code_RPL_ENDOFAUTOOPLIST,"RPL_ENDOFAUTOOPLIST",None),
-      (C.code_ERR_WORDFILTERED,"ERR_WORDFILTERED",  None) ] )
+      (C.RPL_AUTOOPLIST,     "RPL_AUTOOPLIST",       None),
+      (C.RPL_ENDOFAUTOOPLIST,"RPL_ENDOFAUTOOPLIST",  None),
+      (C.ERR_WORDFILTERED,   "ERR_WORDFILTERED",     None) ] )
 
    elif self.CONST.irc_default_draft == "IRCNet":
      self.irc_codes.extend( [
-      (C.code_ERR_NOCHANMODES, "ERR_NOCHANMODES",   None),
-      (C.code_ERR_RESTRICTED,  "ERR_RESTRICTED",    None) ] )
+      (C.ERR_NOCHANMODES,    "ERR_NOCHANMODES",      None),
+      (C.ERR_RESTRICTED,     "ERR_RESTRICTED",       None) ] )
 
    else: # Unknown extending
      pass
