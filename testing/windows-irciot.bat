@@ -3,8 +3,16 @@ SET SCRIPT=firstrun
 SET IRC_TESTS=default isitip nicks masks
 SET ROUTE_TESTS=default forwarding translation
 SET LANG_TESTS=default lua js python pyrangefor
+SET BASE_TESTS=default multidatum multibigval multinextbig libirciot
+SET BASE_TESTS=%BASE_TESTS% new2018datums defrag1b64p defrag2b64z
+SET BASE_TESTS=%BASE_TESTS% test4rsa test2fish
+SET BASE_ARGS1=base64 base85 base32 cryptrsa cryptaes crypt2fish
+SET BASE_ARGS1=%BASE_ARGS1% cryptbz2
+SET BASE_ARGS2=ed25519 rsa1024
+SET BASE_UNARY=crc c1integrity c2integrity version
 SET DLM=~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ~~~~~~~~~~
 SETLOCAL EnableExtensions EnableDelayedExpansion
+IF "%1"=="test_base" SET SCRIPT=irciot-test.py
 IF "%1"=="test_irc" SET SCRIPT=rfc1459-test.py
 IF "%1"=="test_route" SET SCRIPT=irciot_router-test.py
 IF "%1"=="test_lang" SET SCRIPT=irciot_languages-test.py
