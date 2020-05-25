@@ -100,6 +100,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   mod_ANSYML = 'ansible.executor'
   mod_PHPLEX = 'phply.phplex'
   mod_PHPPAR = 'phply.phpparse'
+  mod_MATH = 'math'
   mod_JRE = 'py4j.java_gateway'
   mod_JS  = 'js2py'
   mod_LUA = 'lupa'
@@ -117,8 +118,13 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
    'Expr', 'For', 'If', 'Index', 'keyword', 'List', 'Load', 'Mod', 'Module',
    'Mult', 'NameConstant', 'Not', 'Num', 'Or', 'Set', 'Store', 'Str', 'Sub',
    'Subscript', 'Tuple',  'UAdd', 'UnaryOp', 'USub', 'While', 'Compare', 'Eq' }
+  lang_filter_PYTHON_maths = { 'acos', 'asin', 'atan', 'atan2', 'ceil', 'cos',
+   'cosh', 'degrees', 'e', 'exp', 'fabs', 'floor', 'fmod', 'frexp', 'hypot',
+   'ldexp', 'log', 'log10', 'modf', 'pi', 'pow', 'radians', 'sin', 'sinh',
+   'sqrt', 'tan', 'tanh' }
   lang_filter_PYTHON_funcs = { 'abs', 'max', 'min', 'int', 'float', 'range',
    'set', 'print' }
+  lang_filter_PYTHON_funcs = { *lang_filter_PYTHON_funcs, *lang_filter_PYTHON_maths }
   lang_filter_PYTHON_names = { 'True', 'False', 'None' }
   lang_filter_PYTHON_names = { *lang_filter_PYTHON_names, *lang_filter_PYTHON_funcs }
   lang_filter_PHP_tokens   = { 'VARIABLE', 'STRING', 'EQUALS', 'LNUMBER', 'SEMI',
@@ -392,8 +398,8 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
      restore_io_(old_stdout, old_stderr)
      raise Exception(my_ex)
    restore_io_(old_stdout, old_stderr)
- #
- # End of python_stdout_()
+   #
+   # End of python_stdout_()
 
  def timeout_termination_(self):
    raise Exception('Execution timed out: %s sec.' \
@@ -469,14 +475,19 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
  # incomplete
  def __irciot_EL_run_Python_code_(self, in_code, in_environment):
   my_dict = {}
+  my_MATH = self.irciot_EL_import_(self.CONST.mod_MATH)
+  for my_name in self.CONST.lang_filter_PYTHON_maths:
+    my_dict[ my_name ] = getattr(my_MATH, my_name)
   for my_name in self.CONST.lang_filter_PYTHON_funcs:
-    my_dict[ my_name ] = eval(compile(my_name, '<str>', 'eval'))
+    if my_name not in self.CONST.lang_filter_PYTHON_maths:
+      my_dict[ my_name ] = eval(compile(my_name, '<str>', 'eval'))
   for my_key in in_environment.keys():
     my_value = in_environment[ my_key ]
     if isinstance(my_value, str):
       my_dict[ my_key ] = my_value
   with self.python_stdout_() as my_out:
     exec(in_code, { '__builtins__': None }, my_dict)
+  del my_MATH
   return my_out.getvalue()
   #
   # End of __irciot_EL_run_Python_code_()
@@ -493,10 +504,10 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   def timeout_signal_(in_signal, in_frame):
     self.timeout_termination_()
   if not self.irciot_EL_check_code_(in_lang, in_code):
-    return None
+    return ""
   if not self.irciot_EL_check_environment_(in_lang, in_environment):
     self.irciot_EL_error_(self.CONST.err_BAD_ENVIRONMENT, None)
-    return None
+    return ""
   my_out = None
   if self.__os_name == self.CONST.os_windows:
     pass # Need a method to stop the script by timeout in the Windows
@@ -658,6 +669,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
       return True
   self.irciot_EL_finish_language_(in_lang)
   return False
+  #
   # End of irciot_EL_init_language_()
 
  def irciot_EL_finish_language_(self, in_lang):

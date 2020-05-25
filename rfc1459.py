@@ -439,7 +439,7 @@ class PyLayerIRC( irciot_shared_ ):
    if irc_default_draft == "Unreal":
      RPL_LISTSYNTAX      = "334"
      RPL_WHOISBOT        = "335"
-   if irc_default_draft in [  "Bahamut", "Charybdis", \
+   if irc_default_draft in [ "Bahamut", "Charybdis", \
     "hybrid", "seven" ]:
      RPL_WHOISTEXT       = "337"
    RPL_WHOISACTUALLY     = "338"
@@ -2131,6 +2131,14 @@ class PyLayerIRC( irciot_shared_ ):
    self.__irc_nick = self.irc_nick_old
    return (in_ret, 3, in_wait)
 
+ def func_bad_ping_(self, in_args):
+   (in_string, in_ret, in_init, in_wait) = in_args
+   # This is not a fact, and not according to the RFC, but the
+   # last word in the comment may be a parameter for the PONG
+   my_split = in_string.split(' ')
+   self.irc_pong_(my_split[-1])
+   return (in_ret, in_init, self.CONST.irc_default_wait)
+
  def func_not_reg_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
    #if self.irc_random_nick_(self.__irc_nick) == 1:
@@ -2386,6 +2394,7 @@ class PyLayerIRC( irciot_shared_ ):
     (C.ERR_BADCHANNELKEY,    "ERR_BADCHANNELKEY",    self.func_banned_),
     (C.ERR_ERRONEUSNICKNAME, "ERR_ERRONEUSNICKNAME", self.func_nick_in_use_),
     (C.ERR_NOSUCHCHANNEL,    "ERR_NOSUCHCHANNEL",    self.func_banned_),
+    (C.ERR_NICKCOLLISION,    "ERR_NICKCOLLISION",    self.func_nick_in_use_),
     (C.ERR_NOSUCHSERVER,     "ERR_NOSUCHSERVER",     None),
     (C.ERR_CANNOTSENDTOCHAN, "ERR_CANNOTSENDTOCHAN", None),
     (C.ERR_TOOMANYCHANNELS,  "ERR_TOOMANYCHANNELS",  None),
@@ -2402,7 +2411,6 @@ class PyLayerIRC( irciot_shared_ ):
     (C.ERR_NOADMININFO,      "ERR_NOADMININFO",      None),
     (C.ERR_FILEERROR,        "ERR_FILEERROR",        None),
     (C.ERR_NONICKNAMEGIVEN,  "ERR_NONICKNAMEGIVEN",  None),
-    (C.ERR_NICKCOLLISION,    "ERR_NICKCOLLISION",    None),
     (C.ERR_USERNOTINCHANNEL, "ERR_USERNOTINCHANNEL", None),
     (C.ERR_NOTONCHANNEL,     "ERR_NOTONCHANNEL",     None),
     (C.ERR_NOLOGIN,          "ERR_NOLOGIN",          None),
@@ -2432,7 +2440,7 @@ class PyLayerIRC( irciot_shared_ ):
 
    elif self.CONST.irc_default_draft == "ircu":
      self.irc_codes.extend( [
-      (C.ERR_BADPING,        "ERR_BADPING",          None),
+      (C.ERR_BADPING,        "ERR_BADPING",          self.func_bad_ping_),
       (C.ERR_BANNICKCHANGE,  "ERR_BANNICKCHANGE",    self.func_restore_nick_),
       (C.RPL_USERIP,         "RPL_USERIP",           None),
       (C.ERR_INVALIDUSERNAME,"ERR_INVALIDUSERNAME",  None) ] )
