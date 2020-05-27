@@ -876,6 +876,34 @@ class PyLayerIRCIoT(object):
   #
   # End of irciot_init_encryption_method_()
 
+ def irciot_get_blockchain_private_key_(self):
+  # It is need to exclude illegal access to the key
+  return self.__blockchain_private_key
+
+ def irciot_get_blockchain_public_key_(self):
+  return self.__blockchain_public_key
+
+ def irciot_get_encryption_private_key_(self):
+  # It is need to exclude illegal access to the key
+  return self.__encryption_private_key
+
+ def irciot_get_encryption_public_key_(self):
+  return self.__encryption_public_key
+
+ def irciot_set_blockchain_private_key_(self, in_key):
+  # It is need to exclude illegal replacement of the key
+  self.__blockchain_private_key = in_key
+
+ def irciot_set_blockchain_public_key_(self, in_key):
+  self.__blockchain_public_key = in_key
+
+ def irciot_set_encryption_private_key_(self, in_key):
+  # It is need to exclude illegal replacement of the key
+  self.__encryption_private_key = in_key
+
+ def irciot_set_encryption_public_key_(self, in_key):
+  self.__encryption_public_key = in_key
+
  def irciot_get_blockchain_hash_length_(self, in_mid_method):
   if in_mid_method == self.CONST.tag_mid_ED25519:
     return self.CONST.mid_ED25519_hash_length

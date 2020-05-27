@@ -113,7 +113,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   #
   lang_filter_BASIC_regexps  = []
   lang_filter_PYTHON_regexps = []
-  lang_filter_PYTHON_types = {  'Add', 'And', 'Assign', 'Attribute',
+  lang_filter_PYTHON_types = {  'Add', 'And', 'Assign', 'Attribute', 'Slice',
    'BinOp', 'BitAnd', 'BitOr', 'BitXor', 'BoolOp', 'Dict', 'Div', 'Else',
    'Expr', 'For', 'If', 'Index', 'keyword', 'List', 'Load', 'Mod', 'Module',
    'Mult', 'NameConstant', 'Not', 'Num', 'Or', 'Set', 'Store', 'Str', 'Sub',
@@ -123,7 +123,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
    'ldexp', 'log', 'log10', 'modf', 'pi', 'pow', 'radians', 'sin', 'sinh',
    'sqrt', 'tan', 'tanh' }
   lang_filter_PYTHON_funcs = { 'abs', 'max', 'min', 'int', 'float', 'range',
-   'set', 'print' }
+   'set', 'print', 'len', 'str' }
   lang_filter_PYTHON_funcs = { *lang_filter_PYTHON_funcs, *lang_filter_PYTHON_maths }
   lang_filter_PYTHON_names = { 'True', 'False', 'None' }
   lang_filter_PYTHON_names = { *lang_filter_PYTHON_names, *lang_filter_PYTHON_funcs }

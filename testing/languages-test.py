@@ -38,6 +38,9 @@ class PyLayerIRCIoT_EL_Test(unittest.TestCase):
   def test103_test_Python_for_range_(self):
     self.assertEqual(EL_test_Python_for_range_(), True)
 
+  def test104_test_Python_cosinus_(self):
+    self.assertEqual(EL_test_Python_cosinus_(), True)
+
 _log_mode = 0
 
 def to_log_(in_text):
@@ -87,6 +90,9 @@ def EL_test_simple_Python_():
 def EL_test_Python_for_range_():
   return EL_python_("for i in range(3): print(i); print('a')", "0@a@1@a@2@a@")
 
+def EL_test_Python_cosinus_():
+  return EL_python_("s=str(cos(pi*2-pi/3));print(s[0:7],end='')", "0.50000")
+
 my_command = ""
 my_params  = []
 
@@ -117,6 +123,8 @@ def main():
    EL_test_simple_Python_()
  if (my_command == 'pyrangefor'):
    EL_test_Python_for_range_()
+ if (my_command == 'pycosinus'):
+   EL_test_Python_cosinus_()
 
 if __name__ == '__main__':
   if len(sys.argv) == 1:

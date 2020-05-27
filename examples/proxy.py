@@ -42,10 +42,14 @@ def main():
         irciot.currnet_oid = save_object['oid']
         irciot.current_did = save_object['did']
         irciot.defrag_pool = save_object['defrag_pool']
-        irciot.blockchain_private_key \
-          = save_object['blockchain_private_key']
-        irciot.blockchain_public_key \
-          = save_object['blockchain_public_key']
+        irciot.set_encryption_private_key_(
+          save_object['encryption_private_key'])
+        irciot.set_encryption_public_key_(
+          save_object['encryption_public_key'])
+        irciot.set_blockchain_private_key_(
+          save_object['blockchain_private_key'])
+        irciot.set_blockchain_public_key_(
+          save_object['blockchain_public_key'])
       except:
         pass
 
@@ -77,10 +81,14 @@ def main():
     save_object.update({'oid' : irciot.current_oid})
     save_object.update({'did' : irciot.current_did})
     save_object.update({'defrag_pool' : irciot.defrag_pool})
+    save_object.update({'encryption_private_key' : \
+                  irciot.irciot_get_blockchain_private_key_()})
+    save_object.update({'encryption_pubilc_key' : \
+                  irciot.irciot_get_blockchain_public_key_()})
     save_object.update({'blockchain_private_key' : \
-                  irciot.blockchain_private_key})
+                  irciot.irciot_get_blockchain_private_key_()})
     save_object.update({'blockchain_pubilc_key' : \
-                  irciot.blockchain_public_key})
+                  irciot.irciot_get_blockchain_public_key_()})
     save_json = json.dumps(save_object, separators=(',',':'))
     save_fd.write(save_json + "\n")
     save_fd.close()

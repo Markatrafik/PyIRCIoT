@@ -2,7 +2,7 @@
 SET SCRIPT=firstrun
 SET IRC_TESTS=default isitip nicks masks
 SET ROUTE_TESTS=default forwarding translation
-SET LANG_TESTS=default lua js python pyrangefor
+SET LANG_TESTS=default lua js python pyrangefor pycosinus
 SET BASE_TESTS=default multidatum multibigval multinextbig libirciot
 SET BASE_TESTS=%BASE_TESTS% new2018datums defrag1b64p defrag2b64z
 SET BASE_TESTS=%BASE_TESTS% test4rsa test2fish
