@@ -75,6 +75,8 @@ class PyLayerIRC( irciot_shared_ ):
    irc_default_channel = "#myhome"
    irc_default_chankey = None
    #
+   irc_default_silence = 8 # count of irc_default_wait
+   #
    # User options:
    irc_aop   = 101 # give (+o) him channel operator status
    irc_aban  = 102 # ban (+b) him on these channels
@@ -978,6 +980,9 @@ class PyLayerIRC( irciot_shared_ ):
    #
    self.irc_mid_pipeline_size \
      = self.CONST.irc_default_mid_pipeline_size
+   #
+   self.irc_silence_max = self.CONST.irc_default_silence
+   self.irc_silence = 0
    #
    self.time_now   = datetime.datetime.now()
    self.time_ping  = self.time_now
@@ -2643,6 +2648,19 @@ class PyLayerIRC( irciot_shared_ ):
 
        irc_wait = self.CONST.irc_default_wait
 
+       if irc_init > 3 and self.irc_silence >= self.irc_silence_max:
+         if self.irc_silence == self.irc_silence_max:
+           # To provoke TCP interaction, we take some action
+           if self.irc_who_channel_(self.irc_channel) == -1:
+             irc_init = 0
+           else:
+             self.irc_check_and_restore_nick_()
+         elif self.irc_silence > self.irc_silence_max:
+           irc_init = 0
+         if irc_init == 0:
+           self.irc_disconnect_()
+       self.irc_silence += 1
+
        if self.delta_time > 0:
          irc_wait = self.delta_time
        else:
@@ -2660,6 +2678,8 @@ class PyLayerIRC( irciot_shared_ ):
          if irc_input_split == "":
            irc_input_buff = ""
            continue
+
+         self.irc_silence = 0
 
          if irc_input_split[:5] == self.CONST.cmd_PING + " ":
            self.delta_ping \
@@ -2749,6 +2769,7 @@ class PyLayerIRC( irciot_shared_ ):
           if self.td2ms_(self.time_now - self.time_ping) \
            > self.delta_ping * 2 and self.delta_ping > 0:
              if self.irc_who_channel_(self.irc_channel) == -1:
+               self.irc_disconnect_()
                irc_init = 0
              else:
                self.irc_check_and_restore_nick_()
