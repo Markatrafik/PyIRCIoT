@@ -44,7 +44,7 @@ class PyLayerIRC( irciot_shared_ ):
    #
    irciot_protocol_version = '0.3.33'
    #
-   irciot_library_version  = '0.0.205'
+   irciot_library_version  = '0.0.207'
    #
    # Bot specific constants
    #
@@ -62,6 +62,7 @@ class PyLayerIRC( irciot_shared_ ):
    #
    irc_default_server = "irc-iot.nsk.ru"
    irc_default_port = 6667
+   irc_default_ssl_port = 6697
    irc_default_password = None
    irc_default_ssl = False
    irc_default_ident = False
@@ -208,8 +209,8 @@ class PyLayerIRC( irciot_shared_ ):
    # 34. "PyIRCIoT" (when it works in IRC server mode)
    #
    # Additional drafts extending Internet Relay Chat protocol:
-   #  1. "IRC+"       -- IRC+ Services Protocol
-   #  2. "IRCv3"      -- Specification 3.2 build on top of the IRC protocol
+   irc_add_plus = "IRC+"  # IRC+ Services Protocol
+   irc_add_v3   = "IRCv3" # Specification 3.2 build on top of the IRC protocol
    #
    irc_max_nick_length = 15
    if irc_default_draft == "ircu":
@@ -228,12 +229,12 @@ class PyLayerIRC( irciot_shared_ ):
    ircd_iu_Un_Ba_sn = ircd_iu_Un_sn + [ "Bahamut" ]
    #
    if irc_default_draft in ircd_Un_Ch_se:
-     irc_additional_drafts += [ "IRCv3" ]
+     irc_additional_drafts += [ irc_add_v3 ]
    #
    default_mtu = 480
    if irc_default_draft == "ircu":
      default_mtu = 440
-   if "IRCv3" in irc_additional_drafts:
+   if irc_add_v3 in irc_additional_drafts:
      #default_mtu = 1024 (line-length-3.3)
      pass
    #
@@ -522,7 +523,7 @@ class PyLayerIRC( irciot_shared_ ):
    ERR_WILDTOPLEVEL      = "414"
    if irc_default_draft in ircd_iu_sn:
      ERR_QUERYTOOLONG    = "416"
-   if "IRCv3" in irc_additional_drafts:
+   if irc_add_v3 in irc_additional_drafts:
      ERR_INPUTTOOLONG    = "417"
    ERR_UNKNOWNCOMMAND    = "421"
    ERR_NOMOTD            = "422"
@@ -657,7 +658,7 @@ class PyLayerIRC( irciot_shared_ ):
      RPL_DUMPRPL         = "641"
      RPL_EODUMP          = "642"
      RPL_SPAMCMDFWD      = "659"
-   if "IRCv3" in irc_additional_drafts:
+   if irc_add_v3 in irc_additional_drafts:
      RPL_STARTTLS        = "670"
    if irc_default_draft in ircd_Ch_se_ra_pl:
      RPL_TESTMASK        = "724"
@@ -689,7 +690,7 @@ class PyLayerIRC( irciot_shared_ ):
      RPL_SCANUMODES      = "751"
    if irc_default_draft == "IRCNet":
      RPL_ETRACEEND       = "759"
-   if "IRC+" in irc_additional_drafts:
+   if irc_add_plus in irc_additional_drafts:
      RPL_SERVICES_SUPPORTS_IRCPLUS = "800"
      RPL_SERVICES_NEEDPASS = "801"
      RPL_SERVICES_PASSOK = "802"
@@ -721,7 +722,7 @@ class PyLayerIRC( irciot_shared_ ):
      RPL_LOGGEDOUT       = "901"
      ERR_NICKLOCKED      = "902"
      RPL_SASLSUCCESS     = "903"
-   if "IRCv3" in irc_additional_drafts:
+   if irc_add_v3 in irc_additional_drafts:
      ERR_SASLFAIL        = "904"
      ERR_SASLTOOLONG     = "905"
      ERR_SASLABORTED     = "906"
@@ -827,7 +828,7 @@ class PyLayerIRC( irciot_shared_ ):
      cmd_WALLCHOPS = "WALLCHOPS"
      cmd_WALLUSERS = "WALLUSERS"
      cmd_WALLVOICE = "WALLVOICE"
-   if "IRCv3" in irc_additional_drafts:
+   if irc_add_v3 in irc_additional_drafts:
      cmd_ACC       = "ACC"
      cmd_AUTHENTICATE = "AUTHENTICATE"
      cmd_BATCH     = "BATCH"
@@ -905,10 +906,12 @@ class PyLayerIRC( irciot_shared_ ):
    self.irc_nick_length = self.CONST.irc_max_nick_length
    self.irc_topic_length = self.CONST.irc_max_topic_length
    #
+   self.irc_ssl = self.CONST.irc_default_ssl
    self.irc_server = self.CONST.irc_default_server
    self.irc_port = self.CONST.irc_default_port
+   if self.irc_ssl:
+     self.irc_port = self.CONST.irc_default_ssl_port
    self.irc_password = self.CONST.irc_default_password
-   self.irc_ssl = self.CONST.irc_default_ssl
    self.irc_ident = self.CONST.irc_default_ident
    #
    # This variable is not used to connect, if you don't have a server name
