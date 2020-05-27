@@ -62,6 +62,8 @@ class PyLayerIRCIoT(object):
     irciot_chars_lower + irciot_chars_upper + \
     irciot_chars_base_addon
   #
+  irciot_default_encoding = "utf-8"
+  #
   # IRC-IoT TAGs
   #
   tag_MESSAGE_ID  = 'mid' # Message ID
@@ -383,6 +385,7 @@ class PyLayerIRCIoT(object):
   api_GET_BKTO = 551 # Get Blockchain Key Timeout
   api_SET_BKTO = 552 # Set Blockchain Key Timeout
   api_GET_iMTU = 600 # Get initial Maximum Transmission Unit
+  api_GET_iENC = 601 # Get initial Encoding
   api_GET_VUID = 700 # Get list of Virtual User IDs
   #
   api_vuid_cfg = 'c' # VUID prefix for users from config
@@ -532,7 +535,7 @@ class PyLayerIRCIoT(object):
   #
   # Default Maximum IRC message size (in bytes)
   #
-  default_mtu = 440 # Undernet IRCd at 2019
+  irciot_default_MTU = 440 # Undernet IRCd at 2019
   #
   # Fragmented Message Delete Timeout (in seconds)
   #
@@ -619,15 +622,17 @@ class PyLayerIRCIoT(object):
   self.virtual_lmid = [] # Virtual Last Message IDs pipeline
   self.virtual_omid = [] # Virtual Own Message IDs pipeline
   #
-  self.ldict       = []
+  self.__encoding = self.CONST.irciot_default_encoding
+  #
+  self.ldict = []
   self.ldict_types = []
   self.ldict_sections = []
   self.ldict_file  = None
   self.__ldict_lock = False
   #
-  self.__mid_method  = self.CONST.tag_mid_default
-  self.__oid_method  = 0
-  self.__did_method  = 0
+  self.__mid_method = self.CONST.tag_mid_default
+  self.__oid_method = 0
+  self.__did_method = 0
   #
   self.__crypt_HASH = None
   self.__crypt_RSA  = None
@@ -697,8 +702,8 @@ class PyLayerIRCIoT(object):
   #
   self.irciot_init_encryption_method_(self.crypt_method)
   #
-  self.__initial_mtu = None
-  self.__message_mtu = self.CONST.default_mtu
+  self.__initial_MTU = None
+  self.__message_MTU = self.CONST.irciot_default_MTU
   #
   self.integrity_check = self.CONST.default_integrity_check
   self.integrity_stamp = self.CONST.default_integrity_stamp
@@ -732,7 +737,9 @@ class PyLayerIRCIoT(object):
   elif in_action == self.CONST.api_GET_VUID:
     return (True, [ self.CONST.api_vuid_self ])
   elif in_action == self.CONST.api_GET_iMTU:
-    return (True, self.CONST.default_mtu)
+    return (True, self.CONST.irciot_default_MTU)
+  elif in_action == self.CONST.api_GET_iENC:
+    return (True, self.CONST.irciot_default_encoding)
   return (False, None)
 
  def irciot_error_(self, in_error_code, in_mid, \
@@ -779,7 +786,7 @@ class PyLayerIRCIoT(object):
     self.CONST.irciot_library_version)
 
  def irciot_check_mtu_(self):
-  if isinstance(self.__initial_mtu, int):
+  if isinstance(self.__initial_MTU, int):
     return
   my_status = False
   my_compat = self.irciot_compatibility_()
@@ -792,12 +799,29 @@ class PyLayerIRCIoT(object):
   if my_status:
     if isinstance(my_answer, int):
       if my_answer > 128:
-        self.__initial_mtu = my_answer
-        self.__message_mtu = my_answer
+        self.__initial_MTU = my_answer
+        self.__message_MTU = my_answer
         return
-  self.__initial_mtu = self.CONST.default_mtu
+  self.__initial_MTU = self.CONST.irciot_default_MTU
   #
   # End of irciot_check_mtu_()
+
+ def irciot_check_encoding_(self):
+  my_status = False
+  my_compat = self.irciot_compatibility_()
+  my_result = self.user_pointer (my_compat, \
+    self.CONST.api_GET_iENC, self.CONST.api_vuid_self, None)
+  try:
+    (my_status, my_answer) = my_result
+  except:
+    pass
+  if my_status:
+    if isinstance(my_answer, str):
+      if my_answer != "":
+        self.__encoding = my_answer
+        return
+  #
+  # End of irciot_check_encoding_()
 
  def irciot_crc16_init_(self):
   for my_idx1 in range(0, 256):
@@ -1097,7 +1121,7 @@ class PyLayerIRCIoT(object):
   if not isinstance(in_password, str):
     return None
   my_hash = None
-  my_password = in_password.encode('utf-8')
+  my_password = in_password.encode(self.__encoding)
   if in_hash_size == 16:
     my_hash = self.__crypt_HASH.md5(my_password).digest()
   elif in_hash_size == 20:
@@ -1119,7 +1143,7 @@ class PyLayerIRCIoT(object):
  def irciot_crypto_hash_to_str_(self, in_hash):
   my_hash = in_hash
   if isinstance(in_hash, str):
-    my_hash = bytes(in_hash, 'utf-8')
+    my_hash = bytes(in_hash, self.__encoding)
   if not isinstance(my_hash, bytes):
     return ""
   try:
@@ -1271,7 +1295,7 @@ class PyLayerIRCIoT(object):
   if self.__mid_method == self.CONST.tag_mid_ED25519:
     my_key = in_public_key.encode( \
       encoder = self.__crypt_NACE.HexEncoder )
-    my_key_string = my_key.decode('utf-8')
+    my_key_string = my_key.decode(self.__encoding)
   elif self.__mid_method == self.CONST.tag_mid_RSA1024:
     my_key_string = self.irciot_crypto_hash_to_str_(in_public_key)
     return
@@ -1401,7 +1425,7 @@ class PyLayerIRCIoT(object):
       if self.__mid_method == self.CONST.tag_mid_ED25519:
         my_key = self.__blockchain_public_key.encode( \
           encoder = self.__crypt_NACE.HexEncoder )
-        my_key_string = my_key.decode('utf-8')
+        my_key_string = my_key.decode(self.__encoding)
       else:
         return None
     except:
@@ -1588,7 +1612,7 @@ class PyLayerIRCIoT(object):
   if not isinstance(in_string, str):
     return ""
   try:
-    my_string = in_string.encode('utf-8')
+    my_string = in_string.encode(self.__encoding)
     if self.__mid_method == self.CONST.tag_mid_ED25519:
       my_signed = in_private_key.sign(my_string)
       my_sign = my_signed[:-len(my_string)]
@@ -1642,7 +1666,7 @@ class PyLayerIRCIoT(object):
   if my_pair == None:
     return False
   (my_method, my_sign) = my_pair
-  my_string_bin = bytes(in_string, 'utf-8')
+  my_string_bin = bytes(in_string, self.__encoding)
   my_save = self.irciot_blockchain_save_defaults_()
   my_result = False
   if my_method == self.CONST.tag_mid_ED25519:
@@ -1778,22 +1802,23 @@ class PyLayerIRCIoT(object):
   my_offset = 0
   my_loop   = True
   try:
-    my_KEY = str(in_secret_key, 'utf-8')
+    my_KEY = str(in_secret_key, self.__encoding)
     my_AES = self.__crypt_AES.new(in_secret_key, \
-      self.__crypt_AES.MODE_CBC, bytes(self.crypto_AES_iv, 'utf-8'))
+      self.__crypt_AES.MODE_CBC, bytes(self.crypto_AES_iv, \
+      self.__encoding))
     while my_loop:
       my_block = in_raw_data[my_offset:my_offset + my_chunk]
       my_bsize = len(my_block) % my_chunk
       my_rest = my_chunk - my_bsize
       if my_rest < my_chunk:
         my_addon = self.irciot_crypto_hasher_(None, my_rest)
-        my_block += bytes(my_addon, 'utf-8')
+        my_block += bytes(my_addon, self.__encoding)
         my_loop = False
       my_encrypted += my_AES.encrypt(my_block)
       my_offset += my_chunk
       if my_offset > my_size:
         my_loop = False
-    my_encrypted += bytes(self.crypto_AES_iv, 'utf-8')
+    my_encrypted += bytes(self.crypto_AES_iv, self.__encoding)
     my_encrypted += my_rest.to_bytes(1, 'little')
   except:
     return None
@@ -1813,7 +1838,7 @@ class PyLayerIRCIoT(object):
   my_chunk = 16
   my_loop  = True
   try:
-    my_KEY   = str(in_secret_key, 'utf-8')
+    my_KEY   = str(in_secret_key, self.__encoding)
     my_size  = len(in_encrypted_data)-my_chunk-1
     if my_size - my_chunk < 0:
       return None
@@ -1821,7 +1846,7 @@ class PyLayerIRCIoT(object):
     my_offset = my_size + my_chunk
     my_rawcut = in_encrypted_data[my_offset:my_offset+1]
     my_cut = int.from_bytes(my_rawcut, byteorder='little')
-    my_AES = self.__crypt_AES.new(bytes(my_KEY, 'utf-8'), \
+    my_AES = self.__crypt_AES.new(bytes(my_KEY, self.__encoding), \
       self.__crypt_AES.MODE_CBC, my_AES_iv)
     my_offset = 0
     while my_loop:
@@ -1858,7 +1883,7 @@ class PyLayerIRCIoT(object):
       my_rest  = my_chunk - my_bsize
       if my_rest < 16:
         my_addon = self.irciot_crypto_hasher_(None, my_rest)
-        my_block += bytes(my_addon, 'utf-8')
+        my_block += bytes(my_addon, self.__encoding)
         my_loop = False
       my_encrypted += my_2fish.encrypt(my_block)
       my_offset += my_chunk
@@ -1890,7 +1915,7 @@ class PyLayerIRCIoT(object):
     while my_loop:
       my_block = my_encrypted[my_offset:my_offset+my_chunk]
       my_crypt = my_2fish.decrypt(my_block).decode()
-      my_decrypted += bytes(my_crypt, 'utf-8')
+      my_decrypted += bytes(my_crypt, self.__encoding)
       my_offset += my_chunk
       if my_offset >= my_size:
         break
@@ -2500,17 +2525,17 @@ class PyLayerIRCIoT(object):
     return False
   if in_mtu < 128:
     return False
-  if isinstance(self.__initial_mtu, int):
-    if in_mtu > self.__initial_mtu:
+  if isinstance(self.__initial_MTU, int):
+    if in_mtu > self.__initial_MTU:
       return False
-  self.__message_mtu = in_mtu
+  self.__message_MTU = in_mtu
   return True
 
  def irciot_get_mtu_(self):
-  return self.__message_mtu
+  return self.__message_MTU
 
  def irciot_get_imtu(self):
-  return self.__initial_mtu
+  return self.__initial_MTU
 
  def is_irciot_ldict_type_(self, in_variable, in_type_id):
   my_type = self.irciot_ldict_get_type_by_id_(in_type_id)
@@ -2937,7 +2962,7 @@ class PyLayerIRCIoT(object):
             self.irciot_error_(self.CONST.err_BASE32_DECODING, 0)
             return ""
        else:
-          out_base = bytes(defrag_buffer, 'utf-8')
+          out_base = bytes(defrag_buffer, self.__encoding)
        my_algo = self.irciot_crypto_get_algorithm_(my_crypt_method)
        #if DO_auto_encryption and my_algo != None:
        #   self.irciot_load_encryption_methods_(my_crypt_method)
@@ -3228,7 +3253,7 @@ class PyLayerIRCIoT(object):
          return False
        my_json = self.irciot_remove_text_tags_(in_json, \
          [ self.CONST.tag_MESSAGE_ID, self.CONST.tag_CHK_CRC16 ])
-       my_crc16_json = self.irciot_crc16_(bytes(my_json, 'utf-8'))
+       my_crc16_json = self.irciot_crc16_(bytes(my_json, self.__encoding))
        del my_json
        if my_crc16 != my_crc16_json:
          return False
@@ -3239,7 +3264,7 @@ class PyLayerIRCIoT(object):
          return False
        my_json = self.irciot_remove_text_tags_(in_json, \
          [ self.CONST.tag_MESSAGE_ID, self.CONST.tag_CHK_CRC32 ])
-       my_crc32_json = self.irciot_crc32_(bytes(my_json, 'utf-8'))
+       my_crc32_json = self.irciot_crc32_(bytes(my_json, self.__encoding))
        del my_json
        if my_crc32 != my_crc32_json:
          return False
@@ -3426,6 +3451,7 @@ class PyLayerIRCIoT(object):
  def irciot_deinencap_(self, in_json, in_vuid = None):
   ''' First/simple implementation of IRC-IoT "Datum" deinencapsulator '''
   self.irciot_check_mtu_()
+  self.irciot_check_encoding_()
   self.irciot_blockchain_check_publication_()
   self.irciot_encryption_check_publication_()
   try:
@@ -3618,16 +3644,18 @@ class PyLayerIRCIoT(object):
      if self.__crypt_ZLIB == None:
        return ("", 0)
      bin_big_datum \
-       = self.__crypt_ZLIB.compress(bytes(str_big_datum, 'utf-8'))
+       = self.__crypt_ZLIB.compress(bytes(str_big_datum, \
+         self.__encoding))
   elif self.crypt_compress == self.CONST.compress_BZIP2:
      if DO_auto_compress and self.__crypt_BZ2 == None:
        self.irciot_load_compression_methods_(self.crypt_method)
      if self.__crypt_BZ2 == None:
        return ("", 0)
      bin_big_datum \
-       = self.__crypt_BZ2.compress(bytes(str_big_datum, 'utf-8'))
+       = self.__crypt_BZ2.compress(bytes(str_big_datum, \
+         self.__encoding))
   elif self.crypt_compress == self.CONST.compress_NONE:
-     bin_big_datum = bytes(str_big_datum, 'utf-8')
+     bin_big_datum = bytes(str_big_datum, self.__encoding)
   else: # Unknwon compression
      return ("", 0)
   if big_ot in [
@@ -3704,7 +3732,7 @@ class PyLayerIRCIoT(object):
   out_head += len(self.CONST.tag_DATUM_BC)
   out_head += len(str(my_part)) + 4 #"":,#
   out_head += len(self.CONST.tag_DATUM_BP)
-  out_skip += out_head - self.__message_mtu
+  out_skip += out_head - self.__message_MTU
   out_big_datum = '{'
   out_big_datum += '"' + self.CONST.tag_OBJECT_TYPE + '":"' + big_ot
   out_big_datum += '","' + self.CONST.tag_DATUM_ID
@@ -3712,7 +3740,7 @@ class PyLayerIRCIoT(object):
   out_big_datum += '","' + self.CONST.tag_DATUM_BC + '":' + str(my_bc)
   out_big_datum += ',"' + self.CONST.tag_DATUM_BP + '":' + str(my_part)
   out_big_datum += ',"' + self.CONST.tag_ENC_DATUM + '":"'
-  my_okay = self.__message_mtu - out_head - 43 # Must be calculated
+  my_okay = self.__message_MTU - out_head - 43 # Must be calculated
   my_size = my_bc - my_part
   if my_size > my_okay:
      my_size = my_okay
@@ -3726,6 +3754,7 @@ class PyLayerIRCIoT(object):
 
  def irciot_encap_all_(self, in_datumset, in_vuid = None):
   self.irciot_check_mtu_()
+  self.irciot_check_encoding_()
   if not in_vuid in [
     self.CONST.api_vuid_all,
     self.CONST.api_vuid_cfg,
@@ -3776,6 +3805,7 @@ class PyLayerIRCIoT(object):
    in_vuid = None):
   ''' Public part of encapsulator with per-"Datum" fragmentation '''
   self.irciot_check_mtu_()
+  self.irciot_check_encoding_()
   self.irciot_blockchain_check_publication_()
   self.irciot_encryption_check_publication_()
   # my_encrypt = CAN_encrypt_datum and DO_always_encrypt
@@ -3802,7 +3832,7 @@ class PyLayerIRCIoT(object):
      del my_datums_obj
      del my_datums_cnt
   my_irciot = self.irciot_encap_internal_(my_datums_set, in_vuid)
-  if (len(my_irciot) > self.__message_mtu) or my_encrypt:
+  if (len(my_irciot) > self.__message_MTU) or my_encrypt:
      if in_skip == 0:
         self.current_mid = save_mid # mid rollback
      my_datums = json.loads(my_datums_set)
@@ -3811,7 +3841,7 @@ class PyLayerIRCIoT(object):
         my_datums_total = len(my_datums)
         if my_datums_total > 1:
            my_datums_skip = my_datums_total
-           while (len(my_irciot) > self.__message_mtu) \
+           while (len(my_irciot) > self.__message_MTU) \
              and (my_datums_skip <= my_datums_total):
               part_datums = []
               my_datums_cnt = 0
@@ -3824,7 +3854,7 @@ class PyLayerIRCIoT(object):
               str_part_datums = json.dumps(part_datums, separators=(',',':'))
               self.current_mid = save_mid # mid rollback
               my_irciot = self.irciot_encap_internal_(str_part_datums, in_vuid)
-              if len(my_irciot) <= self.__message_mtu:
+              if len(my_irciot) <= self.__message_MTU:
                 my_skip_out = in_skip + my_datums_skip
                 if my_skip_out >= my_total:
                    my_skip_out = 0

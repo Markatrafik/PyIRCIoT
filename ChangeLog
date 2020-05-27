@@ -158,3 +158,8 @@
 	The constants with the prefix code_* in the class PyLayerIRC.CONST
 	are renamed to commonly accepted, with the prefixes RPL_* and ERR_*
 
+2020-05-28 07:35 GMT+7 PyIRCIoT 0.0.209 Alexey Y. Woronov <alexey@woronov.ru>
+	* Since Version 0.0.209 in API beetwen PyLayerIRCIoT class and any
+	transport class new method with index api_GET_iENC = 601 has been
+	added. Exactly same as api_GET_iMTU. Default value is "utf-8".
+

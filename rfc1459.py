@@ -170,6 +170,9 @@ class PyLayerIRC( irciot_shared_ ):
    irc_channel_regexp = "^#[" + irc_ascii_letters \
      + irc_ascii_digits + "\-_\^\[\]\{\}]{1,24}$"
    #
+   irc_default_encoding  = "utf-8"
+   irc_fallback_encoding = "iso-8859-1"
+   #
    irc_default_draft = DO_default_draft
    irc_additional_drafts = []
    #
@@ -231,11 +234,11 @@ class PyLayerIRC( irciot_shared_ ):
    if irc_default_draft in ircd_Un_Ch_se:
      irc_additional_drafts += [ irc_add_v3 ]
    #
-   default_mtu = 480
+   irc_mtu = 480
    if irc_default_draft == "ircu":
-     default_mtu = 440
+     irc_mtu = 440
    if irc_add_v3 in irc_additional_drafts:
-     #default_mtu = 1024 (line-length-3.3)
+     #irc_mtu = 1024 (line-length-3.3)
      pass
    #
    RPL_WELCOME           = "001"
@@ -890,6 +893,8 @@ class PyLayerIRC( irciot_shared_ ):
    #
    super(PyLayerIRC, self).__init__()
    #
+   self.irc_encoding = self.CONST.irc_default_encoding
+   #
    self.__irc_nick_matcher \
     = re.compile(self.CONST.irc_nick_regexp, re.IGNORECASE)
    self.__irc_channel_matcher \
@@ -1052,7 +1057,8 @@ class PyLayerIRC( irciot_shared_ ):
          while (ident_ok_()):
            my_ready = select.select([my_socket], [], [], 0)
            if my_ready[0] == [] and ident_ok_():
-             my_data = my_conn.recv(self.CONST.irc_buffer_size).decode('utf-8')
+             my_data = my_conn.recv(self.CONST.irc_buffer_size \
+               ).decode(self.irc_encoding)
              if my_data:
                for my_char in [ '\n', '\r', ' ' ]:
                  my_data = my_data.replace(my_char, '')
@@ -1070,7 +1076,7 @@ class PyLayerIRC( irciot_shared_ ):
                  my_out += "USERID : UNIX : %s\n" % self.irc_user
                else:
                  my_out += "ERROR : NO-USER\n"
-               my_conn.send(bytes(my_out, 'utf-8'))
+               my_conn.send(bytes(my_out, self.irc_encoding))
                self.ident_run = False
                break
              else:
@@ -1313,7 +1319,9 @@ class PyLayerIRC( irciot_shared_ ):
          None, None, None, None, None, \
          None, None, in_params,  None)
    elif in_action == self.CONST.api_GET_iMTU:
-     return (True, self.CONST.default_mtu)
+     return (True, self.CONST.irc_mtu)
+   elif in_action == self.CONST.api_GET_iENC:
+     return (True, self.CONST.irc_encoding)
    return (False, None)
    #
    # End of user_handler_()
@@ -1809,7 +1817,7 @@ class PyLayerIRC( irciot_shared_ ):
      if self.irc_debug:
        self.to_log_("Sending to IRC: [" \
          + irc_out.replace('\r','\\r').replace('\n','\\n') + "\\n]")
-     self.irc.send(bytes(irc_out + "\n", 'utf-8'))
+     self.irc.send(bytes(irc_out + "\n", self.irc_encoding))
      sleep(self.CONST.irc_micro_wait)
      irc_out = ""
      return 0
@@ -1850,7 +1858,7 @@ class PyLayerIRC( irciot_shared_ ):
        delta_time = 0
      if ready[0] and self.irc_run:
        irc_input = self.irc.recv(self.CONST.irc_buffer_size \
-         ).decode('utf-8', 'ignore')
+         ).decode(self.irc_encoding, 'ignore')
        if irc_input != "":
          if self.irc_debug:
            self.to_log_("Received from IRC: [" \

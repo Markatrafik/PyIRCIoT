@@ -64,7 +64,9 @@ class PyLayerUDPb( irciot_shared_ ):
   udpb_latency_wait = 1
   udpb_default_wait = 1
   #
-  udpb_default_mtu = 1000 # in bytes
+  udpb_default_MTU = 1000 # in bytes
+  #
+  udpb_default_encoding = "utf-8"
   #
   # 0. Unique User ID
   # 1. User IP address (IPv4 or IPv6)
@@ -91,6 +93,9 @@ class PyLayerUDPb( irciot_shared_ ):
   self.udpb_task = None
   self.udpb_run = False
   self.udpb_debug = self.CONST.udpb_default_debug
+  #
+  self.udpb_encoding = self.CONST.udpb_default_encoding
+  self.udpb_MTU = self.CONST.udpb_default_MTU
   #
   self.udpb_port = self.CONST.udpb_default_port
   self.udpb_ip   = self.CONST.udpb_default_ip
@@ -196,7 +201,9 @@ class PyLayerUDPb( irciot_shared_ ):
       else:
         return (False, None)
   if in_action == self.CONST.api_GET_iMTU:
-    return (True, self.CONST.udpb_default_mtu)
+    return (True, self.CONST.udpb_MTU)
+  if in_action == self.CONST.api_GET_iENC:
+    return (True, self.CONST.udpb_encoding)
   return (False, None)
   #
   # End of user_handler_()
@@ -238,7 +245,7 @@ class PyLayerUDPb( irciot_shared_ ):
     for my_adapter in my_adapters:
       my_adapter_name = my_adapter.name
       if isinstance(my_adapter_name, bytes):
-        my_adapter_name = str(my_adapter_name, 'utf-8')
+        my_adapter_name = str(my_adapter_name, self.udpb_encoding)
       if my_adapter_name == in_interface:
         for my_ip in my_adapter.ips:
           if not in_ipv6 and self.is_ipv4_address_(my_ip.ip):
@@ -428,7 +435,7 @@ class PyLayerUDPb( irciot_shared_ ):
         return ( -1, "", 0, "" )
       if my_ip in self.udpb_local_ip_addresses + [ self.udpb_ip ]:
         return ( -1, "", delta_time, "" )
-      udpb_input = my_data.decode('utf-8')
+      udpb_input = my_data.decode(self.udpb_encoding)
       udpb_input = udpb_input.strip('\n').strip('\r')
       if udpb_input != "":
         if self.udpb_debug:
@@ -465,7 +472,7 @@ class PyLayerUDPb( irciot_shared_ ):
   if self.udpb_debug:
     self.to_log_("Sending to UDP(%s:%s): <" \
       % (my_addr, self.udpb_port) + in_string + ">")
-  my_data = bytes(in_string, 'utf-8')
+  my_data = bytes(in_string, self.udpb_encoding)
   self.udpb_server_sock.sendto(my_data, (my_addr, self.udpb_port))
   sleep(self.CONST.udpb_micro_wait)
   return True

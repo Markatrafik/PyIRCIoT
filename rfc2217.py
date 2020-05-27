@@ -69,6 +69,8 @@ class PyLayerCOM( irciot_shared_ ):
    #
    com_default_MTU = 500
    #
+   com_default_encoding = "utf-8"
+   #
    # According RFC 2217
    #
    # Constants defined by RFC will be here
@@ -81,6 +83,8 @@ class PyLayerCOM( irciot_shared_ ):
    self.CONST = self.CONST()
    #
    super(PyLayerUDPb, self).__init__()
+   #
+   self.com_encoding = self.CONST.com_default_encoding
    #
    self.com_host = socket.gethostname()
    #
@@ -106,6 +110,8 @@ class PyLayerCOM( irciot_shared_ ):
    self.com_task  = None
    self.com_run   = False
    self.com_debug = self.CONST.com_default_debug
+   #
+   self.com_MTU = self.CONST.com_default_MTU
    #
    # Trivial Virtual Users Database (for One User)
    #
@@ -231,7 +237,9 @@ class PyLayerCOM( irciot_shared_ ):
        self.ekto = in_params
      return (True, None)
    elif in_action == self.CONST.api_GET_iMTU:
-     return (True, self.CONST.com_default_mtu)
+     return (True, self.com_MTU)
+   elif in_action == self.CONST.api_GET_iENC:
+     return (True, self.com_encoding)
    return (False, None)
    #
    # End of user_handler_()
@@ -264,7 +272,7 @@ class PyLayerCOM( irciot_shared_ ):
        return -1
      if self.com_debug:
        self.to_log_("Sending to Serial over Network: [" + com_out + "]")
-     #self.com_send(bytes(com_out + "\n", 'utf-8'))
+     #self.com_send(bytes(com_out + "\n", self.com_encoding))
      sleep(self.CONST.com_micro_wait)
      com_out = ""
      return 0

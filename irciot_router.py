@@ -137,6 +137,8 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
     raise ValueError(self.CONST.irciot_library_version, \
      self.CONST.irciot_router_library_version)
   #
+  self.__encoding = self.CONST.irciot_default_encoding
+  #
   # End of PyIRCIoT_router.__init__()
 
  def router_pointer (self, in_compatibility, in_messages_pack):
@@ -260,6 +262,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
     return ""
   if not self.is_router_graphs_(self.router_graphs):
     return ""
+  self.irciot_check_encoding_()
   my_json = self.irciot_deinencap_(in_message, in_vuid)
   if my_json == "":
     return ""
@@ -313,7 +316,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   for my_key, my_value in sorted(my_datum.items()):
     my_string += "%s%s" % (my_key, my_value)
   del my_datum
-  my_bytes = bytes(my_string, 'utf-8')
+  my_bytes = bytes(my_string, self.__encoding)
   my_string = "%s" % self.irciot_crc16_(my_bytes)
   my_string += "%s" % self.irciot_crc32_(my_bytes)
   del my_bytes
