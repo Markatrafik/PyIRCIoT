@@ -234,11 +234,11 @@ class PyLayerIRC( irciot_shared_ ):
    if irc_default_draft in ircd_Un_Ch_se:
      irc_additional_drafts += [ irc_add_v3 ]
    #
-   irc_mtu = 480
+   irc_default_MTU = 480
    if irc_default_draft == "ircu":
-     irc_mtu = 440
+     irc_default_MTU = 440
    if irc_add_v3 in irc_additional_drafts:
-     #irc_mtu = 1024 (line-length-3.3)
+     #irc_default_MTU = 1024 (line-length-3.3)
      pass
    #
    RPL_WELCOME           = "001"
@@ -894,6 +894,7 @@ class PyLayerIRC( irciot_shared_ ):
    super(PyLayerIRC, self).__init__()
    #
    self.irc_encoding = self.CONST.irc_default_encoding
+   self.irc_MTU = self.CONST.irc_default_MTU
    #
    self.__irc_nick_matcher \
     = re.compile(self.CONST.irc_nick_regexp, re.IGNORECASE)
@@ -1319,9 +1320,9 @@ class PyLayerIRC( irciot_shared_ ):
          None, None, None, None, None, \
          None, None, in_params,  None)
    elif in_action == self.CONST.api_GET_iMTU:
-     return (True, self.CONST.irc_mtu)
+     return (True, self.irc_MTU)
    elif in_action == self.CONST.api_GET_iENC:
-     return (True, self.CONST.irc_encoding)
+     return (True, self.irc_encoding)
    return (False, None)
    #
    # End of user_handler_()
