@@ -61,9 +61,9 @@ class PyLayerCOM( irciot_shared_ ):
    #
    com_input_buffer = ""
    #
-   com_buffer_size  = 2560
+   com_buffer_size  = 3072
    #
-   com_modes = [ "CLIENT", "SERVER" ]
+   com_modes = [ "CLIENT", "SERVICE", "SERVER" ]
    #
    com_default_mid_pipeline_size = 16
    #
@@ -115,15 +115,15 @@ class PyLayerCOM( irciot_shared_ ):
    #
    # Trivial Virtual Users Database (for One User)
    #
-   self.lmid = []    # Last Message ID
-   self.omid = []    # Own last Message ID
-   self.ekey = None  # Encryption Public Key
-   self.bkey = None  # Blockchain Public Key
-   self.ekto = None  # Encryption Public Key Timeout
-   self.bkto = None  # Blockchain Public Key Timeout
+   self.__lmid = []   # Last Message ID
+   self.__omid = []   # Own last Message ID
+   self.__ekey = None # Encryption Public Key
+   self.__bkey = None # Blockchain Public Key
+   self.__ekto = None # Encryption Public Key Timeout
+   self.__bkto = None # Blockchain Public Key Timeout
    #
    self.time_now   = datetime.datetime.now()
-   self.delta_time = 0
+   self.__delta_time = 0
    #
    # End of __init__()
 
@@ -195,20 +195,20 @@ class PyLayerCOM( irciot_shared_ ):
    if in_vuid != self.CONST.api_vuid_cfg:
      return (False, None)
    if   in_action == self.CONST.api_GET_LMID:
-     return (True, self.lmid)
+     return (True, self.__lmid)
    elif in_action == self.CONST.api_SET_LMID:
      if isinstance(in_params, str):
-       self.lmid.append(in_params)
-       if len(self.lmid) > self.CONST.com_mid_pipeline_size:
-         del self.lmid[0]
+       self.__lmid.append(in_params)
+       if len(self.__lmid) > self.CONST.com_mid_pipeline_size:
+         del self.__lmid[0]
        return (True, None)
    elif in_action == self.CONST.api_GET_OMID:
-     return (True, self.omid)
+     return (True, self.__omid)
    elif in_action == self.CONST.api_SET_OMID:
      if isinstance(in_params, str):
-       self.omid.append(in_params)
-       if len(self.omid) > self.CONST.com_mid_pipeline_size:
-         del self.omid[0]
+       self.__omid.append(in_params)
+       if len(self.__omid) > self.CONST.com_mid_pipeline_size:
+         del self.__omid[0]
        return (True, None)
    elif in_action == self.CONST.api_GET_VUID:
      return (True, self.CONST.api_vuid_self)
@@ -219,22 +219,22 @@ class PyLayerCOM( irciot_shared_ ):
        self.bkey = in_params
      return (True, None)
    elif in_action == self.CONST.api_GET_BKTO:
-     return (True, self.bkto)
+     return (True, self.__bkto)
    elif in_action == self.CONST.api_SET_BKTO:
      if isinstance(in_params, int):
-       self.bkto = in_params
+       self.__bkto = in_params
      return (True, None)
    elif in_action == self.CONST.api_GET_EKEY:
-     return (True, self.ekey)
+     return (True, self.__ekey)
    elif in_action == self.CONST.api_SET_EKEY:
      if isinstance(in_params, str):
-       self.ekey = in_params
+       self.__ekey = in_params
      return (True, None)
    elif in_action == self.CONST.api_GET_EKTO:
-     return (True, self.ekto)
+     return (True, self.__ekto)
    elif in_action == self.CONST.api_SET_EKTO:
      if isinstance(jn_params, int):
-       self.ekto = in_params
+       self.__ekto = in_params
      return (True, None)
    elif in_action == self.CONST.api_GET_iMTU:
      return (True, self.com_MTU)
@@ -354,7 +354,7 @@ class PyLayerCOM( irciot_shared_ ):
      com_ret = 0
      com_vuid = "%s0" % self.CONST.api_vuid_cfg
 
-     self.delta_time = 0
+     self.__delta_time = 0
 
      # app.run(host='0.0.0.0', port=50000, debug=True)
      # must be FIXed for Unprivileged user

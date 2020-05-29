@@ -118,7 +118,7 @@ class PyLayerIRC( irciot_shared_ ):
    #
    irc_input_buffer = ""
    #
-   irc_buffer_size  = 2560
+   irc_buffer_size  = 3072
    #
    irc_layer_modes  = [ "CLIENT", "SERVICE", "SERVER" ]
    #
@@ -190,26 +190,28 @@ class PyLayerIRC( irciot_shared_ ):
    # 12. "IRCNet"     -- IRCNet ircd, @ IRCNet, ver. 2.12.2
    # 13. "IRCPlus"    -- IRCPlus, for Windows, ver. 5.0
    # 14. "ircu"       -- ircd-ircu aka Undernet IRCd, ver. 2.10.12.10
-   # 15. "miniircd"   -- miniircd, Python based, ver. 1.3 '2003
-   # 16. "Nefarious"  -- Nefarious ircd
-   # 17. "Nefarious2" -- Nefarious IRCu (ircu fork) '2020
-   # 18. "ng"         -- ngIRCd aka Next Generation IRCd, ver. 25 '2019
-   # 19. "Oragono"    -- Oragono, Golang based, ver. 2.0.0 '2016
-   # 20. "plexus"     -- PleXusIRCd '2005
-   # 21. "pircd"      -- Perl IRCd, Perl based '2002
-   # 22. "pure"       -- pureIRCd, CSharp based '2008
-   # 23. "ratbox"     -- ircd-ratbox, @ EFNet, ver. 3.0.8 '2006
-   # 24. "Rock"       -- rock-ircd aka RockIRCd (UnrealIRCd fork), '2009
-   # 25. "Rubi"       -- RubiIRCd, Ruby based '2009
-   # 26. "RusNet"     -- ircd RusNet, @ RusNet, ver. 1.4.19
-   # 27. "seven"      -- ircd-seven, ver. 1.1.3
-   # 28. "Shadow"     -- ShadowIRCd, ver. 6.3.3 '2003
-   # 29. "snircd"     -- snircd (ircu fork), @ QuakeNet, ver. 1.3.4
-   # 30. "solid"      -- solid-ircd (Bahamut fork), ver. 3.4.8 '2004
-   # 31. "Synchronet" -- Synchronet IRCd, js based
-   # 32. "Unreal"     -- UnrealIRCd, ver. 5.0.4 '2020
-   # 33. "We"         -- WeIRCd
-   # 34. "PyIRCIoT" (when it works in IRC server mode)
+   # 15. "Kine"       -- KineIRCd '2005
+   # 16. "miniircd"   -- miniircd, Python based, ver. 1.3 '2003
+   # 17. "Nefarious"  -- Nefarious ircd
+   # 18. "Nefarious2" -- Nefarious IRCu (ircu fork) '2020
+   # 19. "ng"         -- ngIRCd aka Next Generation IRCd, ver. 25 '2019
+   # 20. "Oragono"    -- Oragono, Golang based, ver. 2.0.0 '2016
+   # 21. "plexus"     -- PleXusIRCd '2005
+   # 22. "pircd"      -- Perl IRCd, Perl based '2002
+   # 23. "Provision"  -- ProvisionIRCd, Python based '2006
+   # 24. "pure"       -- pureIRCd, CSharp based '2008
+   # 25. "ratbox"     -- ircd-ratbox, @ EFNet, ver. 3.0.8 '2006
+   # 26. "Rock"       -- rock-ircd aka RockIRCd (UnrealIRCd fork), '2009
+   # 27. "Rubi"       -- RubiIRCd, Ruby based '2009
+   # 28. "RusNet"     -- ircd RusNet, @ RusNet, ver. 1.4.19
+   # 29. "seven"      -- ircd-seven, ver. 1.1.3
+   # 30. "Shadow"     -- ShadowIRCd, ver. 6.3.3 '2003
+   # 31. "snircd"     -- snircd (ircu fork), @ QuakeNet, ver. 1.3.4
+   # 32. "solid"      -- solid-ircd (Bahamut fork), ver. 3.4.8 '2004
+   # 33. "Synchronet" -- Synchronet IRCd, js based
+   # 34. "Unreal"     -- UnrealIRCd, ver. 5.0.4 '2020
+   # 35. "We"         -- WeIRCd
+   # 36. "PyIRCIoT" (when it works in IRC server mode)
    #
    # Additional drafts extending Internet Relay Chat protocol:
    irc_add_plus = "IRC+"  # IRC+ Services Protocol
@@ -453,6 +455,7 @@ class PyLayerIRC( irciot_shared_ ):
      RPL_USERIP          = "340"
    RPL_INVITING          = "341"
    RPL_SUMMONING         = "342"
+   RPL_INVITED           = "354" # GameSurge only?
    if irc_default_draft in [ "Unreal", "ratbox", "seven", \
     "Bahamut", "Charybdis", "hybrid", "plexus" ]:
      RPL_INVITELIST      = "346"
@@ -506,6 +509,8 @@ class PyLayerIRC( irciot_shared_ ):
    RPL_USERS             = "393"
    RPL_ENDOFUSERS        = "394"
    RPL_NOUSERS           = "395"
+   if irc_default_draft == "ircu":
+     RPL_HOSTHIDDEN      = "396"
    ERR_NOSUCHNICK        = "401"
    ERR_NOSUCHSERVER      = "402"
    ERR_NOSUCHCHANNEL     = "403"
@@ -608,6 +613,7 @@ class PyLayerIRC( irciot_shared_ ):
    if irc_default_draft in [ "RFC2812", "hybrid", "IRCNet" ]:
      ERR_RESTRICTED      = "484"
    if irc_default_draft == "Unreal":
+     ERR_ATTACKDENY      = "484"
      ERR_KILLDENY        = "485"
    else:
      ERR_UNIQOPPRIVSNEEDED = "485" # Unknown
@@ -661,8 +667,42 @@ class PyLayerIRC( irciot_shared_ ):
      RPL_DUMPRPL         = "641"
      RPL_EODUMP          = "642"
      RPL_SPAMCMDFWD      = "659"
+   if irc_default_draft == "Kine":
+     RPL_TRACEROUTE_HOP  = "660"
+     RPL_TRACEROUTE_START = "661"
+     RPL_MODECHANGEWARN  = "662"
+     RPL_CHANREDIR       = "663"
+     RPL_SERVMODEIS      = "664"
+     RPL_OTHERUMODEIS    = "665"
    if irc_add_v3 in irc_additional_drafts:
      RPL_STARTTLS        = "670"
+   if irc_default_draft == "Kine":
+     RPL_WHOISSTAFF      = "689"
+     RPL_WHOISLANGUAGE   = "690"
+   if irc_default_draft == "ratbox":
+     RPL_MODLIST         = "702"
+     RPL_ENDOFMODLIST    = "703"
+     RPL_HELPSTART       = "704"
+     RPL_HELPTXT         = "705"
+     RPL_ENDOFHELP       = "706"
+     RPL_ETRACEFULL      = "708"
+     RPL_ETRACE          = "709"
+     RPL_KNOCK           = "710"
+     RPL_KNOCKDLVR       = "711"
+     ERR_TOOMANYKNOCK    = "712"
+     ERR_CHANOPEN        = "713"
+     ERR_KNOCKONCHAN     = "714"
+     ERR_KNOCKDISABLED   = "715"
+     RPL_TARGUMODEG      = "716"
+     RPL_TARGNOTIFY      = "717"
+     RPL_UMODEGMSG       = "718"
+     RPL_OMOTDSTART      = "720"
+     RPL_OMOTD           = "721"
+     RPL_ENDOFOMOTD      = "722"
+     ERR_NOPRIVS         = "723"
+     RPL_TESTMARK        = "724"
+     RPL_TESTLINE        = "725"
+     RPL_NOTESTLINE      = "726"
    if irc_default_draft in ircd_Ch_se_ra_pl:
      RPL_TESTMASK        = "724"
      RPL_TESTLINE        = "725"
@@ -948,7 +988,7 @@ class PyLayerIRC( irciot_shared_ ):
    #
    self.irc_channel = self.CONST.irc_default_channel
    self.irc_chankey = self.CONST.irc_default_chankey
-   self.join_retry  = 0
+   self.__join_retry = 0
    #
    # ( irc channel, irc channel key, join retry count )
    self.irc_channels = [ ( \
@@ -963,13 +1003,13 @@ class PyLayerIRC( irciot_shared_ ):
    self.irc_last_temporal_vuid = \
      self.CONST.api_first_temporal_vuid
    #
-   self.irc_queue = [0, 0]
-   self.irc_queue[self.CONST.irc_queue_input  ] = Queue(maxsize=0)
-   self.irc_queue[self.CONST.irc_queue_output ] = Queue(maxsize=0)
+   self.__irc_queue = [0, 0]
+   self.__irc_queue[self.CONST.irc_queue_input  ] = Queue(maxsize=0)
+   self.__irc_queue[self.CONST.irc_queue_output ] = Queue(maxsize=0)
    #
-   self.irc_queue_lock = [0, 0]
-   self.irc_queue_lock[self.CONST.irc_queue_input  ] = False
-   self.irc_queue_lock[self.CONST.irc_queue_output ] = False
+   self.__irc_queue_lock = [0, 0]
+   self.__irc_queue_lock[self.CONST.irc_queue_input  ] = False
+   self.__irc_queue_lock[self.CONST.irc_queue_output ] = False
    #
    self.irc_commands = []
    self.irc_codes    = []
@@ -978,11 +1018,11 @@ class PyLayerIRC( irciot_shared_ ):
    self.irc_layer_mode \
      = self.CONST.irc_layer_modes[0]
    #
-   self.irc_task  = None
+   self.__irc_task = None
    self.irc_run   = False
    self.irc_debug = self.CONST.irc_default_debug
    #
-   self.ident_task = None
+   self.__ident_task = None
    self.ident_run  = False
    self.ident_ip   = self.CONST.ident_default_ip
    self.ident_port = self.CONST.ident_default_port
@@ -991,12 +1031,14 @@ class PyLayerIRC( irciot_shared_ ):
      = self.CONST.irc_default_mid_pipeline_size
    #
    self.irc_silence_max = self.CONST.irc_default_silence
-   self.irc_silence = 0
+   self.__irc_silence = 0
    #
    self.time_now   = datetime.datetime.now()
-   self.time_ping  = self.time_now
-   self.delta_time = 0
-   self.delta_ping = 0
+   self.__time_ping  = self.time_now
+   self.__delta_time = 0
+   self.__delta_ping = 0
+   #
+   self.__whox = False # Supporting eXtended WHO command
    #
    self.update_irc_host_()
    #
@@ -1100,8 +1142,8 @@ class PyLayerIRC( irciot_shared_ ):
  def start_IRC_(self):
    #
    self.irc_run  = True
-   self.irc_task = threading.Thread(target = self.irc_process_)
-   self.irc_task.start()
+   self.__irc_task = threading.Thread(target = self.irc_process_)
+   self.__irc_task.start()
    #
    # End of start_IRC_()
 
@@ -1113,10 +1155,10 @@ class PyLayerIRC( irciot_shared_ ):
    sleep(self.CONST.irc_micro_wait)
    self.irc_disconnect_()
    self.stop_ident_()
-   if self.irc_task != None:
+   if self.__irc_task != None:
      sleep(self.CONST.irc_micro_wait)
      try:
-       self.irc_task.join()
+       self.__irc_task.join()
      except:
        pass
    #
@@ -1125,18 +1167,18 @@ class PyLayerIRC( irciot_shared_ ):
  def start_ident_(self):
    #
    self.ident_run = True
-   self.ident_task = threading.Thread(target = self.ident_server_)
-   self.ident_task.start()
+   self.__ident_task = threading.Thread(target = self.ident_server_)
+   self.__ident_task.start()
    #
    # End of start_ident_()
 
  def stop_ident_(self):
    #
    self.ident_run = False
-   if self.ident_task != None:
+   if self.__ident_task != None:
      sleep(self.CONST.irc_micro_wait)
      try:
-       self.ident_task.join()
+       self.__ident_task.join()
      except:
        pass
 
@@ -1845,7 +1887,7 @@ class PyLayerIRC( irciot_shared_ ):
        ready = select.select([self.irc], [], [], my_timeout)
        if not self.irc_run:
          return (-1, "", 0)
-       if not self.irc_queue[self.CONST.irc_queue_output].empty():
+       if not self.__irc_queue[self.CONST.irc_queue_output].empty():
          break
        my_timerest -= my_timeout
      time_out_recv = datetime.datetime.now()
@@ -1983,7 +2025,7 @@ class PyLayerIRC( irciot_shared_ ):
    irc_nick = self.irc_tomock_(in_nick)
    if irc_nick == in_nick:
      irc_nick = in_nick + "%d" % random.randint(0, 999)
-   if (self.join_retry > 2) or in_force:
+   if (self.__join_retry > 2) or in_force:
      nick_length = random.randint(2, self.irc_nick_length)
      irc_nick = random.choice(self.CONST.irc_nick_first_char)
      irc_nick += ''.join( \
@@ -2026,18 +2068,18 @@ class PyLayerIRC( irciot_shared_ ):
    # self.irc.setblocking(False)
 
  def irc_check_queue_(self, in_queue_id):
-   old_queue_lock = self.irc_queue_lock[in_queue_id]
+   old_queue_lock = self.__irc_queue_lock[in_queue_id]
    if not old_queue_lock:
-     check_queue = self.irc_queue[in_queue_id]
-     self.irc_queue_lock[in_queue_id] = True
+     check_queue = self.__irc_queue[in_queue_id]
+     self.__irc_queue_lock[in_queue_id] = True
      if not check_queue.empty():
        (irc_message, irc_wait, irc_vuid) = check_queue.get()
-       self.irc_queue_lock[in_queue_id] = old_queue_lock
+       self.__irc_queue_lock[in_queue_id] = old_queue_lock
        return (irc_message, irc_wait, irc_vuid)
      else:
        if old_queue_lock:
           check_queue.task_done()
-     self.irc_queue_lock[in_queue_id] = old_queue_lock
+     self.__irc_queue_lock[in_queue_id] = old_queue_lock
    try:
      sleep(self.CONST.irc_micro_wait)
    except:
@@ -2047,10 +2089,10 @@ class PyLayerIRC( irciot_shared_ ):
    # End of irc_check_queue_()
 
  def irc_add_to_queue_(self, in_queue_id, in_message, in_wait, in_vuid):
-   old_queue_lock = self.irc_queue_lock[in_queue_id]
-   self.irc_queue_lock[in_queue_id] = True
-   self.irc_queue[in_queue_id].put((in_message, in_wait, in_vuid))
-   self.irc_queue_lock[in_queue_id] = old_queue_lock
+   old_queue_lock = self.__irc_queue_lock[in_queue_id]
+   self.__irc_queue_lock[in_queue_id] = True
+   self.__irc_queue[in_queue_id].put((in_message, in_wait, in_vuid))
+   self.__irc_queue_lock[in_queue_id] = old_queue_lock
 
  def irc_check_and_restore_nick_(self):
    if self.__irc_nick != self.irc_nick_base:
@@ -2103,6 +2145,11 @@ class PyLayerIRC( irciot_shared_ ):
        self.irc_nick_length = my_len
    except:
      pass
+   return (in_ret, in_init, in_wait)
+
+ def func_feature_whox_(self, in_args):
+   (in_string, in_ret, in_init, in_wait) = in_args
+   self.__whox = True
    return (in_ret, in_init, in_wait)
 
  # incomplete
@@ -2164,9 +2211,9 @@ class PyLayerIRC( irciot_shared_ ):
 
  def func_banned_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
-   if self.join_retry > 1:
+   if self.__join_retry > 1:
      if self.irc_random_nick_(self.__irc_nick) == 1:
-       self.join_retry += 1
+       self.__join_retry += 1
        return (-1, 0, in_wait)
    return (in_ret, 3, self.CONST.irc_default_wait)
 
@@ -2239,6 +2286,7 @@ class PyLayerIRC( irciot_shared_ ):
 
  def func_who_user_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
+   # Here will be a check of self.__whox
    try:
      my_array = in_string.split(":")
      if my_array[0] == "":
@@ -2560,7 +2608,7 @@ class PyLayerIRC( irciot_shared_ ):
       (C.feature_USERIP,      C.featt_EMPTY,  None),
       (C.feature_WALLCHOPS,   C.featt_EMPTY,  None),
       (C.feature_WALLVOICES,  C.featt_EMPTY,  None),
-      (C.feature_WHOX,        C.featt_EMPTY,  None) ] )
+      (C.feature_WHOX,        C.featt_EMPTY,  self.func_feature_whox_) ] )
    #
    # End of init_rfc1459_()
 
@@ -2593,7 +2641,7 @@ class PyLayerIRC( irciot_shared_ ):
      irc_ret = 0
      irc_vuid = "%s0" % self.CONST.api_vuid_cfg
 
-     self.delta_time = 0
+     self.__delta_time = 0
 
      # app.run(host='0.0.0.0', port=50000, debug=True)
      # must be FIXed for Unprivileged user
@@ -2630,14 +2678,14 @@ class PyLayerIRC( irciot_shared_ ):
            irc_init = 0
 
        elif irc_init == 3:
-         self.join_retry = 0
+         self.__join_retry = 0
          if self.irc_send_(self.CONST.cmd_NICK \
           + " " + self.__irc_nick) == -1:
            irc_init = 0
 
        elif irc_init == 4:
          irc_wait = self.CONST.irc_default_wait
-         self.join_retry += 1
+         self.__join_retry += 1
          if self.irc_send_(self.CONST.cmd_JOIN \
           + " " + self.irc_channel + str(" " \
           + self.irc_chankey if self.irc_chankey else "")) == -1:
@@ -2645,7 +2693,7 @@ class PyLayerIRC( irciot_shared_ ):
 
        elif irc_init == 5:
          irc_wait = self.CONST.irc_default_wait
-         self.join_retry += 1
+         self.__join_retry += 1
          if self.irc_send_(self.CONST.cmd_JOIN \
           + " " + self.irc_channel + "%s\r" % str(" " \
           + self.irc_chankey if self.irc_chankey else "")) == -1:
@@ -2655,26 +2703,26 @@ class PyLayerIRC( irciot_shared_ ):
          self.ident_run = False
 
        if irc_init > 0:
-         (irc_ret, irc_input_buffer, self.delta_time) \
+         (irc_ret, irc_input_buffer, self.__delta_time) \
           = self.irc_recv_(irc_wait)
 
        irc_wait = self.CONST.irc_default_wait
 
-       if irc_init > 3 and self.irc_silence >= self.irc_silence_max:
-         if self.irc_silence == self.irc_silence_max:
+       if irc_init > 3 and self.__irc_silence >= self.irc_silence_max:
+         if self.__irc_silence == self.irc_silence_max:
            # To provoke TCP interaction, we take some action
            if self.irc_who_channel_(self.irc_channel) == -1:
              irc_init = 0
            else:
              self.irc_check_and_restore_nick_()
-         elif self.irc_silence > self.irc_silence_max:
+         elif self.__irc_silence > self.irc_silence_max:
            irc_init = 0
          if irc_init == 0:
            self.irc_disconnect_()
-       self.irc_silence += 1
+       self.__irc_silence += 1
 
-       if self.delta_time > 0:
-         irc_wait = self.delta_time
+       if self.__delta_time > 0:
+         irc_wait = self.__delta_time
        else:
          if irc_init == 6:
            self.irc_track_clarify_nicks_()
@@ -2687,16 +2735,16 @@ class PyLayerIRC( irciot_shared_ ):
 
        for irc_input_split in re.split(r'[\r\n]', irc_input_buffer):
 
+         self.__irc_silence = 0
+
          if irc_input_split == "":
            irc_input_buff = ""
            continue
 
-         self.irc_silence = 0
-
          if irc_input_split[:5] == self.CONST.cmd_PING + " ":
-           self.delta_ping \
-             = self.td2ms_(self.time_now - self.time_ping)
-           self.time_ping = self.time_now
+           self.__delta_ping \
+             = self.td2ms_(self.time_now - self.__time_ping)
+           self.__time_ping = self.time_now
            if self.irc_pong_(irc_input_split) == -1:
              irc_ret = -1
              irc_init = 0
@@ -2778,14 +2826,14 @@ class PyLayerIRC( irciot_shared_ ):
                self.irc_send_(self.CONST.cmd_PRIVMSG + " " \
                  + self.irc_channel + " :" + irc_message)
           irc_message = ""
-          if self.td2ms_(self.time_now - self.time_ping) \
-           > self.delta_ping * 2 and self.delta_ping > 0:
+          if self.td2ms_(self.time_now - self.__time_ping) \
+           > self.__delta_ping * 2 and self.__delta_ping > 0:
              if self.irc_who_channel_(self.irc_channel) == -1:
                self.irc_disconnect_()
                irc_init = 0
              else:
                self.irc_check_and_restore_nick_()
-             self.delta_ping = 0
+             self.__delta_ping = 0
 
    except socket.error:
      self.irc_disconnect()

@@ -127,6 +127,8 @@ class PyLayerUDPb( irciot_shared_ ):
   #
   self.udpb_update_local_ip_addresses_()
   #
+  self.__delta_time = 0
+  #
   # End of PyLayerUDPb.__init__()
 
  def __del__(self):
@@ -519,7 +521,7 @@ class PyLayerUDPb( irciot_shared_ ):
          udpb_init += 1
 
        if udpb_init > 0:
-         ( udpb_ret, udpb_message, self.delta_time, udpb_ip ) \
+         ( udpb_ret, udpb_message, self.__delta_time, udpb_ip ) \
            = self.udpb_receive_(udpb_wait)
          if self.is_json_(udpb_message):
            udpb_vuid = self.udpb_track_get_vuid_by_ip_( udpb_ip )
@@ -535,8 +537,8 @@ class PyLayerUDPb( irciot_shared_ ):
 
        udpb_wait = self.CONST.udpb_default_wait
 
-       if self.delta_time > 0:
-         udpb_wait = self.delta_time
+       if self.__delta_time > 0:
+         udpb_wait = self.__delta_time
 
        if udpb_ret == -1:
          udpb_message = ""
