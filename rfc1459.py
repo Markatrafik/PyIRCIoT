@@ -44,7 +44,7 @@ class PyLayerIRC( irciot_shared_ ):
    #
    irciot_protocol_version = '0.3.33'
    #
-   irciot_library_version  = '0.0.207'
+   irciot_library_version  = '0.0.209'
    #
    # Bot specific constants
    #
@@ -123,6 +123,8 @@ class PyLayerIRC( irciot_shared_ ):
    irc_layer_modes  = [ "CLIENT", "SERVICE", "SERVER" ]
    #
    irc_default_nick_retry = 3600 # in seconds
+   irc_default_join_retry = 32   # trys
+   irc_default_nick_pause = 16   # trys
    #
    irc_default_network_tag = "IRC-IoT"
    #
@@ -973,7 +975,7 @@ class PyLayerIRC( irciot_shared_ ):
      self.irc_proxy_password = self.CONST.irc_default_proxy_password
    #
    self.irc_status = 0
-   self.irc_recon = 1
+   self.__irc_recon = 1
    self.irc_last = None
    #
    self.irc_servers = [ ( \
@@ -989,6 +991,9 @@ class PyLayerIRC( irciot_shared_ ):
    self.irc_channel = self.CONST.irc_default_channel
    self.irc_chankey = self.CONST.irc_default_chankey
    self.__join_retry = 0
+   self.__join_retry_max = self.CONST.irc_default_join_retry
+   #
+   self.__nick_pause = 0
    #
    # ( irc channel, irc channel key, join retry count )
    self.irc_channels = [ ( \
@@ -1596,6 +1601,7 @@ class PyLayerIRC( irciot_shared_ ):
        my_ok = False
    if my_ok:
      self.irc_track_add_nick_(in_nick, in_mask, None, None)
+
    #
    # End of irc_track_fast_nick_()
 
@@ -1847,11 +1853,16 @@ class PyLayerIRC( irciot_shared_ ):
      return
    self.irc_disconnect_()
    self.to_log_("Connection closed, " \
-    + "reconnecting to IRC (try: %d) ... " % self.irc_recon)
-   sleep(self.CONST.irc_first_wait * self.irc_recon)
-   self.irc_recon += 1
-   if self.irc_recon > self.CONST.irc_recon_steps:
-     self.irc_recon = 1
+    + "reconnecting to IRC (try: %d) ... " % self.__irc_recon)
+   my_mult = self.__irc_recon
+   if self.__join_retry > self.__join_retry_max:
+     my_mult = 1
+   sleep(self.CONST.irc_first_wait * my_mult)
+   self.__irc_recon += 1
+   if self.__irc_recon > self.CONST.irc_recon_steps:
+     self.__irc_recon = 1
+   self.__irc_silence = 0
+   self.irc = self.irc_socket_(self.irc_server)
 
  def irc_send_(self, irc_out):
    try:
@@ -2017,6 +2028,11 @@ class PyLayerIRC( irciot_shared_ ):
      return -1
    ret = self.irc_send_(self.CONST.cmd_WHO + " " + in_channel)
    return ret
+
+ def irc_random_user_(self):
+   return ''.join( \
+     random.choice(self.CONST.irc_ascii_lowercase) \
+     for i in range(random.randint(3, 8)))
 
  def irc_random_nick_(self, in_nick, in_force = False):
    if not self.is_irc_nick_(in_nick):
@@ -2209,11 +2225,23 @@ class PyLayerIRC( irciot_shared_ ):
    #  return (-1, 0, in_wait)
    return (in_ret, 1, self.CONST.irc_default_wait)
 
+ def func_registered_(self, in_args):
+   (in_string, in_ret, in_init, in_wait) = in_args
+   return (in_ret, 3, self.CONST.irc_default_wait)
+
  def func_banned_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
    if self.__join_retry > 1:
-     if self.irc_random_nick_(self.__irc_nick) == 1:
-       self.__join_retry += 1
+     if self.__join_retry > self.__join_retry_max:
+       # Now perhaps we were banned by the username,
+       # here, we should know this for sure how, and
+       # maybe connect to another server or from a
+       # different IP address
+       self.irc_reconnect_()
+       return (-1, 0, in_wait)
+     if self.__nick_pause > 0:
+       self.__nick_pause -= 1
+     elif self.irc_random_nick_(self.__irc_nick) == 1:
        return (-1, 0, in_wait)
    return (in_ret, 3, self.CONST.irc_default_wait)
 
@@ -2256,8 +2284,8 @@ class PyLayerIRC( irciot_shared_ ):
  def func_fast_nick_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
    # ... will be calculated from warning, not by RFC 1459 ...
-   in_wait = 3
-   return (in_ret, in_init, in_wait)
+   self.__nick_pause = self.CONST.irc_default_nick_pause
+   return (in_ret, 3, self.CONST.irc_default_wait)
 
  def func_chan_nicks_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
@@ -2460,6 +2488,7 @@ class PyLayerIRC( irciot_shared_ ):
     (C.ERR_ERRONEUSNICKNAME, "ERR_ERRONEUSNICKNAME", self.func_nick_in_use_),
     (C.ERR_NOSUCHCHANNEL,    "ERR_NOSUCHCHANNEL",    self.func_banned_),
     (C.ERR_NICKCOLLISION,    "ERR_NICKCOLLISION",    self.func_nick_in_use_),
+    (C.ERR_ALREADYREGISTERED,"ERR_ALREADYREGISTERED",self.func_registered_),
     (C.ERR_NOSUCHSERVER,     "ERR_NOSUCHSERVER",     None),
     (C.ERR_CANNOTSENDTOCHAN, "ERR_CANNOTSENDTOCHAN", None),
     (C.ERR_TOOMANYCHANNELS,  "ERR_TOOMANYCHANNELS",  None),
@@ -2483,7 +2512,6 @@ class PyLayerIRC( irciot_shared_ ):
     (C.ERR_USERSDISABLED,    "ERR_USERSDISABLED",    None),
     (C.ERR_NEEDMOREPARAMS,   "ERR_NEEDMOREPARAMS",   None),
     (C.ERR_USERSDONTMATCH,   "ERR_USERSDONTMATCH",   None),
-    (C.ERR_ALREADYREGISTERED,"ERR_ALREADYREGISTERED",None),
     (C.ERR_PASSWDMISMATCH,   "ERR_PASSWDMISMATCH",   None),
     (C.ERR_YOUREBANNEDCREEP, "ERR_YOUREBANNEDCREEP", None),
     (C.ERR_YOUWILLBEBANNED,  "ERR_YOUWILLBEBANNED",  None),
@@ -2651,7 +2679,8 @@ class PyLayerIRC( irciot_shared_ ):
      while (self.irc_run):
      
        if not self.irc:
-         sleep(self.CONST.irc_first_wait)
+         if self.__join_retry == 0:
+           sleep(self.CONST.irc_first_wait)
          self.irc = self.irc_socket_(self.irc_server)
          irc_init = 0
 
@@ -2659,6 +2688,9 @@ class PyLayerIRC( irciot_shared_ ):
          irc_init += 1
 
        if irc_init == 1:
+         # self.to_log_("Connecting to '%s:%d'" \
+         #  % (self.irc_server_ip, self.irc_port))
+         self.__irc_silnece = 0
          try:
            self.irc_connect_(self.irc_server_ip, self.irc_port)
          except socket.error:
@@ -2670,7 +2702,12 @@ class PyLayerIRC( irciot_shared_ ):
          if self.irc_password:
            self.irc_send_(self.CONST.cmd_PASS \
             + " " + self.irc_password)
-         self.irc_user = self.irc_tolower_(self.__irc_nick)
+         if self.__join_retry > self.__join_retry_max:
+           self.irc_user = self.irc_random_user_()
+           # Random username can override ban, but can
+           # destroy own IRC mask, it must be restored
+         else:
+           self.irc_user = self.irc_tolower_(self.__irc_nick)
          if self.irc_send_(self.CONST.cmd_USER \
           + " " + self.irc_user \
           + " " + self.irc_host + " 1 :" \
@@ -2705,6 +2742,8 @@ class PyLayerIRC( irciot_shared_ ):
        if irc_init > 0:
          (irc_ret, irc_input_buffer, self.__delta_time) \
           = self.irc_recv_(irc_wait)
+       else:
+         irc_ret = -1
 
        irc_wait = self.CONST.irc_default_wait
 
@@ -2718,7 +2757,7 @@ class PyLayerIRC( irciot_shared_ ):
          elif self.__irc_silence > self.irc_silence_max:
            irc_init = 0
          if irc_init == 0:
-           self.irc_disconnect_()
+           irc_ret = -1
        self.__irc_silence += 1
 
        if self.__delta_time > 0:
@@ -2729,25 +2768,25 @@ class PyLayerIRC( irciot_shared_ ):
 
        if irc_ret == -1:
          self.irc_reconnect_()
-         irc_input_buffer = ""
          irc_init = 0
-         self.irc = self.irc_socket_(self.irc_server)
+         continue
 
        for irc_input_split in re.split(r'[\r\n]', irc_input_buffer):
-
-         self.__irc_silence = 0
 
          if irc_input_split == "":
            irc_input_buff = ""
            continue
+
+         self.__irc_silence = 0
 
          if irc_input_split[:5] == self.CONST.cmd_PING + " ":
            self.__delta_ping \
              = self.td2ms_(self.time_now - self.__time_ping)
            self.__time_ping = self.time_now
            if self.irc_pong_(irc_input_split) == -1:
-             irc_ret = -1
+             self.irc_reconnect_()
              irc_init = 0
+             break
            else:
              self.irc_track_clarify_nicks_()
 
@@ -2829,7 +2868,7 @@ class PyLayerIRC( irciot_shared_ ):
           if self.td2ms_(self.time_now - self.__time_ping) \
            > self.__delta_ping * 2 and self.__delta_ping > 0:
              if self.irc_who_channel_(self.irc_channel) == -1:
-               self.irc_disconnect_()
+               self.irc_reconnect_()
                irc_init = 0
              else:
                self.irc_check_and_restore_nick_()
@@ -2837,7 +2876,6 @@ class PyLayerIRC( irciot_shared_ ):
 
    except socket.error:
      self.irc_disconnect()
-     irc_init = 0
    #
    # End of irc_process_()
 
