@@ -34,11 +34,15 @@ def main():
   irciot.ldict_file = "./ldict.json"
 
   ircbot.irc_server  = "irc-iot.nsk.ru"
+  ircbot.irc_port    = 6667
+
+  #ircbot.irc_server  = "chat.freenode.net"
+  #ircbot.irc_port    = 6697
+  #ircbot.irc_ssl     = True
 
   # Warning: Please, run your own IRC server
   # don't use public networks for testing!!!
 
-  ircbot.irc_port    = 6667
   ircbot.irc_channel = "#Berdsk"
   ircbot.irc_debug   = True
   ircbot.irc_define_nick_("TestBot")

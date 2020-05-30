@@ -2283,9 +2283,24 @@ class PyLayerIRC( irciot_shared_ ):
 
  def func_fast_nick_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
-   # ... will be calculated from warning, not by RFC 1459 ...
-   self.__nick_pause = self.CONST.irc_default_nick_pause
+   my_seconds = 0
+   if self.CONST.irc_default_draft == "ircu":
+     # Calculating from code 438 comments, not by RFC 1459
+     my_split = in_string.split(' ')
+     if len(my_split) > 11:
+       if my_split[-3] == 'wait' and my_split[-1] == 'seconds.':
+         try:
+           my_seconds = int(my_split[-2])
+         except:
+           pass
+   if my_seconds > 0 \
+    and my_seconds < self.CONST.irc_default_nick_pause * 2:
+     self.__nick_pause = my_seconds # trys != seconds, but ...
+   else:
+     self.__nick_pause = self.CONST.irc_default_nick_pause
    return (in_ret, 3, self.CONST.irc_default_wait)
+   #
+   # End of func_fast_nick_()
 
  def func_chan_nicks_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
@@ -2374,7 +2389,7 @@ class PyLayerIRC( irciot_shared_ ):
      my_array = in_string.split(" ")
      if len(my_array) < 5:
        return (in_ret, in_init, in_wait)
-     if my_array[1] != 'MODE':
+     if my_array[1] != self.CONST.cmd_MODE:
        return (in_ret, in_init, in_wait)
      my_channel = my_array[2]
      if not self.is_irc_channel_(my_channel):

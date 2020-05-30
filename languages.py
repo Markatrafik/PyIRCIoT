@@ -101,6 +101,9 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   mod_ANSPLY = 'ansible.playbook.play'
   mod_ANSTQM = 'ansible.executor.task_queue_manager'
   mod_ANSCBP = 'ansible.plugins.callback'
+  mod_BASTOK = 'PyBasic.basictoken'
+  mod_BASLEX = 'PyBasic.lexer'
+  mod_BASPRG = 'PyBasic.program'
   mod_PHPLEX = 'phply.phplex'
   mod_PHPPAR = 'phply.phpparse'
   mod_MATH = 'math'
@@ -275,7 +278,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   if not self.irciot_EL_check_matchers_(in_code, self.__PHP_filter_matchers):
     return False
   # Warning: This code is only for testing of phply library... will be removed
-  my_lexer = self.__PHP_lexer.lexer.clone()
+  my_lexer = self.__PHPLEX.lexer.clone()
   my_lexer.input("<?php " + in_code + "?>")
   my_error = None
   while True:
@@ -677,7 +680,13 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   elif in_lang == self.CONST.lang_BASIC:
     self.__BASIC_filter_matchers = \
      self.__irciot_EL_matchers_(self.CONST.lang_filter_BASIC_regexps)
-    self.irciot_EL_error_(self.CONST.err_UNSUPPORTED_YET, None)
+    self.__BASTOK = self.irciot_EL_import_(self.CONST.mod_BASTOK)
+    self.__BASLEX = self.irciot_EL_import_(self.CONST.mod_BASLEX)
+    self.__BASPRG = self.irciot_EL_import_(self.CONST.mod_BASPRG)
+    for my_item in [ self.__BASTOK, self.__BASLEX, self.__BASPRG ]:
+      if my_item == None:
+        return False
+    return True
   elif in_lang == self.CONST.lang_CS:
     pass
   elif in_lang == self.CONST.lang_CSP:
@@ -707,8 +716,8 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   elif in_lang == self.CONST.lang_PHP:
     self.__PHP_filter_matchers = \
      self.__irciot_EL_matchers_(self.CONST.lang_filter_PHP_regexps)
-    self.__PHP_lexer = self.irciot_EL_import_(self.CONST.mod_PHPLEX)
-    if self.__PHP_lexer != None:
+    self.__PHPLEX = self.irciot_EL_import_(self.CONST.mod_PHPLEX)
+    if self.__PHPLEX != None:
 
       return True
     self.irciot_EL_error_(self.CONST.err_UNSUPPORTED_YET, None)
@@ -747,6 +756,9 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
       del self.__ANSLDR
       del self.__ANSCBP
     elif in_lang == self.CONST.lang_BASH:
+      del self.__BASTOK
+      del self.__BASLEX
+      del self.__BASPRG
       del self.__BASIC_filter_matchers
     elif in_lang == self.CONST.lang_BASIC:
       pass
@@ -768,7 +780,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
     elif in_lang == self.CONST.lang_PERL:
       pass
     elif in_lang == self.CONST.lang_PHP:
-      del self.__PHP_lexer
+      del self.__PHPLEX
       del self.__PHP_filter_matchers
     elif in_lang == self.CONST.lang_R:
       pass
