@@ -95,9 +95,12 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
    err_CODE_EXECUTION   : "Problem while executing the code"
   }
   #
+  mod_ANSLDR = 'ansible.parsing.dataloader'
   mod_ANSVAR = 'ansible.vars.manager'
   mod_ANSINV = 'ansible.inventory.manager'
-  mod_ANSYML = 'ansible.executor'
+  mod_ANSPLY = 'ansible.playbook.play'
+  mod_ANSTQM = 'ansible.executor.task_queue_manager'
+  mod_ANSCBP = 'ansible.plugins.callback'
   mod_PHPLEX = 'phply.phplex'
   mod_PHPPAR = 'phply.phpparse'
   mod_MATH = 'math'
@@ -163,6 +166,8 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   self.__maximal_mem_usage = self.CONST.default_maximal_mem_usage
   self.__maximal_cpu_usage = self.CONST.default_maximal_cpu_usage
   self.__os_name = self.get_os_name_()
+  #
+  self.__ansible_vault_password = None
   #
   # End of PyLayerIRCIoT_EL_.__init__()
 
@@ -401,18 +406,77 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
    #
    # End of python_stdout_()
 
- def timeout_termination_(self):
-   raise Exception('Execution timed out: %s sec.' \
-     % self.__execution_timeout)
+ def __timeout_termination_(self):
+  raise Exception('Execution timed out: %s sec.' \
+    % self.__execution_timeout)
+
+ def irciot_EL_set_Ansible_Vault_(in_password):
+  if not isinstance(in_password, str):
+    return False
+  if in_password == "":
+    return False
+  self.__ansible_vault_password = in_password
+  return True
 
  # incomplete
  def __irciot_EL_run_ANSYML_code_(self, in_code, in_environment):
-  my_inventory = self.__ANSINV.manager.InventoryManager()
-  my_vars = self.__ANSVAR.VariableManager()
-  my_vars.extra_vars = in_environment
-
-  del my_vars
-  return None
+  import yaml
+  class my_loader_class_(self.__ANSLDR.DataLoader):
+    def __init__(self, *args, **kwargs):
+      super(my_loader_class_, self).__init__(*args, **kwargs)
+    def get_basedir(self):
+      return ""
+  class my_callback_class_(self.__ANSCBP.CallbackBase):
+    result = None
+    def __init__(self, *args, **kwargs):
+      super(my_callback_class_, self).__init__(*args, **kwargs)
+    def v2_runner_on_ok(self, result, **kwargs):
+      self.result = json.dumps(result._result)
+    def v2_runner_on_failed(self, result, *args, **kwargs):
+      self.result = json.dumps(result._result)
+  my_passwords = { 'vault_pass': self.__ansible_vault_password }
+  my_loader = my_loader_class_()
+  my_inv = self.__ANSINV.InventoryManager(loader = my_loader, \
+    sources = 'localhost,')
+  my_var = self.__ANSVAR.VariableManager(loader = my_loader, \
+    inventory = my_inv)
+  my_var._extra_vars = in_environment
+  my_tasks = []
+  my_load = yaml.load_all(in_code)
+  for my_item in my_load:
+    for my_subitem in my_item:
+      my_dict = {}
+      for my_subkey in my_subitem.keys():
+        my_dict.update({ 'module': my_subkey,
+         'args': my_subitem[ my_subkey ] })
+        break
+      my_tasks.append({ 'action': my_dict })
+  my_source = {
+    'name': 'IRC-IoT', 'hosts': [ 'localhost' ],
+    'gather_facts': 'no', 'tasks': my_tasks }
+  my_play = self.__ANSPLY.Play().load(my_source)
+  my_callback = my_callback_class_()
+  my_tqm  = self.__ANSTQM.TaskQueueManager(loader = my_loader, \
+    inventory = my_inv, variable_manager = my_var, \
+    passwords = my_passwords, stdout_callback = my_callback )
+  try:
+    my_ret = my_tqm.run(my_play)
+  except Exception as my_ex:
+    my_ret = -1
+  if my_tqm is not None:
+    my_tqm.cleanup()
+  del my_tqm
+  del my_play
+  del my_var
+  del my_inv
+  del my_loader
+  my_out = my_callback.result
+  del my_callback
+  if my_ret == -1:
+    raise Exception(str(my_ex))
+  return my_out
+  #
+  # End of __irciot_EL_run_ANSYML_code_()
 
  # incomplete
  def __irciot_EL_run_JAVA_code_(self, in_code, in_environment):
@@ -460,7 +524,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
  # incomplete
  def __irciot_EL_run_TCL_code_(self, in_code, in_environment):
   my_tcl = self.__TCL.Tcl();
-  my_tcl.after(self.__execution_timeout * 1000, self.timeout_termination_)
+  my_tcl.after(self.__execution_timeout * 1000, self.__timeout_termination_)
   my_out = None
   for my_key in in_environment.keys():
     my_str = in_environment[ my_key ].replace('"', '\\"')
@@ -501,8 +565,8 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
 
  # incomplete
  def irciot_EL_run_code_(self, in_lang, in_code, in_environment = {}):
-  def timeout_signal_(in_signal, in_frame):
-    self.timeout_termination_()
+  def __timeout_signal_(in_signal, in_frame):
+    self.__timeout_termination_()
   if not self.irciot_EL_check_code_(in_lang, in_code):
     return ""
   if not self.irciot_EL_check_environment_(in_lang, in_environment):
@@ -512,7 +576,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   if self.__os_name == self.CONST.os_windows:
     pass # Need a method to stop the script by timeout in the Windows
   else:
-    signal.signal(signal.SIGALRM, timeout_signal_)
+    signal.signal(signal.SIGALRM, __timeout_signal_)
     signal.alarm(self.__execution_timeout)
   try:
     if in_lang == self.CONST.lang_ANSYML:
@@ -597,18 +661,17 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   if in_lang not in self.__allowed_EL:
     return False
   if in_lang == self.CONST.lang_ANSYML:
-    self.__ANSYML = self.irciot_EL_import_(self.CONST.mod_ANSYML)
-    if self.__ANSYML != None:
-      self.__ANSINV = self.irciot_EL_import_(self.CONST.mod_ANSINV)
-      if self.__ANSINV is None:
-        del self.__ANSYML
-      else:
-        self.__ANSVAR = self.irciot_EL_import_(self.CONST.mod_ANSVAR)
-        if self.__ANSVAR is None:
-          del self.__ANSYML
-          del self.__ANSINV
-        else:
-          return True
+    self.__ANSTQM = self.irciot_EL_import_(self.CONST.mod_ANSTQM)
+    self.__ANSPLY = self.irciot_EL_import_(self.CONST.mod_ANSPLY)
+    self.__ANSINV = self.irciot_EL_import_(self.CONST.mod_ANSINV)
+    self.__ANSVAR = self.irciot_EL_import_(self.CONST.mod_ANSVAR)
+    self.__ANSLDR = self.irciot_EL_import_(self.CONST.mod_ANSLDR)
+    self.__ANSCBP = self.irciot_EL_import_(self.CONST.mod_ANSCBP)
+    for my_item in [ self.__ANSTQM, self.__ANSPLY, self.__ANSLDR, \
+     self.__ANSINV, self.__ANSVAR, self.__ANSCBP ]:
+      if my_item == None:
+        return False
+    return True
   elif in_lang == self.CONST.lang_BASH:
     self.irciot_EL_error_(self.CONST.err_UNSUPPORTED_YET, None)
   elif in_lang == self.CONST.lang_BASIC:
@@ -679,7 +742,10 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
     if in_lang == self.CONST.lang_ANSYML:
       del self.__ANSVAR
       del self.__ANSINV
-      del self.__ANSYML
+      del self.__ANSTQM
+      del self.__ANSPLY
+      del self.__ANSLDR
+      del self.__ANSCBP
     elif in_lang == self.CONST.lang_BASH:
       del self.__BASIC_filter_matchers
     elif in_lang == self.CONST.lang_BASIC:
