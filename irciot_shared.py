@@ -83,6 +83,14 @@ class irciot_shared_(object):
    os_linux_proc_ipv4_route = '/proc/net/route'
    os_linux_proc_ipv6_route = '/proc/net/ipv6_route'
    #
+   hl_English = "EN" # Default human language
+   hl_Finnish = "FI"
+   hl_French  = "FR"
+   hl_German  = "DE"
+   hl_Italian = "IT"
+   hl_Russian = "RU"
+   hl_Spanish = "ES"
+   #
    def __setattr__(self, *_):
      pass
 

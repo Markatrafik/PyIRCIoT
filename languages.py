@@ -82,6 +82,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   err_CODE_SIZE_LIMIT  = 1008
   err_LOADING_MODULES  = 1009
   err_CODE_EXECUTION   = 1010
+  err_LEXICAL_ANALISIS = 1025
   #
   err_DESCRIPTIONS = {
    err_UNKNOWN_LANGUAGE : "Unknown programming langauge",
@@ -92,7 +93,8 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
    err_COMMON_FILTER    : "Code declined by common filter",
    err_LANGUAGE_FILTER  : "Code declined by language filter",
    err_CODE_SIZE_LIMIT  : "Code size limit exceeded",
-   err_CODE_EXECUTION   : "Problem while executing the code"
+   err_CODE_EXECUTION   : "Problem while executing the code",
+   err_LEXICAL_ANALISIS : "lexical analysis failed"
   }
   #
   mod_ANSLDR = 'ansible.parsing.dataloader'
@@ -135,7 +137,8 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   lang_filter_PYTHON_names = { *lang_filter_PYTHON_names, *lang_filter_PYTHON_funcs }
   lang_filter_PHP_tokens   = { 'VARIABLE', 'STRING', 'EQUALS', 'LNUMBER', 'SEMI',
    'PRINT', 'LPAREN', 'RPAREN', 'PLUS', 'MINUS', 'MUL', 'DIV', 'IF', 'COLON', 'ELSE',
-   'IS_GREATER', 'IS_SMALLER', 'LBRACE', 'RBRACE', 'NOT', 'XOR', 'FOR', 'WHILE' }
+   'IS_GREATER', 'IS_SMALLER', 'LBRACE', 'RBRACE', 'NOT', 'XOR', 'FOR', 'WHILE',
+   'QUOTE', 'ENCAPSED_AND_WHITESPACE', 'CONSTANT_ENCAPSED_STRING', 'IS_NOT_EQUAL' }
   lang_filter_PHP_regexps  = []
   lang_filter_RUBY_regexps = []
   lang_filter_LUA_regexps  = []
@@ -172,11 +175,16 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   #
   self.__ansible_vault_password = None
   #
+  try:
+    self.err_DESCRIPTIONS.update(self.CONST.err_DESCRIPTIONS)
+  except:
+    self.err_DESCRIPTIONS = self.CONST.err_DESCRIPTIONS
+  #
   # End of PyLayerIRCIoT_EL_.__init__()
 
  def irciot_EL_error_(self, in_error_code, in_addon):
-  if in_error_code in self.CONST.err_DESCRIPTIONS.keys():
-    my_descr = self.CONST.err_DESCRIPTIONS[in_error_code]
+  if in_error_code in self.err_DESCRIPTIONS.keys():
+    my_descr = self.err_DESCRIPTIONS[in_error_code]
     if isinstance(in_addon, str):
       my_descr += " (%s)" % in_addon
   else:
@@ -287,7 +295,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
       if not my_tok:
         break
     except:
-      my_error = "lexical analysis failed"
+      my_error = self.err_DESCRIPTIONS[self.CONST.LEXICAL_ANALISIS]
       break
     if my_tok.type not in self.CONST.lang_filter_PHP_tokens:
       my_error = "ivalid " + str(my_tok)

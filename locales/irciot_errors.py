@@ -71,10 +71,10 @@ def irciot_get_common_error_descriptions_(in_human_language):
   }
  return {}
 
-def irciot_get_EL_error_descriptions_(in_humnan_language):
+def irciot_get_EL_error_descriptions_(in_human_language):
  if in_human_language == "RU": # Russian Language
   return {
-   1001: "Неизвестный язык программирования";
+   1001: "Неизвестный язык программирования",
    1002: "Данный язык ещё не поддерживается",
    1003: "Некорректное окружение для языка",
    1004: "Код запрещен общим фильтром",
@@ -82,9 +82,10 @@ def irciot_get_EL_error_descriptions_(in_humnan_language):
    1007: "Некорректный синтаксис для данного языка",
    1008: "Размер кода превысил лимит",
    1009: "Невозможно загрузить требуемые модули",
-   1010: "Проблема при исполнении кода"
+   1010: "Проблема при исполнении кода",
+   1025: "лексический анализ не пройден"
   }
- if in_human_langauge == "DE": # Deutsch
+ elif in_human_language == "DE": # Deutsch
   return {
    1001: "Unbekannte Programmiersprache",
    1002: "Diese Sprache wird noch nicht unterstützt",
@@ -94,7 +95,8 @@ def irciot_get_EL_error_descriptions_(in_humnan_language):
    1007: "Falsche Syntax für diese Programmiersprache",
    1008: "Die Codegröße hat das Limit überschritten",
    1009: "Problem beim Laden der erforderlichen Module",
-   1010: "Es gab ein Problem, als der Code ausgeführt wurde"
+   1010: "Es gab ein Problem, als der Code ausgeführt wurde",
+   1025: "lexikalische analyse ausgefallen"
   }
  return {}
 
@@ -106,20 +108,20 @@ def irciot_get_router_error_descriptions_(in_human_language):
    10507: "Недопустимое значение обязательного параметра для узла в графе маршрутизации",
    10508: "Неверный параметр направления для узла в графе маршрутизации"
   }
- if in_human_language == "DE": # Deutsch
+ elif in_human_language == "DE": # Deutsch
   return {
    10015: "Der Router hat beim Weiterleiten der Nachricht ein Duplikat entdeckt",
    10505: "Fehlender erforderlicher Parameter für den Knoten in der Routing-Graph",
-   10507: "Unzulässiger Wert eines obligatorischen Parameters für einen Knoten in der Routing-Graph"
+   10507: "Unzulässiger Wert eines obligatorischen Parameters für einen Knoten in der Routing-Graph",
    10508: "Flascher Richtungsparameter für einen Knoten in der Routing-Graph"
   }
  return {}
 
-def irciot_get_all_error_descriptions_(in_human_langauge):
+def irciot_get_all_error_descriptions_(in_human_language):
  if not isinstance(in_human_language, str):
   return {}
  my_dict = irciot_get_common_error_descriptions_(in_human_language)
  my_dict.update(irciot_get_EL_error_descriptions_(in_human_language))
- my_dict.update(irciot_get_router_error_descriptions_(in_human_lagugage))
+ my_dict.update(irciot_get_router_error_descriptions_(in_human_language))
  return my_dict
 

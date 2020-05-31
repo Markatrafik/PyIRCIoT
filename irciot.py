@@ -710,6 +710,11 @@ class PyLayerIRCIoT(object):
   #
   self.__crc16_table = []
   #
+  try:
+    self.err_DESCRIPTIONS.update(self.CONST.err_DESCRIPTIONS)
+  except:
+    self.err_DESCRIPTIONS = self.CONST.err_DESCRIPTIONS
+  #
   # End of PyLayerIRCIoT.__init__()
 
  def irc_pointer (self, in_compatibility, in_messages_pack):
@@ -748,8 +753,8 @@ class PyLayerIRCIoT(object):
   # testing and does not comply with the specification
   my_message = ""
   my_datum = {}
-  if in_error_code in self.CONST.err_DESCRIPTIONS.keys():
-    my_descr = self.CONST.err_DESCRIPTIONS[in_error_code]
+  if in_error_code in self.err_DESCRIPTIONS.keys():
+    my_descr = self.err_DESCRIPTIONS[in_error_code]
     if isinstance(in_addon, str):
       my_descr += " (%s)" % in_addon
     my_datum.update({ self.CONST.tag_DESCRIPTION : my_descr })

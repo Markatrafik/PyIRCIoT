@@ -139,6 +139,11 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   #
   self.__encoding = self.CONST.irciot_default_encoding
   #
+  try:
+    self.err_DESCRIPTIONS.update(self.CONST.err_DESCRIPTIONS)
+  except:
+    self.err_DESCRIPTIONS = self.CONST.err_DESCRIPTIONS
+  #
   # End of PyIRCIoT_router.__init__()
 
  def router_pointer (self, in_compatibility, in_messages_pack):
