@@ -482,6 +482,41 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   # End of __irciot_EL_run_ANSYML_code_()
 
  # incomplete
+ def __irciot_EL_run_BASIC_code_(self, in_code, in_envritonment):
+  my_lexer = self.__BASLEX.Lexer()
+  my_prog  = self.__BASPRG.Program()
+  my_token = self.__BASTOK.BASICToken
+  my_code  = in_code
+  if my_code[-1] != '\n':
+    my_code += "\n"
+  if "RUN" not in my_code:
+    my_code += "RUN\n"
+  if "EXIT" not in my_code:
+    my_code += "EXIT\n"
+  with self.python_stdout_() as my_out:
+    for my_line in my_code.split('\n'):
+      my_tokens = my_lexer.tokenize(my_line)
+      if my_tokens[0].category == my_token.EXIT:
+        break
+      elif my_tokens[0].category == my_token.UNSIGNEDINT \
+       and len(my_tokens) > 1:
+        my_prog.add_stmt(my_tokens)
+      elif my_tokens[0].category == my_token.UNSIGNEDINT \
+       and len(my_tokens) == 1:
+        my_prog.delete_statement(int(my_tokens[0].lexeme))
+      elif my_tokens[0].category == my_token.RUN:
+        my_prog.execute()
+      elif my_tokens[0].category == my_token.LIST:
+        my_prog.list()
+      else:
+        raise("Unrecognised input: '%s'" % my_tokens[0].lexeme())
+  del my_prog
+  del my_lexer
+  return my_out.getvalue()
+  #
+  # Endof of __irciot_EL_run_BASIC_code_()
+
+ # incomplete
  def __irciot_EL_run_JAVA_code_(self, in_code, in_environment):
 
   return None
@@ -587,7 +622,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
     elif in_lang == self.CONST.lang_BASH:
       pass
     elif in_lang == self.CONST.lang_BASIC:
-      pass
+      my_out = self.__irciot_EL_run_BASIC_code_(in_code, in_environment)
     elif in_lang == self.CONST.lang_CS:
       pass
     elif in_lang == self.CONST.lang_CSP:

@@ -78,11 +78,17 @@ def EL_JS_(in_code, in_check):
 def EL_python_(in_code, in_check):
   return EL_test_(in_code, in_check, EL.CONST.lang_PYTHON)
 
+def EL_BASIC_(in_code, in_check):
+  return EL_test_(in_code, in_check, EL.CONST.lang_BASIC)
+
 def EL_test_simple_LUA_():
   return EL_LUA_("assert(os.setlocale('C'))", "C")
 
 def EL_test_simple_JavaScript_():
   return EL_JS_("document.write('hello')", "hello")
+
+def EL_test_simple_BASIC_():
+  return EL_BASIC_("10 PRINT 123", "123@")
 
 def EL_test_simple_Python_():
   return EL_python_("print('hello',end='')", "hello")
@@ -121,6 +127,8 @@ def main():
    EL_test_simple_JavaScript_()
  if (my_command == 'python'):
    EL_test_simple_Python_()
+ if (my_command == 'basic'):
+   EL_test_simple_BASIC_()
  if (my_command == 'pyrangefor'):
    EL_test_Python_for_range_()
  if (my_command == 'pycosinus'):
