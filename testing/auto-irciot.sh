@@ -108,7 +108,7 @@ if [ -x "${TEST_RFC1459_CMD}" ]; then
 echo -ne '\033[1;36m------------------ '
 echo -ne 'PyLayerIRC tests'
 echo -ne ' -------------------\033[0m\n'
-for m in ascii isitip nicks masks ; do
+for m in ascii isitip nicks masks langenc ; do
  run_tests "" "" "" "${m}" rfc1459
 done
 fi

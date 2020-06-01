@@ -38,6 +38,9 @@ class PyLayerIRCTest(unittest.TestCase):
   def test006_unary_masks_(self):
     self.assertEqual(irc_unary_masks_(), True)
 
+  def test007_unary_langenc_(self):
+    self.assertEqual(irc_unary_langenc_(), True)
+
 _log_mode = 0
 
 def to_log_(in_text):
@@ -112,6 +115,36 @@ def irc_unary_masks_():
     return True
   return False
 
+def irc_unary_langenc_():
+  all_encs = my_irc.get_encs_list_()
+  all_langs = my_irc.get_langs_list_()
+  my_encs = my_irc.get_encs_by_lang_(my_irc.CONST.hl_Russian)
+  if my_irc.CONST.enc_KOI8R not in my_encs:
+    to_log_("encoding 'koi8-r' not found in Russian encodings")
+    return False
+  my_langs = my_irc.get_langs_by_enc_(my_irc.CONST.enc_ISO1)
+  if my_irc.CONST.hl_English not in my_langs:
+    to_log_("English language not found in 'iso-8859-1' encoding")
+    return False
+  for my_enc in all_encs:
+    my_langs = my_irc.get_langs_by_enc_(my_enc)
+    for my_lang in my_langs:
+      if my_lang not in all_langs:
+        to_log_("Unknown language: '%s'" % my_lang)
+        return False
+  for my_lang in all_langs:
+    my_encs = my_irc.get_encs_by_lang_(my_lang)
+    for my_enc in my_encs:
+      if my_enc not in all_encs:
+        to_log_("Unknown encoding: '%s'" % my_enc)
+        return False
+  my_lang = my_irc.get_lang_by_enc_(my_irc.CONST.enc_1251)
+  if my_lang != my_irc.CONST.hl_Russian:
+    print("Russian language not found in 'cp1251' encoding")
+    return False
+  to_log_('TEST_IS_OK')
+  return True
+
 def main():
 
  global my_command
@@ -139,6 +172,9 @@ def main():
 
  if (my_command == 'isitip'):
    irc_unary_isitip_()
+
+ if (my_command == 'langenc'):
+   irc_unary_langenc_()
 
 if __name__ == '__main__':
   if len(sys.argv) == 1:

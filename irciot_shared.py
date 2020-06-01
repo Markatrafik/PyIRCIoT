@@ -69,6 +69,7 @@ class irciot_shared_(object):
    os_freebsd = 'FreeBSD'
    os_hpux    = 'HP-UX'
    os_hurd    = 'GNU'
+   os_irix    = 'IRIX'
    os_linux   = 'Linux'
    os_macosx  = 'Darwin'
    os_netbsd  = 'NetBSD'
@@ -83,13 +84,93 @@ class irciot_shared_(object):
    os_linux_proc_ipv4_route = '/proc/net/route'
    os_linux_proc_ipv6_route = '/proc/net/ipv6_route'
    #
-   hl_English = "EN" # Default human language
-   hl_Finnish = "FI"
-   hl_French  = "FR"
-   hl_German  = "DE"
-   hl_Italian = "IT"
-   hl_Russian = "RU"
-   hl_Spanish = "ES"
+   ### Human Languages:
+   #
+   hl_Czech   = 'CZ'
+   hl_Danish  = 'DK'
+   hl_Deutsch = 'DE'
+   hl_English = 'EN'
+   hl_Finnish = 'FI'
+   hl_French  = 'FR'
+   hl_Greek   = 'GR'
+   hl_Hebrew  = 'IL'
+   hl_Iranian = 'IR'
+   hl_Italian = 'IT'
+   hl_Kazakh  = 'KZ'
+   hl_Polish  = 'PL'
+   hl_Russian = 'RU'
+   hl_Serbian = 'RS'
+   hl_Swedish = 'SE'
+   hl_Spanish = 'ES'
+   hl_Turkish = 'TR'
+   #
+   hl_default = hl_English
+   #
+   enc_UTF7  = "utf-7"
+   enc_UTF8  = "utf-8"
+   enc_UTF16 = "utf-16"
+   enc_ASCII = "ascii"
+   enc_437   = "cp437"
+   enc_850   = "cp850"
+   enc_862   = "cp862"
+   enc_863   = "cp863"
+   enc_865   = "cp865"
+   enc_866   = "cp866"
+   enc_869   = "cp869"
+   enc_1250  = "cp1250"
+   enc_1251  = "cp1251"
+   enc_1252  = "cp1252"
+   enc_1253  = "cp1253"
+   enc_1254  = "cp1254"
+   enc_1255  = "cp1255"
+   enc_1257  = "cp1257"
+   enc_ISO1  = "iso-8859-1"
+   enc_ISO2  = "iso-8859-2"
+   enc_ISO5  = "iso-8859-5"
+   enc_ISO7  = "iso-8859-7"
+   enc_ISO8  = "iso-8859-8"
+   enc_ISO9  = "iso-8859-9"
+   enc_KOI8R = "koi8-r"
+   enc_KOI8U = "koi8-u"
+   #
+   enc_aliases = {
+    enc_UTF7  : [ "utf7" ],
+    enc_UTF8  : [ "utf8" ],
+    enc_UTF16 : [ "utf16" ],
+    enc_ASCII : [ "us-ascii" ],
+    enc_437   : [ "ibm437", "ibm-437" ],
+    enc_863   : [ "ibm863", "ibm-863" ],
+    enc_1250  : [ "windows-1250" ],
+    enc_1251  : [ "windows-1251" ],
+    enc_1252  : [ "windows-1252" ],
+    enc_1253  : [ "windows-1253" ],
+    enc_1254  : [ "windows-1254" ],
+    enc_1255  : [ "windows-1255" ],
+    enc_KOI8R : [ "koi8r" ],
+    enc_KOI8U : [ "koi8u" ]
+   }
+   #
+   default_encoding = enc_UTF8
+   #
+   hl_old_enc = {
+    hl_Czech   : [ enc_ISO2 ],
+    hl_Danish  : [ enc_ISO1 ],
+    hl_Deutsch : [ enc_ISO1 ],
+    hl_English : [ enc_ISO1, enc_437, enc_UTF7, enc_ASCII ],
+    hl_Finnish : [ enc_ISO1 ],
+    hl_French  : [ enc_ISO1, enc_863 ],
+    hl_Greek   : [ enc_ISO7, enc_869, enc_1253 ],
+    hl_Hebrew  : [ enc_ISO8, enc_862, enc_1255 ],
+    hl_Iranian : [],
+    hl_Italian : [ enc_ISO1 ],
+    hl_Kazakh  : [],
+    hl_Polish  : [ enc_ISO2 ],
+    hl_Russian : [ enc_ISO5, enc_866, enc_1251, enc_KOI8R ],
+    hl_Serbian : [],
+    hl_Swedish : [ enc_ISO1 ],
+    hl_Spanish : [ enc_ISO1 ],
+    hl_Turkish : [ enc_ISO9, enc_1254 ]
+   }
    #
    def __setattr__(self, *_):
      pass
@@ -120,6 +201,56 @@ class irciot_shared_(object):
    except ValueError:
      return False
    return True
+
+ def get_enc_by_enc_(self, in_encoding):
+   if not isinstance(in_encoding, str):
+     return None
+   my_encoding = in_encoding.lower()
+   for my_key in self.CONST.enc_aliases.keys():
+     if my_encoding in self.CONST.enc_aliases[ my_key ]:
+       my_encoding = my_key
+       break
+   if my_encoding not in self.get_encs_list_():
+     return None
+   return my_encoding
+
+ def get_langs_by_enc_(self, in_encoding):
+   my_encoding = self.get_enc_by_enc_(in_encoding)
+   if my_encoding == None:
+     return []
+   my_langs = []
+   for my_key in self.CONST.hl_old_enc.keys():
+     if my_encoding in self.CONST.hl_old_enc[ my_key ]:
+       my_langs += [ my_key ]
+   return my_langs
+
+ def get_lang_by_enc_(self, in_encoding):
+   my_langs = self.get_langs_by_enc_(in_encoding)
+   if len(my_langs) != 1:
+     return None
+   return my_langs.pop()
+
+ def get_encs_by_lang_(self, in_human_language):
+   if not isinstance(in_human_language, str):
+     return []
+   my_encs = [ self.CONST.enc_UTF8 ]
+   if in_human_language in self.CONST.hl_old_enc.keys():
+     my_encs += self.CONST.hl_old_enc[ in_human_language ]
+   return my_encs
+
+ def get_langs_list_(self):
+   my_langs = []
+   for my_key in self.CONST.hl_old_enc.keys():
+     my_langs += [ my_key ]
+   return my_langs
+
+ def get_encs_list_(self):
+   my_encs = [ self.CONST.enc_UTF8 ]
+   for my_lang in self.CONST.hl_old_enc.keys():
+     for my_enc in self.CONST.hl_old_enc[ my_lang ]:
+       if my_enc not in my_encs:
+         my_encs += [ my_enc ]
+   return my_encs
 
  def is_ipv4_address_(self, in_ipv4_address):
    if not isinstance(in_ipv4_address, str):

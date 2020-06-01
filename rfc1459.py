@@ -1601,7 +1601,6 @@ class PyLayerIRC( irciot_shared_ ):
        my_ok = False
    if my_ok:
      self.irc_track_add_nick_(in_nick, in_mask, None, None)
-
    #
    # End of irc_track_fast_nick_()
 
