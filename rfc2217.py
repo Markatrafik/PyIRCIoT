@@ -107,7 +107,7 @@ class PyLayerCOM( irciot_shared_ ):
    self.com_queue_lock[self.CONST.com_queue_input]  = False
    self.com_queue_lock[self.CONST.com_queue_output] = False
    #
-   self.com_task  = None
+   self.__com_task  = None
    self.com_run   = False
    self.com_debug = self.CONST.com_default_debug
    #
@@ -129,9 +129,9 @@ class PyLayerCOM( irciot_shared_ ):
 
  def start_COM_(self):
    #
-   self.com_task = threading.Thread(target = self.com_process_)
+   self.__com_task = threading.Thread(target = self.com_process_)
    self.com_run  = True
-   self.com_task.start()
+   self.__com_task.start()
    #
    # End of start_COM_()
 
@@ -139,10 +139,10 @@ class PyLayerCOM( irciot_shared_ ):
    self.com_run = False
    #sleep(self.CONST.com_micro_wait)
    #self.com_disconnect_()
-   if self.com_task != None:
+   if self.__com_task != None:
      sleep(self.CONST.com_micro_wait)
      try:
-       self.com_task.join()
+       self.__com_task.join()
      except:
        pass
    #

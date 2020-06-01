@@ -90,7 +90,7 @@ class PyLayerUDPb( irciot_shared_ ):
   #
   super(PyLayerUDPb, self).__init__()
   #
-  self.udpb_task = None
+  self.__udpb_task = None
   self.udpb_run = False
   self.udpb_debug = self.CONST.udpb_default_debug
   #
@@ -311,9 +311,9 @@ class PyLayerUDPb( irciot_shared_ ):
   # End of udpb_setup_()
 
  def start_udpb_(self):
-  self.udpb_task = threading.Thread(target = self.udpb_process_)
+  self.__udpb_task = threading.Thread(target = self.udpb_process_)
   self.udpb_run  = True
-  self.udpb_task.start()
+  self.__udpb_task.start()
   #
   # End of start_udpb_()
 
@@ -321,10 +321,10 @@ class PyLayerUDPb( irciot_shared_ ):
   self.udpb_run  = False
   #sleep(self.CONST.udpb_micro_wait)
   #self.udpb_disconnect_()
-  if self.udpb_task != None:
+  if self.__udpb_task != None:
     sleep(self.CONST.udpb_micro_wait)
     try:
-      self.udpb_task.join()
+      self.__udpb_task.join()
     except:
       pass
   #
