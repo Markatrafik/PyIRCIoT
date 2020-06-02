@@ -86,105 +86,98 @@ class irciot_shared_(object):
    #
    ### Human Languages:
    #
-   hl_Chinese  = 'CN' # Simplified
-   hl_Croatian = 'HR'
-   hl_Czech    = 'CZ'
-   hl_Danish   = 'DK'
-   hl_Deutsch  = 'DE'
-   hl_English  = 'EN'
-   hl_Estonian = 'EE'
-   hl_Finnish  = 'FI'
-   hl_French   = 'FR'
-   hl_Greek    = 'GR'
-   hl_Hrvatski = 'HR'
-   hl_Hebrew   = 'IL'
-   hl_Italian  = 'IT'
-   hl_Kazakh   = 'KZ'
-   hl_Persian  = 'IR'
-   hl_Polish   = 'PL'
-   hl_Romanian = 'RO'
-   hl_Russian  = 'RU'
-   hl_Serbian  = 'RS'
-   hl_Swedish  = 'SE'
-   hl_Spanish  = 'ES'
-   hl_Turkish  = 'TR'
-   hl_Japanese = 'JP'
+   hl_Chinese  = 'cn' # Simplified
+   hl_Croatian = 'hr'
+   hl_Czech    = 'cz'
+   hl_Danish   = 'dk'
+   hl_Deutsch  = 'de'
+   hl_English  = 'en'
+   hl_Estonian = 'ee'
+   hl_Finnish  = 'fi'
+   hl_French   = 'fr'
+   hl_Greek    = 'gr'
+   hl_Hrvatski = 'hr'
+   hl_Hebrew   = 'il'
+   hl_Italian  = 'it'
+   hl_Kazakh   = 'kz'
+   hl_Persian  = 'ir'
+   hl_Polish   = 'pl'
+   hl_Romanian = 'ro'
+   hl_Russian  = 'ru'
+   hl_Serbian  = 'rs'
+   hl_Swedish  = 'se'
+   hl_Spanish  = 'es'
+   hl_Thai     = 'th'
+   hl_Turkish  = 'tr'
+   hl_Japanese = 'jp'
    #
    hl_default = hl_English
    #
-   enc_UTF7  = "utf-7"
-   enc_UTF8  = "utf-8"
-   enc_UTF16 = "utf-16"
-   enc_UTF32 = "utf-32"
    enc_ASCII = "ascii"
-   enc_278   = "cp278"
-   enc_280   = "cp280"
-   enc_297   = "cp297"
-   enc_437   = "cp437"
-   enc_737   = "cp737"
-   enc_850   = "cp850"
-   enc_856   = "cp856"
-   enc_857   = "cp857"
-   enc_862   = "cp862"
-   enc_863   = "cp863"
-   enc_865   = "cp865"
-   enc_866   = "cp866"
-   enc_869   = "cp869"
-   enc_875   = "cp875"
-   enc_922   = "cp922"
-   enc_935   = "cp935"
-   enc_1097  = "cp1097"
-   enc_1250  = "cp1250"
-   enc_1251  = "cp1251"
-   enc_1252  = "cp1252"
-   enc_1253  = "cp1253"
-   enc_1254  = "cp1254"
-   enc_1255  = "cp1255"
-   enc_1257  = "cp1257"
-   enc_ISO1  = "iso-8859-1"
-   enc_ISO2  = "iso-8859-2"
-   enc_ISO5  = "iso-8859-5"
-   enc_ISO7  = "iso-8859-7"
-   enc_ISO8  = "iso-8859-8"
-   enc_ISO9  = "iso-8859-9"
-   enc_ISO15 = "iso-8859-15"
    enc_KOI8R = "koi8-r"
    enc_KOI8U = "koi8-u"
+   for enc in [ 7, 8, 16, 32 ]:
+     locals()["enc_UTF%d" % enc] = "utf-%d" % enc
+   for enc in [ 273, 278, 280, 297, 423, 437, 737, 850,
+    855, 856, 857, 862, 863, 865, 866, 869, 874, 875, 880,
+    905, 922, 935, 1025, 1097, 1250, 1251, 1252, 1253, 1254,
+    1255, 1256, 1257, 1258 ]:
+     locals()["enc_%d" % enc] = "cp%d" % enc
+   for enc in [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 13, 15 ]:
+     locals()["enc_ISO%d" % enc] = "iso-8859-%d" % enc
    #
    enc_aliases = {
-    enc_UTF7  : [ "utf7" ],
-    enc_UTF8  : [ "utf8" ],
-    enc_UTF16 : [ "utf16" ],
-    enc_UTF32 : [ "utf32" ],
     enc_ASCII : [ "us-ascii" ],
+    enc_273   : [ "cp-273", "ibm273", "ibm-273" ],
     enc_278   : [ "cp-278", "ibm278", "ibm-278" ],
     enc_280   : [ "cp-280", "ibm280", "ibm-280" ],
     enc_297   : [ "cp-297", "ibm297", "ibm-297" ],
+    enc_423   : [ "cp-423", "ibm423", "ibm-423" ],
     enc_437   : [ "cp-437", "ibm437", "ibm-437" ],
     enc_737   : [ "cp-737", "ibm737", "ibm-737" ],
+    enc_850   : [ "cp-850" ],
+    enc_855   : [ "cp-855", "ibm855", "ibm-855" ],
     enc_856   : [ "cp-856", "ibm856", "ibm-856" ],
     enc_857   : [ "cp-857", "ibm857", "ibm-857" ],
+    enc_862   : [ "cp-862", "dos-862" ],
     enc_863   : [ "cp-863", "ibm863", "ibm-863" ],
+    enc_865   : [ "cp-865" ],
     enc_866   : [ "cp-866", "ibm866", "ibm-866" ],
+    enc_869   : [ "cp-869" ],
+    enc_874   : [ "cp-874",  "windows-874"  ],
     enc_875   : [ "cp-875", "ibm875", "ibm-875" ],
+    enc_880   : [ "cp-880", "ibm880", "ibm-880" ],
+    enc_905   : [ "cp-905", "ibm905", "ibm-905" ],
     enc_922   : [ "cp-922", "ibm922", "ibm-922" ],
     enc_935   : [ "cp-935", "ibm935", "ibm-935" ],
+    enc_1025  : [ "cp-1025" ],
     enc_1097  : [ "cp-1097", "ibm1097", "ibm-1097" ],
-    enc_1250  : [ "windows-1250", "cp5346" ],
-    enc_1251  : [ "windows-1251", "cp5347" ],
-    enc_1252  : [ "windows-1252", "cp5348" ],
-    enc_1253  : [ "windows-1253", "cp5349" ],
-    enc_1254  : [ "windows-1254", "cp5350" ],
-    enc_1255  : [ "windows-1255" ],
-    enc_ISO1  : [ "iso8859-1", "ibm819", "ibm-819", "latin1" ],
-    enc_ISO2  : [ "iso8859-2", "ibm912", "ibm-912", "latin2" ],
+    enc_1250  : [ "cp-1250", "windows-1250", "cp5346" ],
+    enc_1251  : [ "cp-1251", "windows-1251", "cp5347" ],
+    enc_1252  : [ "cp-1252", "windows-1252", "cp5348" ],
+    enc_1253  : [ "cp-1253", "windows-1253", "cp5349" ],
+    enc_1254  : [ "cp-1254", "windows-1254", "cp5350" ],
+    enc_1255  : [ "cp-1255", "windows-1255" ],
+    enc_1256  : [ "cp-1256", "windows-1256" ],
+    enc_1257  : [ "cp-1257", "windows-1257" ],
+    enc_1258  : [ "cp-1258", "windows-1258" ],
+    enc_ISO1  : [ "iso8859-1", "latin1", "ibm819", "ibm-819" ],
+    enc_ISO2  : [ "iso8859-2", "latin2", "ibm912", "ibm-912" ],
+    enc_ISO3  : [ "iso8859-3", "latin3" ],
+    enc_ISO4  : [ "iso8859-4" ],
     enc_ISO5  : [ "iso8859-5", "ibm915", "ibm-915" ],
-    enc_ISO7  : [ "iso8859-7", "ibm813", "ibm-813", "greek8" ],
+    enc_ISO6  : [ "iso8859-6" ],
+    enc_ISO7  : [ "iso8859-7", "greek8", "ibm813", "ibm-813" ],
     enc_ISO8  : [ "iso8859-8" ],
-    enc_ISO9  : [ "iso8859-9", "ibm920", "ibm-920", "latin5" ],
-    enc_ISO15 : [ "iso8859-15", "ibm923", "ibm-923", "latin9" ],
+    enc_ISO9  : [ "iso8859-9", "latin5", "ibm920", "ibm-920" ],
+    enc_ISO13 : [ "iso8859-13" ],
+    enc_ISO15 : [ "iso8859-15", "latin9", "ibm923", "ibm-923" ],
     enc_KOI8R : [ "koi8r" ],
-    enc_KOI8U : [ "koi8u" ]
+    enc_KOI8U : [ "koi8u" ],
+    enc_UTF7  : [ "utf7"  ],
+    enc_UTF8  : [ "utf8"  ],
+    enc_UTF16 : [ "utf16" ],
+    enc_UTF32 : [ "utf32" ],
    }
    #
    default_encoding = enc_UTF8
@@ -194,12 +187,13 @@ class irciot_shared_(object):
     hl_Croatian : [ enc_ISO2 ],
     hl_Czech    : [ enc_ISO2 ],
     hl_Danish   : [ enc_ISO1 ],
-    hl_Deutsch  : [ enc_ISO1 ],
+    hl_Deutsch  : [ enc_ISO1, enc_273 ],
     hl_English  : [ enc_ISO1, enc_437, enc_UTF7, enc_ASCII ],
-    hl_Estonian : [ enc_ISO15, enc_922 ],
+    hl_Estonian : [ enc_ISO15, enc_ISO13, enc_922 ],
     hl_Finnish  : [ enc_ISO1, enc_278 ],
     hl_French   : [ enc_ISO1, enc_863, enc_297 ],
-    hl_Greek    : [ enc_ISO7, enc_737, enc_869, enc_875, enc_1253 ],
+    hl_Greek    : [ enc_ISO7, enc_423, enc_737, enc_869,
+     enc_875, enc_1253 ],
     hl_Hrvatski : [ enc_ISO1 ],
     hl_Hebrew   : [ enc_ISO8, enc_862, enc_856, enc_1255 ],
     hl_Italian  : [ enc_ISO1, enc_280 ],
@@ -207,11 +201,13 @@ class irciot_shared_(object):
     hl_Persian  : [ enc_1097 ],
     hl_Polish   : [ enc_ISO2 ],
     hl_Romanian : [ enc_ISO2 ],
-    hl_Russian  : [ enc_ISO5, enc_866, enc_1251, enc_KOI8R ],
-    hl_Serbian  : [],
+    hl_Russian  : [ enc_ISO5, enc_855, enc_866, enc_1251,
+     enc_880, enc_KOI8R ],
+    hl_Serbian  : [ enc_1025 ],
     hl_Swedish  : [ enc_ISO1, enc_278 ],
     hl_Spanish  : [ enc_ISO1 ],
-    hl_Turkish  : [ enc_ISO9, enc_857, enc_1254 ],
+    hl_Thai     : [ enc_874 ],
+    hl_Turkish  : [ enc_ISO9, enc_857, enc_905, enc_1254 ],
     hl_Japanese : []
    }
    #

@@ -1,6 +1,6 @@
 
 def irciot_get_common_error_descriptions_(in_human_language):
- if in_human_language == "RU": # Russian Language
+ if in_human_language == "ru": # Russian Language
   return {
    101: "Несоответствие версии протокола",
    102: "Несоответствие версии библиотеки",
@@ -36,7 +36,7 @@ def irciot_get_common_error_descriptions_(in_human_language):
    811: "Подтверждено по Локальному Словарю",
    812: "Ошибка проверки по Локальному Словарю"
   }
- elif in_human_language == "DE": # Deutsch
+ elif in_human_language == "de": # Deutsch
   return {
    101: "Nicht übereinstimmende Protokollversion",
    102: "Nicht übereinstimmende Bibliotheksversion",
@@ -72,7 +72,7 @@ def irciot_get_common_error_descriptions_(in_human_language):
  return {}
 
 def irciot_get_EL_error_descriptions_(in_human_language):
- if in_human_language == "RU": # Russian Language
+ if in_human_language == "ru": # Russian Language
   return {
    1001: "Неизвестный язык программирования",
    1002: "Данный язык ещё не поддерживается",
@@ -85,7 +85,7 @@ def irciot_get_EL_error_descriptions_(in_human_language):
    1010: "Проблема при исполнении кода",
    1025: "лексический анализ не пройден"
   }
- elif in_human_language == "DE": # Deutsch
+ elif in_human_language == "de": # Deutsch
   return {
    1001: "Unbekannte Programmiersprache",
    1002: "Diese Sprache wird noch nicht unterstützt",
@@ -101,14 +101,14 @@ def irciot_get_EL_error_descriptions_(in_human_language):
  return {}
 
 def irciot_get_router_error_descriptions_(in_human_language):
- if in_human_language == "RU": # Russian Language
+ if in_human_language == "ru": # Russian Language
   return {
    10015: "Маршрутизатор обнаружил дубликат при пересылке сообщения",
    10505: "Отсутствует обязательный параметр для узла в графе маршрутизации",
    10507: "Недопустимое значение обязательного параметра для узла в графе маршрутизации",
    10508: "Неверный параметр направления для узла в графе маршрутизации"
   }
- elif in_human_language == "DE": # Deutsch
+ elif in_human_language == "de": # Deutsch
   return {
    10015: "Der Router hat beim Weiterleiten der Nachricht ein Duplikat entdeckt",
    10505: "Fehlender erforderlicher Parameter für den Knoten in der Routing-Graph",
