@@ -18,7 +18,7 @@ DO_debug_library = False
 import socket
 import select
 import threading
-import pyserial
+import serial
 import ssl
 try:
  import json
@@ -73,7 +73,66 @@ class PyLayerCOM( irciot_shared_ ):
    #
    # According RFC 2217
    #
-   # Constants defined by RFC will be here
+   cmd_SET_BAUDRATE = b'\x01'
+   cmd_SET_DATASIZE = b'\x02'
+   cmd_SET_PARITY   = b'\x03'
+   cmd_SET_STOPSIZE = b'\x04'
+   cmd_SET_CONTROL  = b'\x05'
+   cmd_NOTIFY_LINESTATE  = b'\x06'
+   cmd_NOTIFY_MODEMSTATE = b'\x07'
+   cmd_FLOWCONTROL_SUSPEND = b'\x08'
+   cmd_FLOWCONTROL_RESUME  = b'\x09'
+   cmd_SET_LINESTATE_MASK  = b'\x0a'
+   cmd_SET_MODEMSTATE_MASK = b'\x0b'
+   cmd_PURGE_DATA   = b'\x0c'
+   #
+   rpl_SET_BAUDRATE = b'\x65'
+   rpl_SET_DATASIZE = b'\x66'
+   rpl_SET_PARITY   = b'\x67'
+   rpl_SET_STOPSIZE = b'\x68'
+   rpl_SET_CONTROL  = b'\x69'
+   rpl_NOTIFY_LINESTATE  = b'\x6a'
+   rpl_NOTIFY_MODEMSTATE = b'\x6b'
+   rpl_FLOWCONTROL_SUSPEND = b'\x6c'
+   rpl_FLOWCONTROL_RESUME  = b'\x6d'
+   rpl_SET_LINESTATE_MASK  = b'\x6e'
+   rpl_SET_MODEMSTATE_MASK = b'\x6f'
+   rpl_PURGE_DATA   = b'\x70'
+   #
+   map_RFC2217_cmd_rpl = {
+    cmd_SET_BAUDRATE : rpl_SET_BAUDRATE,
+    cmd_SET_DATASIZE : rpl_SET_DATASIZE,
+    cmd_SET_PARITY   : rpl_SET_PARITY,
+    cmd_SET_STOPSIZE : rpl_SET_STOPSIZE,
+    cmd_SET_CONTROL  : rpl_SET_CONTROL,
+    cmd_NOTIFY_LINESTATE  : rpl_NOTIFY_LINESTATE,
+    cmd_NOTIFY_MODEMSTATE : rpl_NOTIFY_MODEMSTATE,
+    cmd_FLOWCONTROL_SUSPEND : rpl_FLOWCONTROL_SUSPEND,
+    cmd_FLOWCONTROL_RESUME  : rpl_FLOWCONTROL_RESUME,
+    cmd_SET_LINESTATE_MASK  : rpl_SET_LINESTATE_MASK,
+    cmd_SET_MODEMSTATE_MASK : rpl_SET_MODEMSTATE_MASK,
+    cmd_PURGE_DATA   : rpl_PURGE_DATA
+   }
+   #
+   # Telnet codes:
+   #
+   tel_SE   = b'\xf0' # Subnegotiation End
+   tel_NOP  = b'\xf1' # No Operation
+   tel_DM   = b'\xf2' # Data Mark
+   tel_BRK  = b'\xf3' # Break
+   tel_IP   = b'\xf4' # Interrupt Process
+   tel_AO   = b'\xf5' # Abort Output
+   tel_AYT  = b'\xf6' # Are You There
+   tel_EC   = b'\xf7' # Erase Character
+   tel_EL   = b'\xf8' # Erase Line
+   tel_GA   = b'\xf9' # Go Ahead
+   tel_SB   = b'\xfa' # Subnegotiation Begin
+   tel_WILL = b'\xfb' #
+   tel_WONT = b'\xfc' #
+   tel_DO   = b'\xfd' #
+   tel_DONT = b'\xfe' #
+   tel_IAC  = b'\xff' # Interpret As Command
+   tel_2IAC = b'\xff\xff'
    #
    def __setattr__(self, *_):
       pass
@@ -82,7 +141,10 @@ class PyLayerCOM( irciot_shared_ ):
    #
    self.CONST = self.CONST()
    #
-   super(PyLayerUDPb, self).__init__()
+   self.__com_port = None
+   self.__com_task = None
+   #
+   super(PyLayerCOM, self).__init__()
    #
    self.com_encoding = self.CONST.com_default_encoding
    #
@@ -99,15 +161,14 @@ class PyLayerCOM( irciot_shared_ ):
    self.com_servers = [ ( \
      self.com_server, self.com_tcp_port, self.com_ssl, 0, None ) ]
    #
-   self.com_queue = [0, 0]
-   self.com_queue[self.CONST.com_queue_input]  = Queue(maxsize=0)
-   self.com_queue[self.CONST.com_queue_output] = Queue(maxsize=0)
+   self.__com_queue = [0, 0]
+   self.__com_queue[self.CONST.com_queue_input]  = Queue(maxsize=0)
+   self.__com_queue[self.CONST.com_queue_output] = Queue(maxsize=0)
    #
-   self.com_queue_lock = [0, 0]
-   self.com_queue_lock[self.CONST.com_queue_input]  = False
-   self.com_queue_lock[self.CONST.com_queue_output] = False
+   self.__com_queue_lock = [0, 0]
+   self.__com_queue_lock[self.CONST.com_queue_input]  = False
+   self.__com_queue_lock[self.CONST.com_queue_output] = False
    #
-   self.__com_task  = None
    self.com_run   = False
    self.com_debug = self.CONST.com_default_debug
    #
@@ -291,18 +352,18 @@ class PyLayerCOM( irciot_shared_ ):
    pass
 
  def com_check_queue_(self, queue_id):
-   old_queue_lock = self.com_queue_lock[queue_id]
+   old_queue_lock = self.__com_queue_lock[queue_id]
    if not old_queue_lock:
-     check_queue = self.com_queue[queue_id]
-     self.com_queue_lock[queue_id] = True
+     check_queue = self.__com_queue[queue_id]
+     self.__com_queue_lock[queue_id] = True
      if not check_queue.empty():
        (com_message, com_wait, com_vuid) = check_queue.get()
-       self.com_queue_lock[queue_id] = old_queue_lock
+       self.__com_queue_lock[queue_id] = old_queue_lock
        return (com_message, com_wait, com_vuid)
      else:
        if old_queue_lock:
           check_queue.task_done()
-     self.com_queue_lock[queue_id] = old_queue_lock
+     self.__com_queue_lock[queue_id] = old_queue_lock
    try:
      sleep(self.CONST.com_micro_wait)
    except:
@@ -312,10 +373,10 @@ class PyLayerCOM( irciot_shared_ ):
    # End of com_check_queue_()
 
  def com_add_to_queue_(self, in_queue_id, in_message, in_wait, in_vuid):
-   old_queue_lock = self.com_queue_lock[in_queue_id]
-   self.com_queue_lock[in_queue_id] = True
-   self.com_queue[in_queue_id].put((in_message, in_wait, in_vuid))
-   self.com_queue_lock[in_queue_id] = old_queue_lock
+   old_queue_lock = self.__com_queue_lock[in_queue_id]
+   self.__com_queue_lock[in_queue_id] = True
+   self.__com_queue[in_queue_id].put((in_message, in_wait, in_vuid))
+   self.__com_queue_lock[in_queue_id] = old_queue_lock
 
  def com_output_all_(self, in_messages_packs, in_wait = None):
    if not isinstance(in_messages_packs, list):
@@ -361,21 +422,21 @@ class PyLayerCOM( irciot_shared_ ):
 
      while (self.com_run):
 
-       if not self.com:
+       if not self.__com_port:
          sleep(self.CONST.com_first_wait)
-         # self.com = self.irc_socket_()
+         # self.__com_port = self.com_socket_()
          com_init = 0
 
        if com_init < 2:
          com_init += 1
 
-       if irc_init == 1:
+       if com_init == 1:
          try:
            self.com_connect_(self.com_server, self.tcp_port)
          except:
            self.com_disconnect_()
-           # self.com = self.com_socket_()
-           irc_init = 0
+           # self.__com_port = self.com_socket_()
+           com_init = 0
 
        sleep(self.CONST.com_micro_wait)
 

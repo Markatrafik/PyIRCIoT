@@ -103,13 +103,13 @@ class PyLayerUDPb( irciot_shared_ ):
   #
   self.udpb_size = self.CONST.udpb_default_size
   #
-  self.udpb_queue = [0, 0]
-  self.udpb_queue[self.CONST.udpb_queue_input  ] = Queue(maxsize=0)
-  self.udpb_queue[self.CONST.udpb_queue_output ] = Queue(maxsize=0)
+  self.__udpb_queue = [0, 0]
+  self.__udpb_queue[self.CONST.udpb_queue_input  ] = Queue(maxsize=0)
+  self.__udpb_queue[self.CONST.udpb_queue_output ] = Queue(maxsize=0)
   #
-  self.udpb_queue_lock = [0, 0]
-  self.udpb_queue_lock[self.CONST.udpb_queue_input  ] = False
-  self.udpb_queue_lock[self.CONST.udpb_queue_output ] = False
+  self.__udpb_queue_lock = [0, 0]
+  self.__udpb_queue_lock[self.CONST.udpb_queue_input  ] = False
+  self.__udpb_queue_lock[self.CONST.udpb_queue_output ] = False
   #
   self.udpb_users = self.CONST.udpb_default_users
   self.udpb_anons = []
@@ -120,8 +120,8 @@ class PyLayerUDPb( irciot_shared_ ):
   self.udpb_talk_with_strangers \
     = self.CONST.udpb_default_talk_with_strangers
   #
-  self.udpb_client_sock = None
-  self.udpb_server_sock = None
+  self.__udpb_client_sock = None
+  self.__udpb_server_sock = None
   #
   self.udpb_os_name = self.get_os_name_()
   #
@@ -294,17 +294,17 @@ class PyLayerUDPb( irciot_shared_ ):
   else:
     return
   self.udpb_update_local_ip_addresses_()
-  self.udpb_client_sock = my_init_socket_(my_af_inet, \
+  self.__udpb_client_sock = my_init_socket_(my_af_inet, \
     self.udpb_os_name)
   if self.udpb_os_name == self.CONST.os_windows:
     my_bind_ip = self.udpb_ip
   else:
     my_bind_ip = self.udpb_ip_broadcast
   try:
-    self.udpb_client_sock.bind((my_bind_ip, self.udpb_port))
-    self.udpb_server_sock = my_init_socket_(my_af_inet, \
+    self.__udpb_client_sock.bind((my_bind_ip, self.udpb_port))
+    self.__udpb_server_sock = my_init_socket_(my_af_inet, \
       self.udpb_os_name)
-    self.udpb_server_sock.settimeout(self.CONST.udpb_default_wait)
+    self.__udpb_server_sock.settimeout(self.CONST.udpb_default_wait)
   except:
     return
   #
@@ -377,18 +377,18 @@ class PyLayerUDPb( irciot_shared_ ):
   self.udpb_anons = []
 
  def udpb_check_queue_(self, in_queue_id):
-  old_queue_lock = self.udpb_queue_lock[in_queue_id]
+  old_queue_lock = self.__udpb_queue_lock[in_queue_id]
   if not old_queue_lock:
-    check_queue = self.udpb_queue[in_queue_id]
-    self.udpb_queue_lock[in_queue_id] = True
+    check_queue = self.__udpb_queue[in_queue_id]
+    self.__udpb_queue_lock[in_queue_id] = True
     if not check_queue.empty():
       (udpb_message, udpb_wait, udpb_vuid) = check_queue.get()
-      self.udpb_queue_lock[in_queue_id] = old_queue_lock
+      self.__udpb_queue_lock[in_queue_id] = old_queue_lock
       return (udpb_message, udpb_wait, udpb_vuid)
     else:
       if old_queue_lock:
          check_queue.task_done()
-    self.udpb_queue_lock[in_queue_id] = old_queue_lock
+    self.__udpb_queue_lock[in_queue_id] = old_queue_lock
   try:
     sleep(self.CONST.udpb_micro_wait)
   except:
@@ -398,27 +398,27 @@ class PyLayerUDPb( irciot_shared_ ):
   # End of udpb_check_queue_()
 
  def udpb_add_to_queue_(self, in_queue_id, in_message, in_wait, in_vuid):
-  old_queue_lock = self.udpb_queue_lock[in_queue_id]
-  self.udpb_queue_lock[in_queue_id] = True
-  self.udpb_queue[in_queue_id].put((in_message, in_wait, in_vuid))
-  self.udpb_queue_lock[in_queue_id] = old_queue_lock
+  old_queue_lock = self.__udpb_queue_lock[in_queue_id]
+  self.__udpb_queue_lock[in_queue_id] = True
+  self.__udpb_queue[in_queue_id].put((in_message, in_wait, in_vuid))
+  self.__udpb_queue_lock[in_queue_id] = old_queue_lock
   #
   # End of udpb_add_to_queue_()
 
  # incomplete
  def udpb_receive_(self, recv_timeout):
-  if self.udpb_client_sock == None:
+  if self.__udpb_client_sock == None:
     return ( -1, "", 0, "" )
   try:
     time_in_recv = datetime.datetime.now()
-    ready = select.select([self.udpb_client_sock], [], [], 0)
+    ready = select.select([self.__udpb_client_sock], [], [], 0)
     my_timerest = recv_timeout
     while ready[0] == [] and my_timerest > 0 and self.udpb_run:
       my_timeout = my_timerest % self.CONST.udpb_latency_wait
       if my_timeout == 0:
         my_timeout = self.CONST.udpb_latency_wait
-      ready = select.select([self.udpb_client_sock], [], [], my_timeout)
-      if not self.udpb_queue[self.CONST.udpb_queue_output].empty():
+      ready = select.select([self.__udpb_client_sock], [], [], my_timeout)
+      if not self.__udpb_queue[self.CONST.udpb_queue_output].empty():
         break
       my_timerest -= my_timeout
     time_out_recv = datetime.datetime.now()
@@ -431,7 +431,7 @@ class PyLayerUDPb( irciot_shared_ ):
     if delta_time_in < 0:
       delta_time = 0
     if ready[0] and self.udpb_run:
-      my_data, my_addr = self.udpb_client_sock.recvfrom(self.udpb_size)
+      my_data, my_addr = self.__udpb_client_sock.recvfrom(self.udpb_size)
       ( my_ip, my_port ) = my_addr
       if not self.is_ip_address_(my_ip) or not self.is_ip_port_(my_port):
         return ( -1, "", 0, "" )
@@ -455,7 +455,7 @@ class PyLayerUDPb( irciot_shared_ ):
 
  # incomplete
  def udpb_send_(self, in_string, in_vuid = None):
-  if self.udpb_server_sock == None:
+  if self.__udpb_server_sock == None:
     return False
   if in_vuid == None:
     in_vuid = self.CONST.api_vuid_all
@@ -475,7 +475,7 @@ class PyLayerUDPb( irciot_shared_ ):
     self.to_log_("Sending to UDP(%s:%s): <" \
       % (my_addr, self.udpb_port) + in_string + ">")
   my_data = bytes(in_string, self.udpb_encoding)
-  self.udpb_server_sock.sendto(my_data, (my_addr, self.udpb_port))
+  self.__udpb_server_sock.sendto(my_data, (my_addr, self.udpb_port))
   sleep(self.CONST.udpb_micro_wait)
   return True
   #
@@ -513,7 +513,7 @@ class PyLayerUDPb( irciot_shared_ ):
    #
    while (self.udpb_run):
      try:
-       if not self.udpb_client_sock or not self.udpb_server_sock:
+       if not self.__udpb_client_sock or not self.__udpb_server_sock:
          self.udpb_setup_()
          sleep(self.CONST.udpb_default_wait)
 
