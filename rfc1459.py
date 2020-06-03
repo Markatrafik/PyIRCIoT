@@ -335,6 +335,10 @@ class PyLayerIRC( irciot_shared_ ):
    RPL_SERVICE           = "233"
    RPL_SERVLIST          = "234"
    RPL_SERVLISTEND       = "235"
+   if irc_default_draft == "IRCNet":
+     RPL_STATSIAUTH      = "239"
+   elif irc_default_draft == "RFC2812":
+     RPL_STATSVLINE      = "240"
    RPL_STATSLLINE        = "241"
    RPL_STATSUPTIME       = "242"
    RPL_STATSOLINE        = "243"
@@ -469,7 +473,7 @@ class PyLayerIRC( irciot_shared_ ):
    RPL_NAMREPLY          = "353"
    if irc_default_draft == "Bahamut":
      RPL_RWHOREPLY       = "354"
-   if irc_default_draft in [ "ircu", "seven", \
+   elif irc_default_draft in [ "ircu", "seven", \
     "Charybdis", "snircd" ]:
      RPL_WHOSPCRPL       = "354"
    if irc_default_draft in ircd_iu_sn:
@@ -513,6 +517,7 @@ class PyLayerIRC( irciot_shared_ ):
    RPL_NOUSERS           = "395"
    if irc_default_draft == "ircu":
      RPL_HOSTHIDDEN      = "396"
+   ERR_UNKNOWNERROR      = "400" # Unknown
    ERR_NOSUCHNICK        = "401"
    ERR_NOSUCHSERVER      = "402"
    ERR_NOSUCHCHANNEL     = "403"
@@ -531,8 +536,12 @@ class PyLayerIRC( irciot_shared_ ):
    ERR_NOTEXTTOSEND      = "412"
    ERR_NOTOPLEVEL        = "413"
    ERR_WILDTOPLEVEL      = "414"
+   if irc_default_draft == "RFC2812":
+     ERR_BADMASK         = "415"
    if irc_default_draft in ircd_iu_sn:
      ERR_QUERYTOOLONG    = "416"
+   elif irc_default_draft == "IRCNet":
+     ERR_TOOMANYMATCHES  = "416"
    if irc_add_v3 in irc_additional_drafts:
      ERR_INPUTTOOLONG    = "417"
    ERR_UNKNOWNCOMMAND    = "421"
@@ -541,7 +550,7 @@ class PyLayerIRC( irciot_shared_ ):
    ERR_FILEERROR         = "424"
    if irc_default_draft == "Unreal":
      ERR_NOOPERMOTD      = "425"
-   if irc_default_draft == "Bahamut":
+   elif irc_default_draft == "Bahamut":
      ERR_TOOMANYAWAY     = "429"
    ERR_NONICKNAMEGIVEN   = "431"
    ERR_ERRONEUSNICKNAME  = "432"
@@ -612,7 +621,7 @@ class PyLayerIRC( irciot_shared_ ):
    ERR_CANTKILLSERVER    = "483"
    if irc_default_draft == "ircu":
      ERR_ISCHANSERVICE   = "484"
-   if irc_default_draft in [ "RFC2812", "hybrid", "IRCNet" ]:
+   elif irc_default_draft in [ "RFC2812", "hybrid", "IRCNet" ]:
      ERR_RESTRICTED      = "484"
    if irc_default_draft == "Unreal":
      ERR_ATTACKDENY      = "484"
@@ -621,7 +630,10 @@ class PyLayerIRC( irciot_shared_ ):
      ERR_UNIQOPPRIVSNEEDED = "485" # Unknown
    if irc_default_draft == "unreal":
      ERR_HTMDISABLED     = "486"
-   if irc_default_draft == "Bahamut":
+   if irc_default_draft == "IRCNet":
+     ERR_CHANTOORECENT   = "487"
+     ERR_TSLESSCHAN      = "488"
+   elif irc_default_draft == "Bahamut":
      ERR_NOSSL           = "488"
    if irc_default_draft == "Unreal":
      ERR_SECUREONLYCHAN  = "489"
@@ -655,7 +667,7 @@ class PyLayerIRC( irciot_shared_ ):
    if irc_default_draft == "Unreal":
      RPL_WATCHOFF        = "602"
      RPL_WATCHSTAT       = "603"
-   if irc_default_draft == "Bahamut":
+   elif irc_default_draft == "Bahamut":
      RPL_NOWON           = "604"
      RPL_NOWOFF          = "605"
    if irc_default_draft == "Unreal":
@@ -784,12 +796,12 @@ class PyLayerIRC( irciot_shared_ ):
      ERR_ENDOFEXEMPTCHANOPSLIST = "954"
    if irc_default_draft in [ "Unreal", "plexus" ]:
      ERR_CANNOTDOCOMMAND = "972"
-   if irc_default_draft == "Insp":
+   elif irc_default_draft == "Insp":
      ERR_CANTUNLOADMODULE = "972"
      RPL_UNLOADEDMODULE  = "973"
      ERR_CANTLOADMODULE  = "974"
      RPL_LOADEDMODULE    = "975"
-   if irc_default_draft == "Bahamut":
+   elif irc_default_draft == "Bahamut":
      ERR_NUMERICERROR    = "999"
    #
    cmd_ADMIN      = "ADMIN"
