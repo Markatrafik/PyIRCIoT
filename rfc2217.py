@@ -42,13 +42,29 @@ class PyLayerCOM( irciot_shared_ ):
    #
    irciot_protocol_version = '0.3.33'
    #
-   irciot_library_version  = '0.0.209'
+   irciot_library_version  = '0.0.211'
    #
    com_default_debug = DO_debug_library
    #
    com_default_server = "serial.nsk.ru"
    com_default_tcp_port = 2217
    com_default_ssl = False
+   #
+   com_default_baud_rate = 9600
+   com_default_rtscts  = False
+   com_default_xonxoff = False
+   com_default_RTS = False
+   com_default_DTR = False
+   #
+   com_parity_NONE = 'N'
+   com_parity_EVEN = 'E'
+   com_parity_ODD  = 'O'
+   com_parity_all  = [
+    com_parity_NONE,
+    com_parity_EVEN,
+    com_parity_ODD ]
+   #
+   com_default_parity = com_parity_NONE
    #
    com_first_wait = 1
    com_micro_wait = 0.1
@@ -63,11 +79,16 @@ class PyLayerCOM( irciot_shared_ ):
    #
    com_buffer_size  = 3072
    #
-   com_modes = [ "CLIENT", "SERVICE", "SERVER" ]
-   #
    com_default_mid_pipeline_size = 16
    #
    com_default_MTU = 500
+   #
+   com_mode_CLIENT = "CLIENT"
+   # ^ Connecting to remote virtual COM port using RFC2217 protocol
+   com_mode_SERVER = "SERVER"
+   # ^ Accepting connections to virtual COM port by RFC2217 protocol
+   com_modes = [ com_mode_CLIENT, com_mode_SERVER ]
+   com_default_mode = com_mode_CLIENT
    #
    com_default_encoding = "utf-8"
    #
@@ -141,7 +162,7 @@ class PyLayerCOM( irciot_shared_ ):
    #
    self.CONST = self.CONST()
    #
-   self.__com_port = None
+   self.__com_sock = None
    self.__com_task = None
    #
    super(PyLayerCOM, self).__init__()
@@ -158,6 +179,13 @@ class PyLayerCOM( irciot_shared_ ):
    self.com_recon = 1
    self.com_last = None
    #
+   self.com_baud_rate = self.CONST.com_default_baud_rate
+   self.com_rtscts  = self.CONST.com_default_rtscts
+   self.com_xonxoff = self.CONST.com_default_xonxoff
+   self.com_RTS = self.CONST.com_default_RTS
+   self.com_DTR = self.CONST.com_default_DTR
+   self.com_parity  = self.CONST.com_default_parity
+   #
    self.com_servers = [ ( \
      self.com_server, self.com_tcp_port, self.com_ssl, 0, None ) ]
    #
@@ -169,7 +197,9 @@ class PyLayerCOM( irciot_shared_ ):
    self.__com_queue_lock[self.CONST.com_queue_input]  = False
    self.__com_queue_lock[self.CONST.com_queue_output] = False
    #
-   self.com_run   = False
+   self.__com_mode = self.CONST.com_default_mode
+   #
+   self.__com_run = False
    self.com_debug = self.CONST.com_default_debug
    #
    self.com_MTU = self.CONST.com_default_MTU
@@ -188,16 +218,33 @@ class PyLayerCOM( irciot_shared_ ):
    #
    # End of __init__()
 
+ def set_COM_mode_(self, in_mode):
+   if in_mode not in self.com_modes:
+     return False
+   if self.__com_run:
+     return False
+   self.__com_mode = in_mode
+   return True
+
+ def is_COM_runned_(self):
+   return self.__com_run
+
  def start_COM_(self):
    #
-   self.__com_task = threading.Thread(target = self.com_process_)
-   self.com_run  = True
+   if self.__com_mode == self.CONST.com_mode_CLIENT:
+     my_target = self.com_process_client_
+   elif self.__com_mode == self.CONST.com_mode_SERVER:
+     my_target = self.com_process_server_
+   else:
+     return
+   self.__com_task = threading.Thread(target = my_target)
+   self.__com_run  = True
    self.__com_task.start()
    #
    # End of start_COM_()
 
  def stop_COM_(self):
-   self.com_run = False
+   self.__com_run = False
    #sleep(self.CONST.com_micro_wait)
    #self.com_disconnect_()
    if self.__com_task != None:
@@ -222,6 +269,12 @@ class PyLayerCOM( irciot_shared_ ):
 
  def irciot_library_version_(self):
    return self.CONST.irciot_library_version
+
+ def com_set_parity_(in_parity):
+   if in_parity not in self.CONST.com_parity_all:
+     return False
+   self.com_parity = in_parity
+   return True
 
  def com_handler (self, in_compatibility, in_message_pack):
    # Warning: interface may be changed
@@ -305,18 +358,27 @@ class PyLayerCOM( irciot_shared_ ):
    #
    # End of user_handler_()
 
+ # incomplete
  def com_quit_(self):
    pass
    #
    # End of com_quit_()
 
+ # incomplete
+ def com_socket_(self):
+   return None
+   #
+   # End of com_socket_()
+
+ # incomplete
  def com_disconnect_(self):
    pass
    #
    # End of com_disconnect_()
 
+ # incomplete
  def com_reconnect_(self):
-   if not self.com_run:
+   if not self.__com_run:
      return
    self.com_disconnect_()
    self.to_log_("Connection closed, " \
@@ -327,6 +389,7 @@ class PyLayerCOM( irciot_shared_ ):
    if self.com_recon > self.CONST.com_recon_steps:
      self.com_recon = 1
 
+ # incomplete
  def com_send_(self, com_out):
    try:
      if com_out == "":
@@ -346,6 +409,7 @@ class PyLayerCOM( irciot_shared_ ):
    #
    # End of com_send_()
 
+ # incomplete
  def com_connect_(self, com_server, com_port):
    # self.com_connect((com_server, com_port))
    # self.com_setblocking(False)
@@ -396,15 +460,51 @@ class PyLayerCOM( irciot_shared_ ):
    #
    # End of com_output_all_()
 
- # SERVICE Hooks:
+ # incomplete
+ def com_socket_(self):
+   return None
 
+ # incomplete
  def init_rfc2217_(self):
    #
    C = self.CONST
    #
    # End of init_rfc2217
 
- def com_process_(self):
+ # incomplete
+ def com_process_server_(self):
+   ''' Accepting connections to virtual COM port using RFC2217 protocol '''
+   #
+   self.init_rfc2217_()
+   #
+   try:
+     com_init = 0
+     com_wait = self.CONST.com_first_wait
+     com_input_buffer = ""
+     com_ret = 0
+     com_vuid = "%s0" % self.CONST.api_vuid_cfg
+
+     while (self.__com_run):
+
+       if not self.__com_sock:
+         sleep(self.CONST.com_first_wait)
+         self.__com_sock = self.com_socket_()
+         com_init = 0
+
+       if com_init < 2:
+         com_init += 1
+
+       sleep(self.CONST.com_micro_wait)
+
+   except:
+     self.com_disconnect()
+   self.__com_run = False
+   #
+   # End of com_process_server_()
+
+ # incomplete
+ def com_process_client_(self):
+   ''' Connecting to remote virtual COM port using RFC2217 protocol '''
    #
    self.init_rfc2217_()
    #
@@ -420,11 +520,11 @@ class PyLayerCOM( irciot_shared_ ):
      # app.run(host='0.0.0.0', port=50000, debug=True)
      # must be FIXed for Unprivileged user
 
-     while (self.com_run):
+     while (self.__com_run):
 
-       if not self.__com_port:
+       if not self.__com_sock:
          sleep(self.CONST.com_first_wait)
-         # self.__com_port = self.com_socket_()
+         self.__com_sock = self.com_socket_()
          com_init = 0
 
        if com_init < 2:
@@ -435,14 +535,14 @@ class PyLayerCOM( irciot_shared_ ):
            self.com_connect_(self.com_server, self.tcp_port)
          except:
            self.com_disconnect_()
-           # self.__com_port = self.com_socket_()
+           # self.__com_sock = self.com_socket_()
            com_init = 0
 
        sleep(self.CONST.com_micro_wait)
 
    except socket.error:
      self.com_disconnect()
-     com_init = 0
+   self.__com_run = False
    #
-   # End of com_process_()
+   # End of com_process_client_()
 

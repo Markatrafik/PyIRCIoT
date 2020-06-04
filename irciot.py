@@ -43,7 +43,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.33'
   #
-  irciot_library_version  = '0.0.209'
+  irciot_library_version  = '0.0.211'
   #
   # IRC-IoT characters
   #
@@ -742,7 +742,7 @@ class PyLayerIRCIoT(object):
   elif in_action == self.CONST.api_GET_VUID:
     return (True, [ self.CONST.api_vuid_self ])
   elif in_action == self.CONST.api_GET_iMTU:
-    return (True, self.CONST.irciot_default_MTU)
+    return (False, None)
   elif in_action == self.CONST.api_GET_iENC:
     return (True, self.CONST.irciot_default_encoding)
   return (False, None)
@@ -2530,9 +2530,6 @@ class PyLayerIRCIoT(object):
     return False
   if in_mtu < 128:
     return False
-  if isinstance(self.__initial_MTU, int):
-    if in_mtu > self.__initial_MTU:
-      return False
   self.__message_MTU = in_mtu
   return True
 

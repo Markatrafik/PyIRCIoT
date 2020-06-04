@@ -151,29 +151,29 @@ def main():
  global my_params
 
  my_params = []
- if (len(sys.argv) > 1):
+ if len(sys.argv) > 1:
    my_command = sys.argv[1]
  for my_idx in range(2, 6):
    if len(sys.argv) > my_idx:
      my_params += [ sys.argv[my_idx] ]
- if (my_command == ""):
+ if my_command == "":
    my_command = 'default'
 
  print ("TEST NAME: '%s'" % my_command)
 
- if (my_command == 'default'):
+ if my_command == 'default':
    irc_test_default_()
 
- if (my_command == 'nicks'):
+ if my_command == 'nicks':
    irc_unary_nicks_()
 
- if (my_command == 'masks'):
+ if my_command == 'masks':
    irc_unary_masks_()
 
- if (my_command == 'isitip'):
+ if my_command == 'isitip':
    irc_unary_isitip_()
 
- if (my_command == 'langenc'):
+ if my_command == 'langenc':
    irc_unary_langenc_()
 
 if __name__ == '__main__':

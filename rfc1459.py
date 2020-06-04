@@ -44,7 +44,7 @@ class PyLayerIRC( irciot_shared_ ):
    #
    irciot_protocol_version = '0.3.33'
    #
-   irciot_library_version  = '0.0.209'
+   irciot_library_version  = '0.0.211'
    #
    # Bot specific constants
    #
@@ -120,7 +120,17 @@ class PyLayerIRC( irciot_shared_ ):
    #
    irc_buffer_size  = 3072
    #
-   irc_layer_modes  = [ "CLIENT", "SERVICE", "SERVER" ]
+   irc_mode_CLIENT  = "CLIENT"
+   # ^ Connects to IRC server over the network as an IRC client
+   irc_mode_SERVICE = "SERVICE"
+   # ^ Connects to IRC server over the network as an IRC service
+   irc_mode_SERVER  = "SERVER"
+   # ^ Act as an IRC server, accepting connections of IRC clients
+   irc_layer_modes  = [
+    irc_mode_CLIENT,
+    irc_mode_SERVICE,
+    irc_mode_SERVER ]
+   irc_default_mode = irc_mode_CLIENT
    #
    irc_default_nick_retry = 3600 # in seconds
    irc_default_join_retry = 32   # trys
@@ -1032,8 +1042,7 @@ class PyLayerIRC( irciot_shared_ ):
    self.irc_codes    = []
    self.irc_features = []
    #
-   self.irc_layer_mode \
-     = self.CONST.irc_layer_modes[0]
+   self.__irc_layer_mode = self.CONST.irc_default_mode
    #
    self.__irc_task = None
    self.irc_run   = False
@@ -1158,9 +1167,18 @@ class PyLayerIRC( irciot_shared_ ):
 
  def start_IRC_(self):
    #
+   if self.__irc_layer_mode in [
+    self.CONST.irc_mode_CLIENT,
+    self.CONST.irc_mode_SERVICE ]:
+     my_target = self.irc_process_client_
+   elif self.__irc_layer_mode == self.COSNT.irc_mode_SERVER:
+     my_target = self.irc_process_server_
+   else:
+     return False
    self.irc_run  = True
-   self.__irc_task = threading.Thread(target = self.irc_process_)
+   self.__irc_task = threading.Thread(target = my_target)
    self.__irc_task.start()
+   return True
    #
    # End of start_IRC_()
 
@@ -2515,6 +2533,11 @@ class PyLayerIRC( irciot_shared_ ):
     (C.ERR_NOSUCHCHANNEL,    "ERR_NOSUCHCHANNEL",    self.func_banned_),
     (C.ERR_NICKCOLLISION,    "ERR_NICKCOLLISION",    self.func_nick_in_use_),
     (C.ERR_ALREADYREGISTERED,"ERR_ALREADYREGISTERED",self.func_registered_),
+    (C.RPL_WELCOME,          "RPL_WELCOME",          None),
+    (C.RPL_CREATED,          "RPL_CREATED",          None),
+    (C.RPL_MYINFO,           "RPL_MYINFO",           None),
+    (C.RPL_LUSERCHANNELS,    "RPL_LUSERCHANNELS",    None),
+    (C.RPL_LUSERME,          "RPL_LUSERME",          None),
     (C.ERR_NOSUCHSERVER,     "ERR_NOSUCHSERVER",     None),
     (C.ERR_CANNOTSENDTOCHAN, "ERR_CANNOTSENDTOCHAN", None),
     (C.ERR_TOOMANYCHANNELS,  "ERR_TOOMANYCHANNELS",  None),
@@ -2599,7 +2622,7 @@ class PyLayerIRC( irciot_shared_ ):
      pass
 
    #
-   if self.irc_layer_mode == self.CONST.irc_layer_modes[0]:
+   if self.__irc_layer_mode == self.CONST.irc_mode_CLIENT:
      self.irc_commands = [
       (C.cmd_INVITE,  None),
       (C.cmd_JOIN,    self.func_on_join_),
@@ -2614,7 +2637,7 @@ class PyLayerIRC( irciot_shared_ ):
       (C.cmd_QUIT,    self.func_on_quit_),
       (C.cmd_ERROR,   self.func_on_error_) ]
    #
-   else: # RFC 2813
+   elif self.irc_layer_mode == self.CONST.irc_mode_SERVER: # RFC 2813
      self.irc_cmmands = [
       (C.cmd_PASS,    None), (C.cmd_SERVER,     None),
       (C.cmd_NICK,    None), (C.cmd_QUIT,       None),
@@ -2684,7 +2707,22 @@ class PyLayerIRC( irciot_shared_ ):
    #
    # End of irc_output_all_()
 
- def irc_process_(self):
+ # incomplete
+ def irc_process_server_(self):
+   #
+   self.init_rfc1459_()
+   #
+   try:
+     pass
+
+   except:
+     pass
+
+   self.irc_run = False
+   #
+   # End of irc_process_server_()
+
+ def irc_process_client_(self):
    #
    self.init_rfc1459_()
    #
@@ -2902,6 +2940,7 @@ class PyLayerIRC( irciot_shared_ ):
 
    except socket.error:
      self.irc_disconnect()
+     self.irc_run = False
    #
-   # End of irc_process_()
+   # End of irc_process_client_()
 

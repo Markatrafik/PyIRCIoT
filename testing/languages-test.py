@@ -118,20 +118,20 @@ def main():
 
  to_log_("TEST NAME: '%s'" % my_command)
 
- if (my_command == 'default'):
+ if my_command == 'default':
    EL_test_default_()
 
- if (my_command == 'lua'):
+ if my_command == 'lua':
    EL_test_simple_LUA_()
- if (my_command == 'js'):
+ if my_command == 'js':
    EL_test_simple_JavaScript_()
- if (my_command == 'python'):
+ if my_command == 'python':
    EL_test_simple_Python_()
- if (my_command == 'basic'):
+ if my_command == 'basic':
    EL_test_simple_BASIC_()
- if (my_command == 'pyrangefor'):
+ if my_command == 'pyrangefor':
    EL_test_Python_for_range_()
- if (my_command == 'pycosinus'):
+ if my_command == 'pycosinus':
    EL_test_Python_cosinus_()
 
 if __name__ == '__main__':

@@ -176,12 +176,12 @@ def main():
 
  to_log_("TEST NAME: '%s'" % my_command)
 
- if (my_command == 'default'):
+ if my_command == 'default':
    ii_test_default_()
 
- if (my_command == 'forwarding'):
+ if my_command == 'forwarding':
    ii_test_forwarding_()
- if (my_command == 'translation'):
+ if my_command == 'translation':
    ii_test_translation_()
 
 if __name__ == '__main__':
