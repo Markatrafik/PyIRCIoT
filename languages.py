@@ -122,10 +122,10 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   lang_filter_BASIC_regexps  = []
   lang_filter_PYTHON_regexps = []
   lang_filter_PYTHON_types = {  'Add', 'And', 'Assign', 'Attribute', 'Slice',
-   'BinOp', 'BitAnd', 'BitOr', 'BitXor', 'BoolOp', 'Dict', 'Div', 'Else',
+   'BinOp', 'BitAnd', 'BitOr', 'BitXor', 'BoolOp', 'Dict', 'Div', 'Else', 'Eq',
    'Expr', 'For', 'If', 'Index', 'keyword', 'List', 'Load', 'Mod', 'Module',
-   'Mult', 'NameConstant', 'Not', 'Num', 'Or', 'Set', 'Store', 'Str', 'Sub',
-   'Subscript', 'Tuple',  'UAdd', 'UnaryOp', 'USub', 'While', 'Compare', 'Eq' }
+   'Mult', 'NameConstant', 'Not', 'Num', 'Or', 'Pass', 'Set', 'Store', 'Str',
+   'Sub', 'Subscript', 'Tuple',  'UAdd', 'UnaryOp', 'USub', 'While', 'Compare' }
   lang_filter_PYTHON_maths = { 'acos', 'asin', 'atan', 'atan2', 'ceil', 'cos',
    'cosh', 'degrees', 'e', 'exp', 'fabs', 'floor', 'fmod', 'frexp', 'hypot',
    'ldexp', 'log', 'log10', 'modf', 'pi', 'pow', 'radians', 'sin', 'sinh',

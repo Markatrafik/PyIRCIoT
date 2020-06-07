@@ -80,6 +80,9 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
    err_INVALID_DIRECTION: "Invalid direction parameter for routing graph node"
   })
   #
+  default_LMR_id = 1000
+  default_GMR_id = 5000
+  #
   # End of PyIRCIoT_router.CONST()
 
  def __init__(self):
@@ -143,6 +146,9 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
     self.err_DESCRIPTIONS.update(self.CONST.err_DESCRIPTIONS)
   except:
     self.err_DESCRIPTIONS = self.CONST.err_DESCRIPTIONS
+  #
+  self.__LMR_pool = {}
+  self.__GMR_pool = {}
   #
   # End of PyIRCIoT_router.__init__()
 
@@ -350,35 +356,79 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
 
  # incomplete
  def init_LMR_(self):
-  pass
+  my_LMR_id = self.CONST.default_LMR_id - 1
+  for my_key in self.__LMR_pool.keys():
+    if my_LMR_id < my_key:
+      my_LMR_id = my_key
+  my_GMR_id += 1
+  self.__LMR_pool.update({
+    my_LMR_id: {}
+  })
+  return my_LMR_id
 
  # incomplete
  def init_GMR_(self):
+  my_GMR_id = self.CONST.default_GMR_id - 1
+  for my_key in self.__GMR_pool.keys():
+    if my_GMR_id < my_key:
+      my_GMR_id = my_key
+  my_GMR_id += 1
+  self.__GMR_pool.update({
+    my_GMR_id: {}
+  })
+  return my_GMR_id
+
+ # incomplete
+ def get_LMR_list_(self):
+  my_LMR_list = []
+  for my_key in self.__LMR_pool.keys():
+    my_LMR_list.append(my_key)
+  return my_LMR_list
+
+ # incomplete
+ def get_GMR_list_(self):
+  my_GMR_list = []
+  for my_key in self.__GMR_pool.keys():
+    my_GMR_list.append(my_key)
+  return my_GMR_list
+
+ # incomplete
+ def start_LMR_(self, in_LMR_id = None):
   pass
 
  # incomplete
- def start_LMR_(self):
+ def start_GMR_(self, in_GMR_id = None):
   pass
 
  # incomplete
- def start_GMR_(self):
+ def pause_LMR_(self, in_LMR_id = None):
   pass
 
  # incomplete
- def pause_LMR_(self):
+ def pause_GMR_(self, in_GMR_id = None):
   pass
 
  # incomplete
- def pause_GMR_(self):
+ def drop_LMR_(self, in_LMR_id = None):
   pass
 
  # incomplete
- def stop_LMR_(self):
+ def drop_GMR_(self, in_GMR_id = None):
   pass
 
  # incomplete
- def stop_GMR_(self):
-  pass
+ def do_router_LMR_(self, in_datum, in_params, \
+   in_direction, in_vuid = None):
+   # The optional parameter GMR ID will be in the parameter pack
+
+   return in_datum
+
+ # incomplete
+ def do_router_GMR_(self, in_datum, in_params, \
+   in_direction, in_vuid = None):
+   # The optional parameter GMR ID will be in the parameter pack
+
+   return in_datum
 
  def connections_tracking_cleaner_(self):
   current_time = time()

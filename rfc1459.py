@@ -1066,6 +1066,8 @@ class PyLayerIRC( irciot_shared_ ):
    #
    self.__whox = False # Supporting eXtended WHO command
    #
+   self.__os_name = self.get_os_name_()
+   #
    self.update_irc_host_()
    #
    # End of __init__()

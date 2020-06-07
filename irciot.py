@@ -502,7 +502,7 @@ class PyLayerIRCIoT(object):
    err_BASE85_DECODING    : "BASE85 decoding problem",
    err_BASE32_DECODING    : "BASE32 decoding problem",
    err_BASE122_DECODING   : "BASE122 decoding problem",
-   err_ENC_UNIMPLEMENTED  : "This encryption not implemented",
+   err_ENC_UNIMPLEMENTED  : "This encryption is not implemented",
    err_DEFRAG_INVALID_DID : "Invalid 'dp' when defragmenting",
    err_CONTENT_MISSMATCH  : "Content missmatch",
    err_DEFRAG_OP_MISSING  : "No tag 'op' when defragmenting",

@@ -72,14 +72,18 @@ class irciot_shared_(object):
    os_irix    = 'IRIX'
    os_linux   = 'Linux'
    os_macosx  = 'Darwin'
+   os_minix3  = 'Minix3'
    os_netbsd  = 'NetBSD'
+   os_openbsd = 'OpenBSD'
+   os_os400   = 'OS400'
    os_solaris = 'SunOS'
    os_windows = 'WindowsNT'
    os_qnx     = 'QNX'
    #
    os_all_UNIX = [
-    os_aix,    os_hpux,   os_freebsd, os_linux,
-    os_macosx, os_netbsd, os_solaris, os_qnx ]
+    os_aix,     os_hpux,   os_freebsd, os_linux,
+    os_macosx,  os_minix3, os_netbsd,  os_openbsd,
+    os_solaris, os_qnx ]
    #
    os_linux_proc_ipv4_route = '/proc/net/route'
    os_linux_proc_ipv6_route = '/proc/net/ipv6_route'
@@ -124,11 +128,11 @@ class irciot_shared_(object):
     1025, 1097, 1250, 1251, 1252, 1253, 1254, 1255, 1256, 1257,
     1258, 1259 ]:
      locals()["enc_%d" % enc] = "cp%d" % enc
-   for enc in [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 13, 15 ]:
+   for enc in [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 15 ]:
      locals()["enc_ISO%d" % enc] = "iso-8859-%d" % enc
    #
    enc_aliases = {
-    enc_ASCII : [ "us-ascii" ],
+    enc_ASCII : [ "cp-367", "cp367", "us-ascii" ],
     enc_273   : [ "cp-273", "ibm273", "ibm-273" ],
     enc_278   : [ "cp-278", "ibm278", "ibm-278" ],
     enc_280   : [ "cp-280", "ibm280", "ibm-280" ],
@@ -157,7 +161,7 @@ class irciot_shared_(object):
     enc_905   : [ "cp-905", "ibm905", "ibm-905" ],
     enc_922   : [ "cp-922", "ibm922", "ibm-922" ],
     enc_935   : [ "cp-935", "ibm935", "ibm-935" ],
-    enc_1025  : [ "cp-1025" ],
+    enc_1025  : [ "cp-1025", "ibm1025", "ibm-1025" ],
     enc_1097  : [ "cp-1097", "ibm1097", "ibm-1097" ],
     enc_1250  : [ "cp-1250", "windows-1250", "cp5346" ],
     enc_1251  : [ "cp-1251", "windows-1251", "cp5347" ],
@@ -178,6 +182,7 @@ class irciot_shared_(object):
     enc_ISO7  : [ "iso8859-7", "greek8", "ibm813", "ibm-813" ],
     enc_ISO8  : [ "iso8859-8", "hebrew8" ],
     enc_ISO9  : [ "iso8859-9", "latin5", "ibm920", "ibm-920" ],
+    enc_ISO10 : [ "iso8859-10", "latin6" ],
     enc_ISO13 : [ "iso8859-13", "cp921", "cp-921" ],
     enc_ISO15 : [ "iso8859-15", "latin9", "ibm923", "ibm-923" ],
     enc_KOI8R : [ "koi8r", "cp878", "ibm-878" ],

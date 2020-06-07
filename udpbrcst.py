@@ -123,7 +123,7 @@ class PyLayerUDPb( irciot_shared_ ):
   self.__udpb_client_sock = None
   self.__udpb_server_sock = None
   #
-  self.udpb_os_name = self.get_os_name_()
+  self.__os_name = self.get_os_name_()
   #
   self.udpb_update_local_ip_addresses_()
   #
@@ -295,15 +295,14 @@ class PyLayerUDPb( irciot_shared_ ):
     return
   self.udpb_update_local_ip_addresses_()
   self.__udpb_client_sock = my_init_socket_(my_af_inet, \
-    self.udpb_os_name)
-  if self.udpb_os_name == self.CONST.os_windows:
+    self.__os_name)
+  if self.__os_name == self.CONST.os_windows:
     my_bind_ip = self.udpb_ip
   else:
     my_bind_ip = self.udpb_ip_broadcast
   try:
     self.__udpb_client_sock.bind((my_bind_ip, self.udpb_port))
-    self.__udpb_server_sock = my_init_socket_(my_af_inet, \
-      self.udpb_os_name)
+    self.__udpb_server_sock = my_init_socket_(my_af_inet, self.__os_name)
     self.__udpb_server_sock.settimeout(self.CONST.udpb_default_wait)
   except:
     return
