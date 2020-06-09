@@ -418,17 +418,21 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
 
  # incomplete
  def do_router_LMR_(self, in_datum, in_params, \
-   in_direction, in_vuid = None):
-   # The optional parameter GMR ID will be in the parameter pack
+  in_direction, in_vuid = None):
+  # The optional parameter LMR ID will be in the parameter pack
 
-   return in_datum
+  return in_datum
+  #
+  # End of do_router_LMR_()
 
  # incomplete
  def do_router_GMR_(self, in_datum, in_params, \
-   in_direction, in_vuid = None):
-   # The optional parameter GMR ID will be in the parameter pack
+  in_direction, in_vuid = None):
+  # The optional parameter GMR ID will be in the parameter pack
 
-   return in_datum
+  return in_datum
+  #
+  # End of do_router_GMR_()
 
  def connections_tracking_cleaner_(self):
   current_time = time()

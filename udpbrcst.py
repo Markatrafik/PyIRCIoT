@@ -66,7 +66,7 @@ class PyLayerUDPb( irciot_shared_ ):
   #
   udpb_default_MTU = 1000 # in bytes
   #
-  udpb_default_encoding = "utf-8"
+  udpb_default_encoding = irciot_shared_.CONST.enc_UTF8
   #
   # 0. Unique User ID
   # 1. User IP address (IPv4 or IPv6)

@@ -90,7 +90,7 @@ class PyLayerCOM( irciot_shared_ ):
    com_modes = [ com_mode_CLIENT, com_mode_SERVER ]
    com_default_mode = com_mode_CLIENT
    #
-   com_default_encoding = "utf-8"
+   com_default_encoding = irciot_shared_.CONST.enc_UTF8
    #
    # According RFC 2217
    #

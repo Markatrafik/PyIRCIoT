@@ -182,8 +182,8 @@ class PyLayerIRC( irciot_shared_ ):
    irc_channel_regexp = "^#[" + irc_ascii_letters \
      + irc_ascii_digits + "\-_\^\[\]\{\}]{1,24}$"
    #
-   irc_default_encoding  = "utf-8"
-   irc_fallback_encoding = "iso-8859-1"
+   irc_default_encoding  = irciot_shared_.CONST.enc_UTF8
+   irc_fallback_encoding = irciot_shared_.CONST.enc_ISO1
    #
    irc_default_draft = DO_default_draft
    irc_additional_drafts = []
@@ -814,13 +814,34 @@ class PyLayerIRC( irciot_shared_ ):
    elif irc_default_draft == "Bahamut":
      ERR_NUMERICERROR    = "999"
    #
+   # v this set will be regrouped ...
+   #
    cmd_ADMIN      = "ADMIN"
    cmd_AWAY       = "AWAY"
+   cmd_CACTION    = "CACTION"
+   cmd_CCLIENTINF = "CCLIENTINFO"
+   cmd_CDCC       = "CDCC"
+   cmd_CERRMSG    = "CERRMSG"
+   cmd_CFINGER    = "CFINGER"
+   cmd_CHAT       = "CHAT"
+   cmd_CPING      = "CPING"
+   cmd_CRCLIENTIN = "CRCLIENTINFO"
+   cmd_CRFINGER   = "CRFINGER"
+   cmd_CRPING     = "CRPING"
+   cmd_CRTIME     = "CRTIME"
+   cmd_CRUSERINFO = "CRUSERINFO"
+   cmd_CSOURCE    = "CSOURCE"
    cmd_CTCP       = "CTCP"
    cmd_CTCPREPLY  = "CTCPREPLY"
+   cmd_CTIME      = "CTIME"
+   cmd_CUSERINFO  = "CUSERINFO"
+   cmd_CVERSION   = "CVERSION"
+   cmd_DCC_CLOSE  = "DCC_CLOSE"
    cmd_DCC_CON    = "DCC_CONNECT"
    cmd_DCC_DISCON = "DCC_DISCONNECT"
    cmd_DCC_MSG    = "DCCMSG"
+   cmd_DCC_OPEN   = "DCC_OPEN"
+   cmd_DCC_UPDATE = "DCC_UPDATE"
    cmd_DISCONNECT = "DISCONNECT"
    cmd_ERROR      = "ERROR"
    cmd_INFO       = "INFO"
@@ -829,10 +850,12 @@ class PyLayerIRC( irciot_shared_ ):
    cmd_JOIN       = "JOIN"
    cmd_KICK       = "KICK"
    cmd_KILL       = "KILL"
+   cmd_LEAVING    = "LEAVING"
    cmd_LINKS      = "LINKS"
    cmd_LIST       = "LIST"
    cmd_MODE       = "MODE"
    cmd_MOTD       = "MOTD"
+   cmd_MSG        = "MSG"
    cmd_NAMES      = "NAMES"
    cmd_NICK       = "NICK"
    cmd_NOTICE     = "NOTICE"
@@ -844,6 +867,7 @@ class PyLayerIRC( irciot_shared_ ):
    cmd_PONG       = "PONG"
    cmd_PRIVMSG    = "PRIVMSG"
    cmd_PRIVNOTICE = "PRIVNOTICE"
+   cmd_PUBLIC     = "PUBLIC"
    cmd_PUBMSG     = "PUBMSG"
    cmd_PUBNOTICE  = "PUBNOTICE"
    cmd_REHASH     = "REHASH"
@@ -856,6 +880,7 @@ class PyLayerIRC( irciot_shared_ ):
    cmd_TIME       = "TIME"
    cmd_TOPIC      = "TOPIC"
    cmd_TRACE      = "TRACE"
+   cmd_UMODE      = "UMODE"
    cmd_USER       = "USER"
    cmd_USERS      = "USERS"
    cmd_USERHOST   = "USERHOST"
