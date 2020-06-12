@@ -106,14 +106,22 @@ def irciot_get_router_error_descriptions_(in_human_language):
    10015: "Маршрутизатор обнаружил дубликат при пересылке сообщения",
    10505: "Отсутствует обязательный параметр для узла в графе маршрутизации",
    10507: "Недопустимое значение обязательного параметра для узла в графе маршрутизации",
-   10508: "Неверный параметр направления для узла в графе маршрутизации"
+   10508: "Неверный параметр направления для узла в графе маршрутизации",
+   10601: "Неправильная версия протокола для взаимодействия LMR маршрутизаторов",
+   10607: "Невозможно создать LMR, достигнуто максимальное число экземпляров",
+   10701: "Неправильная версия протокола для взаимодействия GMR маршрутизаторов",
+   10707: "Невозможно создать GMR, достигнуто максимальное число экземпляров"
   }
  elif in_human_language == "de": # Deutsch
   return {
    10015: "Der Router hat beim Weiterleiten der Nachricht ein Duplikat entdeckt",
    10505: "Fehlender erforderlicher Parameter für den Knoten in der Routing-Graph",
    10507: "Unzulässiger Wert eines obligatorischen Parameters für einen Knoten in der Routing-Graph",
-   10508: "Flascher Richtungsparameter für einen Knoten in der Routing-Graph"
+   10508: "Flascher Richtungsparameter für einen Knoten in der Routing-Graph",
+   10601: "Falsche Protokollversion für die Interkommunikation von LMR-Routern",
+   10607: "LMR kann nicht erstellt werden, maximale Anzahl von Instanzen erreicht",
+   10701: "Falsche Protokollversion für die Interkommunikation von GMR-Routern",
+   10707: "GMR kann nicht erstellt werden, maximale Anzahl von Instanzen erreicht"
   }
  return {}
 

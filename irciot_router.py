@@ -40,6 +40,9 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   default_maximal_connection_tracking = 8192 # items
   default_timeout_connection_tracking = 3600 # seconds
   #
+  maximal_LMR_count = 256
+  maximal_GMR_count = 16
+  #
   dir_in   = 'i' # input traffic direction
   dir_out  = 'o' # output traffic direction
   dir_both = 'b' # input and output directions
@@ -60,6 +63,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   err_LMR_INVALID_PARAM  = 10602
   err_LMR_AUTHENTICATION = 10604
   err_LMR_COMPATIBILITY  = 10605
+  err_LMR_MAX_INSTANCES  = 10607
   err_LMR_LOOP_DETECTED  = 10611
   #
   err_GMR_INCORRECT_VER  = 10701
@@ -67,6 +71,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   err_GMR_BAD_INTERACTOR = 10703
   err_GMR_AUTHENTICATION = 10704
   err_GMR_COMPATIBILITY  = 10705
+  err_GMR_MAX_INSTANCES  = 10707
   err_GMR_LOOP_DETECTED  = 10711
   err_GMR_INVALID_ORIGIN = 10712
   err_GMR_INVALID_PATH   = 10713
@@ -77,11 +82,23 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
    err_ROUTER_DUP_DETECT: "Router detected a duplicate while forwarding the message",
    err_MISSING_PARAMETER: "Missing required parameter for routing graph node",
    err_INVALID_PARAMETER: "Invalid required parameter for routing graph node",
-   err_INVALID_DIRECTION: "Invalid direction parameter for routing graph node"
+   err_INVALID_DIRECTION: "Invalid direction parameter for routing graph node",
+   err_LMR_INCORRECT_VER: "Incorrect protocol version for LMR intercommunication",
+   err_LMR_MAX_INSTANCES: "Cannot create LMR, maximum number of instances reached",
+   err_GMR_INCORRECT_VER: "Incorrect protocol version for GMR intercommunication",
+   err_GMR_MAX_INSTANCES: "Cannot create GMR, maximum number of instances reached"
   })
   #
   default_LMR_id = 1000
   default_GMR_id = 5000
+  #
+  state_LMR_stopped = 0
+  state_LMR_running = 1
+  state_LMR_paused  = 3
+  #
+  state_GMR_stopped = 0
+  state_GMR_running = 1
+  state_GMR_paused  = 3
   #
   # End of PyIRCIoT_router.CONST()
 
@@ -115,7 +132,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   # of output messages at an external level outside of this
   # IRC-IoT router class
   #
-  self.connections_tracking = {}
+  self.__connections_tracking = {}
   #
   self.__dup_detection_pipeline = []
   #
@@ -149,6 +166,8 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   #
   self.__LMR_pool = {}
   self.__GMR_pool = {}
+  #
+  self.__primary_irciot_address = ""
   #
   # End of PyIRCIoT_router.__init__()
 
@@ -355,26 +374,52 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   # End of PyIRCIoT_router.global_message_router_()
 
  # incomplete
- def init_LMR_(self):
+ def init_LMR_(self, in_src = None):
+  if in_src == None:
+    my_src = self.__primary_irciot_address
+  else:
+    my_src = in_src
+  if not self.is_irciot_address_(my_src):
+    return None
   my_LMR_id = self.CONST.default_LMR_id - 1
   for my_key in self.__LMR_pool.keys():
     if my_LMR_id < my_key:
       my_LMR_id = my_key
-  my_GMR_id += 1
+  my_LMR_id += 1
+  if my_LMR_id > self.CONST.maximal_LMR_count:
+    self.irciot_error_(self.CONST.err_LMR_MAX_INSTANCES, \
+      0, in_addon = "%d" % self.CONST.maximal_LMR_count )
+    return None
   self.__LMR_pool.update({
-    my_LMR_id: {}
+    my_LMR_id: {
+     'src': my_src,
+     'status': self.CONST.state_LMR_stopped
+    }
   })
   return my_LMR_id
 
  # incomplete
- def init_GMR_(self):
+ def init_GMR_(self, in_src = None):
+  if in_src == None:
+    my_src = self.__primary_irciot_address
+  else:
+    my_src = in_src
+  if not self.is_irciot_address_(my_src):
+    return None
   my_GMR_id = self.CONST.default_GMR_id - 1
   for my_key in self.__GMR_pool.keys():
     if my_GMR_id < my_key:
       my_GMR_id = my_key
   my_GMR_id += 1
+  if my_GMR_id > self.CONST.maximal_GMR_count:
+    self.irciot_error_(self.CONST.err_GMR_MAX_INSTANCES, \
+      0, in_addon = "%d" % self.CONST.maximal_GMR_count )
+    return None
   self.__GMR_pool.update({
-    my_GMR_id: {}
+    my_GMR_id: {
+     'src': my_src,
+     'status': self.CONST.state_GMR_stopped
+    }
   })
   return my_GMR_id
 
@@ -439,10 +484,10 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   minimal_time = current_time
   minimal_key  = None
   my_count = 0
-  for my_key in self.connections_tracking.keys():
-    ( my_addr, my_time ) = self.connections_tracking[ my_key ]
+  for my_key in self.__connections_tracking.keys():
+    ( my_addr, my_time ) = self.__connections_tracking[ my_key ]
     if current_time - my_time > self.timeout_connection_tracking:
-      del self.connections_tracking[ my_key ]
+      del self.__connections_tracking[ my_key ]
     else:
       if my_time < minimal_time:
         minimal_time = my_time
@@ -450,7 +495,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
       my_count += 1
   if my_count > self.maximal_connection_tracking \
     and minimal_key != None:
-      del self.connections_tracking[ minimal_key ]
+      del self.__connections_tracking[ minimal_key ]
   #
   # End of connections_tracking_cleaner_()
 
@@ -495,17 +540,17 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
             my_translate = True
     if my_translate:
       my_key = out_addr + '@@' + dst_addr;
-      if my_key in self.connections_tracking.keys():
-        my_translation = self.connections_tracking[ my_key ]
+      if my_key in self.__connections_tracking.keys():
+        my_translation = self.__connections_tracking[ my_key ]
       else:
         my_translation = ( src_addr, time() )
-        self.connections_tracking[ my_key ] = my_translation
+        self.__connections_tracking[ my_key ] = my_translation
       out_datum[ self.CONST.tag_SRC_ADDR ] = out_addr
   #
   if in_direction in [ self.CONST.dir_out, self.CONST.dir_both ]:
     my_key = dst_addr + '@@' + src_addr;
-    if my_key in self.connections_tracking.keys():
-      ( my_src_addr, my_time ) = self.connections_tracking[ my_key ]
+    if my_key in self.__connections_tracking.keys():
+      ( my_src_addr, my_time ) = self.__connections_tracking[ my_key ]
       out_datum[ self.CONST.tag_DST_ADDR ] = my_src_addr
   #
   return out_datum

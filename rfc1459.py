@@ -207,7 +207,7 @@ class PyLayerIRC( irciot_shared_ ):
    # 17. "Nefarious"  -- Nefarious ircd
    # 18. "Nefarious2" -- Nefarious IRCu (ircu fork) '2020
    # 19. "ng"         -- ngIRCd aka Next Generation IRCd, ver. 25 '2019
-   # 20. "Oragono"    -- Oragono, Golang based, ver. 2.0.0 '2016
+   # 20. "Oragono"    -- Oragono, Golang based, ver. 2.1.0 '2012-2020
    # 21. "plexus"     -- PleXusIRCd '2005
    # 22. "pircd"      -- Perl IRCd, Perl based '2002
    # 23. "Provision"  -- ProvisionIRCd, Python based '2006
@@ -216,13 +216,13 @@ class PyLayerIRC( irciot_shared_ ):
    # 26. "Rock"       -- rock-ircd aka RockIRCd (UnrealIRCd fork), '2009
    # 27. "Rubi"       -- RubiIRCd, Ruby based '2009
    # 28. "RusNet"     -- ircd RusNet, @ RusNet, ver. 1.4.19
-   # 29. "seven"      -- ircd-seven, ver. 1.1.3
+   # 29. "seven"      -- ircd-seven, ver. 1.1.3 '2007-2019
    # 30. "Shadow"     -- ShadowIRCd, ver. 6.3.3 '2003
    # 31. "snircd"     -- snircd (ircu fork), @ QuakeNet, ver. 1.3.4
-   # 32. "solid"      -- solid-ircd (Bahamut fork), ver. 3.4.8 '2004
-   # 33. "Synchronet" -- Synchronet IRCd, js based
-   # 34. "Unreal"     -- UnrealIRCd, ver. 5.0.4 '2020
-   # 35. "We"         -- WeIRCd
+   # 32. "solid"      -- solid-ircd (Bahamut fork), ver. 3.4.8 '2004-2013
+   # 33. "Synchronet" -- Synchronet IRCd, js based, '2010-2019
+   # 34. "Unreal"     -- UnrealIRCd, ver. 5.0.5, '1999-2020
+   # 35. "We"         -- WeIRCd, ver. 0.8.2, '2010
    # 36. "PyIRCIoT" (when it works in IRC server mode)
    #
    # Additional drafts extending Internet Relay Chat protocol:
