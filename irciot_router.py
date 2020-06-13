@@ -439,27 +439,53 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
 
  # incomplete
  def start_LMR_(self, in_LMR_id = None):
-  pass
+  if not isinstance(in_LMR_id, int):
+    return False
+  if in_LMR_id not in self.__LMR_pool.keys():
+    return False
+  return False
 
  # incomplete
  def start_GMR_(self, in_GMR_id = None):
-  pass
+  if not isinstance(in_GMR_id, int):
+    return False
+  if in_GMR_id not in self.__GMR_pool.keys():
+    return False
+  return False
 
  # incomplete
  def pause_LMR_(self, in_LMR_id = None):
-  pass
+  if not isinstance(in_LMR_id, int):
+    return False
+  if in_LMR_id not in self.__LMR_pool.keys():
+    return False
+  return False
 
  # incomplete
  def pause_GMR_(self, in_GMR_id = None):
-  pass
+  if not isinstance(in_GMR_id, int):
+    return False
+  if in_GMR_id not in self.__GMR_pool.keys():
+    return False
+  return False
 
  # incomplete
  def drop_LMR_(self, in_LMR_id = None):
-  pass
+  if not isinstance(in_LMR_id, int):
+    return False
+  if in_LMR_id in self.__LMR_pool.keys():
+    self.__LMR_pool.pop(in_LMR_id)
+    return True
+  return False
 
  # incomplete
  def drop_GMR_(self, in_GMR_id = None):
-  pass
+  if not isinstance(in_LMR_id, int):
+    return False
+  if in_GMR_id in self.__GMR_pool.keys():
+    self.__GMR_pool.pop(in_GMR_id)
+    return True
+  return False
 
  # incomplete
  def do_router_LMR_(self, in_datum, in_params, \

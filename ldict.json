@@ -951,6 +951,38 @@
       "type_of_type": 1
     },
     {
+      "encoding": "utf-8",
+      "endianness": null,
+      "exponent": null,
+      "interval_maximum": null,
+      "interval_minimum": null,
+      "is_array_dynamically_sized": false,
+      "is_it_array": false,
+      "is_variable_dynamically_sized": true,
+      "precision": null,
+      "size": null,
+      "size_of_array": null,
+      "type_id": 131,
+      "type_name": "IPv4-string",
+      "type_of_type": 1
+    },
+    {
+      "encoding": "utf-8",
+      "endianness": null,
+      "exponent": null,
+      "interval_maximum": null,
+      "interval_minimum": null,
+      "is_array_dynamically_sized": false,
+      "is_it_array": false,
+      "is_variable_dynamically_sized": true,
+      "precision": null,
+      "size": null,
+      "size_of_array": null,
+      "type_id": 133,
+      "type_name": "IPv6-string",
+      "type_of_type": 1
+    },
+    {
       "encoding": null,
       "endianness": null,
       "exponent": null,

@@ -104,6 +104,15 @@ function run_tests () {
   echo -ne "\033[1;31mfailed\033[0m\n" ; fi
 }
 
+if [ -x "${TEST_IRCIOT_CMD}" ]; then
+echo -ne '\033[1;36m---------------- '
+echo -ne 'PyLayerIRCIoT tests'
+echo -ne ' ------------------\033[0m\n'
+for m in ascii default ; do
+ run_tests "" "" "" "${m}" irciot
+done
+fi
+
 if [ -x "${TEST_RFC1459_CMD}" ]; then
 echo -ne '\033[1;36m------------------ '
 echo -ne 'PyLayerIRC tests'

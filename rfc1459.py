@@ -191,33 +191,33 @@ class PyLayerIRC( irciot_shared_ ):
    #  1. "RFC1459" Internet Relay Chat Protocol '1993
    #  2. "RFC2812" IRC Draft: Client Protocol '2000
    #  3. "asp"        -- AspIRCd (Charybdis fork) '2019
-   #  4. "Bahamut"    -- Bahamut, ver. 2.0.7
+   #  4. "Bahamut"    -- Bahamut, ver. 2.0.7, '1999-2020
    #  5. "beware"     -- beware ircd, Delphi based, ver. 2.2.0
-   #  6. "Charybdis"  -- charybdis-ircd, ver. 3.5.0 '2020
+   #  6. "Charybdis"  -- charybdis-ircd, ver. 3.5.0, '2020
    #  7. "ConfRoom"   -- Conference Room
    #  8. "discord"    -- discordIRCd, js based, ver. 0.5.0
    #  9. "Elemental"  -- Elemental-IRCd, ver. 6.6.2
    # 10. "hybrid"     -- ircd-hybrid, @ EFNet, ver. 8.2.29
-   # 11. "Insp"       -- Inspircd, ver. 2.0
+   # 11. "Insp"       -- Inspircd, ver. 2.0.20, '2015
    # 12. "IRCNet"     -- IRCNet ircd, @ IRCNet, ver. 2.12.2
    # 13. "IRCPlus"    -- IRCPlus, for Windows, ver. 5.0
    # 14. "ircu"       -- ircd-ircu aka Undernet IRCd, ver. 2.10.12.10
-   # 15. "Kine"       -- KineIRCd '2005
-   # 16. "miniircd"   -- miniircd, Python based, ver. 1.3 '2003
+   # 15. "Kine"       -- KineIRCd, C++, '2002-2005
+   # 16. "miniircd"   -- miniircd, Python based, ver. 1.3, '2003
    # 17. "Nefarious"  -- Nefarious ircd
    # 18. "Nefarious2" -- Nefarious IRCu (ircu fork) '2020
    # 19. "ng"         -- ngIRCd aka Next Generation IRCd, ver. 25 '2019
-   # 20. "Oragono"    -- Oragono, Golang based, ver. 2.1.0 '2012-2020
-   # 21. "plexus"     -- PleXusIRCd '2005
-   # 22. "pircd"      -- Perl IRCd, Perl based '2002
-   # 23. "Provision"  -- ProvisionIRCd, Python based '2006
-   # 24. "pure"       -- pureIRCd, CSharp based '2008
-   # 25. "ratbox"     -- ircd-ratbox, @ EFNet, ver. 3.0.8 '2006
+   # 20. "Oragono"    -- Oragono, Golang based, ver. 2.1.0, '2012-2020
+   # 21. "plexus"     -- PleXusIRCd, C++, '2003-2006
+   # 22. "pircd"      -- Perl IRCd, Perl based, '2002
+   # 23. "Provision"  -- ProvisionIRCd, Python based, '2006
+   # 24. "pure"       -- pureIRCd, CSharp based, '2008
+   # 25. "ratbox"     -- ircd-ratbox, @ EFNet, ver. 3.0.8, '2006
    # 26. "Rock"       -- rock-ircd aka RockIRCd (UnrealIRCd fork), '2009
    # 27. "Rubi"       -- RubiIRCd, Ruby based '2009
    # 28. "RusNet"     -- ircd RusNet, @ RusNet, ver. 1.4.19
-   # 29. "seven"      -- ircd-seven, ver. 1.1.3 '2007-2019
-   # 30. "Shadow"     -- ShadowIRCd, ver. 6.3.3 '2003
+   # 29. "seven"      -- ircd-seven, ver. 1.1.3, '2007-2019
+   # 30. "Shadow"     -- ShadowIRCd, ver. 6.3.3, '2003
    # 31. "snircd"     -- snircd (ircu fork), @ QuakeNet, ver. 1.3.4
    # 32. "solid"      -- solid-ircd (Bahamut fork), ver. 3.4.8 '2004-2013
    # 33. "Synchronet" -- Synchronet IRCd, js based, '2010-2019
