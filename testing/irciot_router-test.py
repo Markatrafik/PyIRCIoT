@@ -143,6 +143,10 @@ def ii_test_LMR_statuses_():
  to_log_("\nINPUT MESSAGE: @\033[1m%s\033[0m@" % my_message)
  my_LMR_id = ii.init_LMR_(in_src = "include@efgh")
  if ii.get_LMR_list_() != [ my_LMR_id ]:
+   to_log_('\n\033[1;41mNO LMR ID in dynamic pool\033[0m')
+   return False
+ if ii.get_LMR_status_(my_LMR_id) != ii.CONST.state_LMR_stopped:
+   to_log_('\n\033[1;41mincorrect GMR status\033[0m')
    return False
  ii.router_graphs = [
    ( ii.do_router_LMR_, {
@@ -151,8 +155,12 @@ def ii_test_LMR_statuses_():
  ii.start_LMR_()
  my_message = ii.do_router_(my_message, ii.CONST.dir_both, None)
  to_log_('\nOUTPUT MESSAGE @\033[1;39m%s\033[0m@\n' % my_message)
+ if ii.get_LMR_status_() != ii.CONST.state_LMR_running:
+   # only ONE item ^^^ must be in pool, no parameters - first item
+   to_log_('\n\033[1;43mincorrect LMR status\033[0m')
+   return False
  if not ii.is_irciot_(my_message):
-   print("Not an IRC-IoT message")
+   to_log_('\n\033[1;43mNot an IRC-IoT message\033[0m')
    return False
  to_log_("TEST_IS_OK")
  return True
@@ -165,6 +173,10 @@ def ii_test_GMR_statuses_():
  to_log_("\nINPUT MESSAGE: @\033[1m%s\033[0m@" % my_message)
  my_GMR_id = ii.init_GMR_(in_src = "include@efgh")
  if ii.get_GMR_list_() != [ my_GMR_id ]:
+   to_log_('\n\033[1;41mNO GMR ID in dynamic pool\033[0m')
+   return False
+ if ii.get_GMR_status_(my_GMR_id) != ii.CONST.state_GMR_stopped:
+   to_log_('\n\033[1;41mincorrect GMR status\033[0m')
    return False
  ii.router_graphs = [
    ( ii.do_router_GMR_, {
@@ -173,8 +185,12 @@ def ii_test_GMR_statuses_():
  ii.start_GMR_()
  my_message = ii.do_router_(my_message, ii.CONST.dir_both, None)
  to_log_('\nOUTPUT MESSAGE @\033[1;39m%s\033[0m@\n' % my_message)
+ if ii.get_GMR_status_() != ii.CONST.state_GMR_running:
+   # only ONE item ^^^ must be in pool, no parameters - first item
+   to_log_('\n\033[1;41mincorrect GMR status\033[0m')
+   return False
  if not ii.is_irciot_(my_message):
-   print("Not an IRC-IoT message")
+   to_log_("\n\033[1;41mNot an IRC-IoT message\033[0m")
    return False
  to_log_("TEST_IS_OK")
  return True

@@ -463,6 +463,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   if in_LMR_id not in self.__LMR_pool.keys():
     self.__invalid_LMR_id_(in_LMR_id)
     return False
+  return True
 
  def __check_GMR_id_(self, in_GMR_id):
   if in_GMR_id == None:
@@ -473,6 +474,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   if in_GMR_id not in self.__GMR_pool.keys():
     self.__invalid_GMR_id_(in_GMR_id)
     return False
+  return True
 
  def __get_LMR_id_(self, in_LMR_id):
   if in_LMR_id != None:
@@ -508,7 +510,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   self.__LMR_pool[my_LMR_id].update({
     'status': self.CONST.state_LMR_running
   })
-  return False
+  return True
 
  # incomplete
  def start_GMR_(self, in_GMR_id = None):
@@ -518,7 +520,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   self.__GMR_pool[my_GMR_id].update({
     'status': self.CONST.state_GMR_running
   })
-  return False
+  return True
 
  # incomplete
  def pause_LMR_(self, in_LMR_id = None):
@@ -528,7 +530,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   self.__LMR_pool[my_LMR_id].update({
     'status': self.CONST.state_LMR_running
   })
-  return False
+  return True
 
  # incomplete
  def pause_GMR_(self, in_GMR_id = None):
@@ -538,7 +540,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   self.__LMR_pool[my_LMR_id].update({
     'status': self.CONST.state_LMR_pasued
   })
-  return False
+  return True
 
  # incomplete
  def drop_LMR_(self, in_LMR_id = None):

@@ -28,6 +28,25 @@ class PyLayerIRCIoTTest(unittest.TestCase):
   def test001_default_(self):
     self.assertEqual(ii_test_default_(), True)
 
+  def test002_unary_crc_(self):
+    self.assertEqual(ii_test_unary_crc_(), True)
+
+  def test003_unary_aes_(self):
+    self.assertEqual(ii_test_unary_aes_(), True)
+
+  def test004_unary_rsa_(self):
+    self.assertEqual(ii_test_unary_rsa_(), True)
+
+  def test006_c1integrity_(self):
+    self.assertEqual(ii_test_c1integrity_(), True)
+    ii.integrity_check = 0
+    ii.integrity_stamp = 0
+
+  def test007_c2integrity_(self):
+    self.assertEqual(ii_test_c2integrity_(), True)
+    ii.integrity_check = 0
+    ii.integrity_stamp = 0
+
 _log_mode = 0
 
 def to_log_(in_text):
@@ -78,6 +97,117 @@ def ii_test_default_():
     if JSON_TEST_is_irciot_(json_text):
      to_log_("TEST_IS_OK")
      return True
+  return False
+
+def ii_test_unary_rsa_():
+  my_password = b'my_password&'
+  for i in range(0, 3):
+    my_password += my_password
+  to_log_("original==@\033[1;33m%s\033[0m@" % str(my_password, 'utf-8'))
+  ii.irciot_enable_encryption_(ii.CONST.tag_ENC_B64Z_RSA)
+  ( my_method, my_private_key, my_public_key ) \
+    = ii.irciot_encryption_save_defaults_()
+  my_encbuf = ii.irciot_crypto_RSA_encrypt_( my_password, my_public_key )
+  to_log_("encrypted(RSA)==@\033[1;35m%s\033[0m@" % my_encbuf)
+  my_decrypt = ii.irciot_crypto_RSA_decrypt_( my_encbuf, my_private_key )
+  if my_decrypt == None:
+    return False
+  to_log_("decrypted==@\033[1;32m%s\033[0m@" \
+    % str(my_decrypt, 'utf-8'))
+  if my_password == my_decrypt:
+    to_log_("TEST_IS_OK")
+    return True
+  return False
+
+def ii_test_unary_aes_():
+  my_password = b'my_password&'
+  for i in range(0, 5):
+    my_password += my_password
+  to_log_("original==@\033[1;33m%s\033[0m@" % str(my_password, 'utf-8'))
+  ii.irciot_enable_encryption_(ii.CONST.tag_ENC_B64_AES)
+  ( my_method, my_private_key, my_public_key ) \
+    = ii.irciot_encryption_save_defaults_()
+  my_encbuf = ii.irciot_crypto_AES_encrypt_( my_password, my_private_key )
+  to_log_("encrypted(AES)==@\033[1;35m%s\033[0m@" % my_encbuf)
+  if my_encbuf == None:
+    return False
+  my_decrypt = ii.irciot_crypto_AES_decrypt_( my_encbuf, my_private_key )
+  to_log_("decrypted==@\033[1;32m%s\033[0m@" \
+    % str(my_decrypt, 'utf-8'))
+  if my_password == my_decrypt:
+    to_log_("TEST_IS_OK")
+    return True
+  return False
+
+def ii_test_unary_crc_():
+  my_test = 0
+  my_password = b'MY_password-inside-stringxxx@'
+  to_log_('\nmy_password: [\033[1;41m%s\033[0m]\n' \
+    % str(my_password, 'utf-8'))
+  ii.irciot_crc16_init_()
+  my_crc16 = ii.irciot_crc16_(my_password)
+  if my_crc16 != None:
+    my_addon = '"c1":"%s",' % my_crc16
+    to_log_("CRC16 internal: [\033[1;1;44m%s\033[0m] (len=%d)\n" \
+      % (my_addon, len(my_addon)))
+  if my_addon == '"c1":"5c66",':
+    my_test += 1
+  my_crc32 = ii.irciot_crc32_(my_password)
+  if my_crc32 != None:
+    my_addon = '"c2":"%s",' % my_crc32
+    to_log_("CRC32 by Zlib: [\033[1;1;44m%s\033[0m] (len=%d)\n" \
+      % (my_addon, len(my_addon)))
+  if my_addon == '"c2":"08623ca6",':
+    my_test += 1
+  if my_test == 2:
+    to_log_("TEST_IS_OK")
+    return True
+  return False
+
+def ii_test_c1integrity_():
+  ii.irciot_crc16_init_()
+  ii.integrity_check = 1
+  json_lead  = '{"mid":"'
+  json_text  = '","oc":0,"op":0,"optkey1st":"test",'
+  json_text += '"optkey2nd":8015,"optkey5x":392,"o":[{"oid":111281,'
+  json_text += '"d":{"datkey":"aaa","src":"@xxx","dst":"@yyy"},'
+  json_text += '"ok2nd":727,"ok5x":761,"ot":"test1"},{"oid":111282,'
+  json_text += '"d":{"datkey2":"bbb","src":"@xxx","dst":"@yyy"},'
+  json_text += '"objkey1":"abcdef","ot":"test2"}],'
+  json_calc  = json_lead + json_text + '"c1":""}'
+  to_log_("Calculating JSON: #\033[2;33m%s\033[0m#len=%d#" \
+    % (json_calc, len(json_calc)))
+  my_crc16   = ii.irciot_crc16_(bytes(json_calc, 'UTF-8'))
+  to_log_("Calculated CRC16: 0x%s" % my_crc16)
+  json_test  = json_lead + "abcdef" + json_text + '"c1":"%s"}' % my_crc16
+  to_log_("Tested JSON: #\033[2;36m%s\033[0m#len=%d#" \
+    % (json_test, len(json_test)))
+  if ii.is_irciot_(json_test) and my_crc16 == 'f564':
+    to_log_("TEST_IS_OK")
+    return True
+  return False
+
+def ii_test_c2integrity_():
+  ii.irciot_crc32_init_()
+  ii.integrity_check = 2
+  json_lead  = '{"mid":"'
+  json_text  = '","oc":0,"op":0,"optkey1st":"test",'
+  json_text += '"optkey2nd":8015,"optkey5x":392,"o":[{"oid":111281,'
+  json_text += '"d":{"datkey":"aaa","src":"@xxx","dst":"@yyy"},'
+  json_text += '"ok2nd":727,"ok5x":761,"ot":"test1"},{"oid":111282,'
+  json_text += '"d":{"datkey2":"bbb","src":"@xxx","dst":"@yyy"},'
+  json_text += '"objkey1":"abcdef","ot":"test2"}],'
+  json_calc  = json_lead + json_text + '"c1":""}'
+  to_log_("Calculating JSON: #\033[2;33m%s\033[0m#len=%d#" \
+    % (json_calc, len(json_calc)))
+  my_crc32   = ii.irciot_crc32_(bytes(json_calc, 'UTF-8'))
+  to_log_("Calculated CRC32: 0x%s" % my_crc32)
+  json_test  = json_lead + "abcdef" + json_text + '"c1":"%s"}' % my_crc32
+  to_log_("Tested JSON: #\033[2;36m%s\033[0m#len=%d#" \
+    % (json_test, len(json_test)))
+  if ii.is_irciot_(json_test) and my_crc32 == 'fa7fda88':
+    to_log_("TEST_IS_OK")
+    return True
   return False
 
 my_command = ""
@@ -132,6 +262,27 @@ def main():
 
  if my_command == 'default':
    ii_test_default_()
+
+ if my_command == 'c1integrity':
+   ii_test_c1integrity_()
+
+ if my_command == 'c2integrity':
+   ii_test_c2integrity_()
+
+ if my_command == 'test4rsa':
+   if (len(sys.argv) > 2) and my_params != []:
+     to_log_("TEST_IS_SKIPPED")
+     return
+   ii_test_unary_rsa_()
+
+ if my_command == 'test4aes':
+   if (len(sys.argv) > 2) and my_params != []:
+     to_log_("TEST_IS_SKIPPED")
+     return
+   ii_test_unary_aes_()
+
+ if my_command == 'crc':
+   ii_test_unary_crc_()
  #
  # End of main()
 

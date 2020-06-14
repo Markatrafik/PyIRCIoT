@@ -108,7 +108,10 @@ if [ -x "${TEST_IRCIOT_CMD}" ]; then
 echo -ne '\033[1;36m---------------- '
 echo -ne 'PyLayerIRCIoT tests'
 echo -ne ' ------------------\033[0m\n'
-for m in ascii default ; do
+for m in ascii crc c1integrity c2integrity ; do
+ run_tests "" "" "" "${m}" irciot
+done
+for m in default test4rsa test4aes ; do
  run_tests "" "" "" "${m}" irciot
 done
 fi
@@ -126,7 +129,7 @@ if [ -x "${TEST_IRCIOTR_CMD}" ]; then
 echo -ne '\033[1;36m--------------- '
 echo -ne 'PyIRCIoT_router tests'
 echo -ne ' -----------------\033[0m\n'
-for m in ascii forwarding translation ; do
+for m in ascii forwarding translation lmrstatuses gmrstatuses ; do
  run_tests "" "" "" "${m}" irciot_router
 done
 fi
