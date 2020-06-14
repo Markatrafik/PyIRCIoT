@@ -396,12 +396,14 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
     my_src = in_src
   if not self.is_irciot_address_(my_src):
     return None
-  my_LMR_id = self.CONST.default_LMR_id - 1
+  my_LMR_id = self.CONST.default_LMR_id
+  my_LMR_count = 0
   for my_key in self.__LMR_pool.keys():
+    my_LMR_count += 1
     if my_LMR_id < my_key:
       my_LMR_id = my_key
   my_LMR_id += 1
-  if my_LMR_id > self.CONST.maximal_LMR_count:
+  if my_LMR_count >= self.CONST.maximal_LMR_count:
     self.irciot_error_(self.CONST.err_LMR_MAX_INSTANCES, \
       0, in_addon = "%d" % self.CONST.maximal_LMR_count )
     return None
@@ -422,11 +424,13 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   if not self.is_irciot_address_(my_src):
     return None
   my_GMR_id = self.CONST.default_GMR_id - 1
+  my_GMR_count = 0
   for my_key in self.__GMR_pool.keys():
+    my_GMR_count += 1
     if my_GMR_id < my_key:
       my_GMR_id = my_key
   my_GMR_id += 1
-  if my_GMR_id > self.CONST.maximal_GMR_count:
+  if my_GMR_count >= self.CONST.maximal_GMR_count:
     self.irciot_error_(self.CONST.err_GMR_MAX_INSTANCES, \
       0, in_addon = "%d" % self.CONST.maximal_GMR_count )
     return None
@@ -438,22 +442,21 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   })
   return my_GMR_id
 
- # incomplete
  def get_LMR_list_(self):
   my_LMR_list = []
   for my_key in self.__LMR_pool.keys():
     my_LMR_list.append(my_key)
   return my_LMR_list
 
- # incomplete
  def get_GMR_list_(self):
   my_GMR_list = []
   for my_key in self.__GMR_pool.keys():
     my_GMR_list.append(my_key)
   return my_GMR_list
 
- # incomplete
- def start_LMR_(self, in_LMR_id = None):
+ def __check_LMR_id_(self, in_LMR_id):
+  if in_LMR_id == None:
+    return False
   if not isinstance(in_LMR_id, int):
     self.__invalid_LMR_id_(in_LMR_id)
     return False
@@ -461,67 +464,96 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
     self.__invalid_LMR_id_(in_LMR_id)
     return False
 
-  return False
-
- # incomplete
- def start_GMR_(self, in_GMR_id = None):
+ def __check_GMR_id_(self, in_GMR_id):
+  if in_GMR_id == None:
+    return False
   if not isinstance(in_GMR_id, int):
     self.__invalid_GMR_id_(in_GMR_id)
     return False
   if in_GMR_id not in self.__GMR_pool.keys():
     self.__invalid_GMR_id_(in_GMR_id)
     return False
-  self.__GMR_pool[in_GMR_id].update({
+
+ def __get_LMR_id_(self, in_LMR_id):
+  if in_LMR_id != None:
+    return in_LMR_id
+  if len(self.__LMR_pool) == 1:
+    return list(self.__LMR_pool)[0]
+  return None
+
+ def __get_GMR_id_(self, in_GMR_id):
+  if in_GMR_id != None:
+    return in_GMR_id
+  if len(self.__GMR_pool) == 1:
+    return list(self.__GMR_pool)[0]
+  return None
+
+ def get_LMR_status_(self, in_LMR_id = None):
+  my_LMR_id = self.__get_LMR_id_(in_LMR_id)
+  if not self.__check_LMR_id_(my_LMR_id):
+    return None
+  return self.__LMR_pool[my_LMR_id]['status']
+
+ def get_GMR_status_(self, in_GMR_id = None):
+  my_GMR_id = self.__get_GMR_id_(in_GMR_id)
+  if not self.__check_GMR_id_(my_GMR_id):
+    return None
+  return self.__GMR_pool[my_GMR_id]['status']
+
+ # incomplete
+ def start_LMR_(self, in_LMR_id = None):
+  my_LMR_id = self.__get_LMR_id_(in_LMR_id)
+  if not self.__check_LMR_id_(my_LMR_id):
+    return False
+  self.__LMR_pool[my_LMR_id].update({
+    'status': self.CONST.state_LMR_running
+  })
+  return False
+
+ # incomplete
+ def start_GMR_(self, in_GMR_id = None):
+  my_GMR_id = self.__get_GMR_id_(in_GMR_id)
+  if not self.__check_GMR_id_(my_GMR_id):
+    return False
+  self.__GMR_pool[my_GMR_id].update({
     'status': self.CONST.state_GMR_running
   })
   return False
 
  # incomplete
  def pause_LMR_(self, in_LMR_id = None):
-  if not isinstance(in_LMR_id, int):
-    self.__invalid_LMR_id_(in_LMR_id)
+  my_LMR_id = self.__get_LMR_id_(in_LMR_id)
+  if not self.__check_LMR_id_(my_LMR_id):
     return False
-  if in_LMR_id not in self.__LMR_pool.keys():
-    self.__invalid_LMR_id_(in_LMR_id)
-    return False
-  self.__LMR_pool[in_LMR_id].update({
+  self.__LMR_pool[my_LMR_id].update({
     'status': self.CONST.state_LMR_running
   })
   return False
 
  # incomplete
  def pause_GMR_(self, in_GMR_id = None):
-  if not isinstance(in_GMR_id, int):
-    self.__invalid_GMR_id_(in_GMR_id)
+  my_GMR_id = self.__get_GMR_id_(in_GMR_id)
+  if not self.__check_GMR_id_(my_GMR_id):
     return False
-  if in_GMR_id not in self.__GMR_pool.keys():
-    self.__invalid_GMR_id_(in_GMR_id)
-    return False
-  self.__LMR_pool[in_LMR_id].update({
+  self.__LMR_pool[my_LMR_id].update({
     'status': self.CONST.state_LMR_pasued
   })
   return False
 
  # incomplete
  def drop_LMR_(self, in_LMR_id = None):
-  if not isinstance(in_LMR_id, int):
-    self.__invalid_GMR_id_(in_LMR_id)
+  my_LMR_id = self.__get_LMR_id_(in_LMR_id)
+  if not self.__check_LMR_id_(my_LMR_id):
     return False
-  if in_LMR_id not in self.__LMR_pool.keys():
-    self.__invalid_LMR_id_(in_LMR_id)
-    return False
-  self.__LMR_pool.pop(in_LMR_id)
+  self.__LMR_pool.pop(my_LMR_id)
   return True
 
  # incomplete
  def drop_GMR_(self, in_GMR_id = None):
-  if not isinstance(in_LMR_id, int):
-    self.__invalid_GMR_id_(in_GMR_id)
+  my_GMR_id = self.__get_GMR_id_(in_GMR_id)
+  if not self.__check_GMR_id_(my_GMR_id):
     return False
-  if in_GMR_id not in self.__GMR_pool.keys():
-    self.__invalid_GMR_id_(in_GMR_id)
-    return False
-  self.__GMR_pool.pop(in_GMR_id)
+  self.__GMR_pool.pop(my_GMR_id)
   return True
 
  # incomplete

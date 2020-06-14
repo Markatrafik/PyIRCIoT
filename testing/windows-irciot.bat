@@ -1,6 +1,7 @@
 @ECHO OFF
 SET SCRIPT=firstrun
 SET ROUTE_TESTS=default forwarding translation
+SET ROUTE_TESTS=%ROUTE_TESTS% lmrstatuses gmrstatuses
 SET IRC_TESTS=default isitip nicks masks langenc
 SET LANG_TESTS=default lua js python pyrangefor pycosinus
 SET BASE_TESTS=default multidatum multibigval multinextbig libirciot

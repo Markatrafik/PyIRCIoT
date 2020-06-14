@@ -32,6 +32,12 @@ class PyLayerIRCIoTTest(unittest.TestCase):
   def test002_test_translation_(self):
     self.assertEqual(ii_test_translation_(), True)
 
+  def test003_test_LMR_statuses_(self):
+    self.assertEqual(ii_test_LMR_statuses_(), True)
+
+  def test004_test_GMR_statuses_(self):
+    self.assertEqual(ii_test_GMR_statuses_(), True)
+
 _log_mode = 0
 
 def to_log_(in_text):
@@ -130,6 +136,50 @@ def ii_test_translation_():
   return False
   # End of ii_test_translation_()
 
+def ii_test_LMR_statuses_():
+ my_message  = '{"mid":"111","o":{"oid":"123","ot":"testing",'
+ my_message += '"src":"abcdef@efgh","dst":"eklmn@oprst",'
+ my_message += '"d":{"test":"testing"}}}'
+ to_log_("\nINPUT MESSAGE: @\033[1m%s\033[0m@" % my_message)
+ my_LMR_id = ii.init_LMR_(in_src = "include@efgh")
+ if ii.get_LMR_list_() != [ my_LMR_id ]:
+   return False
+ ii.router_graphs = [
+   ( ii.do_router_LMR_, {
+     ii.CONST.tag_LMR_ID: my_LMR_id
+   } ) ]
+ ii.start_LMR_()
+ my_message = ii.do_router_(my_message, ii.CONST.dir_both, None)
+ to_log_('\nOUTPUT MESSAGE @\033[1;39m%s\033[0m@\n' % my_message)
+ if not ii.is_irciot_(my_message):
+   print("Not an IRC-IoT message")
+   return False
+ to_log_("TEST_IS_OK")
+ return True
+ # End of ii_test_MR_statuses_()
+
+def ii_test_GMR_statuses_():
+ my_message  = '{"mid":"111","o":{"oid":"123","ot":"testing",'
+ my_message += '"src":"abcdef@efgh","dst":"eklmn@oprst",'
+ my_message += '"d":{"test":"testing"}}}'
+ to_log_("\nINPUT MESSAGE: @\033[1m%s\033[0m@" % my_message)
+ my_GMR_id = ii.init_GMR_(in_src = "include@efgh")
+ if ii.get_GMR_list_() != [ my_GMR_id ]:
+   return False
+ ii.router_graphs = [
+   ( ii.do_router_GMR_, {
+     ii.CONST.tag_GMR_ID: my_GMR_id
+   } ) ]
+ ii.start_GMR_()
+ my_message = ii.do_router_(my_message, ii.CONST.dir_both, None)
+ to_log_('\nOUTPUT MESSAGE @\033[1;39m%s\033[0m@\n' % my_message)
+ if not ii.is_irciot_(my_message):
+   print("Not an IRC-IoT message")
+   return False
+ to_log_("TEST_IS_OK")
+ return True
+ # End of ii_test_MR_statuses_()
+
 my_command = ""
 my_params  = []
 
@@ -183,6 +233,10 @@ def main():
    ii_test_forwarding_()
  if my_command == 'translation':
    ii_test_translation_()
+ if my_command == 'lmrstatuses':
+   ii_test_LMR_statuses_()
+ if my_command == 'gmrstatuses':
+   ii_test_GMR_statuses_()
 
 if __name__ == '__main__':
   if len(sys.argv) == 1:
