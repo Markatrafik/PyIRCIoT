@@ -116,11 +116,11 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   #
   common_filter_regexps = [
    '.*\\\\\\.*', '.*\\\\\'.*', '.*\\\\\".*', # Disable some escaping
-   '.*\_\_\s*\.\s*\_\_.*'
+   '.*__\s*\.\s*__.*'
   ]
   #
   lang_filter_BASIC_regexps  = []
-  lang_filter_PYTHON_regexps = []
+  lang_filter_PYTHON_regexps = [ '.*__[a-z]*__.*' ]
   lang_filter_PYTHON_types = {  'Add', 'And', 'Assign', 'Attribute', 'Slice',
    'BinOp', 'BitAnd', 'BitOr', 'BitXor', 'BoolOp', 'Dict', 'Div', 'Else', 'Eq',
    'Expr', 'For', 'If', 'Index', 'keyword', 'List', 'Load', 'Mod', 'Module',
@@ -342,6 +342,8 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
         ast.NodeVisitor.generic_visit(self, in_node)
       else:
         raise SyntaxError("type '%s' is not allowed" % type(in_node).__name__)
+  if not self.irciot_EL_check_matchers_(in_code, self.__PYTHON_filter_matchers):
+    return False
   my_check = Python_checker_();
   my_check.CONST = self.CONST
   try:
@@ -497,9 +499,9 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   my_code  = in_code
   if my_code[-1] != '\n':
     my_code += "\n"
-  if "RUN" not in my_code:
+  if "\nRUN\n" not in my_code:
     my_code += "RUN\n"
-  if "EXIT" not in my_code:
+  if "\nEXIT\n" not in my_code:
     my_code += "EXIT\n"
   with self.python_stdout_() as my_out:
     for my_line in my_code.split('\n'):

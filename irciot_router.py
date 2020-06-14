@@ -53,6 +53,8 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   #
   tag_IN_SCOPE  = 'iscp'
   tag_OUT_SCOPE = 'oscp'
+  tag_LMR_ID = 'lmri'
+  tag_GMR_ID = 'gmri'
   #
   err_ROUTER_DUP_DETECT = 10015
   err_MISSING_PARAMETER = 10505
@@ -64,6 +66,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   err_LMR_AUTHENTICATION = 10604
   err_LMR_COMPATIBILITY  = 10605
   err_LMR_MAX_INSTANCES  = 10607
+  err_LMR_INVALID_ID     = 10608
   err_LMR_LOOP_DETECTED  = 10611
   #
   err_GMR_INCORRECT_VER  = 10701
@@ -72,6 +75,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   err_GMR_AUTHENTICATION = 10704
   err_GMR_COMPATIBILITY  = 10705
   err_GMR_MAX_INSTANCES  = 10707
+  err_GMR_INVALID_ID     = 10708
   err_GMR_LOOP_DETECTED  = 10711
   err_GMR_INVALID_ORIGIN = 10712
   err_GMR_INVALID_PATH   = 10713
@@ -83,8 +87,10 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
    err_MISSING_PARAMETER: "Missing required parameter for routing graph node",
    err_INVALID_PARAMETER: "Invalid required parameter for routing graph node",
    err_INVALID_DIRECTION: "Invalid direction parameter for routing graph node",
+   err_LMR_INVALID_ID:    "Invalid LMR instance identificator",
    err_LMR_INCORRECT_VER: "Incorrect protocol version for LMR intercommunication",
    err_LMR_MAX_INSTANCES: "Cannot create LMR, maximum number of instances reached",
+   err_GMR_INVALID_ID:    "Invalid GMR instance identificator",
    err_GMR_INCORRECT_VER: "Incorrect protocol version for GMR intercommunication",
    err_GMR_MAX_INSTANCES: "Cannot create GMR, maximum number of instances reached"
   })
@@ -233,7 +239,8 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   my_keys = my_function_( None, self.CONST.rgn_REQUEST_PARAMS, None )
   for my_key in my_keys:
     if not my_key in my_params.keys():
-      self.irciot_error_(self.CONST.err_MISSING_PARAMETER, 0)
+      self.irciot_error_(self.CONST.err_MISSING_PARAMETER, 0, \
+        in_addon = my_key)
       return None
   return my_function_( in_datum, my_params, in_direction, in_vuid )
 
@@ -373,6 +380,14 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   #
   # End of PyIRCIoT_router.global_message_router_()
 
+ def __invalid_LMR_id_(in_LMR_id):
+  self.irciot_error_(self.CONST.err_LMR_INVALID_ID, 0, \
+    in_addon = "{}".format(in_LMR_id))
+
+ def __invalid_GMR_id_(in_GMR_id):
+  self.irciot_error_(self.CONST.err_GMR_INVALID_ID, 0, \
+    in_addon = "{}".format(in_GMR_id))
+
  # incomplete
  def init_LMR_(self, in_src = None):
   if in_src == None:
@@ -440,57 +455,90 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
  # incomplete
  def start_LMR_(self, in_LMR_id = None):
   if not isinstance(in_LMR_id, int):
+    self.__invalid_LMR_id_(in_LMR_id)
     return False
   if in_LMR_id not in self.__LMR_pool.keys():
+    self.__invalid_LMR_id_(in_LMR_id)
     return False
+
   return False
 
  # incomplete
  def start_GMR_(self, in_GMR_id = None):
   if not isinstance(in_GMR_id, int):
+    self.__invalid_GMR_id_(in_GMR_id)
     return False
   if in_GMR_id not in self.__GMR_pool.keys():
+    self.__invalid_GMR_id_(in_GMR_id)
     return False
+  self.__GMR_pool[in_GMR_id].update({
+    'status': self.CONST.state_GMR_running
+  })
   return False
 
  # incomplete
  def pause_LMR_(self, in_LMR_id = None):
   if not isinstance(in_LMR_id, int):
+    self.__invalid_LMR_id_(in_LMR_id)
     return False
   if in_LMR_id not in self.__LMR_pool.keys():
+    self.__invalid_LMR_id_(in_LMR_id)
     return False
+  self.__LMR_pool[in_LMR_id].update({
+    'status': self.CONST.state_LMR_running
+  })
   return False
 
  # incomplete
  def pause_GMR_(self, in_GMR_id = None):
   if not isinstance(in_GMR_id, int):
+    self.__invalid_GMR_id_(in_GMR_id)
     return False
   if in_GMR_id not in self.__GMR_pool.keys():
+    self.__invalid_GMR_id_(in_GMR_id)
     return False
+  self.__LMR_pool[in_LMR_id].update({
+    'status': self.CONST.state_LMR_pasued
+  })
   return False
 
  # incomplete
  def drop_LMR_(self, in_LMR_id = None):
   if not isinstance(in_LMR_id, int):
+    self.__invalid_GMR_id_(in_LMR_id)
     return False
-  if in_LMR_id in self.__LMR_pool.keys():
-    self.__LMR_pool.pop(in_LMR_id)
-    return True
-  return False
+  if in_LMR_id not in self.__LMR_pool.keys():
+    self.__invalid_LMR_id_(in_LMR_id)
+    return False
+  self.__LMR_pool.pop(in_LMR_id)
+  return True
 
  # incomplete
  def drop_GMR_(self, in_GMR_id = None):
   if not isinstance(in_LMR_id, int):
+    self.__invalid_GMR_id_(in_GMR_id)
     return False
-  if in_GMR_id in self.__GMR_pool.keys():
-    self.__GMR_pool.pop(in_GMR_id)
-    return True
-  return False
+  if in_GMR_id not in self.__GMR_pool.keys():
+    self.__invalid_GMR_id_(in_GMR_id)
+    return False
+  self.__GMR_pool.pop(in_GMR_id)
+  return True
 
  # incomplete
  def do_router_LMR_(self, in_datum, in_params, \
   in_direction, in_vuid = None):
-  # The optional parameter LMR ID will be in the parameter pack
+  if not isinstance(in_params, dict):
+    if in_params == self.CONST.rgn_REQUEST_PARAMS:
+      return [ self.CONST.tag_LMR_ID ]
+    return None
+  if in_direction not in self.CONST.dir_any:
+    self.irciot_error_(self.CONST.err_INVALID_DIRECTION, 0)
+    return None
+  my_id = in_params[ self.CONST.tag_LMR_ID ]
+  if my_id not in self.__LMR_pool.keys():
+    self.__invalid_LMR_id_(my_id)
+    return in_datum
+  my_LMR = self.__LMR_pool[my_id]
 
   return in_datum
   #
@@ -499,7 +547,18 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
  # incomplete
  def do_router_GMR_(self, in_datum, in_params, \
   in_direction, in_vuid = None):
-  # The optional parameter GMR ID will be in the parameter pack
+  if not isinstance(in_params, dict):
+    if in_params == self.CONST.rgn_REQUEST_PARAMS:
+      return [ self.CONST.tag_GMR_ID ]
+    return None
+  if in_direction not in self.CONST.dir_any:
+    self.irciot_error_(self.CONST.err_INVALID_DIRECTION, 0)
+    return None
+  my_id = in_params[ self.CONST.tag_GMR_ID ]
+  if my_id not in self.__GMR_pool.keys():
+    self.__invalid_GMR_id_(my_id)
+    return in_datum
+  my_GMR = self.__GMR_pool[my_id]
 
   return in_datum
   #

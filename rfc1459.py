@@ -193,7 +193,7 @@ class PyLayerIRC( irciot_shared_ ):
    #  3. "asp"        -- AspIRCd (Charybdis fork) '2019
    #  4. "Bahamut"    -- Bahamut, ver. 2.0.7, '1999-2020
    #  5. "beware"     -- beware ircd, Delphi based, ver. 2.2.0
-   #  6. "Charybdis"  -- charybdis-ircd, ver. 3.5.0, '2020
+   #  6. "Charybdis"  -- charybdis-ircd, ver. 3.5.0, '2007-2020
    #  7. "ConfRoom"   -- Conference Room
    #  8. "discord"    -- discordIRCd, js based, ver. 0.5.0
    #  9. "Elemental"  -- Elemental-IRCd, ver. 6.6.2
@@ -206,7 +206,7 @@ class PyLayerIRC( irciot_shared_ ):
    # 16. "miniircd"   -- miniircd, Python based, ver. 1.3, '2003
    # 17. "Nefarious"  -- Nefarious ircd
    # 18. "Nefarious2" -- Nefarious IRCu (ircu fork) '2020
-   # 19. "ng"         -- ngIRCd aka Next Generation IRCd, ver. 25 '2019
+   # 19. "ng"         -- ngIRCd aka Next Generation IRCd, ver. 25, '2019
    # 20. "Oragono"    -- Oragono, Golang based, ver. 2.1.0, '2012-2020
    # 21. "plexus"     -- PleXusIRCd, C++, '2003-2006
    # 22. "pircd"      -- Perl IRCd, Perl based, '2002

@@ -109,8 +109,10 @@ def irciot_get_router_error_descriptions_(in_human_language):
    10508: "Неверный параметр направления для узла в графе маршрутизации",
    10601: "Неправильная версия протокола для взаимодействия LMR маршрутизаторов",
    10607: "Невозможно создать LMR, достигнуто максимальное число экземпляров",
+   10608: "Неверный идентификатор экземпляра LMR",
    10701: "Неправильная версия протокола для взаимодействия GMR маршрутизаторов",
-   10707: "Невозможно создать GMR, достигнуто максимальное число экземпляров"
+   10707: "Невозможно создать GMR, достигнуто максимальное число экземпляров",
+   10708: "Неверный идентификатор экземпляра GMR"
   }
  elif in_human_language == "de": # Deutsch
   return {
@@ -120,8 +122,10 @@ def irciot_get_router_error_descriptions_(in_human_language):
    10508: "Flascher Richtungsparameter für einen Knoten in der Routing-Graph",
    10601: "Falsche Protokollversion für die Interkommunikation von LMR-Routern",
    10607: "LMR kann nicht erstellt werden, maximale Anzahl von Instanzen erreicht",
+   10608: "Ungültiger LMR-Instanz-Identifikator",
    10701: "Falsche Protokollversion für die Interkommunikation von GMR-Routern",
-   10707: "GMR kann nicht erstellt werden, maximale Anzahl von Instanzen erreicht"
+   10707: "GMR kann nicht erstellt werden, maximale Anzahl von Instanzen erreicht",
+   10708: "Ungültiger LMR-Instanz-Identifikator"
   }
  return {}
 
