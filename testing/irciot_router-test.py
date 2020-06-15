@@ -156,7 +156,7 @@ def ii_test_LMR_statuses_():
  my_message = ii.do_router_(my_message, ii.CONST.dir_both, None)
  to_log_('\nOUTPUT MESSAGE @\033[1;39m%s\033[0m@\n' % my_message)
  if ii.get_LMR_status_() != ii.CONST.state_LMR_running:
-   # only ONE item ^^^ must be in pool, no parameters - first item
+   # only ONE item ^^^ must be in the pool, no parameters - first item
    to_log_('\n\033[1;43mincorrect LMR status\033[0m')
    return False
  if not ii.is_irciot_(my_message):
@@ -186,7 +186,7 @@ def ii_test_GMR_statuses_():
  my_message = ii.do_router_(my_message, ii.CONST.dir_both, None)
  to_log_('\nOUTPUT MESSAGE @\033[1;39m%s\033[0m@\n' % my_message)
  if ii.get_GMR_status_() != ii.CONST.state_GMR_running:
-   # only ONE item ^^^ must be in pool, no parameters - first item
+   # only ONE item ^^^ must be in the pool, no parameters - first item
    to_log_('\n\033[1;41mincorrect GMR status\033[0m')
    return False
  if not ii.is_irciot_(my_message):

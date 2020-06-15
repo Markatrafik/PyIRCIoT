@@ -83,6 +83,9 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   err_LOADING_MODULES  = 1009
   err_CODE_EXECUTION   = 1010
   err_LEXICAL_ANALISIS = 1025
+  err_ILLEGAL_SUBST    = 1101
+  err_ILLEGAL_IMPORT   = 1201
+  err_ILLEGAL_IMPORTF  = 1202
   #
   err_DESCRIPTIONS = {
    err_UNKNOWN_LANGUAGE : "Unknown programming langauge",
@@ -94,7 +97,10 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
    err_LANGUAGE_FILTER  : "Code declined by language filter",
    err_CODE_SIZE_LIMIT  : "Code size limit exceeded",
    err_CODE_EXECUTION   : "Problem while executing the code",
-   err_LEXICAL_ANALISIS : "lexical analysis failed"
+   err_LEXICAL_ANALISIS : "lexical analysis failed",
+   err_ILLEGAL_SUBST    : "command substitution is not allowed",
+   err_ILLEGAL_IMPORT   : "import statement is not allowed",
+   err_ILLEGAL_IMPORTF  : "import from statement is not allowed"
   }
   #
   mod_ANSLDR = 'ansible.parsing.dataloader'
@@ -106,6 +112,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   mod_BASTOK = 'PyBasic.basictoken'
   mod_BASLEX = 'PyBasic.lexer'
   mod_BASPRG = 'PyBasic.program'
+  mod_BSHLEX = 'bashlex'
   mod_PHPLEX = 'phply.phplex'
   mod_PHPPAR = 'phply.phpparse'
   mod_MATH = 'math'
@@ -119,7 +126,9 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
    '.*__\s*\.\s*__.*'
   ]
   #
-  lang_filter_BASIC_regexps  = []
+  lang_filter_BASH_regexps = [ '^\/sbin.*', '.*>.*' ]
+  lang_filter_BASH_funcs   = { 'printf', 'echo' }
+  lang_filter_BASIC_regexps = []
   lang_filter_PYTHON_regexps = [ '.*__[a-z]*__.*' ]
   lang_filter_PYTHON_types = {  'Add', 'And', 'Assign', 'Attribute', 'Slice',
    'BinOp', 'BitAnd', 'BitOr', 'BitXor', 'BoolOp', 'Dict', 'Div', 'Else', 'Eq',
@@ -258,6 +267,32 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   return True
 
  # incomplete
+ def irciot_EL_check_BASH_code_(self, in_code):
+  class bash_checker_(self.__BSHLEX.ast.nodevisitor):
+    def check(self, in_code):
+      my_trees = self.bashlex.parse(in_code)
+      for my_tree in my_trees:
+        self.visit(my_tree)
+    def visit(self, in_node):
+      # print(in_node)
+      super(bash_checker_, self).visit(in_node)
+    def visitcommandsubstitution(self, in_node, in_command):
+      raise SyntaxError(self.errors[self.CONST.err_ILLEGAL_SUBST])
+  if not self.irciot_EL_check_matchers_(in_code, self.__BASH_filter_matchers):
+    return False
+  my_line = in_code.replace(r'[\r\n]', ';')
+  my_check = bash_checker_()
+  my_check.CONST = self.CONST
+  my_check.errors = self.err_DESCRIPTIONS
+  my_check.bashlex = self.__BSHLEX
+  try:
+    my_check.check(my_line)
+  except Exception as my_ex:
+    self.irciot_EL_error_(self.CONST.err_LANGUAGE_SYNTAX, str(my_ex))
+    return False
+  return True
+
+ # incomplete
  def irciot_EL_check_BASIC_code_(self, in_code):
   if not self.irciot_EL_check_matchers_(in_code, self.__BASIC_filter_matchers):
     return False
@@ -334,9 +369,9 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
         else:
           raise SyntaxError("name '%s' is reserved" % in_node.id)
     def visit_Import(self, in_node):
-      SyntaxError("import statement is not allowed")
+      raise SyntaxError(self.errors[self.CONST.err_ILLEGAL_IMPORT])
     def visit_ImportFrom(self, in_node):
-      SyntaxError("import from statement is not allowed")
+      raise SyntaxError(self.errors[self.CONST.err_ILLEGAL_IMPORTF])
     def generic_visit(self, in_node):
       if type(in_node).__name__ in self.CONST.lang_filter_PYTHON_types:
         ast.NodeVisitor.generic_visit(self, in_node)
@@ -346,6 +381,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
     return False
   my_check = Python_checker_();
   my_check.CONST = self.CONST
+  my_check.errors = self.err_DESCRIPTIONS
   try:
     my_line = in_code.replace(r'[\r\n]', ';')
     my_check.check(my_line)
@@ -379,6 +415,8 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   # Language-specific filters:
   if in_lang == self.CONST.lang_ANSYML:
     return self.irciot_EL_check_Ansible_code_(in_code)
+  elif in_lang == self.CONST.lang_BASH:
+    return self.irciot_EL_check_BASH_code_(in_code)
   elif in_lang == self.CONST.lang_BASIC:
     return self.irciot_EL_check_BASIC_code_(in_code)
   elif in_lang == self.CONST.lang_JRE:
@@ -492,7 +530,13 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   # End of __irciot_EL_run_ANSYML_code_()
 
  # incomplete
- def __irciot_EL_run_BASIC_code_(self, in_code, in_envritonment):
+ def __irciot_EL_run_BASH_code_(self, in_code, in_environment):
+
+
+  return ""
+
+ # incomplete
+ def __irciot_EL_run_BASIC_code_(self, in_code, in_envronment):
   my_lexer = self.__BASLEX.Lexer()
   my_prog  = self.__BASPRG.Program()
   my_token = self.__BASTOK.BASICToken
@@ -630,7 +674,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
     if in_lang == self.CONST.lang_ANSYML:
       my_out = self.__irciot_EL_run_ANSYML_code_(in_code, in_environment)
     elif in_lang == self.CONST.lang_BASH:
-      pass
+      my_out = self.__irciot_EL_run_BASH_code_(in_code, in_environment)
     elif in_lang == self.CONST.lang_BASIC:
       my_out = self.__irciot_EL_run_BASIC_code_(in_code, in_environment)
     elif in_lang == self.CONST.lang_CS:
@@ -721,7 +765,12 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
         return False
     return True
   elif in_lang == self.CONST.lang_BASH:
-    self.irciot_EL_error_(self.CONST.err_UNSUPPORTED_YET, None)
+    self.__BASH_filter_matchers = \
+     self.__irciot_EL_matchers_(self.CONST.lang_filter_BASH_regexps)
+    self.__BSHLEX = self.irciot_EL_import_(self.CONST.mod_BSHLEX)
+    if self.__BSHLEX == None:
+      return False
+    return True
   elif in_lang == self.CONST.lang_BASIC:
     self.__BASIC_filter_matchers = \
      self.__irciot_EL_matchers_(self.CONST.lang_filter_BASIC_regexps)
@@ -801,12 +850,13 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
       del self.__ANSLDR
       del self.__ANSCBP
     elif in_lang == self.CONST.lang_BASH:
+      del self.__BSHLEX
+      del self.__BASH_filter_matchers
+    elif in_lang == self.CONST.lang_BASIC:
       del self.__BASTOK
       del self.__BASLEX
       del self.__BASPRG
       del self.__BASIC_filter_matchers
-    elif in_lang == self.CONST.lang_BASIC:
-      pass
     elif in_lang == self.CONST.lang_CS:
       pass
     elif in_lang == self.CONST.lang_CSP:
