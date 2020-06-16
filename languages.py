@@ -82,6 +82,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   err_CODE_SIZE_LIMIT  = 1008
   err_LOADING_MODULES  = 1009
   err_CODE_EXECUTION   = 1010
+  err_TIME_EXECUTION   = 1024
   err_LEXICAL_ANALISIS = 1025
   err_ILLEGAL_SUBST    = 1101
   err_ILLEGAL_IMPORT   = 1201
@@ -97,6 +98,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
    err_LANGUAGE_FILTER  : "Code declined by language filter",
    err_CODE_SIZE_LIMIT  : "Code size limit exceeded",
    err_CODE_EXECUTION   : "Problem while executing the code",
+   err_TIME_EXECUTION   : "Execution timed out",
    err_LEXICAL_ANALISIS : "lexical analysis failed",
    err_ILLEGAL_SUBST    : "command substitution is not allowed",
    err_ILLEGAL_IMPORT   : "import statement is not allowed",
@@ -458,8 +460,8 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
    # End of python_stdout_()
 
  def __timeout_termination_(self):
-  raise Exception('Execution timed out: %s sec.' \
-    % self.__execution_timeout)
+  raise Exception('%s: %s sec.' \
+    % (self.errors[self.CONST.err_TIME_EXECUTION], self.__execution_timeout))
 
  def irciot_EL_set_Ansible_Vault_(in_password):
   if not isinstance(in_password, str):
