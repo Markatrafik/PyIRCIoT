@@ -41,7 +41,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   #
   irciot_protocol_version = '0.3.33'
   #
-  irciot_library_version  = '0.0.211'
+  irciot_library_version  = '0.0.215'
   #
   # IRC-IoT Embedded Languages tags:
   #
@@ -84,9 +84,12 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   err_CODE_EXECUTION   = 1010
   err_TIME_EXECUTION   = 1024
   err_LEXICAL_ANALISIS = 1025
+  err_ILLEGAL_TYPE     = 1100
   err_ILLEGAL_SUBST    = 1101
-  err_ILLEGAL_IMPORT   = 1201
-  err_ILLEGAL_IMPORTF  = 1202
+  err_ILLEGAL_FUNCT    = 1103
+  err_ILLEGAL_IMPORT   = 1121
+  err_ILLEGAL_IMPORTF  = 1122
+  err_RESERVED_NAME    = 1131
   #
   err_DESCRIPTIONS = {
    err_UNKNOWN_LANGUAGE : "Unknown programming langauge",
@@ -100,9 +103,12 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
    err_CODE_EXECUTION   : "Problem while executing the code",
    err_TIME_EXECUTION   : "Execution timed out",
    err_LEXICAL_ANALISIS : "lexical analysis failed",
+   err_ILLEGAL_TYPE     : "The type '{}' is not allowed",
+   err_ILLEGAL_FUNCT    : "The function '{}' is not allowed",
    err_ILLEGAL_SUBST    : "command substitution is not allowed",
-   err_ILLEGAL_IMPORT   : "import statement is not allowed",
-   err_ILLEGAL_IMPORTF  : "import from statement is not allowed"
+   err_ILLEGAL_IMPORT   : "'import' statement is not allowed",
+   err_ILLEGAL_IMPORTF  : "'import' 'from' statement is not allowed",
+   err_RESERVED_NAME    : "The name '{}' is reserved"
   }
   #
   mod_ANSLDR = 'ansible.parsing.dataloader'
@@ -141,8 +147,8 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
    'cosh', 'degrees', 'e', 'exp', 'fabs', 'floor', 'fmod', 'frexp', 'hypot',
    'ldexp', 'log', 'log10', 'modf', 'pi', 'pow', 'radians', 'sin', 'sinh',
    'sqrt', 'tan', 'tanh' }
-  lang_filter_PYTHON_funcs = { 'abs', 'max', 'min', 'int', 'float', 'range',
-   'set', 'print', 'len', 'str' }
+  lang_filter_PYTHON_funcs = { 'abs', 'max', 'min', 'bool', 'int', 'float', 'range',
+   'set', 'print', 'len', 'str', 'type', 'isinstance' }
   lang_filter_PYTHON_funcs = { *lang_filter_PYTHON_funcs, *lang_filter_PYTHON_maths }
   lang_filter_PYTHON_names = { 'True', 'False', 'None' }
   lang_filter_PYTHON_names = { *lang_filter_PYTHON_names, *lang_filter_PYTHON_funcs }
@@ -161,7 +167,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   environment_second_chars = environment_first_chars + "0123456789_"
   #
   default_execution_timeout = 3 # in seconds
-  default_maximal_code_size = 4096 # bytes
+  default_maximal_code_size = 2048 # bytes
   default_maximal_mem_usage = 1048576 # bytes
   default_maximal_cpu_usage = 5 # percent of one core
   #
@@ -197,11 +203,11 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   if in_error_code in self.err_DESCRIPTIONS.keys():
     my_descr = self.err_DESCRIPTIONS[in_error_code]
     if isinstance(in_addon, str):
-      my_descr += " (%s)" % in_addon
+      my_descr += " ({})".format(in_addon)
   else:
     return
   if CAN_debug_library:
-    print("EL error (%d):" % in_error_code, my_descr)
+    print("EL error ({}):".format(in_error_code), my_descr)
   #
   # End of irciot_EL_error_()
 
@@ -359,7 +365,8 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
       if in_node.func.id in self.CONST.lang_filter_PYTHON_funcs:
         ast.NodeVisitor.generic_visit(self, in_node)
       else:
-        raise SyntaxError("function '%s' is not allowed" % in_node.func.id)
+        raise SyntaxError(self.errors[self.CONST.err_ILLEGAL_FUNCT].format( \
+         in_node.func.id))
     def visit_Name(self, in_node):
       try:
         eval(in_node.id)
@@ -369,7 +376,8 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
         if in_node.id in self.CONST.lang_filter_PYTHON_names:
           ast.NodeVisitor.generic_visit(self, in_node)
         else:
-          raise SyntaxError("name '%s' is reserved" % in_node.id)
+          raise SyntaxError(self.errors[self.CONST.err_RESERVED_NAME].format( \
+           in_node.id))
     def visit_Import(self, in_node):
       raise SyntaxError(self.errors[self.CONST.err_ILLEGAL_IMPORT])
     def visit_ImportFrom(self, in_node):
@@ -378,7 +386,8 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
       if type(in_node).__name__ in self.CONST.lang_filter_PYTHON_types:
         ast.NodeVisitor.generic_visit(self, in_node)
       else:
-        raise SyntaxError("type '%s' is not allowed" % type(in_node).__name__)
+        raise SyntaxError(self.errors[self.CONST.err_ILLEGAL_TYPE].format( \
+         type(in_node).__name__))
   if not self.irciot_EL_check_matchers_(in_code, self.__PYTHON_filter_matchers):
     return False
   my_check = Python_checker_();
@@ -408,7 +417,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
     return False
   if len(in_code) > self.__maximal_code_size:
     self.irciot_EL_error_(self.CONST.err_CODE_SIZE_LIMIT, \
-      '+%d bytes' % int(len(in_code) - self.__maximal_code_size))
+      '+{} byte(s)'.format(len(in_code) - self.__maximal_code_size))
   # Common filters:
   for my_re in self.__common_filter_matchers:
     if my_re.match(in_code):
@@ -460,8 +469,9 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
    # End of python_stdout_()
 
  def __timeout_termination_(self):
-  raise Exception('%s: %s sec.' \
-    % (self.errors[self.CONST.err_TIME_EXECUTION], self.__execution_timeout))
+  raise Exception('{}: {} sec.'.format( \
+   self.errors[self.CONST.err_TIME_EXECUTION], \
+   self.__execution_timeout))
 
  def irciot_EL_set_Ansible_Vault_(in_password):
   if not isinstance(in_password, str):
@@ -565,7 +575,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
       elif my_tokens[0].category == my_token.LIST:
         my_prog.list()
       else:
-        raise("Unrecognised input: '%s'" % my_tokens[0].lexeme())
+        raise("Unrecognised input: '{}'".format(my_tokens[0].lexeme()))
   del my_prog
   del my_lexer
   return my_out.getvalue()
@@ -784,11 +794,11 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
         return False
     return True
   elif in_lang == self.CONST.lang_CS:
-    pass
+    self.irciot_EL_error_(self.CONST.err_UNSUPPORTED_YET, None)
   elif in_lang == self.CONST.lang_CSP:
     self.irciot_EL_error_(self.CONST.err_UNSUPPORTED_YET, None)
   elif in_lang == self.CONST.lang_GO:
-    pass
+    self.irciot_EL_error_(self.CONST.err_UNSUPPORTED_YET, None)
   elif in_lang == self.CONST.lang_JRE:
     self.__JAVA_filter_matchers = \
      self.__irciot_EL_matchers_(self.CONST.lang_filter_JAVA_regexps)

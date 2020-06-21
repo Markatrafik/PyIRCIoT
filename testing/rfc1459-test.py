@@ -71,8 +71,8 @@ def irc_unary_nicks_():
     my_irc.irc_random_nick_("Test", True)
     to_log_("%d. PyLayerIRC." % my_idx \
       + "irc_random_nick_('Test', True) -> ")
-    to_log_("PyLayerIRC.is_irc_nick_('%s') -> " \
-      % my_irc.irc_nick_try)
+    to_log_("PyLayerIRC.is_irc_nick_('{}') -> ".format( \
+      my_irc.irc_nick_try))
     if not my_irc.is_irc_nick_(my_irc.irc_nick_try):
       my_test = False
       to_log_("False")
@@ -98,7 +98,7 @@ def irc_unary_masks_():
     ( my_from, my_mask, my_need ) = my_couple
     to_log_("Comparing [ '%s' with '%s' ] must be %s ..." % (my_from, my_mask, my_need))
     my_result = my_irc.irc_check_mask_(my_from, my_mask)
-    to_log_("out = '%s'." % my_result)
+    to_log_("out = '{}'.".format(my_result))
     if my_result == None:
       my_test = False
     elif my_result:
@@ -130,13 +130,13 @@ def irc_unary_langenc_():
     my_langs = my_irc.get_langs_by_enc_(my_enc)
     for my_lang in my_langs:
       if my_lang not in all_langs:
-        to_log_("Unknown language: '%s'" % my_lang)
+        to_log_("Unknown language: '{}'".format(my_lang))
         return False
   for my_lang in all_langs:
     my_encs = my_irc.get_encs_by_lang_(my_lang)
     for my_enc in my_encs:
       if my_enc not in all_encs:
-        to_log_("Unknown encoding: '%s'" % my_enc)
+        to_log_("Unknown encoding: '{}'".format(my_enc))
         return False
   my_lang = my_irc.get_lang_by_enc_(my_irc.CONST.enc_1251)
   if my_lang != my_irc.CONST.hl_Russian:
@@ -159,7 +159,7 @@ def main():
  if my_command == "":
    my_command = 'default'
 
- print ("TEST NAME: '%s'" % my_command)
+ print ("TEST NAME: '{}'".format(my_command))
 
  if my_command == 'default':
    irc_test_default_()

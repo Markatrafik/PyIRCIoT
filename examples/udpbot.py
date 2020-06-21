@@ -5,6 +5,7 @@ import os
 import time
 import json
 import random
+#import subprocess
 # For keypress handling:
 if os.name == "nt":
   import msvcrt
@@ -29,7 +30,6 @@ def main():
 
   udpbot = PyLayerUDPb()
 
-  # udpbot.bot_name = 'udpBot'
   # udpbot.bot_background_start_()
   # udpbot.bot_redirect_output_('./udpBot.log')
   
@@ -87,7 +87,7 @@ def main():
       = udpbot.udpb_check_queue_(udpbot.CONST.udpb_queue_input)
 
     if (udpb_message != ""):
-       print("udpb_message=[\033[0;44m%s\033[0m]" % udpb_message)
+       print("udpb_message=[\033[0;44m{}\033[0m]".format(udpb_message))
 
        if (irciot.is_irciot_(udpb_message)):
 

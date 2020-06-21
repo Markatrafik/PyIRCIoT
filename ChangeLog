@@ -163,3 +163,19 @@
 	transport class new method with index api_GET_iENC = 601 has been
 	added. Exactly same as api_GET_iMTU. Default value is "utf-8".
 
+2020-06-17 01:30 GMT+7 PyIRCIoT 0.0.212 Alexey Y. Woronov <alexey@woronov.ru>
+	Bug fix in the Twofish cryptographic method. The latest versions of the
+	library contain many changes in the classes such as PyLayerIRCIoT_EL_,
+	PyIRCIoT_router, in the service files for testing and localization, but
+	at the moment most of these changes are not involved, however, all of
+	them will be used, now, you also can use them for experimental purposes.
+
+2020-06-18 16:30 GMT+17 PyIRCIoT 0.0.215 Alexey Y. Woronov <alexey@woronov.ru>
+	Starting with this version, in all interaсtive methods, logs, errors and
+	UI the construction ''.format() will be used, instead of %s but it will
+	remain in the dataflow methods until we make sure that the alternative
+	works just as well. At this moment Python 3.5 is taken as the basis,
+	when Python version 3.7 and higher will gain great popularity, and
+	younger versions will no longer be used on a large amount of hardware,
+	we will move on to F-Strings.
+

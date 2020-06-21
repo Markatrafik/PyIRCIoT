@@ -31,25 +31,25 @@ def main():
  datumset_text += '{"dst":"THERMO@Kidsroom","t":"2018-08-23 14:48:08.157125",'
  datumset_text += '"src":"myengine","cnd":{"humidity":"?"},"ot":"request"}]'
   
- print ("input datumset: @\033[1;33;44m%s\033[0m@\n" % datumset_text)
+ print ("input datumset: @\033[1;33;44m{}\033[0m@\n".format(datumset_text))
  json_text, skip_param, part_param \
   = irciot.irciot_encap_(datumset_text, 0, 0)
  if (not irciot.is_irciot_(json_text)):
    print ("*** Not an IRC-IoT message")
  else:
-   print("output IRC-IoT: @%s@len=%d@\n" % (json_text, len(json_text)))
+   print("output IRC-IoT: @{}@len={}@\n".format(json_text, len(json_text)))
    msg_text = irciot.irciot_deinencap_(json_text)
    if (msg_text != ""):
-     print("output datumset: @\033[1;36;44m%s\033[0m@\n" % msg_text)
+     print("output datumset: @\033[1;36;44m{}\033[0m@\n".format(msg_text))
    print("input it to self\n")
    while ((skip_param > 0) or (part_param > 0)):
      json_text, skip_param, part_param \
       = irciot.irciot_encap_(datumset_text, skip_param, part_param)
-     print("output IRC-IoT: @%s@len=%d@\n" % (json_text, len(json_text)))
+     print("output IRC-IoT: @{}@len={}@\n".format(json_text, len(json_text)))
      msg_text = irciot.irciot_deinencap_(json_text)
      print("input it to self\n")
      if (msg_text != ""):
-       print("output datumset: @\033[1;36;44m%s\033[0m@\n" % msg_text)
+       print("output datumset: @\033[1;36;44m{}\033[0m@\n".format(msg_text))
    
 if __name__ == '__main__':
   main()

@@ -17,8 +17,8 @@ def main():
     irciot_skip = 0
 
     if (len(sys.argv) != 4):
-       print("\nUsage: %s " % sys.argv[0] + \
-        "<mode> '<JSON>' '<state save file>'\n")
+       print("\nUsage: {} ".format(sys.argv[0]) \
+        + "<mode> '<JSON>' '<state save file>'\n")
        print(" Where <mode> is:\n");
        print("  1 - Convert IRC-IoT \"Datum\" set to IRC-IoT \"Message\"")
        print("  2 - Convert IRC-IoT \"Message\" to IRC-IoT \"Datum\" set\n")

@@ -121,15 +121,15 @@ class irciot_shared_(object):
    enc_KOI8R = "koi8-r"
    enc_KOI8U = "koi8-u"
    for enc in [  7,  8, 16, 32 ]:
-     locals()["enc_UTF%d" % enc] = "utf-%d" % enc
+     locals()["enc_UTF%d" % enc] = "utf-{}".format(enc)
    for enc in [  273,  278,  280,  297,  423,  437,  737,  775,
      850,  851,  852,  855,  856,  857,  858,  860,  861,  862,
      863,  865,  866,  869,  874,  875,  880,  905,  922,  935,
     1025, 1097, 1250, 1251, 1252, 1253, 1254, 1255, 1256, 1257,
     1258, 1259 ]:
-     locals()["enc_%d" % enc] = "cp%d" % enc
+     locals()["enc_%d" % enc] = "cp{}".format(enc)
    for enc in [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 15 ]:
-     locals()["enc_ISO%d" % enc] = "iso-8859-%d" % enc
+     locals()["enc_ISO%d" % enc] = "iso-8859-{}".format(enc)
    #
    enc_aliases = {
     enc_ASCII : [ "cp-367", "cp367", "us-ascii" ],
@@ -560,8 +560,8 @@ class irciot_shared_(object):
   # End of get_src_ip_by_dst_ip_()
 
  def bot_usage_handler (self):
-  print('%s (based on IRC-IoT demo library)' % self.bot_name)
-  print('\nUsage: %s [<options>]\n' % sys.argv[0])
+  print('{} (based on IRC-IoT demo library)'.format(self.bot_name))
+  print('\nUsage: {} [<options>]\n'.format(sys.argv[0]))
 
  def bot_redirect_output_(self, in_filename):
   if not isinstance(in_filename, str):
@@ -606,7 +606,7 @@ class irciot_shared_(object):
     if my_list[ my_count - 1 ] != self.bot_background_parameter:
       my_list  = [ os.path.expanduser(sys.argv[0]) ] + my_list
       my_list += [ self.bot_background_parameter ]
-      print("Starting %s ..." % self.bot_name)
+      print("Starting {} ...".format(self.bot_name))
       my_process = subprocess.Popen( my_list )
       sys.exit(0)
 

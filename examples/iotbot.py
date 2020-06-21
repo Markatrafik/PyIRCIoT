@@ -76,7 +76,7 @@ def main():
       = ircbot.irc_check_queue_(ircbot.CONST.irc_queue_input)
 
     if (irc_message != ""):
-       print("irc_message=[\033[0;44m%s\033[0m]" % irc_message)
+       print("irc_message=[\033[0;44m{}\033[0m]".format(irc_message))
 
        if (irciot.is_irciot_(irc_message)):
           irc_json = irciot.irciot_deinencap_(irc_message, irc_vuid)

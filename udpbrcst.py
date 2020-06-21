@@ -45,7 +45,7 @@ class PyLayerUDPb( irciot_shared_ ):
   #
   irciot_protocol_version = '0.3.33'
   #
-  irciot_library_version  = '0.0.211'
+  irciot_library_version  = '0.0.215'
   #
   udpb_default_debug = DO_debug_library
   #
@@ -440,8 +440,8 @@ class PyLayerUDPb( irciot_shared_ ):
       udpb_input = udpb_input.strip('\n').strip('\r')
       if udpb_input != "":
         if self.udpb_debug:
-          self.to_log_("Received from UDP(%s): <" \
-            % my_ip + udpb_input + ">")
+          self.to_log_("Received from " \
+           + "UDP({}): <{}>".format(my_ip, udpb_input))
         return ( 0, udpb_input, delta_time, my_ip )
       return ( -1, "", delta_time, my_ip )
   except socket.error:
@@ -471,8 +471,8 @@ class PyLayerUDPb( irciot_shared_ ):
     if not self.is_ip_address_(my_addr):
       return False
   if self.udpb_debug:
-    self.to_log_("Sending to UDP(%s:%s): <" \
-      % (my_addr, self.udpb_port) + in_string + ">")
+    self.to_log_("Sending to " \
+     + "UDP({}:{}): <{}>".format(my_addr, self.udpb_port, in_string))
   my_data = bytes(in_string, self.udpb_encoding)
   self.__udpb_server_sock.sendto(my_data, (my_addr, self.udpb_port))
   sleep(self.CONST.udpb_micro_wait)

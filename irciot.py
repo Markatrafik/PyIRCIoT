@@ -43,7 +43,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.33'
   #
-  irciot_library_version  = '0.0.211'
+  irciot_library_version  = '0.0.215'
   #
   # IRC-IoT characters
   #
@@ -756,7 +756,7 @@ class PyLayerIRCIoT(object):
   if in_error_code in self.err_DESCRIPTIONS.keys():
     my_descr = self.err_DESCRIPTIONS[in_error_code]
     if isinstance(in_addon, str):
-      my_descr += " (%s)" % in_addon
+      my_descr += " ({})".format(in_addon)
     my_datum.update({ self.CONST.tag_DESCRIPTION : my_descr })
   else:
     return
@@ -895,7 +895,7 @@ class PyLayerIRCIoT(object):
     self.crypto_AES_iv = self.irciot_crypto_hasher_(None, \
     self.crypto_AES_BLOCK_SIZE )
   elif my_algo == self.CONST.crypto_2FISH:
-    self.irciot_error_(self.CONST.err_ENC_UNIMPLEMENTED, in_crypt_method)
+    pass
   (self.__encryption_private_key, \
    self.__encryption_public_key) \
     = self.irciot_encryption_generate_keys_(in_crypt_method)
@@ -904,6 +904,33 @@ class PyLayerIRCIoT(object):
   return True
   #
   # End of irciot_init_encryption_method_()
+
+ def __check_crypto_key_(self, in_key):
+  if in_key is None:
+    return False
+  if not isinstance(in_key, object):
+    return False
+  return True
+
+ def irciot_check_blockchain_private_key_(self, in_key):
+  if not self.__check_crypto_key_(in_key):
+    return False
+  return True
+
+ def irciot_check_blockchain_public_key_(self, in_key):
+  if not self.__check_crypto_key_(in_key):
+    return False
+  return True
+
+ def irciot_check_encryption_private_key_(self, in_key):
+  if not self.__check_crypto_key_(in_key):
+    return False
+  return True
+
+ def irciot_check_encryption_public_key_(self, in_key):
+  if not self.__check_crypto_key_(in_key):
+    return False
+  return True
 
  def irciot_get_blockchain_private_key_(self):
   # It is need to exclude illegal access to the key
@@ -920,18 +947,30 @@ class PyLayerIRCIoT(object):
   return self.__encryption_public_key
 
  def irciot_set_blockchain_private_key_(self, in_key):
+  if not self.irciot_check_blockchain_private_key_(in_key):
+    return False
   # It is need to exclude illegal replacement of the key
   self.__blockchain_private_key = in_key
+  return True
 
  def irciot_set_blockchain_public_key_(self, in_key):
+  if not self.irciot_check_blockchain_public_key_(in_key):
+    return False
   self.__blockchain_public_key = in_key
+  return True
 
  def irciot_set_encryption_private_key_(self, in_key):
+  if not self.irciot_check_encryption_private_key_(in_key):
+    return False
   # It is need to exclude illegal replacement of the key
   self.__encryption_private_key = in_key
+  return True
 
  def irciot_set_encryption_public_key_(self, in_key):
+  if not self.irciot_check_encryption_public_key_(in_key):
+    return False
   self.__encryption_public_key = in_key
+  return True
 
  def irciot_get_blockchain_hash_length_(self, in_mid_method):
   if in_mid_method == self.CONST.tag_mid_ED25519:
@@ -1293,9 +1332,7 @@ class PyLayerIRCIoT(object):
 
  def irciot_blockchain_key_publication_(self, in_public_key, \
    in_ot, in_vuid = None):
-  if in_public_key is None:
-    return
-  if not isinstance(in_public_key, object):
+  if not self.irciot_check_blockchain_public_key_(in_public_key):
     return
   if self.__mid_method == self.CONST.tag_mid_ED25519:
     my_key = in_public_key.encode( \
@@ -1321,9 +1358,7 @@ class PyLayerIRCIoT(object):
 
  def irciot_encryption_key_publication_(self, in_public_key, \
    in_ot, in_vuid = None):
-  if in_public_key is None:
-    return
-  if not isinstance(in_public_key, object):
+  if not self.irciot_check_encryption_public_key_(in_public_key):
     return
   my_key_string = ""
   if self.crypt_algo == self.CONST.crypto_RSA:
@@ -1345,7 +1380,8 @@ class PyLayerIRCIoT(object):
  def irciot_blockchain_check_publication_(self):
   if self.__blockchain_key_published > 0:
     return
-  if not isinstance(self.__blockchain_public_key, object):
+  if not self.irciot_check_blockchain_public_key_( \
+   self.__blockchain_public_key):
     return
   if not self.__mid_method in [
     self.CONST.tag_mid_ED25519,
@@ -1362,7 +1398,8 @@ class PyLayerIRCIoT(object):
  def irciot_encryption_check_publication_(self):
   if self.__encryption_key_published > 0:
     return
-  if not isinstance(self.__encryption_public_key, object):
+  if not self.irciot_check_encryption_public_key_( \
+   self.__encryption_public_key):
     return
   if self.crypt_model != self.CONST.crypt_ASYMMETRIC:
     return
@@ -1444,7 +1481,7 @@ class PyLayerIRCIoT(object):
   except:
     return None
   if my_status:
-    if my_answer == None:
+    if my_answer is None:
       self.irciot_blockchain_request_foreign_key_(in_vuid)
   else:
     return None
@@ -1919,8 +1956,8 @@ class PyLayerIRCIoT(object):
     my_cut = int.from_bytes(my_rawcut, byteorder='little')
     while my_loop:
       my_block = my_encrypted[my_offset:my_offset+my_chunk]
-      my_crypt = my_2fish.decrypt(my_block).decode()
-      my_decrypted += bytes(my_crypt, self.__encoding)
+      my_crypt = my_2fish.decrypt(my_block)
+      my_decrypted += my_crypt
       my_offset += my_chunk
       if my_offset >= my_size:
         break
@@ -2071,7 +2108,7 @@ class PyLayerIRCIoT(object):
     self.CONST.ldict_ITEM_SECTS  : my_sections
   }
   #
-  # print('adding to ldict: ot="%s", field="%s"' % (my_ot, my_name))
+  # print('adding to ldict: ot="{}", field="{}"'.format(my_ot, my_name))
   if not self.irciot_ldict_check_item_(my_item):
     return
   if self.irciot_ldict_get_item_by_ot_(my_ot, my_name):
@@ -2975,9 +3012,8 @@ class PyLayerIRCIoT(object):
           out_base = self.irciot_crypto_AES_decrypt_(out_base, \
             self.__encryption_private_key)
        elif my_algo == self.CONST.crypto_2FISH:
-          #out_base = self.irciot_crypto_2fish_decrypt_(out_base, \
-          #  self.__encryption_private_key)
-          pass
+          out_base = self.irciot_crypto_2fish_decrypt_(out_base, \
+            self.__encryption_private_key)
        my_compress = self.irciot_crypto_get_compress_( \
           my_crypt_method )
        if my_compress == self.CONST.compress_NONE:
@@ -3324,7 +3360,7 @@ class PyLayerIRCIoT(object):
      self.CONST.ot_BCH_REQUEST,
      self.CONST.ot_BCH_ACK ]:
     if DO_debug_library:
-      print("\033[1;33mBLOCKCHAIN TEST SKIPPED OT '%s' \033[0m" % my_ot)
+      print("\033[1;33mBLOCKCHAIN TEST SKIPPED OT '{}' \033[0m".format(my_ot))
     self.irciot_blockchain_update_last_mid_(in_vuid, my_hismid)
     return True
   my_bkey = self.irciot_blockchain_get_foreign_key_(in_vuid)
@@ -3372,7 +3408,7 @@ class PyLayerIRCIoT(object):
       if my_vuid == in_vuid:
         continue # The User already checked
       if DO_debug_library:
-        print("Checking blockcahin for VUID = '%s' ..." % my_vuid)
+        print("Checking blockcahin for VUID = '{}' ...".format(my_vuid))
       my_newmids = self.irciot_blockchain_get_own_mids_(in_vuid)
       if isinstance(my_newmids, list):
         for my_newmid in reversed(my_newmids):
@@ -3697,7 +3733,7 @@ class PyLayerIRCIoT(object):
        bin_big_datum, self.__encryption_private_key )
      if crypt_big_datum == None:
         return ("", 0)
-     # bin_big_datum = crypt_big_datum
+     bin_big_datum = crypt_big_datum
   if self.crypt_base == self.CONST.base_BASE64:
      base_big_datum = base64.b64encode(bin_big_datum)
   elif self.crypt_base == self.CONST.base_BASE85:
@@ -3773,7 +3809,7 @@ class PyLayerIRCIoT(object):
     self.CONST.api_vuid_cfg,
     self.CONST.api_vuid_tmp ]:
     if in_vuid == self.CONST.api_vuid_all \
-      and self.crypt_model == self.CONST.crypt_NO_ENCRYPTION:
+     and self.crypt_model == self.CONST.crypt_NO_ENCRYPTION:
         result += self.irciot_encap_all_(in_datumset, None)
         return result
     # If the message is to be encrypted with end-to-end encryption

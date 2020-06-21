@@ -47,6 +47,9 @@ class PyLayerIRCIoTTest(unittest.TestCase):
     ii.integrity_check = 0
     ii.integrity_stamp = 0
 
+  def test011_test_libirciot_(self):
+    self.assertEqual(ii_test_libirciot_(), True)
+
 _log_mode = 0
 
 def to_log_(in_text):
@@ -56,8 +59,8 @@ def to_log_(in_text):
 # FOR TESTING:
 
 def JSON_TEST_is_irciot_(my_json_text):
- to_log_("Testing JSON for IRC-IoT: @\033[1m%s\033[0m@len=%d@" \
-  % (my_json_text, len(my_json_text)))
+ to_log_("Testing JSON for IRC-IoT: @\033[1m{}\033[0m@len={}@".format( \
+   my_json_text, len(my_json_text)))
  if (len(my_json_text) > ii.irciot_get_mtu_()):
    to_log_("IRC-IoT Message length out of MTU range.")
    return False
@@ -69,8 +72,8 @@ def JSON_TEST_is_irciot_(my_json_text):
    return True
 
 def JSON_TEST_is_irciot_datumset_(my_datumset_text):
- to_log_("Testing Datums set: @\033[1m%s\033[0m@len=%d@" \
-  % (my_datumset_text, len(my_datumset_text)))
+ to_log_("Testing Datums set: @\033[1m{}\033[0m@len={}@".format( \
+   my_datumset_text, len(my_datumset_text)))
  if (not ii.is_irciot_datumset_(my_datumset_text)):
    to_log_("is_irciot_datumset_() = *** This is not IRC-IoT datum set ...")
    return False
@@ -92,8 +95,8 @@ def ii_test_default_():
     json_text, my_skip, my_part \
      = ii.irciot_encap_(datumset_text, 0, 0, \
        ii.CONST.api_vuid_self)
-    to_log_("irciot_encap_(): skip = %d, part = %d." \
-     % (my_skip, my_part))
+    to_log_("irciot_encap_(): skip = {}, part = {}.".format( \
+     my_skip, my_part))
     if JSON_TEST_is_irciot_(json_text):
      to_log_("TEST_IS_OK")
      return True
@@ -155,8 +158,8 @@ def ii_test_unary_crc_():
   my_crc32 = ii.irciot_crc32_(my_password)
   if my_crc32 != None:
     my_addon = '"c2":"%s",' % my_crc32
-    to_log_("CRC32 by Zlib: [\033[1;1;44m%s\033[0m] (len=%d)\n" \
-      % (my_addon, len(my_addon)))
+    to_log_("CRC32 by Zlib: [\033[1;1;44m" \
+     + "{}\033[0m] (len={})\n".format(my_addon, len(my_addon)))
   if my_addon == '"c2":"08623ca6",':
     my_test += 1
   if my_test == 2:
@@ -175,13 +178,13 @@ def ii_test_c1integrity_():
   json_text += '"d":{"datkey2":"bbb","src":"@xxx","dst":"@yyy"},'
   json_text += '"objkey1":"abcdef","ot":"test2"}],'
   json_calc  = json_lead + json_text + '"c1":""}'
-  to_log_("Calculating JSON: #\033[2;33m%s\033[0m#len=%d#" \
-    % (json_calc, len(json_calc)))
-  my_crc16   = ii.irciot_crc16_(bytes(json_calc, 'UTF-8'))
+  to_log_("Calculating JSON: #\033[2;33m{}\033[0m#len={}#".format( \
+    json_calc, len(json_calc)))
+  my_crc16   = ii.irciot_crc16_(bytes(json_calc, 'utf-8'))
   to_log_("Calculated CRC16: 0x%s" % my_crc16)
   json_test  = json_lead + "abcdef" + json_text + '"c1":"%s"}' % my_crc16
-  to_log_("Tested JSON: #\033[2;36m%s\033[0m#len=%d#" \
-    % (json_test, len(json_test)))
+  to_log_("Tested JSON: #\033[2;36m{}\033[0m#len={}#".format( \
+    json_test, len(json_test)))
   if ii.is_irciot_(json_test) and my_crc16 == 'f564':
     to_log_("TEST_IS_OK")
     return True
@@ -198,16 +201,28 @@ def ii_test_c2integrity_():
   json_text += '"d":{"datkey2":"bbb","src":"@xxx","dst":"@yyy"},'
   json_text += '"objkey1":"abcdef","ot":"test2"}],'
   json_calc  = json_lead + json_text + '"c1":""}'
-  to_log_("Calculating JSON: #\033[2;33m%s\033[0m#len=%d#" \
-    % (json_calc, len(json_calc)))
-  my_crc32   = ii.irciot_crc32_(bytes(json_calc, 'UTF-8'))
+  to_log_("Calculating JSON: #\033[2;33m{}\033[0m#len={}#".format( \
+    json_calc, len(json_calc)))
+  my_crc32   = ii.irciot_crc32_(bytes(json_calc, 'utf-8'))
   to_log_("Calculated CRC32: 0x%s" % my_crc32)
   json_test  = json_lead + "abcdef" + json_text + '"c1":"%s"}' % my_crc32
-  to_log_("Tested JSON: #\033[2;36m%s\033[0m#len=%d#" \
-    % (json_test, len(json_test)))
+  to_log_("Tested JSON: #\033[2;36m{}\033[0m#len={}#".format( \
+    json_test, len(json_test)))
   if ii.is_irciot_(json_test) and my_crc32 == 'fa7fda88':
     to_log_("TEST_IS_OK")
     return True
+  return False
+
+def ii_test_libirciot_():
+  json_text  = '{"mid":107770,"oc":0,"op":0,"optkey1st":"test",'
+  json_text += '"optkey2nd":801,"optkey5x":392,"o":[{"oid":111281,'
+  json_text += '"d":{"datkey":"aaa","src":"@xxx","dst":"@yyy"},'
+  json_text += '"ok2nd":727,"ok5x":761,"ot":"test1"},{"oid":111282,'
+  json_text += '"d":{"datkey2":"bbb","src":"@xxx","dst":"@yyy"},'
+  json_text += '"objkey1":"abcdef","ot":"test2"}]}'
+  if JSON_TEST_is_irciot_(json_text):
+     to_log_("TEST_IS_OK")
+     return True
   return False
 
 my_command = ""
@@ -258,10 +273,13 @@ def main():
    ii.integrity_check = 2
    ii.integrity_stamp = 2
 
- to_log_("TEST NAME: '%s'" % my_command)
+ to_log_("TEST NAME: '{}'".format(my_command))
 
  if my_command == 'default':
    ii_test_default_()
+
+ if my_command == 'libirciot':
+   ii_test_libirciot_()
 
  if my_command == 'c1integrity':
    ii_test_c1integrity_()
@@ -270,15 +288,9 @@ def main():
    ii_test_c2integrity_()
 
  if my_command == 'test4rsa':
-   if (len(sys.argv) > 2) and my_params != []:
-     to_log_("TEST_IS_SKIPPED")
-     return
    ii_test_unary_rsa_()
 
  if my_command == 'test4aes':
-   if (len(sys.argv) > 2) and my_params != []:
-     to_log_("TEST_IS_SKIPPED")
-     return
    ii_test_unary_aes_()
 
  if my_command == 'crc':

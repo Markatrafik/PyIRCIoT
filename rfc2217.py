@@ -42,7 +42,7 @@ class PyLayerCOM( irciot_shared_ ):
    #
    irciot_protocol_version = '0.3.33'
    #
-   irciot_library_version  = '0.0.211'
+   irciot_library_version  = '0.0.215'
    #
    com_default_debug = DO_debug_library
    #
@@ -382,8 +382,8 @@ class PyLayerCOM( irciot_shared_ ):
      return
    self.com_disconnect_()
    self.to_log_("Connection closed, " \
-    + "reconnecting to Serial over Network (try: %d) ... " \
-     % self.com_recon)
+    + "reconnecting to Serial over Network " \
+    + "(try: {}) ... ".format(self.com_recon))
    # sleep(self.CONST.com_first_wait * self.com_recon)
    self.com_recon += 1
    if self.com_recon > self.CONST.com_recon_steps:

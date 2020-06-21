@@ -47,8 +47,8 @@ def to_log_(in_text):
 # FOR TESTING:
 
 def JSON_TEST_is_irciot_(my_json_text):
- to_log_("Testing JSON for IRC-IoT: @\033[1m%s\033[0m@len=%d@" \
-  % (my_json_text, len(my_json_text)))
+ to_log_("Testing JSON for IRC-IoT: @\033[1m{}\033[0m@len={}@".format( \
+   my_json_text, len(my_json_text)))
  if (len(my_json_text) > ii.irciot_get_mtu_()):
    to_log_("IRC-IoT Message length out of MTU range.")
    return False
@@ -60,8 +60,8 @@ def JSON_TEST_is_irciot_(my_json_text):
    return True
 
 def JSON_TEST_is_irciot_datumset_(my_datumset_text):
- to_log_("Testing Datums set: @\033[1m%s\033[0m@len=%d@" \
-  % (my_datumset_text, len(my_datumset_text)))
+ to_log_("Testing Datums set: @\033[1m{}\033[0m@len={}@".format( \
+   my_datumset_text, len(my_datumset_text)))
  if (not ii.is_irciot_datumset_(my_datumset_text)):
    to_log_("is_irciot_datumset_() = *** This is not IRC-IoT datum set ...")
    return False
@@ -83,9 +83,9 @@ def ii_test_forwarding_():
   my_message  = ii.do_router_(my_message, ii.CONST.dir_in, None)
   if not JSON_TEST_is_irciot_(my_message):
     return False
-  to_log_("\nOutput message(wanif): '%s'\n" % my_message)
+  to_log_("\nOutput message(wanif): '{}'\n".format(my_message))
   out_json = ii.irciot_deinencap_(my_message, ii.CONST.api_vuid_self)
-  to_log_("OUT_JSON==@%s@\n" % out_json)
+  to_log_("OUT_JSON==@{}@\n".format(out_json))
   if not out_json == "[]":
     if JSON_TEST_is_irciot_datumset_(out_json):
       my_json = json.loads(out_json)[0]
@@ -101,8 +101,8 @@ def ii_test_translation_():
   my_from = 'controller@kitchen'
   my_to   = 'computer@house'
   my_dst  = 'flower@garden/yyy'
-  to_log_("\nIn Scope:  '\033[1m%s\033[0m'" % my_from)
-  to_log_("\nOut Scope: '\033[1m%s\033[0m'" % my_to)
+  to_log_("\nIn Scope:  '\033[1m{}\033[0m'".format(my_from))
+  to_log_("\nOut Scope: '\033[1m{}\033[0m'".format(my_to))
   ii.router_graphs += [
     ( ii.do_router_translation_, { 
       ii.CONST.tag_IN_SCOPE  : my_from,
@@ -113,7 +113,7 @@ def ii_test_translation_():
   my_message += '[{"src":"%s/xxx","help":"super-string"}]}]}' % my_from
   to_log_("\nPASS(1) :: from insdie\n\nInput message(lanif): '%s'" % my_message)
   my_message  = ii.do_router_(my_message, ii.CONST.dir_in, None)
-  to_log_("\nOutput message(wanif): '%s'" % my_message)
+  to_log_("\nOutput message(wanif): '{}'".format(my_message))
   if not JSON_TEST_is_irciot_(my_message):
     return False
   my_message  = '{"mid":"2","oc":1,"op":1,"o":'
@@ -121,11 +121,11 @@ def ii_test_translation_():
   my_message += '"dst":"%s/xxx","d":{"help":"not-super-string"}}]}' % my_to
   to_log_("\nPASS(2) :: from outside\n\nInput message(wanif):  '%s'" % my_message)
   my_message = ii.do_router_(my_message, ii.CONST.dir_out, None)
-  to_log_("\nOutput message(lanif): '%s'\n" % my_message)
+  to_log_("\nOutput message(lanif): '{}'\n".format(my_message))
   if not JSON_TEST_is_irciot_(my_message):
     return False
   out_json = ii.irciot_deinencap_(my_message, ii.CONST.api_vuid_self)
-  to_log_("OUT_JSON==@%s@\n" % out_json)
+  to_log_("OUT_JSON==@{}@\n".format(out_json))
   if not out_json == "[]":
     if JSON_TEST_is_irciot_datumset_(out_json):
       my_json = json.loads(out_json)[0]
@@ -240,7 +240,7 @@ def main():
    ii.integrity_check = 2
    ii.integrity_stamp = 2
 
- to_log_("TEST NAME: '%s'" % my_command)
+ to_log_("TEST NAME: '{}'".format(my_command))
 
  if my_command == 'default':
    ii_test_default_()

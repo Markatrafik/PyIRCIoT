@@ -44,7 +44,7 @@ class PyLayerIRC( irciot_shared_ ):
    #
    irciot_protocol_version = '0.3.33'
    #
-   irciot_library_version  = '0.0.211'
+   irciot_library_version  = '0.0.215'
    #
    # Bot specific constants
    #
@@ -1089,7 +1089,10 @@ class PyLayerIRC( irciot_shared_ ):
    self.__delta_time = 0
    self.__delta_ping = 0
    #
-   self.__whox = False # Supporting eXtended WHO command
+   # Supporting eXtended WHO command:
+   self.__whox = False
+   # Supporting of WALLCHOPS command:
+   self.__wallchops = False
    #
    self.__os_name = self.get_os_name_()
    #
@@ -1484,6 +1487,9 @@ class PyLayerIRC( irciot_shared_ ):
 
  def irc_get_nick_(self):
    return self.__irc_nick
+
+ def irc_get_delta_(self):
+   return self.__delta_time
 
  def irc_check_mask_(self, in_from, in_mask):
    str_from = self.irc_tolower_(in_from)
@@ -1909,7 +1915,7 @@ class PyLayerIRC( irciot_shared_ ):
      return
    self.irc_disconnect_()
    self.to_log_("Connection closed, " \
-    + "reconnecting to IRC (try: %d) ... " % self.__irc_recon)
+    + "reconnecting to IRC (try: {}) ... ".format(self.__irc_recon))
    my_mult = self.__irc_recon
    if self.__join_retry > self.__join_retry_max:
      my_mult = 1
@@ -2195,8 +2201,13 @@ class PyLayerIRC( irciot_shared_ ):
        my_string = in_string[:my_max]
      if not self.CONST.irc_default_network_tag in my_string:
        self.to_log_("Warning! not an IRC-IoT network, " \
-        + "name: '%s'" % my_string)
+        + "name: '{}'".format(my_string))
      self.irc_network_name = my_string
+   return (in_ret, in_init, in_wait)
+
+ def func_feature_wallchops_(self, in_args):
+   (in_string, in_ret, in_init, in_wait) = in_args
+   self.__wallchops = True
    return (in_ret, in_init, in_wait)
 
  def func_feature_topiclen_(self, in_args):
@@ -2466,8 +2477,8 @@ class PyLayerIRC( irciot_shared_ ):
        elif my_char in self.CONST.irc_user_modes:
          my_mask = my_array[my_index + 4]
          self.to_log_( \
-           "mode change '%s','%s' for '%s' on '%s'" \
-           % (my_change, my_char, my_mask, my_channel))
+           "mode change '{}','{}' for '{}' on '{}'".format( \
+             my_change, my_char, my_mask, my_channel))
          if ((my_change == self.CONST.irc_mode_del) \
            and (my_char == self.CONST.irc_umode_op)):
            my_vuid = self.irc_get_vuid_by_mask_(irc_mask, \
@@ -2500,13 +2511,13 @@ class PyLayerIRC( irciot_shared_ ):
          my_index += 1
        elif my_char in self.CONST.irc_channel_modes:
          self.to_log_( \
-           "mode change '%s','%s' for '%s'" \
-           % (my_change, my_char, my_channel))
+           "mode change '{}','{}' for '{}'".format( \
+             my_change, my_char, my_channel))
        elif my_char in self.CONST.irc_extra_modes:
          my_extra = my_array[my_index + 4]
          self.to_log_( \
-           "mode change '%s','%s' extra '%s' for '%s'" \
-           % (my_change, my_char, my_extra, my_channel))
+           "mode change '{}','{}' extra '{}' for '{}'".format( \
+             my_change, my_char, my_extra, my_channel))
          my_index += 1
        if my_unban != None:
          my_user = self.irc_cfg_get_user_struct_by_vuid_(my_unban)
@@ -2710,7 +2721,7 @@ class PyLayerIRC( irciot_shared_ ):
       (C.feature_STATUSMSG,   C.featt_FLAGS,  None),
       (C.feature_TOPICLEN,    C.featt_NUMBER, self.func_feature_topiclen_),
       (C.feature_USERIP,      C.featt_EMPTY,  None),
-      (C.feature_WALLCHOPS,   C.featt_EMPTY,  None),
+      (C.feature_WALLCHOPS,   C.featt_EMPTY,  self.func_feature_wallchops_),
       (C.feature_WALLVOICES,  C.featt_EMPTY,  None),
       (C.feature_WHOX,        C.featt_EMPTY,  self.func_feature_whox_) ] )
    #
@@ -2779,8 +2790,8 @@ class PyLayerIRC( irciot_shared_ ):
          irc_init += 1
 
        if irc_init == 1:
-         # self.to_log_("Connecting to '%s:%d'" \
-         #  % (self.irc_server_ip, self.irc_port))
+         # self.to_log_("Connecting to " \
+         #  + "'{}:{}'".format(self.irc_server_ip, self.irc_port))
          self.__irc_silnece = 0
          try:
            self.irc_connect_(self.irc_server_ip, self.irc_port)

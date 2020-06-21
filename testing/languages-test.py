@@ -54,15 +54,15 @@ def EL_test_default_():
   return True
 
 def EL_test_(in_code, in_check, in_lang):
-  to_log_('%s code: "%s"' % (in_lang, in_code))
+  to_log_('{} code: "{}"'.format(in_lang, in_code))
   if not EL.irciot_EL_admit_language_(in_lang):
-    to_log_('Cannot admit language: %s' % in_lang)
+    to_log_('Cannot admit language: {}'.format(in_lang))
     return False
   if not EL.irciot_EL_init_language_(in_lang):
-    to_log_('Cannot init language: %s' % in_lang)
+    to_log_('Cannot init language: {}'.format(in_lang))
     return False
   my_out = EL.irciot_EL_run_code_(in_lang, in_code)
-  to_log_("%s out: '%s'" % (in_lang, my_out))
+  to_log_("{} out: '{}'".format(in_lang, my_out))
   if my_out.replace('\n', '@') == in_check:
     to_log_('TEST_IS_OK')
     return True
@@ -116,7 +116,7 @@ def main():
  if (my_command == ""):
    my_command = 'default'
 
- to_log_("TEST NAME: '%s'" % my_command)
+ to_log_("TEST NAME: '{}'".format(my_command))
 
  if my_command == 'default':
    EL_test_default_()

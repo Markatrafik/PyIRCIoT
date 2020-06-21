@@ -82,24 +82,24 @@ def main():
     (irc1in_message, irc1_wait, irc1_vuid) \
       = ircbot1.irc_check_queue_(ircbot1.CONST.irc_queue_input)
     if irc1in_message != "":
-       print("irc1in_message=[\033[0;44m%s\033[0m]" % irc1in_message)
+       print("irc1in_message=[\033[0;44m{}\033[0m]".format(irc1in_message))
        irc1int_message = irciot1.do_router_(irc1in_message, irciot1.CONST.dir_in, irc1_vuid)
-       print('irc1int_message=[\033[1m%s\033[0m]' % irc1int_message)
+       print('irc1int_message=[\033[1m{}\033[0m]'.format(irc1int_message))
        if irc1int_message != "":
           irc2out_message = irciot2.do_router_(irc1int_message, irciot1.CONST.dir_out, irc1_vuid)
-          print('irc2out_message=[\033[1m%s\033[0m]' % irc2out_message)
+          print('irc2out_message=[\033[1m{}\033[0m]'.format(irc2out_message))
           ircbot2.irc_add_to_queue_(ircbot2.CONST.irc_queue_output, \
            irc2out_message, irc1_wait, irc1_vuid)
 
     (irc2in_message, irc2_wait, irc2_vuid) \
       = ircbot2.irc_check_queue_(ircbot2.CONST.irc_queue_input)
     if irc2in_message != "":
-       print("irc2in_message=[\033[0;1;44m%s\033[0m]" % irc2in_message)
+       print("irc2in_message=[\033[0;1;44m{}\033[0m]".format(irc2in_message))
        irc2int_message = irciot1.do_router_(irc2in_message, irciot2.CONST.dir_in, irc2_vuid)
-       print('irc2int_message=[\033[1m%s\033[0m]' % irc2int_message)
+       print('irc2int_message=[\033[1m{}\033[0m]'.format(irc2int_message))
        if irc2int_message != "":
           irc1out_message = irciot2.do_router_(irc2int_message, irciot2.CONST.dir_out, irc2_vuid)
-          print('irc2out_message=[\033[1m%s\033[0m]' % irc1out_message)
+          print('irc2out_message=[\033[1m{}\033[0m]'.format(irc1out_message))
           ircbot1.irc_add_to_queue_(ircbot1.CONST.irc_queue_output, \
            irc1out_message, irc2_wait, irc2_vuid)
 
@@ -128,7 +128,7 @@ def main():
 
   print("Stopping IRC, please wait for exit")
 
-  ircbot1.ircbot.bot_process_kill_timeout_(5)
+  ircbot1.bot_process_kill_timeout_(5)
 
   del irciot1
   del irciot2

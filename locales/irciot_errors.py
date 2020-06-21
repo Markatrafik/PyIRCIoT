@@ -85,9 +85,12 @@ def irciot_get_EL_error_descriptions_(in_human_language):
    1010: "Проблема при исполнении кода",
    1024: "Время выполнения истекло",
    1025: "лексический анализ не пройден",
-   1101: "подстановка команд недопустимпа",
-   1201: "оператор 'import' не допускается",
-   1202: "конструкция 'import' 'from' недопсутима"
+   1100: "использование типа '{}' не допускается",
+   1101: "подстановка команд недопустима",
+   1103: "функция '{}' недопустима",
+   1121: "оператор 'import' не допускается",
+   1122: "конструкция 'import' 'from' недопсутима",
+   1131: "имя '{}' зарезерировано"
   }
  elif in_human_language == "de": # Deutsch
   return {
@@ -102,9 +105,12 @@ def irciot_get_EL_error_descriptions_(in_human_language):
    1010: "Es gab ein Problem, als der Code ausgeführt wurde",
    1024: "Zeitüberschreitung bei der Ausführung",
    1025: "lexikalische analyse ausgefallen",
+   1100: "Der Typ '{}' ist nicht erlaubt",
    1101: "befehlsersetzung ist nicht erlaubt",
-   1201: "Die Answisung 'import' ist nicht erlaubt",
-   1202: "Die Anweisung 'import 'from' ist nicht zulässig"
+   1103: "Die Funktion '{}' ist nicht erlaubt",
+   1121: "Die Answisung 'import' ist nicht erlaubt",
+   1122: "Die Anweisung 'import 'from' ist nicht zulässig",
+   1131: "Der Name '{}' ist reserviert"
   }
  return {}
 

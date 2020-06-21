@@ -71,7 +71,6 @@ function run_tests () {
   export TEST_CMD="${TEST_RFC1459_CMD}"
   export TEST_LIB="${TEST_RFC1459_LIB}"
  else echo "Unknown section: '${5}'" ; exit 1 ; fi
-
  if [ "x${1}x" != "xx" ]; then
   export TEST_NAME="${TEST_NAME}'${1}' " ; fi
  if [ "x${2}x" != "xx" ]; then
@@ -86,7 +85,7 @@ function run_tests () {
  if [ "x${TEST_NAME:0:7}x" == "x'ascii'x" ]; then
    export OUTDATA="$(checkascii "${TEST_LIB}")"
  else export OUTDATA="$("${TEST_CMD}" \
-    "${4}" "${1}" "${2}" "${3}" \
+  "${4}" "${1}" "${2}" "${3}" \
    2>/dev/null | /usr/bin/head -n 4096 2>/dev/null)" ; fi
  let TEST_COUNT=TEST_COUNT+1
  echo "${OUTDATA}" | "${GREP_BINARY}" -e "TEST_IS_OK" \
@@ -108,11 +107,13 @@ if [ -x "${TEST_IRCIOT_CMD}" ]; then
 echo -ne '\033[1;36m---------------- '
 echo -ne 'PyLayerIRCIoT tests'
 echo -ne ' ------------------\033[0m\n'
-for m in ascii crc c1integrity c2integrity ; do
+for m in ascii crc c1integrity c2integrity test4rsa test4aes ; do
  run_tests "" "" "" "${m}" irciot
 done
-for m in default test4rsa test4aes ; do
- run_tests "" "" "" "${m}" irciot
+for l in "" base64 base85 base32 cryptrsa cryptaes ; do
+for m in default libirciot ; do
+ run_tests "" "" "${l}" "${m}" irciot
+done
 done
 fi
 

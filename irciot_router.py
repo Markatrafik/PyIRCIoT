@@ -33,7 +33,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   #
   irciot_router_protocol_version = '0.3.33'
   #
-  irciot_router_library_version = '0.0.211'
+  irciot_router_library_version = '0.0.215'
   #
   default_maximal_detect_dup_messages = 128
   #
@@ -369,14 +369,36 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   # End of PyIRCIoT_router.dup_detection_()
 
  # incomplete
+ def __direct_router_message_(self, in_dict, in_vuid):
+  if not isinstance(in_dict, dict) \
+   or not isinstance(in_vuid, str):
+    return
+  my_message = json.dumps(in_dict, separators=(',',':'))
+  my_compat = self.irciot_compatibility_()
+  my_pack = (my_message, in_vuid)
+  if not self.irc_pointer (my_compat, my_pack):
+    # Warning; if transport handler was not attached,
+    # the message will be added to the output_pool,
+    # but delivering the message at a specified time
+    # is not guaranteed and the routing protocol
+    # may not work correctly !!!
+    self.output_pool.append(my_pack)
+
+ # incomplete
  def local_message_router_(self):
   pass
+  #
+  # timer-generated LMR messages will pass
+  # to function self.__direct_router_message_()
   #
   # End of PyIRCIoT_router.local_message_router_()
 
  # incomplete
  def global_message_router_(self):
   pass
+  #
+  # timer-generated GMR messages will pass
+  # to function self.__direct_router_message_()
   #
   # End of PyIRCIoT_router.global_message_router_()
 
@@ -405,7 +427,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   my_LMR_id += 1
   if my_LMR_count >= self.CONST.maximal_LMR_count:
     self.irciot_error_(self.CONST.err_LMR_MAX_INSTANCES, \
-      0, in_addon = "%d" % self.CONST.maximal_LMR_count )
+      0, in_addon = "{}".format(self.CONST.maximal_LMR_count))
     return None
   self.__LMR_pool.update({
     my_LMR_id: {
@@ -432,7 +454,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   my_GMR_id += 1
   if my_GMR_count >= self.CONST.maximal_GMR_count:
     self.irciot_error_(self.CONST.err_GMR_MAX_INSTANCES, \
-      0, in_addon = "%d" % self.CONST.maximal_GMR_count )
+      0, in_addon = "{}".format(self.CONST.maximal_GMR_count))
     return None
   self.__GMR_pool.update({
     my_GMR_id: {
@@ -573,6 +595,10 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
     self.__invalid_LMR_id_(my_id)
     return in_datum
   my_LMR = self.__LMR_pool[my_id]
+  if my_LMR['status'] in [
+   self.CONST.state_LMR_stopped,
+   self.CONST.state_LMR_paused ]:
+    return in_datum
 
   return in_datum
   #
@@ -593,6 +619,10 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
     self.__invalid_GMR_id_(my_id)
     return in_datum
   my_GMR = self.__GMR_pool[my_id]
+  if my_GMR['status'] in [
+   self.CONST.state_GMR_stopped,
+   self.CONST.state_GMR_paused ]:
+    return in_datum
 
   return in_datum
   #
