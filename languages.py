@@ -632,7 +632,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   my_out = None
   for my_key in in_environment.keys():
     my_str = in_environment[ my_key ].replace('"', '\\"')
-    my_tcl.eval('set %s "%s"' % (my_key, my_str))
+    my_tcl.eval('set {} "{}"'.format(my_key, my_str))
   try:
     my_out = my_tcl.eval(in_code)
   except Exception as my_ex:

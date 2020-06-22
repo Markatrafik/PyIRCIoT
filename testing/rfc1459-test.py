@@ -69,7 +69,7 @@ def irc_unary_nicks_():
   my_test = True
   for my_idx in range(1000):
     my_irc.irc_random_nick_("Test", True)
-    to_log_("%d. PyLayerIRC." % my_idx \
+    to_log_("{}. PyLayerIRC.".format(my_idx) \
       + "irc_random_nick_('Test', True) -> ")
     to_log_("PyLayerIRC.is_irc_nick_('{}') -> ".format( \
       my_irc.irc_nick_try))
@@ -96,9 +96,10 @@ def irc_unary_masks_():
   my_ok = True
   for my_couple in my_couple_set:
     ( my_from, my_mask, my_need ) = my_couple
-    to_log_("Comparing [ '%s' with '%s' ] must be %s ..." % (my_from, my_mask, my_need))
+    to_log_("Comparing '\033[1m{}\033[0m' with '\033[1m{}\033[0m' ...".format( \
+      my_from, my_mask))
     my_result = my_irc.irc_check_mask_(my_from, my_mask)
-    to_log_("out = '{}'.".format(my_result))
+    to_log_("must be: {}, out: {}.".format(my_need, my_result))
     if my_result == None:
       my_test = False
     elif my_result:

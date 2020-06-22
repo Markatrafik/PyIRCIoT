@@ -37,6 +37,11 @@ class PyLayerIRCIoTTest(unittest.TestCase):
   def test004_unary_rsa_(self):
     self.assertEqual(ii_test_unary_rsa_(), True)
 
+  def test005_unary_2fish_(self):
+    warnings.filterwarnings('ignore', category=PendingDeprecationWarning)
+    warnings.filterwarnings('ignore', category=ResourceWarning)
+    self.assertEqual(ii_test_unary_2fish_(), True)
+
   def test006_c1integrity_(self):
     self.assertEqual(ii_test_c1integrity_(), True)
     ii.integrity_check = 0
@@ -102,21 +107,39 @@ def ii_test_default_():
      return True
   return False
 
+def ii_test_unary_2fish_():
+  my_password = b'my_password&'
+  for i in range(0, 5):
+    my_password += my_password
+  to_log_("original==@\033[1;33m{}\033[0m@".format(str(my_password, 'utf-8')))
+  ii.irciot_enable_encryption_(ii.CONST.tag_ENC_B64_2FISH)
+  ( my_method, my_private_key, my_public_key ) \
+    = ii.irciot_encryption_save_defaults_()
+  my_encbuf = ii.irciot_crypto_2fish_encrypt_( my_password, my_private_key )
+  to_log_("encrypted(TwoFish)==@\033[1;35m{}\033[0m@".format(my_encbuf))
+  my_decrypt = ii.irciot_crypto_2fish_decrypt_( my_encbuf, my_private_key )
+  if my_decrypt == None:
+    return False
+  to_log_("decrypted==@\033[1;32m{}\033[0m@".format(str(my_decrypt, 'utf-8')))
+  if my_password == my_decrypt:
+    to_log_("TEST_IS_OK")
+    return True
+  return False
+
 def ii_test_unary_rsa_():
   my_password = b'my_password&'
   for i in range(0, 3):
     my_password += my_password
-  to_log_("original==@\033[1;33m%s\033[0m@" % str(my_password, 'utf-8'))
+  to_log_("original==@\033[1;33m{}\033[0m@".format(str(my_password, 'utf-8')))
   ii.irciot_enable_encryption_(ii.CONST.tag_ENC_B64Z_RSA)
   ( my_method, my_private_key, my_public_key ) \
     = ii.irciot_encryption_save_defaults_()
   my_encbuf = ii.irciot_crypto_RSA_encrypt_( my_password, my_public_key )
-  to_log_("encrypted(RSA)==@\033[1;35m%s\033[0m@" % my_encbuf)
+  to_log_("encrypted(RSA)==@\033[1;35m{}\033[0m@".format(my_encbuf))
   my_decrypt = ii.irciot_crypto_RSA_decrypt_( my_encbuf, my_private_key )
   if my_decrypt == None:
     return False
-  to_log_("decrypted==@\033[1;32m%s\033[0m@" \
-    % str(my_decrypt, 'utf-8'))
+  to_log_("decrypted==@\033[1;32m{}\033[0m@".format(str(my_decrypt, 'utf-8')))
   if my_password == my_decrypt:
     to_log_("TEST_IS_OK")
     return True
@@ -126,17 +149,16 @@ def ii_test_unary_aes_():
   my_password = b'my_password&'
   for i in range(0, 5):
     my_password += my_password
-  to_log_("original==@\033[1;33m%s\033[0m@" % str(my_password, 'utf-8'))
+  to_log_("original==@\033[1;33m{}\033[0m@".format(str(my_password, 'utf-8')))
   ii.irciot_enable_encryption_(ii.CONST.tag_ENC_B64_AES)
   ( my_method, my_private_key, my_public_key ) \
     = ii.irciot_encryption_save_defaults_()
   my_encbuf = ii.irciot_crypto_AES_encrypt_( my_password, my_private_key )
-  to_log_("encrypted(AES)==@\033[1;35m%s\033[0m@" % my_encbuf)
+  to_log_("encrypted(AES)==@\033[1;35m{}\033[0m@".format(my_encbuf))
   if my_encbuf == None:
     return False
   my_decrypt = ii.irciot_crypto_AES_decrypt_( my_encbuf, my_private_key )
-  to_log_("decrypted==@\033[1;32m%s\033[0m@" \
-    % str(my_decrypt, 'utf-8'))
+  to_log_("decrypted==@\033[1;32m{}\033[0m@".format(str(my_decrypt, 'utf-8')))
   if my_password == my_decrypt:
     to_log_("TEST_IS_OK")
     return True
@@ -145,14 +167,14 @@ def ii_test_unary_aes_():
 def ii_test_unary_crc_():
   my_test = 0
   my_password = b'MY_password-inside-stringxxx@'
-  to_log_('\nmy_password: [\033[1;41m%s\033[0m]\n' \
-    % str(my_password, 'utf-8'))
+  to_log_('\nmy_password: [\033[1;41m{}\033[0m]\n'.format( \
+    str(my_password, 'utf-8')))
   ii.irciot_crc16_init_()
   my_crc16 = ii.irciot_crc16_(my_password)
   if my_crc16 != None:
     my_addon = '"c1":"%s",' % my_crc16
-    to_log_("CRC16 internal: [\033[1;1;44m%s\033[0m] (len=%d)\n" \
-      % (my_addon, len(my_addon)))
+    to_log_("CRC16 internal: [\033[1;1;44m{}\033[0m] (len={})\n".format( \
+      my_addon, len(my_addon)))
   if my_addon == '"c1":"5c66",':
     my_test += 1
   my_crc32 = ii.irciot_crc32_(my_password)
@@ -181,7 +203,7 @@ def ii_test_c1integrity_():
   to_log_("Calculating JSON: #\033[2;33m{}\033[0m#len={}#".format( \
     json_calc, len(json_calc)))
   my_crc16   = ii.irciot_crc16_(bytes(json_calc, 'utf-8'))
-  to_log_("Calculated CRC16: 0x%s" % my_crc16)
+  to_log_("Calculated CRC16: 0x{}".format(my_crc16))
   json_test  = json_lead + "abcdef" + json_text + '"c1":"%s"}' % my_crc16
   to_log_("Tested JSON: #\033[2;36m{}\033[0m#len={}#".format( \
     json_test, len(json_test)))
@@ -204,7 +226,7 @@ def ii_test_c2integrity_():
   to_log_("Calculating JSON: #\033[2;33m{}\033[0m#len={}#".format( \
     json_calc, len(json_calc)))
   my_crc32   = ii.irciot_crc32_(bytes(json_calc, 'utf-8'))
-  to_log_("Calculated CRC32: 0x%s" % my_crc32)
+  to_log_("Calculated CRC32: 0x{}".format(my_crc32))
   json_test  = json_lead + "abcdef" + json_text + '"c1":"%s"}' % my_crc32
   to_log_("Tested JSON: #\033[2;36m{}\033[0m#len={}#".format( \
     json_test, len(json_test)))
@@ -292,6 +314,9 @@ def main():
 
  if my_command == 'test4aes':
    ii_test_unary_aes_()
+
+ if my_command == 'test2fish':
+   ii_test_unary_2fish_()
 
  if my_command == 'crc':
    ii_test_unary_crc_()

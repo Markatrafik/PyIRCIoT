@@ -107,7 +107,8 @@ if [ -x "${TEST_IRCIOT_CMD}" ]; then
 echo -ne '\033[1;36m---------------- '
 echo -ne 'PyLayerIRCIoT tests'
 echo -ne ' ------------------\033[0m\n'
-for m in ascii crc c1integrity c2integrity test4rsa test4aes ; do
+for m in ascii crc c1integrity c2integrity test4rsa test4aes \
+test2fish ; do
  run_tests "" "" "" "${m}" irciot
 done
 for l in "" base64 base85 base32 cryptrsa cryptaes ; do

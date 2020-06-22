@@ -140,7 +140,7 @@ def ii_test_LMR_statuses_():
  my_message  = '{"mid":"111","o":{"oid":"123","ot":"testing",'
  my_message += '"src":"abcdef@efgh","dst":"eklmn@oprst",'
  my_message += '"d":{"test":"testing"}}}'
- to_log_("\nINPUT MESSAGE: @\033[1m%s\033[0m@" % my_message)
+ to_log_("\nINPUT MESSAGE: @\033[1m{}\033[0m@".format(my_message))
  my_LMR_id = ii.init_LMR_(in_src = "include@efgh")
  if ii.get_LMR_list_() != [ my_LMR_id ]:
    to_log_('\n\033[1;41mNO LMR ID in dynamic pool\033[0m')
@@ -154,7 +154,7 @@ def ii_test_LMR_statuses_():
    } ) ]
  ii.start_LMR_()
  my_message = ii.do_router_(my_message, ii.CONST.dir_both, None)
- to_log_('\nOUTPUT MESSAGE @\033[1;39m%s\033[0m@\n' % my_message)
+ to_log_('\nOUTPUT MESSAGE @\033[1;39m{}\033[0m@\n'.format(my_message))
  if ii.get_LMR_status_() != ii.CONST.state_LMR_running:
    # only ONE item ^^^ must be in the pool, no parameters - first item
    to_log_('\n\033[1;43mincorrect LMR status\033[0m')
@@ -184,7 +184,7 @@ def ii_test_GMR_statuses_():
    } ) ]
  ii.start_GMR_()
  my_message = ii.do_router_(my_message, ii.CONST.dir_both, None)
- to_log_('\nOUTPUT MESSAGE @\033[1;39m%s\033[0m@\n' % my_message)
+ to_log_('\nOUTPUT MESSAGE @\033[1;39m{}\033[0m@\n'.format(my_message))
  if ii.get_GMR_status_() != ii.CONST.state_GMR_running:
    # only ONE item ^^^ must be in the pool, no parameters - first item
    to_log_('\n\033[1;41mincorrect GMR status\033[0m')
