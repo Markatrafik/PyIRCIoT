@@ -27,6 +27,7 @@ try:
 except:
  import simplejson as json
 
+
 class PyIRCIoT_router( PyLayerIRCIoT ):
 
  class CONST( PyLayerIRCIoT.CONST ):
@@ -165,10 +166,9 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   #
   self.__encoding = self.CONST.irciot_default_encoding
   #
-  try:
-    self.err_DESCRIPTIONS.update(self.CONST.err_DESCRIPTIONS)
-  except:
-    self.err_DESCRIPTIONS = self.CONST.err_DESCRIPTIONS
+  self.err_DESCRIPTIONS = self.CONST.err_DESCRIPTIONS
+  #
+  self.irciot_set_locale_(self.lang)
   #
   self.__LMR_pool = {}
   self.__GMR_pool = {}
@@ -180,6 +180,31 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
  def router_pointer (self, in_compatibility, in_messages_pack):
   # Warning: interface may be changed while developing
   return False
+
+ def irciot_set_locale_(self, in_lang):
+  if not isinstance(in_lang, str):
+    return
+  self.lang = in_lang
+  my_desc = {}
+  try:
+    from PyIRCIoT.irciot_errors \
+    import irciot_get_common_error_descriptions_
+    my_desc = irciot_get_common_error_descriptions_(in_lang)
+    my_dsec = self.validate_descriptions_(my_desc)
+    if my_desc != {}:
+      self.err_DESCRIPTIONS.update(my_desc)
+  except:
+    pass
+  my_desc = {}
+  try:
+    from PyIRCIoT.irciot_errors \
+    import irciot_get_router_error_descriptions_
+    my_desc = irciot_get_router_error_descriptions_(in_lang)
+    my_desc = self.validate_descriptions_(my_desc)
+    if my_desc != {}:
+      self.err_DESCRIPTIONS.update(my_desc)
+  except:
+    pass
 
  def router_error_(self, in_error_code, in_addon = None):
   # Warning: interface may be changed while developing

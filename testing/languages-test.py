@@ -116,6 +116,9 @@ def main():
  if (my_command == ""):
    my_command = 'default'
 
+ if 'locale' in my_params:
+   EL.irciot_set_locale_('ru')
+
  to_log_("TEST NAME: '{}'".format(my_command))
 
  if my_command == 'default':

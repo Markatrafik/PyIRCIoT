@@ -233,6 +233,8 @@ class irciot_shared_(object):
    self.bot_python = self.CONST.default_bot_python
    self.bot_background_parameter \
      = self.CONST.default_bot_background_parameter
+   self.err_DESCRIPTIONS = {}
+   self.lang = self.CONST.hl_default
    # Only for testing:
    self.os_override = None
    self.os_linux_proc_ipv4_route \
@@ -558,6 +560,41 @@ class irciot_shared_(object):
   return my_ip_out
   #
   # End of get_src_ip_by_dst_ip_()
+
+ def validate_descriptions_(self, in_dict):
+  if not isinstance(in_dict, dict):
+    return {}
+  my_dict = in_dict
+  for my_key in in_dict.keys():
+    if not isinstance(my_key, int):
+      del my_dict[ my_key ]
+      continue
+    my_item = in_dict[ my_key ]
+    if not isinstance(my_item, str):
+      del my_dict[ my_key ]
+      continue
+    my_a = my_item.count('{')
+    my_b = my_item.count('}')
+    my_c = my_item.count('{}')
+    if my_a != my_c or my_b != my_c:
+      del my_dict[ my_key ]
+      continue
+  return my_dict
+
+ def irciot_set_locale_(self, in_lang):
+  if not isinstance(in_lang, str):
+    return
+  self.lang = in_lang
+  my_desc = {}
+  try:
+    from PyIRCIoT.locales.irciot_errors \
+    import irciot_get_all_error_descriptions_
+    my_desc = irciot_get_all_error_descriptions_(in_lang)
+    my_desc = self.validate_descriptions_(my_desc)
+    if my_desc != {}:
+      self.err_DESCRIPTIONS.update(my_desc)
+  except:
+    pass
 
  def bot_usage_handler (self):
   print('{} (based on IRC-IoT demo library)'.format(self.bot_name))

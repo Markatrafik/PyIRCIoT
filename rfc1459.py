@@ -194,7 +194,7 @@ class PyLayerIRC( irciot_shared_ ):
    #  4. "Bahamut"    -- Bahamut, ver. 2.0.7, '1999-2020
    #  5. "beware"     -- beware ircd, Delphi based, ver. 2.2.0
    #  6. "Charybdis"  -- charybdis-ircd, ver. 3.5.0, '2007-2020
-   #  7. "ConfRoom"   -- Conference Room
+   #  7. "ConfRoom"   -- Conference Room, ver. 1.7.6, '2014
    #  8. "discord"    -- discordIRCd, js based, ver. 0.5.0
    #  9. "Elemental"  -- Elemental-IRCd, ver. 6.6.2
    # 10. "hybrid"     -- ircd-hybrid, @ EFNet, ver. 8.2.29

@@ -64,6 +64,8 @@ class PyLayerIRCIoT(object):
   #
   irciot_default_encoding = "utf-8"
   #
+  irciot_default_language = "en"
+  #
   # IRC-IoT TAGs
   #
   tag_MESSAGE_ID  = 'mid' # Message ID
@@ -601,9 +603,8 @@ class PyLayerIRCIoT(object):
   # 1 is CRC16 Check "c1": +12 bytes
   # 2 is CRC32 Check "c2": +16 bytes
   #
-  #
   def __setattr__(self, *_):
-      pass
+    pass
 
  def __init__(self):
   #
@@ -623,6 +624,8 @@ class PyLayerIRCIoT(object):
   self.virtual_omid = [] # Virtual Own Message IDs pipeline
   #
   self.__encoding = self.CONST.irciot_default_encoding
+  #
+  self.lang  = self.CONST.irciot_default_language
   #
   self.ldict = []
   self.ldict_types = []
@@ -710,10 +713,9 @@ class PyLayerIRCIoT(object):
   #
   self.__crc16_table = []
   #
-  try:
-    self.err_DESCRIPTIONS.update(self.CONST.err_DESCRIPTIONS)
-  except:
-    self.err_DESCRIPTIONS = self.CONST.err_DESCRIPTIONS
+  self.err_DESCRIPTIONS = self.CONST.err_DESCRIPTIONS
+  #
+  self.irciot_set_locale_(self.lang)
   #
   # End of PyLayerIRCIoT.__init__()
 
@@ -810,6 +812,25 @@ class PyLayerIRCIoT(object):
   self.__initial_MTU = self.CONST.irciot_default_MTU
   #
   # End of irciot_check_mtu_()
+
+ def irciot_set_locale_(self, in_lang):
+  if not isinstance(in_lang, str):
+    return
+  self.lang = in_lang
+  try:
+    from PyIRCIoT.locales irciot_errors \
+    import irciot_get_common_error_descriptions_
+    from PyIRCIoT.irciot_shared import irciot_shared_
+  except:
+    return
+  my_desc = {}
+  try:
+    my_desc = irciot_get_common_error_descriptions_(in_lang)
+    my_desc = irciot_shared_.validate_descriptions_(my_desc)
+    if my_desc != {}:
+      self.err_DESCRIPTIONS.update(my_desc)
+  except:
+    pass
 
  def irciot_check_encoding_(self):
   my_status = False

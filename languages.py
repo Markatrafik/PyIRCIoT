@@ -192,12 +192,35 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   #
   self.__ansible_vault_password = None
   #
-  try:
-    self.err_DESCRIPTIONS.update(self.CONST.err_DESCRIPTIONS)
-  except:
-    self.err_DESCRIPTIONS = self.CONST.err_DESCRIPTIONS
+  self.err_DESCRIPTIONS = self.CONST.err_DESCRIPTIONS
+  #
+  self.irciot_set_locale_(self.lang)
   #
   # End of PyLayerIRCIoT_EL_.__init__()
+
+ def irciot_set_locale_(self, in_lang):
+  if not isinstance(in_lang, str):
+    return
+  self.lang = in_lang
+  my_desc = {}
+  try:
+    from PyIRCIoT.locales.irciot_errors \
+    import irciot_get_common_error_descriptions_
+    my_desc.update(irciot_get_common_error_descriptions_(in_lang))
+    my_desc = self.validate_descriptions_(my_desc)
+    if my_desc != {}:
+      self.err_DESCRIPTIONS.update(my_desc)
+  except:
+    pass
+  try:
+    from PyIRCIoT.locales.irciot_errors \
+    import irciot_get_EL_error_descriptions_
+    my_desc.update(irciot_get_EL_error_descriptions_(in_lang))
+    my_desc = self.validate_descriptions_(my_desc)
+    if my_desc != {}:
+      self.err_DESCRIPTIONS.update(my_desc)
+  except:
+    pass
 
  def irciot_EL_error_(self, in_error_code, in_addon):
   if in_error_code in self.err_DESCRIPTIONS.keys():
