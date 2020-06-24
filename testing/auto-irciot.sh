@@ -111,9 +111,11 @@ for m in ascii crc c1integrity c2integrity test4rsa test4aes \
 test2fish ; do
  run_tests "" "" "" "${m}" irciot
 done
+for k in "" ed25519 rsa1024 ; do
 for l in "" base64 base85 base32 cryptrsa cryptaes ; do
-for m in default libirciot ; do
- run_tests "" "" "${l}" "${m}" irciot
+for m in default libirciot bchsigning ; do
+ run_tests "" "${k}" "${l}" "${m}" irciot
+done
 done
 done
 fi

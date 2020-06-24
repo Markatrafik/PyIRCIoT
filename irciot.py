@@ -713,7 +713,7 @@ class PyLayerIRCIoT(object):
   #
   self.__crc16_table = []
   #
-  self.err_DESCRIPTIONS = self.CONST.err_DESCRIPTIONS
+  self.errors = self.CONST.err_DESCRIPTIONS
   #
   self.irciot_set_locale_(self.lang)
   #
@@ -755,8 +755,8 @@ class PyLayerIRCIoT(object):
   # testing and does not comply with the specification
   my_message = ""
   my_datum = {}
-  if in_error_code in self.err_DESCRIPTIONS.keys():
-    my_descr = self.err_DESCRIPTIONS[in_error_code]
+  if in_error_code in self.errors.keys():
+    my_descr = self.errors[in_error_code]
     if isinstance(in_addon, str):
       my_descr += " ({})".format(in_addon)
     my_datum.update({ self.CONST.tag_DESCRIPTION : my_descr })
@@ -818,7 +818,7 @@ class PyLayerIRCIoT(object):
     return
   self.lang = in_lang
   try:
-    from PyIRCIoT.locales irciot_errors \
+    from PyIRCIoT.irciot_errors \
     import irciot_get_common_error_descriptions_
     from PyIRCIoT.irciot_shared import irciot_shared_
   except:
@@ -828,7 +828,7 @@ class PyLayerIRCIoT(object):
     my_desc = irciot_get_common_error_descriptions_(in_lang)
     my_desc = irciot_shared_.validate_descriptions_(my_desc)
     if my_desc != {}:
-      self.err_DESCRIPTIONS.update(my_desc)
+      self.errors.update(my_desc)
   except:
     pass
 

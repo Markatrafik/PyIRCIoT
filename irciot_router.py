@@ -166,7 +166,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   #
   self.__encoding = self.CONST.irciot_default_encoding
   #
-  self.err_DESCRIPTIONS = self.CONST.err_DESCRIPTIONS
+  self.errors = self.CONST.err_DESCRIPTIONS
   #
   self.irciot_set_locale_(self.lang)
   #
@@ -192,7 +192,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
     my_desc = irciot_get_common_error_descriptions_(in_lang)
     my_dsec = self.validate_descriptions_(my_desc)
     if my_desc != {}:
-      self.err_DESCRIPTIONS.update(my_desc)
+      self.errors.update(my_desc)
   except:
     pass
   my_desc = {}
@@ -202,7 +202,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
     my_desc = irciot_get_router_error_descriptions_(in_lang)
     my_desc = self.validate_descriptions_(my_desc)
     if my_desc != {}:
-      self.err_DESCRIPTIONS.update(my_desc)
+      self.errors.update(my_desc)
   except:
     pass
 

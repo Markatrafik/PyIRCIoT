@@ -52,6 +52,22 @@ class PyLayerIRCIoTTest(unittest.TestCase):
     ii.integrity_check = 0
     ii.integrity_stamp = 0
 
+  def test008_bchsigning_with_ed25519_(self):
+    ii.irciot_enable_blockchain_(ii.CONST.tag_mid_ED25519)
+    self.assertEqual(ii_test_bchsigning_(), True)
+    ii.irciot_disable_blockchain_()
+
+  def test009_bchsigning_with_rsa1024_(self):
+    ii.irciot_enable_blockchain_(ii.CONST.tag_mid_RSA1024)
+    self.assertEqual(ii_test_bchsigning_(), True)
+    ii.irciot_disable_blockchain_()
+
+  def test010_bchsigning_with_gost12_(self):
+    my_params.append('gost12')
+    ii.irciot_enable_blockchain_(ii.CONST.tag_mid_GOST12)
+    self.assertEqual(ii_test_bchsigning_(), True)
+    ii.irciot_disable_blockchain_()
+
   def test011_test_libirciot_(self):
     self.assertEqual(ii_test_libirciot_(), True)
 
@@ -235,6 +251,36 @@ def ii_test_c2integrity_():
     return True
   return False
 
+def ii_test_bchsigning_():
+  my_range = range(80)
+  if 'gost12' in my_params:
+    my_range = [ 1, 100 ]
+  for i in my_range:
+    my_str = 'abcdef{}'.format(i)
+    for j in range(i):
+      my_str += "x"
+    to_log_("Source String: '" + my_str + "'")
+    ( my_method, my_private_key, my_public_key ) \
+      = ii.irciot_blockchain_save_defaults_()
+    my_hash = ii.irciot_blockchain_sign_string_( \
+     my_str, my_private_key)
+    to_log_("Sign Hash: %s<%d>" % (my_hash, len(my_hash)))
+    my_ok = ii.irciot_blockchain_verify_string_( \
+     my_str, my_hash, my_public_key)
+    if my_ok:
+      to_log_("Verify: OK")
+    else:
+      to_log_("Verifying failed")
+      return False
+    to_log_("")
+  to_log_("Using PyLayerIRCIoT: \033[1m%s\033[0m" \
+    % ii.CONST.irciot_library_version)
+  to_log_("Protocol: %s\n" \
+    % ii.CONST.irciot_protocol_version)
+  to_log_("TEST_IS_OK")
+  return True
+  # End of ii_test_bchsigning_()
+
 def ii_test_libirciot_():
   json_text  = '{"mid":107770,"oc":0,"op":0,"optkey1st":"test",'
   json_text += '"optkey2nd":801,"optkey5x":392,"o":[{"oid":111281,'
@@ -314,6 +360,14 @@ def main():
 
  if my_command == 'test4aes':
    ii_test_unary_aes_()
+
+ if my_command == 'bchsigning':
+   # The test is correct only if the appropriate
+   # Blockchain signature method is selected:
+   if len(set(['ed25519','rsa1024','gost12'])-set(my_params)) == 3:
+     to_log_("TEST_IS_SKIPPED")
+     return
+   ii_test_bchsigning_()
 
  if my_command == 'test2fish':
    ii_test_unary_2fish_()

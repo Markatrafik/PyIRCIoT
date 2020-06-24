@@ -973,6 +973,13 @@ class PyLayerIRC( irciot_shared_ ):
    ident_default_ip   = '0.0.0.0'
    ident_default_port = 113
    #
+   err_NOT_IRCIOT_NET   = 2019
+   #
+   err_DESCRIPTIONS = irciot_shared_.CONST.err_DESCRIPTIONS
+   err_DESCRIPTIONS.update({
+    err_NOT_IRCIOT_NET   : "Warning! Not an IRC-IoT network: '{}'"
+   })
+   #
    def __setattr__(self, *_):
       pass
 
@@ -1097,6 +1104,8 @@ class PyLayerIRC( irciot_shared_ ):
    self.__os_name = self.get_os_name_()
    #
    self.update_irc_host_()
+   #
+   self.errors = self.CONST.err_DESCRIPTIONS
    #
    # End of __init__()
 
@@ -2200,8 +2209,8 @@ class PyLayerIRC( irciot_shared_ ):
      if len(in_string) > my_max:
        my_string = in_string[:my_max]
      if not self.CONST.irc_default_network_tag in my_string:
-       self.to_log_("Warning! not an IRC-IoT network, " \
-        + "name: '{}'".format(my_string))
+       self.to_log_(self.errors[self.CONST.err_NOT_IRCIOT_NET].format( \
+         my_string))
      self.irc_network_name = my_string
    return (in_ret, in_init, in_wait)
 

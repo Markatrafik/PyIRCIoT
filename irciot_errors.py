@@ -90,7 +90,8 @@ def irciot_get_EL_error_descriptions_(in_human_language):
    1103: "функция '{}' недопустима",
    1121: "оператор 'import' не допускается",
    1122: "конструкция 'import' 'from' недопсутима",
-   1131: "имя '{}' зарезерировано"
+   1131: "имя '{}' зарезерировано",
+   1151: "Нераспозноваемый ввод: '{}'"
   }
  elif in_human_language == "de": # Deutsch
   return {
@@ -110,8 +111,27 @@ def irciot_get_EL_error_descriptions_(in_human_language):
    1103: "Die Funktion '{}' ist nicht erlaubt",
    1121: "Die Answisung 'import' ist nicht erlaubt",
    1122: "Die Anweisung 'import 'from' ist nicht zulässig",
-   1131: "Der Name '{}' ist reserviert"
+   1131: "Der Name '{}' ist reserviert",
+   1151: "Nicht identifizierbare Eingabe: '{}'"
   }
+ return {}
+
+def irciot_get_rfc1459_error_descriptions_(in_human_language):
+ if in_human_language == "ru": # Russian Language
+  return {
+   2019: "Предупреждение! Не IRC-IoT сеть: '{}'"
+  }
+ elif in_human_language == "de": # Deutsch
+  return {
+   2019: "Warnung! Kein IRC-IoT Netzwerk: '{}'"
+  }
+ return {}
+
+def irciot_get_rfc2217_error_descriptions_(in_human_language):
+ if in_human_language == "ru": # Russian Language
+  return {}
+ elif in_human_language == "de": # Deutsch
+  return {}
  return {}
 
 def irciot_get_router_error_descriptions_(in_human_language):

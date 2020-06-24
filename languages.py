@@ -90,8 +90,10 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   err_ILLEGAL_IMPORT   = 1121
   err_ILLEGAL_IMPORTF  = 1122
   err_RESERVED_NAME    = 1131
+  err_UNRECOG_INPUT    = 1151
   #
-  err_DESCRIPTIONS = {
+  err_DESCRIPTIONS = irciot_shared_.CONST.err_DESCRIPTIONS
+  err_DESCRIPTIONS.update({
    err_UNKNOWN_LANGUAGE : "Unknown programming langauge",
    err_UNSUPPORTED_YET  : "This language is not yet supported",
    err_LANGUAGE_SYNTAX  : "Incorrect syntax for this language",
@@ -108,8 +110,9 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
    err_ILLEGAL_SUBST    : "command substitution is not allowed",
    err_ILLEGAL_IMPORT   : "'import' statement is not allowed",
    err_ILLEGAL_IMPORTF  : "'import' 'from' statement is not allowed",
-   err_RESERVED_NAME    : "The name '{}' is reserved"
-  }
+   err_RESERVED_NAME    : "The name '{}' is reserved",
+   err_UNRECOG_INPUT    : "Unrecognised input: '{}'"
+  })
   #
   mod_ANSLDR = 'ansible.parsing.dataloader'
   mod_ANSVAR = 'ansible.vars.manager'
@@ -192,7 +195,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   #
   self.__ansible_vault_password = None
   #
-  self.err_DESCRIPTIONS = self.CONST.err_DESCRIPTIONS
+  self.errors = self.CONST.err_DESCRIPTIONS
   #
   self.irciot_set_locale_(self.lang)
   #
@@ -204,27 +207,28 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   self.lang = in_lang
   my_desc = {}
   try:
-    from PyIRCIoT.locales.irciot_errors \
+    from PyIRCIoT.irciot_errors \
     import irciot_get_common_error_descriptions_
     my_desc.update(irciot_get_common_error_descriptions_(in_lang))
     my_desc = self.validate_descriptions_(my_desc)
     if my_desc != {}:
-      self.err_DESCRIPTIONS.update(my_desc)
+      self.errors.update(my_desc)
   except:
     pass
+  my_desc = {}
   try:
-    from PyIRCIoT.locales.irciot_errors \
+    from PyIRCIoT.irciot_errors \
     import irciot_get_EL_error_descriptions_
     my_desc.update(irciot_get_EL_error_descriptions_(in_lang))
     my_desc = self.validate_descriptions_(my_desc)
     if my_desc != {}:
-      self.err_DESCRIPTIONS.update(my_desc)
+      self.errors.update(my_desc)
   except:
     pass
 
  def irciot_EL_error_(self, in_error_code, in_addon):
-  if in_error_code in self.err_DESCRIPTIONS.keys():
-    my_descr = self.err_DESCRIPTIONS[in_error_code]
+  if in_error_code in self.errors.keys():
+    my_descr = self.errors[in_error_code]
     if isinstance(in_addon, str):
       my_descr += " ({})".format(in_addon)
   else:
@@ -314,7 +318,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   my_line = in_code.replace(r'[\r\n]', ';')
   my_check = bash_checker_()
   my_check.CONST = self.CONST
-  my_check.errors = self.err_DESCRIPTIONS
+  my_check.errors = self.errors
   my_check.bashlex = self.__BSHLEX
   try:
     my_check.check(my_line)
@@ -361,7 +365,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
       if not my_tok:
         break
     except:
-      my_error = self.err_DESCRIPTIONS[self.CONST.LEXICAL_ANALISIS]
+      my_error = self.errors[self.CONST.LEXICAL_ANALISIS]
       break
     if my_tok.type not in self.CONST.lang_filter_PHP_tokens:
       my_error = "ivalid " + str(my_tok)
@@ -415,7 +419,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
     return False
   my_check = Python_checker_();
   my_check.CONST = self.CONST
-  my_check.errors = self.err_DESCRIPTIONS
+  my_check.errors = self.errors
   try:
     my_line = in_code.replace(r'[\r\n]', ';')
     my_check.check(my_line)
@@ -598,7 +602,8 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
       elif my_tokens[0].category == my_token.LIST:
         my_prog.list()
       else:
-        raise("Unrecognised input: '{}'".format(my_tokens[0].lexeme()))
+        raise(self.errors[self.CONST.err_UNRECOG_INPUT].format( \
+          my_tokens[0].lexeme()))
   del my_prog
   del my_lexer
   return my_out.getvalue()
@@ -651,7 +656,8 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
  # incomplete
  def __irciot_EL_run_TCL_code_(self, in_code, in_environment):
   my_tcl = self.__TCL.Tcl();
-  my_tcl.after(self.__execution_timeout * 1000, self.__timeout_termination_)
+  my_tcl.after(self.__execution_timeout * 1000, \
+    self.__timeout_termination_ )
   my_out = None
   for my_key in in_environment.keys():
     my_str = in_environment[ my_key ].replace('"', '\\"')

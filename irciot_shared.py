@@ -224,6 +224,8 @@ class irciot_shared_(object):
     hl_Japanese : []
    }
    #
+   err_DESCRIPTIONS = {}
+   #
    def __setattr__(self, *_):
      pass
 
@@ -233,7 +235,7 @@ class irciot_shared_(object):
    self.bot_python = self.CONST.default_bot_python
    self.bot_background_parameter \
      = self.CONST.default_bot_background_parameter
-   self.err_DESCRIPTIONS = {}
+   self.errors = self.CONST.err_DESCRIPTIONS
    self.lang = self.CONST.hl_default
    # Only for testing:
    self.os_override = None
@@ -587,12 +589,12 @@ class irciot_shared_(object):
   self.lang = in_lang
   my_desc = {}
   try:
-    from PyIRCIoT.locales.irciot_errors \
+    from PyIRCIoT.irciot_errors \
     import irciot_get_all_error_descriptions_
     my_desc = irciot_get_all_error_descriptions_(in_lang)
     my_desc = self.validate_descriptions_(my_desc)
     if my_desc != {}:
-      self.err_DESCRIPTIONS.update(my_desc)
+      self.errors.update(my_desc)
   except:
     pass
 

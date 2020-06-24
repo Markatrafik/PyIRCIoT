@@ -216,6 +216,10 @@ class PyLayerCOM( irciot_shared_ ):
    self.time_now   = datetime.datetime.now()
    self.__delta_time = 0
    #
+   self.err_DESCRIPTIONS = irciot_shared_.CONST.err_DESCRIPTIONS
+   #self.err_DESCRIPTIONS.update({
+   #})
+   #
    # End of __init__()
 
  def set_COM_mode_(self, in_mode):
