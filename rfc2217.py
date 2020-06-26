@@ -155,6 +155,15 @@ class PyLayerCOM( irciot_shared_ ):
    tel_IAC  = b'\xff' # Interpret As Command
    tel_2IAC = b'\xff\xff'
    #
+   err_CONNECT_CLOSED = 3004
+   err_RECONNECTING   = 3007
+   #
+   err_DESCRIPTIONS = irciot_shared_.CONST.err_DESCRIPTIONS
+   err_DESCRIPTIONS.update({
+    err_CONNECT_CLOSED : "Connection closed",
+    err_RECONNECTING   : "reconnecting to Serial over Network, (try: {}) ..."
+   })
+   #
    def __setattr__(self, *_):
       pass
 
@@ -216,9 +225,11 @@ class PyLayerCOM( irciot_shared_ ):
    self.time_now   = datetime.datetime.now()
    self.__delta_time = 0
    #
-   self.err_DESCRIPTIONS = irciot_shared_.CONST.err_DESCRIPTIONS
-   #self.err_DESCRIPTIONS.update({
-   #})
+   self.lang = self.CONST.hl_default
+   #
+   self.errors = self.CONST.err_DESCRIPTIONS
+   #
+   self.irciot_set_locale_(self.lang)
    #
    # End of __init__()
 
@@ -362,6 +373,31 @@ class PyLayerCOM( irciot_shared_ ):
    #
    # End of user_handler_()
 
+ def irciot_set_locale_(self, in_lang):
+   if not isinstance(in_lang, str):
+     return
+   self.lang = in_lang
+   my_desc = {}
+   try:
+     from PyIRCIoT.irciot_errors \
+     import irciot_get_common_error_descriptions_
+     my_desc = irciot_get_common_error_descriptions_(in_lang)
+     my_dsec = self.validate_descriptions_(my_desc)
+     if my_desc != {}:
+       self.errors.update(my_desc)
+   except:
+     pass
+   my_desc = {}
+   try:
+     from PyIRCIoT.irciot_errors \
+     import irciot_get_rfc2217_error_descriptions_
+     my_desc = irciot_get_rfc2217_error_descriptions_(in_lang)
+     my_desc = self.validate_descriptions_(my_desc)
+     if my_desc != {}:
+       self.errors.update(my_desc)
+   except:
+     pass
+
  # incomplete
  def com_quit_(self):
    pass
@@ -385,9 +421,8 @@ class PyLayerCOM( irciot_shared_ ):
    if not self.__com_run:
      return
    self.com_disconnect_()
-   self.to_log_("Connection closed, " \
-    + "reconnecting to Serial over Network " \
-    + "(try: {}) ... ".format(self.com_recon))
+   self.to_log_(self.errors[self.CONST.err_CONNECT_CLOSED] + ", " \
+     + self.errors[self.CONST.err_RECONNECTING].format(self.com_recon))
    # sleep(self.CONST.com_first_wait * self.com_recon)
    self.com_recon += 1
    if self.com_recon > self.CONST.com_recon_steps:

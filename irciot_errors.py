@@ -129,9 +129,15 @@ def irciot_get_rfc1459_error_descriptions_(in_human_language):
 
 def irciot_get_rfc2217_error_descriptions_(in_human_language):
  if in_human_language == "ru": # Russian Language
-  return {}
+  return {
+   3004: "Соединение закрыто",
+   3007: "переподключаемся к COM порту через сеть, (попытка: {}) ..."
+ }
  elif in_human_language == "de": # Deutsch
-  return {}
+  return {
+   3004: "Verbindung geschlossen",
+   3007: "Stellt Verbindung zu COM über Netzwerk, (Versuch: {}) ..."
+ }
  return {}
 
 def irciot_get_router_error_descriptions_(in_human_language):

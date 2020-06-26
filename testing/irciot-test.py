@@ -71,6 +71,9 @@ class PyLayerIRCIoTTest(unittest.TestCase):
   def test011_test_libirciot_(self):
     self.assertEqual(ii_test_libirciot_(), True)
 
+  def test020_test_version_(self):
+    self.assertEqual(ii_test_version_(), True)
+
 _log_mode = 0
 
 def to_log_(in_text):
@@ -121,6 +124,23 @@ def ii_test_default_():
     if JSON_TEST_is_irciot_(json_text):
      to_log_("TEST_IS_OK")
      return True
+  return False
+
+def ii_test_version_():
+  my_string = '{"mid":"53159", "ver": "?"}'
+  if ii.is_irciot_(my_string):
+    to_log_('IN: {}'.format(my_string))
+    my_json = ii.irciot_deinencap_(my_string)
+    to_log_('OUT: {}'.format(my_json))
+    try:
+      my_list = json.loads(my_json)
+      my_dict = my_list[0]
+      my_ver  = my_dict['ver']
+      if my_ver == ii.irciot_protocol_version_():
+        to_log_('TEST_IS_OK')
+        return True
+    except:
+      return False
   return False
 
 def ii_test_unary_2fish_():
@@ -346,6 +366,9 @@ def main():
  if my_command == 'default':
    ii_test_default_()
 
+ if my_command == 'version':
+   ii_test_version_()
+
  if my_command == 'libirciot':
    ii_test_libirciot_()
 
@@ -361,6 +384,9 @@ def main():
  if my_command == 'test4aes':
    ii_test_unary_aes_()
 
+ if my_command == 'test2fish':
+   ii_test_unary_2fish_()
+
  if my_command == 'bchsigning':
    # The test is correct only if the appropriate
    # Blockchain signature method is selected:
@@ -368,9 +394,6 @@ def main():
      to_log_("TEST_IS_SKIPPED")
      return
    ii_test_bchsigning_()
-
- if my_command == 'test2fish':
-   ii_test_unary_2fish_()
 
  if my_command == 'crc':
    ii_test_unary_crc_()

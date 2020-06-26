@@ -6,10 +6,11 @@ SET IRC_TESTS=default isitip nicks masks langenc
 SET LANG_TESTS=default lua js python pyrangefor pycosinus
 SET BASE_TESTS=default multidatum multibigval multinextbig libirciot
 SET BASE_TESTS=%BASE_TESTS% new2018datums defrag1b64p defrag2b64z
+SET BASE_TESTS=%BASE_TESTS% test4rsa test4aes test2fish
 SET BASE_ARGS1=base64 base85 base32 cryptrsa cryptaes crypt2fish
 SET BASE_ARGS1=%BASE_ARGS1% cryptbz2
 SET BASE_ARGS2=ed25519 rsa1024
-SET BASE_UNARY=crc c1integrity c2integrity version test4rsa test2aes
+SET BASE_UNARY=crc c1integrity c2integrity version
 SET DLM=~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ~~~~~~~~~~
 SETLOCAL EnableExtensions EnableDelayedExpansion
 IF "%1"=="test_base" SET SCRIPT=irciot-test.py
@@ -41,6 +42,9 @@ ECHO %* tests ...
 ECHO %DLM%
 ENDLOCAL & EXIT /B
 :maintag
+CALL :banfunc Performing IRC-IoT basic tests
+FOR /D %%i IN (%BASE_UNARY%) DO CALL %0 test_base %%i
+FOR /D %%i IN (%BASE_TESTS%) DO CALL %0 test_base %%i
 CALL :banfunc Performing trasnport layer IRC (RFC1459)
 FOR /D %%i IN (%IRC_TESTS%) DO CALL %0 test_irc %%i
 CALL :banfunc Performing IRC-IoT routing engine

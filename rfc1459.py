@@ -973,7 +973,7 @@ class PyLayerIRC( irciot_shared_ ):
    ident_default_ip   = '0.0.0.0'
    ident_default_port = 113
    #
-   err_NOT_IRCIOT_NET   = 2019
+   err_NOT_IRCIOT_NET = 2019
    #
    err_DESCRIPTIONS = irciot_shared_.CONST.err_DESCRIPTIONS
    err_DESCRIPTIONS.update({
@@ -1105,7 +1105,11 @@ class PyLayerIRC( irciot_shared_ ):
    #
    self.update_irc_host_()
    #
+   self.lang = self.CONST.hl_default
+   #
    self.errors = self.CONST.err_DESCRIPTIONS
+   #
+   self.irciot_set_locale_(self.lang)
    #
    # End of __init__()
 
@@ -1442,6 +1446,31 @@ class PyLayerIRC( irciot_shared_ ):
    return (False, None)
    #
    # End of user_handler_()
+
+ def irciot_set_locale_(self, in_lang):
+   if not isinstance(in_lang, str):
+     return
+   self.lang = in_lang
+   my_desc = {}
+   try:
+     from PyIRCIoT.irciot_errors \
+     import irciot_get_common_error_descriptions_
+     my_desc = irciot_get_common_error_descriptions_(in_lang)
+     my_dsec = self.validate_descriptions_(my_desc)
+     if my_desc != {}:
+       self.errors.update(my_desc)
+   except:
+     pass
+   my_desc = {}
+   try:
+     from PyIRCIoT.irciot_errors \
+     import irciot_get_rfc1459_error_descriptions_
+     my_desc = irciot_get_rfc1459_error_descriptions_(in_lang)
+     my_desc = self.validate_descriptions_(my_desc)
+     if my_desc != {}:
+       self.errors.update(my_desc)
+   except:
+     pass
 
  def irc_tolower_(self, in_input):
    return in_input.translate(self.CONST.irc_translation)
