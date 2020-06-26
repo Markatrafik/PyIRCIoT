@@ -71,6 +71,11 @@ class PyLayerIRCIoTTest(unittest.TestCase):
   def test011_test_libirciot_(self):
     self.assertEqual(ii_test_libirciot_(), True)
 
+  def test018_test_defrag3loop_(self):
+    ii.irciot_disable_blockchain_()
+    ii.irciot_enable_encryption_(ii.CONST.tag_ENC_B64_ZLIB)
+    self.assertEqual(ii_test_defrag3loop_(), True)
+
   def test020_test_version_(self):
     self.assertEqual(ii_test_version_(), True)
 
@@ -313,6 +318,57 @@ def ii_test_libirciot_():
      return True
   return False
 
+def ii_test_defrag3loop_():
+  datumset_text  = '[{"bigval":"long-long-value-xxxxxxxxxxxxxxxxxxxxxxxxxxx'
+  datumset_text += 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+  datumset_text += 'xxxxxxxxxxxxxxxxxxxxxxxvxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+  datumset_text += 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+  datumset_text += 'xxxxxxxxxxxxxxxxxxxxvxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+  datumset_text += 'xxxxxxxxxxxxxxxxsensorxxxxxxxxnxxxxxxxxxxxxxxxxxxxxxxxx'
+  datumset_text += 'xxxxexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+  datumset_text += 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+  datumset_text += 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+  datumset_text += 'xxxxxxxxxxxxxxxxxxx","ot":"request","dst":"PLAYER@Kidsroom",'
+  datumset_text += '"t":"2018-08-23 14:48:07.115959","src":"myengine",'
+  datumset_text += '"addonvar1":"value1","addonvar2":"val2","addonvar3":"val3",'
+  datumset_text += '"x1":45,"x2":46,"x3":47,"x4":551,"x5l":0.000000001,"uu":"o",'
+  datumset_text += '"middlevar":"text-text-text-text-text-text-text-text-text",'
+  datumset_text += '"visionon1":"000001","vixicron2":"abcd","uptime645":"ffff",'
+  datumset_text += '"garbagevar":"ejkqdfwjefkljwklefjklwejfklwejfkljwkljfeklw",'
+  datumset_text += '"cnd":{"uri":"?"}},'
+  datumset_text += '{"dst":"THERMO@Kidsroom","t":"2018-08-23 14:48:07.116012",'
+  datumset_text += '"src":"myengine","cnd":{"temperature":"?"},"ot":"request"},'
+  datumset_text += '{"dst":"THERMO@Kidsroom","t":"2018-08-23 14:48:08.157125",'
+  datumset_text += '"src":"myengine","cnd":{"humidity":"?"},"ot":"request"}]'
+  if 'big_mtu' in my_params:
+    to_log_("TEST_IS_SKIPPED")
+    return True
+  JSON_cnt = 0
+  to_log_("DATUMSET == @{}@".format(datumset_text))
+  json_text, skip_param, part_param \
+   = ii.irciot_encap_(datumset_text, 0, 0, \
+    ii.CONST.api_vuid_self)
+  if ii.is_irciot_(json_text):
+    to_log_("JSON == @{}@".format(json_text))
+    msg_text = ii.irciot_deinencap_(json_text, \
+      ii.CONST.api_vuid_self)
+    while ((skip_param > 0) or (part_param > 0)):
+      json_text, skip_param, part_param \
+       = ii.irciot_encap_(datumset_text, skip_param, part_param, \
+        ii.CONST.api_vuid_self)
+      to_log_("JSON_TEXT==@{}@".format(json_text))
+      out_json = ii.irciot_deinencap_(json_text, \
+        ii.CONST.api_vuid_self)
+      to_log_("OUT_JSON==@{}@".format(out_json))
+      if out_json != "[]":
+        if JSON_TEST_is_irciot_datumset_(out_json):
+          JSON_cnt += 1
+          if (JSON_cnt == 2):
+            to_log_("TEST_IS_OK")
+            return True
+  return False
+  # End of ii_test_defrag3loop_()
+
 my_command = ""
 my_params  = []
 
@@ -394,6 +450,13 @@ def main():
      to_log_("TEST_IS_SKIPPED")
      return
    ii_test_bchsigning_()
+
+ if my_command == 'defrag3loop':
+   # The following workarounds should be resolved:
+   if 'rsa1024' in my_params and 'crypt2fish' in my_params:
+     to_log_("TEST_IS_SKIPPED")
+     return
+   ii_test_defrag3loop_()
 
  if my_command == 'crc':
    ii_test_unary_crc_()

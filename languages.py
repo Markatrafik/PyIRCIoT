@@ -73,6 +73,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
      lang_TCL
     ]
   #
+  err_EL_ERROR         = 1000
   err_UNKNOWN_LANGUAGE = 1001
   err_UNSUPPORTED_YET  = 1002
   err_BAD_ENVIRONMENT  = 1003
@@ -94,6 +95,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   #
   err_DESCRIPTIONS = irciot_shared_.CONST.err_DESCRIPTIONS
   err_DESCRIPTIONS.update({
+   err_EL_ERROR         : "EL error ({}):",
    err_UNKNOWN_LANGUAGE : "Unknown programming langauge",
    err_UNSUPPORTED_YET  : "This language is not yet supported",
    err_LANGUAGE_SYNTAX  : "Incorrect syntax for this language",
@@ -234,7 +236,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   else:
     return
   if CAN_debug_library:
-    print("EL error ({}):".format(in_error_code), my_descr)
+    print(self.errors[self.CONST.err_EL_ERROR].format(in_error_code), my_descr)
   #
   # End of irciot_EL_error_()
 

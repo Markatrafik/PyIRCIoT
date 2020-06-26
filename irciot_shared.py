@@ -224,7 +224,13 @@ class irciot_shared_(object):
     hl_Japanese : []
    }
    #
-   err_DESCRIPTIONS = {}
+   err_SEC = 7
+   err_MIN = 8
+   #
+   err_DESCRIPTIONS = {
+     err_SEC: " sec.",
+     err_MIN: " min."
+   }
    #
    def __setattr__(self, *_):
      pass

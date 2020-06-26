@@ -74,6 +74,7 @@ def irciot_get_common_error_descriptions_(in_human_language):
 def irciot_get_EL_error_descriptions_(in_human_language):
  if in_human_language == "ru": # Russian Language
   return {
+   1000: "Ошибка EL ({}):",
    1001: "Неизвестный язык программирования",
    1002: "Данный язык ещё не поддерживается",
    1003: "Некорректное окружение для языка",
@@ -95,6 +96,7 @@ def irciot_get_EL_error_descriptions_(in_human_language):
   }
  elif in_human_language == "de": # Deutsch
   return {
+   1000: "EL-Fehler ({}):",
    1001: "Unbekannte Programmiersprache",
    1002: "Diese Sprache wird noch nicht unterstützt",
    1003: "Falsche Umgebung für Programmiersprache",
