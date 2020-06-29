@@ -114,7 +114,7 @@ done
 for j in "" big_mtu ; do
 for k in "" ed25519 rsa1024 ; do
 for l in "" base64 base85 base32 cryptrsa cryptaes ; do
-for m in default libirciot defrag3loop bchsigning ; do
+for m in default libirciot multidatum defrag3loop bchsigning ; do
  run_tests "${j}" "${k}" "${l}" "${m}" irciot
 done
 done

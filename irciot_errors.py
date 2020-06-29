@@ -2,6 +2,10 @@
 def irciot_get_common_error_descriptions_(in_human_language):
  if in_human_language == "ru": # Russian Language
   return {
+     5: " сек.",
+     6: " мин.",
+     7: " ч.",
+     8: " байт",
    101: "Несоответствие версии протокола",
    102: "Несоответствие версии библиотеки",
    103: "Недопустимое значение поля 'dp' при дефрагментации",
@@ -38,6 +42,10 @@ def irciot_get_common_error_descriptions_(in_human_language):
   }
  elif in_human_language == "de": # Deutsch
   return {
+     5: " Sek.",
+     6: " Min.",
+     7: " St.",
+     8: " Byte(s)",
    101: "Nicht übereinstimmende Protokollversion",
    102: "Nicht übereinstimmende Bibliotheksversion",
    103: "Falscher 'dp'-Feldwert während der Defragmentierung",

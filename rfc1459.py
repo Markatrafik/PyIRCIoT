@@ -44,7 +44,7 @@ class PyLayerIRC( irciot_shared_ ):
    #
    irciot_protocol_version = '0.3.33'
    #
-   irciot_library_version  = '0.0.215'
+   irciot_library_version  = '0.0.217'
    #
    # Bot specific constants
    #
@@ -1185,7 +1185,7 @@ class PyLayerIRC( irciot_shared_ ):
                    my_ok = False
                my_out = "%s , %s : " % (my_split[0], my_split[1])
                if my_ok:
-                 my_out += "USERID : UNIX : %s\n" % self.irc_user
+                 my_out += "USERID : UNIX : {}\n".format(self.irc_user)
                else:
                  my_out += "ERROR : NO-USER\n"
                my_conn.send(bytes(my_out, self.irc_encoding))

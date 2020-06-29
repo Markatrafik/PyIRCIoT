@@ -71,6 +71,9 @@ class PyLayerIRCIoTTest(unittest.TestCase):
   def test011_test_libirciot_(self):
     self.assertEqual(ii_test_libirciot_(), True)
 
+  def test013_test_multidatum_(self):
+    self.assertEqual(ii_test_multidatum_(), True)
+
   def test018_test_defrag3loop_(self):
     ii.irciot_disable_blockchain_()
     ii.irciot_enable_encryption_(ii.CONST.tag_ENC_B64_ZLIB)
@@ -318,6 +321,65 @@ def ii_test_libirciot_():
      return True
   return False
 
+def ii_test_multidatum_():
+  datumset_text  = '[{"ot":"maireq","dst":"MUSICA@Kidsroom",'
+  datumset_text += '"t":"2018-08-23 14:48:07.115959",'
+  datumset_text += '"src":"maiengine","cnd":{"temperature":"?"}},'
+  datumset_text += '{"ot":"maireq","dst":"MUSICA@Kidsroom",'
+  datumset_text += '"t":"2018-08-23 14:48:07.116012",'
+  datumset_text += '"src":"maiengine","cnd":{"humidity":"?"}},'
+  datumset_text += '{"ot":"maireq","dst":"IPC1002@Kidsroom",'
+  datumset_text += '"t":"2018-08-23 14:48:07.116048",'
+  datumset_text += '"src":"maiengine","cnd":{"kidsdoor":"?"}},'
+  datumset_text += '{"ot":"maireq","dst":"TUX2@Livingroom",'
+  datumset_text += '"t":"2018-08-23 14:48:08.11253",'
+  datumset_text += '"src":"maiengine","cnd":{"temperature":"?"}},'
+  datumset_text += '{"ot":"maireq","dst":"TUX2@Livingroom",'
+  datumset_text += '"t":"2018-08-23 14:48:08.11752",'
+  datumset_text += '"src":"maiengine","cnd":{"humidity":"?"}},'
+  datumset_text += '{"ot":"maireq","dst":"TUX2@Livingroom",'
+  datumset_text += '"t":"2018-08-23 14:48:08.11788",'
+  datumset_text += '"src":"maiengine","cnd":{"motion":"?"}},'
+  datumset_text += '{"ot":"maireq","dst":"MUSICA@Kidsroom",'
+  datumset_text += '"t":"2018-08-23 14:49:07.115959",'
+  datumset_text += '"src":"maiengine","cnd":{"temperature":"?"}},'
+  datumset_text += '{"ot":"maireq","dst":"MUSICA@Kidsroom",'
+  datumset_text += '"t":"2018-08-23 14:49:07.116012",'
+  datumset_text += '"src":"maiengine","cnd":{"humidity":"?"}},'
+  datumset_text += '{"ot":"maireq","dst":"IPC1002@Kidsroom",'
+  datumset_text += '"t":"2018-08-23 14:49:07.116048",'
+  datumset_text += '"src":"maiengine","cnd":{"kidsdoor":"?"}},'
+  datumset_text += '{"ot":"maireq","dst":"TUX2@Livingroom",'
+  datumset_text += '"t":"2018-08-23 14:49:08.11253",'
+  datumset_text += '"src":"maiengine","cnd":{"temperature":"?"}},'
+  datumset_text += '{"ot":"maireq","dst":"TUX2@Livingroom",'
+  datumset_text += '"t":"2018-08-23 14:49:08.11752",'
+  datumset_text += '"src":"maiengine","cnd":{"humidity":"?"}},'
+  datumset_text += '{"ot":"maireq","dst":"TUX2@Livingroom",'
+  datumset_text += '"t":"2018-08-23 14:49:08.11788",'
+  datumset_text += '"src":"maiengine","cnd":{"motion":"?"}}]'
+  if JSON_TEST_is_irciot_datumset_(datumset_text):
+   json_text, my_skip, my_part \
+    = ii.irciot_encap_(datumset_text, 0, 0, \
+     ii.CONST.api_vuid_self)
+   to_log_("irciot_encap_(): " \
+    + "skip = {}, part = {}.".format(my_skip, my_part))
+   if JSON_TEST_is_irciot_(json_text):
+    test_ok = 1
+    while ((my_skip > 0) or (my_part > 0)):
+     json_text, my_skip, my_part \
+      = ii.irciot_encap_(datumset_text, my_skip, my_part, \
+       ii.CONST.api_vuid_self)
+     to_log_("irciot_encap_(): " \
+      + "skip = {}, part = {}.".format(my_skip, my_part))
+     if not JSON_TEST_is_irciot_(json_text):
+      test_ok = 0
+    if (test_ok == 1):
+     to_log_("TEST_IS_OK")
+     return True
+  return False
+  # End of ii_test_multidatum_()
+
 def ii_test_defrag3loop_():
   datumset_text  = '[{"bigval":"long-long-value-xxxxxxxxxxxxxxxxxxxxxxxxxxx'
   datumset_text += 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
@@ -427,6 +489,9 @@ def main():
 
  if my_command == 'libirciot':
    ii_test_libirciot_()
+
+ if my_command == 'multidatum':
+   ii_test_multidatum_()
 
  if my_command == 'c1integrity':
    ii_test_c1integrity_()
