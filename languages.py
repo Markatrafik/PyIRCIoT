@@ -498,9 +498,10 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
    # End of python_stdout_()
 
  def __timeout_termination_(self):
-  raise Exception('{}: {} sec.'.format( \
+  raise Exception('{}: {}'.format( \
    self.errors[self.CONST.err_TIME_EXECUTION], \
-   self.__execution_timeout))
+   self.__execution_timeout) \
+   + self.errors[self.CONST.err_SEC])
 
  def irciot_EL_set_Ansible_Vault_(in_password):
   if not isinstance(in_password, str):

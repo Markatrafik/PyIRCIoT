@@ -1881,8 +1881,8 @@ class PyLayerIRC( irciot_shared_ ):
      ( my_uid,  my_mask, my_chan, my_opt,  \
        my_ekey, my_bkey, my_lmid, my_ekto, \
        my_bkto, my_omid ) = my_user
-     if ((in_channel == "*") or \
-      (self.irc_compare_channels_(in_channel, my_chan))):
+     if in_channel == "*" or \
+      self.irc_compare_channels_(in_channel, my_chan):
        if self.irc_check_mask_(in_from, my_mask):
          return "%s%d" % (self.CONST.api_vuid_cfg, my_uid)
    return None
@@ -2141,7 +2141,7 @@ class PyLayerIRC( irciot_shared_ ):
    irc_nick = self.irc_tomock_(in_nick)
    if irc_nick == in_nick:
      irc_nick = in_nick + "%d" % random.randint(0, 999)
-   if (self.__join_retry > 2) or in_force:
+   if self.__join_retry > 2 or in_force:
      nick_length = random.randint(2, self.irc_nick_length)
      irc_nick = random.choice(self.CONST.irc_nick_first_char)
      irc_nick += ''.join( \
@@ -2968,7 +2968,7 @@ class PyLayerIRC( irciot_shared_ ):
              self.time_now = datetime.datetime.now()
              irc_message = self.irc_extract_message_(irc_input_split)
 
-           if ((irc_message == None) and (irc_input_buffer == "")):
+           if irc_message == None and irc_input_buffer == "":
              self.time_now = datetime.datetime.now()
              irc_message = ""
 

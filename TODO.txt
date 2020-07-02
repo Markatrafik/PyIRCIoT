@@ -65,3 +65,7 @@
  ............: support for the "MAGMA" encryption algorithm in
   ~ Useful ~ : accordance with the Russian standard GOST 28147-89
 
+  2020-07-01 : It will be useful to implement PEP 257 "Doctring
+ ............: Conventions" recomendations from official Python
+  ~ Useful ~ : Developer's Guide for PyIRCIoT demo library code.
+

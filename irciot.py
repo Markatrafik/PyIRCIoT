@@ -3075,17 +3075,17 @@ class PyLayerIRCIoT(object):
        try:
           # Adding missing fields to the "Datum" from parent object
           my_datum = json.loads(out_json)
-          if ((not self.CONST.tag_OBJECT_TYPE in my_datum) \
-           and (my_ot != None)):
+          if self.CONST.tag_OBJECT_TYPE not in my_datum \
+           and my_ot != None:
               my_datum[self.CONST.tag_OBJECT_TYPE] = my_ot
-          if ((not self.CONST.tag_DATE_TIME in my_datum) \
-           and (my_dt != None)):
+          if self.CONST.tag_DATE_TIME not in my_datum \
+           and my_dt != None:
               my_datum[self.CONST.tag_DATE_TIME] = my_dt
-          if ((not self.CONST.tag_SRC_ADDR in my_datum) \
-           and (my_src != None)):
+          if self.CONST.tag_SRC_ADDR not in my_datum \
+           and my_src != None:
               my_datum[self.CONST.tag_SRC_ADDR] = my_src
-          if ((not self.CONST.tag_DST_ADDR in my_datum) \
-           and (my_dst != None)):
+          if self.CONST.tag_DST_ADDR not in my_datum \
+           and my_dst != None:
               my_datum[self.CONST.tag_DST_ADDR] = my_dst
           self.irciot_check_datum_(my_datum, in_vuid, my_ot)
           return json.dumps(my_datum, separators=(',',':'))
@@ -3131,13 +3131,13 @@ class PyLayerIRCIoT(object):
    orig_json, in_vuid = None):
   if not self.CONST.tag_ENC_DATUM in in_datum.keys():
      (my_dt, my_ot, my_src, my_dst, my_dc, my_dp) = in_header
-     if not self.CONST.tag_DATE_TIME in in_datum.keys():
+     if self.CONST.tag_DATE_TIME not in in_datum.keys():
         in_datum[self.CONST.tag_DATE_TIME] = my_dt
-     if not self.CONST.tag_OBJECT_TYPE in in_datum.keys():
+     if self.CONST.tag_OBJECT_TYPE not in in_datum.keys():
         in_datum[self.CONST.tag_OBJECT_TYPE] = my_ot
-     if not self.CONST.tag_SRC_ADDR in in_datum.keys():
+     if self.CONST.tag_SRC_ADDR not in in_datum.keys():
         in_datum[self.CONST.tag_SRC_ADDR] = my_src
-     if not self.CONST.tag_DST_ADDR in in_datum.keys():
+     if self.CONST.tag_DST_ADDR not in in_datum.keys():
         in_datum[self.CONST.tag_DST_ADDR] = my_dst
      if in_datum[self.CONST.tag_DATE_TIME] == None:
         del in_datum[self.CONST.tag_DATE_TIME]
@@ -3168,7 +3168,7 @@ class PyLayerIRCIoT(object):
     for my_key in [
       self.CONST.tag_BCH_METHOD,
       self.CONST.tag_BCH_PUBKEY ]:
-      if not my_key in in_datum.keys():
+      if my_key not in in_datum.keys():
         return
     my_method = in_datum[self.CONST.tag_BCH_METHOD]
     if my_method != self.__mid_method and DO_auto_blockchain:

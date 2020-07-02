@@ -108,12 +108,12 @@ def main():
  global my_params
 
  my_params = []
- if (len(sys.argv) > 1):
+ if len(sys.argv) > 1:
    my_command = sys.argv[1]
  for my_idx in range(2, 6):
    if len(sys.argv) > my_idx:
      my_params += [ sys.argv[my_idx] ]
- if (my_command == ""):
+ if my_command == "":
    my_command = 'default'
 
  if 'locale' in my_params:

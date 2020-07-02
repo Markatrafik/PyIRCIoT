@@ -74,6 +74,9 @@ class PyLayerIRCIoTTest(unittest.TestCase):
   def test013_test_multidatum_(self):
     self.assertEqual(ii_test_multidatum_(), True)
 
+  def test014_test_multibigval_(self):
+    self.assertEqual(ii_test_multibigval_(), True)
+
   def test018_test_defrag3loop_(self):
     ii.irciot_disable_blockchain_()
     ii.irciot_enable_encryption_(ii.CONST.tag_ENC_B64_ZLIB)
@@ -106,7 +109,7 @@ def JSON_TEST_is_irciot_(my_json_text):
 def JSON_TEST_is_irciot_datumset_(my_datumset_text):
  to_log_("Testing Datums set: @\033[1m{}\033[0m@len={}@".format( \
    my_datumset_text, len(my_datumset_text)))
- if (not ii.is_irciot_datumset_(my_datumset_text)):
+ if not ii.is_irciot_datumset_(my_datumset_text):
    to_log_("is_irciot_datumset_() = *** This is not IRC-IoT datum set ...")
    return False
  else:
@@ -123,7 +126,7 @@ def ii_test_default_():
    datumset_text = ii.irciot_deinencap_(json_text, \
      ii.CONST.api_vuid_self)
    to_log_("irciot_deinencap_()")
-   if (JSON_TEST_is_irciot_datumset_(datumset_text)):
+   if JSON_TEST_is_irciot_datumset_(datumset_text):
     json_text, my_skip, my_part \
      = ii.irciot_encap_(datumset_text, 0, 0, \
        ii.CONST.api_vuid_self)
@@ -374,11 +377,53 @@ def ii_test_multidatum_():
       + "skip = {}, part = {}.".format(my_skip, my_part))
      if not JSON_TEST_is_irciot_(json_text):
       test_ok = 0
-    if (test_ok == 1):
+    if test_ok == 1:
      to_log_("TEST_IS_OK")
      return True
   return False
   # End of ii_test_multidatum_()
+
+def ii_test_multibigval_():
+  datumset_text  = '[{"bigval":"realbigval-hello-world-big-string-NNN-xxx55'
+  datumset_text += '55zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz-vvvvvvvvvvvvvvvv'
+  datumset_text += 'vvvvv-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-xxxxxxxxxx'
+  datumset_text += 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+  datumset_text += 'vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv'
+  datumset_text += 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+  datumset_text += 'xxxxxxxxxxxxxxxxxxx","ot":"maireq","dst":"MUSICA@Kidsroom",'
+  datumset_text += '"t":"2018-08-23 14:48:07.115959","src":"maiengine",'
+  datumset_text += '"cnd":{"temperature":"?"}},{"ot":"maireq",'
+  datumset_text += '"dst":"MUSICA@Kidsroom","t":"2018-08-23 14:48:07.116012",'
+  datumset_text += '"src":"maiengine","cnd":{"humidity":"?"}},'
+  datumset_text += '{"ot":"maireq","dst":"IPC1002@Kidsroom",'
+  datumset_text += '"t":"2018-08-23 14:48:07.116048",'
+  datumset_text += '"src":"maiengine","cnd":{"kidsdoor":"?"}},'
+  datumset_text += '{"ot":"maireq","dst":"TUX2@Livingroom",'
+  datumset_text += '"t":"2018-08-23 14:48:08.11253","src":"maiengine",'
+  datumset_text += '"cnd":{"temperature":"?"}},{"ot":"maireq",'
+  datumset_text += '"dst":"TUX2@Livingroom","t":"2018-08-23 14:48:08.11752",'
+  datumset_text += '"src":"maiengine","cnd":{"humidity":"?"}}]'
+  if JSON_TEST_is_irciot_datumset_(datumset_text):
+   json_text, my_skip, my_part \
+    = ii.irciot_encap_(datumset_text, 0, 0, \
+     ii.CONST.api_vuid_self)
+   to_log_("irciot_encap_(): " \
+    + "skip = {}, part = {}.".format(my_skip, my_part))
+   if JSON_TEST_is_irciot_(json_text):
+    test_ok = 1
+    while ((my_skip > 0) or (my_part > 0)):
+     json_text, my_skip, my_part \
+      = ii.irciot_encap_(datumset_text, my_skip, my_part, \
+       ii.CONST.api_vuid_self)
+     to_log_("irciot_encap_(): " \
+      + "skip = {}, part = {}.".format(my_skip, my_part))
+     if not JSON_TEST_is_irciot_(json_text):
+      test_ok = 0
+    if test_ok == 1:
+     to_log_("TEST_IS_OK")
+     return True
+  return False
+  # End of ii_test_multibigval_()
 
 def ii_test_defrag3loop_():
   datumset_text  = '[{"bigval":"long-long-value-xxxxxxxxxxxxxxxxxxxxxxxxxxx'
@@ -425,7 +470,7 @@ def ii_test_defrag3loop_():
       if out_json != "[]":
         if JSON_TEST_is_irciot_datumset_(out_json):
           JSON_cnt += 1
-          if (JSON_cnt == 2):
+          if JSON_cnt == 2:
             to_log_("TEST_IS_OK")
             return True
   return False
@@ -440,12 +485,12 @@ def main():
  global my_params
 
  my_params = []
- if (len(sys.argv) > 1):
+ if len(sys.argv) > 1:
    my_command = sys.argv[1]
  for my_idx in range(2, 6):
    if len(sys.argv) > my_idx:
      my_params += [ sys.argv[my_idx] ]
- if (my_command == ""):
+ if my_command == "":
    my_command = 'default'
 
  if 'gost12' in my_params:
@@ -492,6 +537,9 @@ def main():
 
  if my_command == 'multidatum':
    ii_test_multidatum_()
+
+ if my_command == 'multibigval':
+   ii_test_multibigval_()
 
  if my_command == 'c1integrity':
    ii_test_c1integrity_()
