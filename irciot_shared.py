@@ -128,8 +128,12 @@ class irciot_shared_(object):
    hl_default = hl_English
    #
    enc_ASCII = "ascii"
+   for enc in [ "7", "8", "8a", "16u" ]:
+     locals()["enc_ArmSCII{}".format(enc.upper())] \
+      = "armscii-{}".format(enc)
    for enc in [ "c", "r", "ru", "t", "u" ]:
-     locals()["enc_KOI8%s" % enc.upper()] = "koi8-{}".format(enc)
+     locals()["enc_KOI8{}".format(enc.upper())] \
+      = "koi8-{}".format(enc)
    for enc in [  7,  8, 16, 32 ]:
      locals()["enc_UTF{}".format(enc)] = "utf-{}".format(enc)
    for enc in [  273,  278,  280,  297,  423,  437,  737,  775,
@@ -139,7 +143,7 @@ class irciot_shared_(object):
     1258, 1259 ]:
      locals()["enc_{}".format(enc)] = "cp{}".format(enc)
    for enc in [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 15 ]:
-     locals()["enc_ISO%d" % enc] = "iso-8859-{}".format(enc)
+     locals()["enc_ISO{}".format(enc)] = "iso-8859-{}".format(enc)
    #
    enc_aliases = {
     enc_ASCII : [ "cp-367", "cp367", "us-ascii" ],
@@ -207,7 +211,7 @@ class irciot_shared_(object):
    #
    hl_old_enc = {
     hl_Arabic   : [],
-    hl_Armenian : [],
+    hl_Armenian : [ enc_ArmSCII7, enc_ArmSCII8, enc_ArmSCII8A ],
     hl_Basque   : [],
     hl_Bashkir  : [],
     hl_Chinese  : [ enc_935 ],
@@ -380,6 +384,24 @@ class irciot_shared_(object):
  # incomplete
  def is_local_ip_address_(self, in_ip):
    return False
+
+ def dns_ipv4_resolver_(self, in_name):
+   if not isinstance(in_name, str):
+     return None
+   my_ip_list = []
+   try:
+     from dns import resolver
+     my_result = resolver.query(in_name, 'A')
+     for my_answer in my_result.response.answer:
+       for my_item in my_answer.items:
+         my_ip = my_item.address
+         if not self.is_ipv4_address_(my_ip):
+           continue
+         if my_ip not in my_ip_list:
+           my_ip_list += [ my_ip ]
+     return my_ip_list
+   except:
+     return None
 
  def dns_reverse_resolver_(self, in_server_ip):
    if self.is_ip_address_(in_server_ip):

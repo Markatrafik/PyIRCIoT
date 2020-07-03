@@ -10,10 +10,16 @@ export TEST_IRCIOT_LIB="./irciot.py"
 export TEST_IRCIOTR_LIB="./irciot_router.py"
 export TEST_RFC1459_LIB="./rfc1459.py"
 export TEST_LANGUAGES_LIB="./languages.py"
-
+export PYTHON3_BINARY="/usr/bin/python3"
 export GREP_BINARY="/bin/grep"
+
+
 if [ ! -f "${GREP_BINARY}" -a -f "/usr/bin/grep" ]; then
  export GREP_BINARY="/usr/bin/grep" ; fi # Btw, MacOS
+if [ ! -x "${PYTHON3_BINARY}" ]; then
+ echo "Cannot find Python interpreter: '${PYTHON3_BINARY}'."
+ exit 1
+fi
 
 for TEST_CMD in "${TEST_IRCIOT_CMD}" "${TEST_IRCIOTR_CMD}" \
  "${TEST_RFC1459_CMD}" "${TEST_LANGUAGES_CMD}" ; do
@@ -32,6 +38,14 @@ function checkascii () {
  if [ ${ERRLV} -eq 0 ]; then
   echo "TEST_FAILED" ; else
   echo "TEST_IS_OK" ; fi
+}
+
+function checksyntax () {
+ "${PYTHON3_BINARY}" -B "${1}" 1>/dev/null 2>/dev/null
+ ERRLV=$?
+ if [ ${ERRLV} -eq 0 ]; then
+  echo "TEST_IS_OK" ; else
+  echo "TEST_IS_FAILED" ; fi
 }
 
 function resultat () {
@@ -84,6 +98,8 @@ function run_tests () {
  echo -ne "Test ${TEST_NAME} "
  if [ "x${TEST_NAME:0:7}x" == "x'ascii'x" ]; then
    export OUTDATA="$(checkascii "${TEST_LIB}")"
+ elif [ "x${TEST_NAME:0:8}x" == "x'syntax'x" ]; then
+   export OUTDATA="$(checksyntax "${TEST_LIB}")"
  else export OUTDATA="$("${TEST_CMD}" \
   "${4}" "${1}" "${2}" "${3}" \
    2>/dev/null | /usr/bin/head -n 4096 2>/dev/null)" ; fi
@@ -107,15 +123,15 @@ if [ -x "${TEST_IRCIOT_CMD}" ]; then
 echo -ne '\033[1;36m---------------- '
 echo -ne 'PyLayerIRCIoT tests'
 echo -ne ' ------------------\033[0m\n'
-for m in ascii crc c1integrity c2integrity version test4rsa \
-test4aes test2fish ; do
+for m in syntax ascii crc c1integrity c2integrity version \
+ test4rsa test4aes test2fish ; do
  run_tests "" "" "" "${m}" irciot
 done
 for j in "" big_mtu ; do
 for k in "" ed25519 rsa1024 ; do
 for l in "" base64 base85 base32 cryptrsa cryptaes ; do
 for m in default libirciot multidatum multibigval multinextbig \
-defrag3loop bchsigning ; do
+new2018datums defrag3loop bchsigning ; do
  run_tests "${j}" "${k}" "${l}" "${m}" irciot
 done
 done
@@ -127,7 +143,7 @@ if [ -x "${TEST_RFC1459_CMD}" ]; then
 echo -ne '\033[1;36m------------------ '
 echo -ne 'PyLayerIRC tests'
 echo -ne ' -------------------\033[0m\n'
-for m in ascii isitip nicks masks langenc ; do
+for m in syntax ascii isitip nicks masks langenc ; do
  run_tests "" "" "" "${m}" rfc1459
 done
 fi
@@ -137,7 +153,8 @@ echo -ne '\033[1;36m--------------- '
 echo -ne 'PyIRCIoT_router tests'
 echo -ne ' -----------------\033[0m\n'
 for j in "" big_mtu ; do
-for m in ascii forwarding translation lmrstatuses gmrstatuses ; do
+for m in syntax ascii forwarding translation lmrstatuses \
+ gmrstatuses ; do
  run_tests "${j}" "" "" "${m}" irciot_router
 done
 done
@@ -147,7 +164,7 @@ if [ -x "${TEST_RFC1459_CMD}" ]; then
 echo -ne '\033[1;36m-------------- '
 echo -ne 'PyLayerIRCIoT_EL_ tests'
 echo -ne ' ----------------\033[0m\n'
-for m in ascii lua js python pyrangefor pycosinus ; do
+for m in syntax ascii lua js python pyrangefor pycosinus ; do
  run_tests "" "" "" "${m}" irciot_languages
 done
 fi

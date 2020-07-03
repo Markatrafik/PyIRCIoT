@@ -77,8 +77,11 @@ class PyLayerIRCIoTTest(unittest.TestCase):
   def test014_test_multibigval_(self):
     self.assertEqual(ii_test_multibigval_(), True)
 
-  def test017_test_multinextbig_(self):
+  def test015_test_multinextbig_(self):
     self.assertEqual(ii_test_multinextbig_(), True)
+
+  def test016_test_new2018datums_(self):
+    self.assertEqual(ii_test_new2018datums_(), True)
 
   def test018_test_defrag3loop_(self):
     ii.irciot_disable_blockchain_()
@@ -524,6 +527,47 @@ def ii_test_defrag3loop_():
   return False
   # End of ii_test_defrag3loop_()
 
+def ii_test_new2018datums_():
+  datumset_text  = '[{"ot": "mainfo","t": "2018-08-01 00:00:33.228723",'
+  datumset_text += '"src": "MP714@Kitchen/co2","dst": "","dt":"cnd","d":1162},'
+  datumset_text += '{"ot": "mainfo","t": "2018-08-01 00:00:41.425239",'
+  datumset_text += '"src": "MP714@Kitchen/adc2","dst": "","dt":"cnd","d":135},'
+  datumset_text += '{"ot": "mainfo","t": "2018-08-01 00:00:51.797226",'
+  datumset_text += '"src": "MP714@Kitchen/temperature","dst": "",'
+  datumset_text += '"dt":"cnd","d":26.45 },'
+  datumset_text += '{"ot": "mainfo","t": "2018-08-01 00:01:02.170460",'
+  datumset_text += '"src": "MP714@Kitchen/cookerhood","dst": "",'
+  datumset_text += '"dt":"cnd","d": 0},'
+  datumset_text += '{"ot": "mainfo","t": "2018-08-01 00:15:47.977112",'
+  datumset_text += '"src": "MP714@Kitchen/motion","dst": "",'
+  datumset_text += '"dt":"prs","d":1},'
+  datumset_text += '{"ot": "mainfo","t": "2018-08-01 00:15:47.977112",'
+  datumset_text += '"src": "MP714@Kitchen/LIZA","dst": "",'
+  datumset_text += '"dt":"prs","d":0.75},'
+  datumset_text += '{"ot": "maicmd","t": "2018-08-01 00:15:50.186060",'
+  datumset_text += '"src": "nooLite@Kitchen/toplight","dst": "",'
+  datumset_text += '"dt":"act","d": 1}]'
+  if JSON_TEST_is_irciot_datumset_(datumset_text):
+   json_text, my_skip, my_part \
+    = ii.irciot_encap_(datumset_text, 0, 0, \
+     ii.CONST.api_vuid_self)
+   to_log_("irciot_encap_(): skip = {}, part = {}.".format(my_skip, my_part))
+   if JSON_TEST_is_irciot_(json_text):
+    test_ok = 1
+    while my_skip > 0 or my_part > 0:
+     json_text, my_skip, my_part \
+     = ii.irciot_encap_(datumset_text, my_skip, my_part, \
+       ii.CONST.api_vuid_self)
+     to_log_("irciot_encap_(): " \
+      + "skip = {}, part = {}.".format(my_skip, my_part))
+     if not JSON_TEST_is_irciot_(json_text):
+       test_ok = 0
+    if test_ok == 1:
+     to_log_("TEST_IS_OK")
+     return True
+  return False
+  # End of ii_test_new2018datums_()
+
 my_command = ""
 my_params  = []
 
@@ -591,6 +635,9 @@ def main():
 
  if my_command == 'multinextbig':
    ii_test_multinextbig_()
+
+ if my_command == 'new2018datums':
+   ii_test_new2018datums_()
 
  if my_command == 'c1integrity':
    ii_test_c1integrity_()
