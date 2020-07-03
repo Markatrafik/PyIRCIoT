@@ -88,9 +88,14 @@ class irciot_shared_(object):
    os_linux_proc_ipv4_route = '/proc/net/route'
    os_linux_proc_ipv6_route = '/proc/net/ipv6_route'
    #
-   ### Human Languages:
+   ### Human Languages (ISO 639-1):
    #
+   hl_Arabic   = 'ar'
+   hl_Armenian = 'hy'
+   hl_Basque   = 'eu'
+   hl_Bashkir  = 'ba'
    hl_Chinese  = 'cn' # Simplified
+   hl_Church   = 'cu' # Slavonic
    hl_Croatian = 'hr'
    hl_Czech    = 'cz'
    hl_Danish   = 'dk'
@@ -99,11 +104,13 @@ class irciot_shared_(object):
    hl_Estonian = 'ee'
    hl_Finnish  = 'fi'
    hl_French   = 'fr'
+   hl_Georgian = 'ka'
    hl_Greek    = 'gr'
    hl_Hrvatski = 'hr'
    hl_Hebrew   = 'il'
    hl_Italian  = 'it'
-   hl_Kazakh   = 'kz'
+   hl_Kazakh   = 'kk'
+   hl_Kyrgyz   = 'ky'
    hl_Persian  = 'ir'
    hl_Polish   = 'pl'
    hl_Romanian = 'ro'
@@ -111,23 +118,26 @@ class irciot_shared_(object):
    hl_Serbian  = 'rs'
    hl_Swedish  = 'se'
    hl_Spanish  = 'es'
+   hl_Tajik    = 'tg'
    hl_Thai     = 'th'
    hl_Turkish  = 'tr'
+   hl_Turkmen  = 'tk'
+   hl_Uzbek    = 'uz'
    hl_Japanese = 'jp'
    #
    hl_default = hl_English
    #
    enc_ASCII = "ascii"
-   enc_KOI8R = "koi8-r"
-   enc_KOI8U = "koi8-u"
+   for enc in [ "c", "r", "ru", "t", "u" ]:
+     locals()["enc_KOI8%s" % enc.upper()] = "koi8-{}".format(enc)
    for enc in [  7,  8, 16, 32 ]:
-     locals()["enc_UTF%d" % enc] = "utf-{}".format(enc)
+     locals()["enc_UTF{}".format(enc)] = "utf-{}".format(enc)
    for enc in [  273,  278,  280,  297,  423,  437,  737,  775,
      850,  851,  852,  855,  856,  857,  858,  860,  861,  862,
      863,  865,  866,  869,  874,  875,  880,  905,  922,  935,
     1025, 1097, 1250, 1251, 1252, 1253, 1254, 1255, 1256, 1257,
     1258, 1259 ]:
-     locals()["enc_%d" % enc] = "cp{}".format(enc)
+     locals()["enc_{}".format(enc)] = "cp{}".format(enc)
    for enc in [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 15 ]:
      locals()["enc_ISO%d" % enc] = "iso-8859-{}".format(enc)
    #
@@ -196,7 +206,12 @@ class irciot_shared_(object):
    default_encoding = enc_UTF8
    #
    hl_old_enc = {
+    hl_Arabic   : [],
+    hl_Armenian : [],
+    hl_Basque   : [],
+    hl_Bashkir  : [],
     hl_Chinese  : [ enc_935 ],
+    hl_Church   : [],
     hl_Croatian : [ enc_ISO2 ],
     hl_Czech    : [ enc_ISO2 ],
     hl_Danish   : [ enc_ISO1 ],
@@ -205,22 +220,27 @@ class irciot_shared_(object):
     hl_Estonian : [ enc_ISO15, enc_ISO13, enc_922 ],
     hl_Finnish  : [ enc_ISO1, enc_278 ],
     hl_French   : [ enc_ISO1, enc_863, enc_297 ],
+    hl_Georgian : [],
     hl_Greek    : [ enc_ISO7, enc_423, enc_737, enc_869,
      enc_875, enc_1253 ],
     hl_Hrvatski : [ enc_ISO1 ],
     hl_Hebrew   : [ enc_ISO8, enc_862, enc_856, enc_1255 ],
     hl_Italian  : [ enc_ISO1, enc_280 ],
     hl_Kazakh   : [],
+    hl_Kyrgyz   : [],
     hl_Persian  : [ enc_1097 ],
     hl_Polish   : [ enc_ISO2 ],
     hl_Romanian : [ enc_ISO2 ],
     hl_Russian  : [ enc_ISO5, enc_855, enc_866, enc_1251,
-     enc_880, enc_KOI8R ],
+     enc_880, enc_KOI8C, enc_KOI8R, enc_KOI8RU ],
     hl_Serbian  : [ enc_1025 ],
     hl_Swedish  : [ enc_ISO1, enc_278 ],
     hl_Spanish  : [ enc_ISO1 ],
+    hl_Tajik    : [ enc_KOI8T ],
     hl_Thai     : [ enc_874 ],
     hl_Turkish  : [ enc_ISO9, enc_857, enc_905, enc_1254 ],
+    hl_Turkmen  : [],
+    hl_Uzbek    : [],
     hl_Japanese : []
    }
    #

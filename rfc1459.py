@@ -1585,7 +1585,7 @@ class PyLayerIRC( irciot_shared_ ):
        # Only the last message ID can be updated in pipeline
        if isinstance(in_lmid, str):
          if isinstance(my_lmid, list):
-           if not in_lmid in my_lmid:
+           if in_lmid not in my_lmid:
              my_lmid.append(in_lmid)
              if len(my_lmid) > self.irc_mid_pipeline_size:
                del my_lmid[0]
@@ -1593,7 +1593,7 @@ class PyLayerIRC( irciot_shared_ ):
            my_lmid = [ in_lmid ]
        if isinstance(in_omid, str):
          if isinstance(my_omid, list):
-           if not in_omid in my_omid:
+           if in_omid not in my_omid:
              my_omid.append(in_omid)
              if len(my_omid) > self.irc_mid_pipeline_size:
                del my_omid[0]
@@ -1637,7 +1637,7 @@ class PyLayerIRC( irciot_shared_ ):
          my_bkey = in_bkey
        if isinstance(in_lmid, str):
          if isinstance(my_lmid, list):
-           if not in_lmid in my_lmid:
+           if in_lmid not in my_lmid:
              my_lmid.append(in_lmid)
              if len(my_lmid) > self.irc_mid_pipeline_size:
                del my_lmid[0]
@@ -1649,7 +1649,7 @@ class PyLayerIRC( irciot_shared_ ):
          my_bkto = in_bkto
        if isinstance(in_omid, str):
          if isinstance(my_omid, list):
-           if not in_omid in my_omid:
+           if in_omid not in my_omid:
              my_omid.append(in_omid)
              if len(my_omid) > self.irc_mid_pipeline_size:
                del my_omid[0]

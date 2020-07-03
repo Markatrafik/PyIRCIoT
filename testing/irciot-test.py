@@ -77,6 +77,9 @@ class PyLayerIRCIoTTest(unittest.TestCase):
   def test014_test_multibigval_(self):
     self.assertEqual(ii_test_multibigval_(), True)
 
+  def test017_test_multinextbig_(self):
+    self.assertEqual(ii_test_multinextbig_(), True)
+
   def test018_test_defrag3loop_(self):
     ii.irciot_disable_blockchain_()
     ii.irciot_enable_encryption_(ii.CONST.tag_ENC_B64_ZLIB)
@@ -425,6 +428,51 @@ def ii_test_multibigval_():
   return False
   # End of ii_test_multibigval_()
 
+def ii_test_multinextbig_():
+  datumset_text  = '[{"ot":"maireq","t":"2018-08-23 14:48:01.113333",'
+  datumset_text += '"dst":"MUSICA@Kidsroom","src":"maiengine",'
+  datumset_text += '"cnd":{"relay3":"?"}},'
+  datumset_text += '{"bigval":"realbigval-hello-wolrd-big-string-NNN-xxx55'
+  datumset_text += '55zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz-vvvvvvvvvvvvvvvv'
+  datumset_text += 'vvvvv-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-xxxxxxxxxx'
+  datumset_text += 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+  datumset_text += 'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn'
+  datumset_text += 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+  datumset_text += 'xxxxxxxxxxxxxxxxxxx","ot":"maireq","dst":"MUSICA@Kidsroom",'
+  datumset_text += '"t":"2018-08-23 14:48:07.115959","src":"maiengine",'
+  datumset_text += '"cnd":{"temperature":"?"}},{"ot":"maireq",'
+  datumset_text += '"dst":"MUSICA@Kidsroom","t":"2018-08-23 14:48:07.116012",'
+  datumset_text += '"src":"maiengine","cnd":{"humidity":"?"}},'
+  datumset_text += '{"ot":"maireq","dst":"IPC1002@Kidsroom",'
+  datumset_text += '"t":"2018-08-23 14:48:07.116048",'
+  datumset_text += '"src":"maiengine","cnd":{"kidsdoor":"?"}},'
+  datumset_text += '{"ot":"maireq","dst":"TUX2@Livingroom",'
+  datumset_text += '"t":"2018-08-23 14:48:08.11253","src":"maiengine",'
+  datumset_text += '"cnd":{"temperature":"?"}},{"ot":"maireq",'
+  datumset_text += '"dst":"TUX2@Livingroom","t":"2018-08-23 14:48:08.11752",'
+  datumset_text += '"src":"maiengine","cnd":{"humidity":"?"}}]'
+  if JSON_TEST_is_irciot_datumset_(datumset_text):
+   json_text, my_skip, my_part \
+    = ii.irciot_encap_(datumset_text, 0, 0, \
+     ii.CONST.api_vuid_self)
+   to_log_("irciot_encap_(): " \
+    + "skip = {}, part = {}.".format(my_skip, my_part))
+   if JSON_TEST_is_irciot_(json_text):
+    test_ok = 1
+    while ((my_skip > 0) or (my_part > 0)):
+     json_text, my_skip, my_part \
+      = ii.irciot_encap_(datumset_text, my_skip, my_part, \
+       ii.CONST.api_vuid_self)
+     to_log_("irciot_encap_(): " \
+      + "skip = {}, part = {}.".format(my_skip, my_part))
+     if not JSON_TEST_is_irciot_(json_text):
+      test_ok = 0
+    if test_ok == 1:
+     to_log_("TEST_IS_OK")
+     return True
+  return False
+  # End of ii_test_multinextbig_()
+
 def ii_test_defrag3loop_():
   datumset_text  = '[{"bigval":"long-long-value-xxxxxxxxxxxxxxxxxxxxxxxxxxx'
   datumset_text += 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
@@ -540,6 +588,9 @@ def main():
 
  if my_command == 'multibigval':
    ii_test_multibigval_()
+
+ if my_command == 'multinextbig':
+   ii_test_multinextbig_()
 
  if my_command == 'c1integrity':
    ii_test_c1integrity_()
