@@ -155,12 +155,10 @@ class PyLayerCOM( irciot_shared_ ):
    tel_IAC  = b'\xff' # Interpret As Command
    tel_2IAC = b'\xff\xff'
    #
-   err_CONNECT_CLOSED = 3004
    err_RECONNECTING   = 3007
    #
    err_DESCRIPTIONS = irciot_shared_.CONST.err_DESCRIPTIONS
    err_DESCRIPTIONS.update({
-    err_CONNECT_CLOSED : "Connection closed",
     err_RECONNECTING   : "reconnecting to Serial over Network, (try: {}) ..."
    })
    #
@@ -421,7 +419,7 @@ class PyLayerCOM( irciot_shared_ ):
    if not self.__com_run:
      return
    self.com_disconnect_()
-   self.to_log_(self.errors[self.CONST.err_CONNECT_CLOSED] + ", " \
+   self.to_log_(self.errors[self.CONST.err_CLOSED] + ", " \
      + self.errors[self.CONST.err_RECONNECTING].format(self.com_recon))
    # sleep(self.CONST.com_first_wait * self.com_recon)
    self.com_recon += 1

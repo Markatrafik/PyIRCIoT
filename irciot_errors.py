@@ -6,6 +6,8 @@ def irciot_get_common_error_descriptions_(in_human_language):
      6: " мин.",
      7: " ч.",
      8: " байт",
+    10: "Соединение закрыто",
+    12: "Подключаемся к ",
    101: "Несоответствие версии протокола",
    102: "Несоответствие версии библиотеки",
    103: "Недопустимое значение поля 'dp' при дефрагментации",
@@ -46,6 +48,8 @@ def irciot_get_common_error_descriptions_(in_human_language):
      6: " Min.",
      7: " St.",
      8: " Byte(s)",
+    10: "Verbindung geschlossen",
+    12: "Verbindung zum ",
    101: "Nicht übereinstimmende Protokollversion",
    102: "Nicht übereinstimmende Bibliotheksversion",
    103: "Falscher 'dp'-Feldwert während der Defragmentierung",
@@ -100,7 +104,7 @@ def irciot_get_EL_error_descriptions_(in_human_language):
    1121: "оператор 'import' не допускается",
    1122: "конструкция 'import' 'from' недопсутима",
    1131: "имя '{}' зарезерировано",
-   1151: "Нераспозноваемый ввод: '{}'"
+   1151: "Нераспознаваемый ввод: '{}'"
   }
  elif in_human_language == "de": # Deutsch
   return {
@@ -140,12 +144,10 @@ def irciot_get_rfc1459_error_descriptions_(in_human_language):
 def irciot_get_rfc2217_error_descriptions_(in_human_language):
  if in_human_language == "ru": # Russian Language
   return {
-   3004: "Соединение закрыто",
    3007: "переподключаемся к COM порту через сеть, (попытка: {}) ..."
  }
  elif in_human_language == "de": # Deutsch
   return {
-   3004: "Verbindung geschlossen",
    3007: "Stellt Verbindung zu COM über Netzwerk, (Versuch: {}) ..."
  }
  return {}

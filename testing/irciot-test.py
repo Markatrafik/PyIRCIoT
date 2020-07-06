@@ -83,10 +83,14 @@ class PyLayerIRCIoTTest(unittest.TestCase):
   def test016_test_new2018datums_(self):
     self.assertEqual(ii_test_new2018datums_(), True)
 
-  def test018_test_defrag3loop_(self):
+  def test017_test_defrag3loop_(self):
     ii.irciot_disable_blockchain_()
     ii.irciot_enable_encryption_(ii.CONST.tag_ENC_B64_ZLIB)
     self.assertEqual(ii_test_defrag3loop_(), True)
+
+  def test018_test_defrag1b64p_(self):
+    ii.irciot_enable_encryption_(ii.CONST.tag_ENC_BASE64)
+    self.assertEqual(ii_test_defrag1b64p_(), True)
 
   def test020_test_version_(self):
     self.assertEqual(ii_test_version_(), True)
@@ -105,7 +109,7 @@ def JSON_TEST_is_irciot_(my_json_text):
  if (len(my_json_text) > ii.irciot_get_mtu_()):
    to_log_("IRC-IoT Message length out of MTU range.")
    return False
- if (not ii.is_irciot_(my_json_text)):
+ if not ii.is_irciot_(my_json_text):
    to_log_("is_irciot_() = *** This is not an IRC-IoT message ...")
    return False
  else:
@@ -568,6 +572,35 @@ def ii_test_new2018datums_():
   return False
   # End of ii_test_new2018datums_()
 
+def ii_test_defrag1b64p_():
+  to_log_("Input datums to irciot_deinencap_() functions")
+  msg_test  = '{"mid":"43907","o":{"oid":"5101","ot":"maireq",'
+  msg_test += '"d":{"bp":0,"did":"248","bc":451,"ed":"'
+  msg_test += 'eyJ0IjoiMjAxOC0wOC0yMyAxNDo0ODowNy4xMTU5NTkiLCJzcmMiOiJtYWllbmd'
+  msg_test += 'pbmUiLCJjbmQiOnsidGVtcGVyYXR1cmUiOiI/In0sImRzdCI6Ik1VU0lDQUBLaW'
+  msg_test += 'Rzcm9vbSIsImJpZ3ZhbCI6InJlYWxiaWd2YWwtaGVsbG8td29scmQtYmlnLXN0c'
+  msg_test += 'mluZy1OTk4teHh4NTU1NXp6enp6enp6enp6enp6enp6enp6enp6enp6enp6enp6'
+  msg_test += 'enp6ei12dnZ2dnZ2dnZ2dnYtYWFhYWFhYWFhYWFhYWFhYWFhYWF'
+  msg_test += 'hYWFhYWFhYWFhYWFhYWFhYWEteHh4eHh4eHh4eHh4eHh4"}}}'
+  if JSON_TEST_is_irciot_(msg_test):
+    out_json  = ii.irciot_deinencap_(msg_test, \
+      ii.CONST.api_vuid_self)
+    if out_json == "[]":
+      msg_test  = '{"mid":"43908","o":{"oid":"5101","ot":"maireq",'
+      msg_test += '"d":{"bp":360,"did":"248","bc":451,"ed":"'
+      msg_test += 'eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh'
+      msg_test += '4eHh2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dn'
+      msg_test += 'Z2dnZ2dnZ2dnZ2eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4e'
+      msg_test += 'Hh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHgifQ=="}}}'
+      if JSON_TEST_is_irciot_(msg_test):
+        out_json = ii.irciot_deinencap_(msg_test, \
+          ii.CONST.api_vuid_self)
+        if JSON_TEST_is_irciot_datumset_(out_json):
+          to_log_("TEST_IS_OK")
+          return True
+  return False
+  # End of ii_test_defrag1b64p_()
+
 my_command = ""
 my_params  = []
 
@@ -661,6 +694,13 @@ def main():
      to_log_("TEST_IS_SKIPPED")
      return
    ii_test_bchsigning_()
+
+ if my_command == 'defrag1b64p':
+   if ii.crypt_method != ii.CONST.tag_ENC_BASE64:
+     # The test is correct only for b64p encryption method
+     to_log_("TEST_IS_SKIPPED")
+     return
+   ii_test_defrag1b64p_()
 
  if my_command == 'defrag3loop':
    # The following workarounds should be resolved:

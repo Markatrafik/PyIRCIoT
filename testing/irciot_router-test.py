@@ -52,7 +52,7 @@ def JSON_TEST_is_irciot_(my_json_text):
  if (len(my_json_text) > ii.irciot_get_mtu_()):
    to_log_("IRC-IoT Message length out of MTU range.")
    return False
- if (not ii.is_irciot_(my_json_text)):
+ if not ii.is_irciot_(my_json_text):
    to_log_("is_irciot_() = *** This is not an IRC-IoT message ...")
    return False
  else:
@@ -62,7 +62,7 @@ def JSON_TEST_is_irciot_(my_json_text):
 def JSON_TEST_is_irciot_datumset_(my_datumset_text):
  to_log_("Testing Datums set: @\033[1m{}\033[0m@len={}@".format( \
    my_datumset_text, len(my_datumset_text)))
- if (not ii.is_irciot_datumset_(my_datumset_text)):
+ if not ii.is_irciot_datumset_(my_datumset_text):
    to_log_("is_irciot_datumset_() = *** This is not IRC-IoT datum set ...")
    return False
  else:
@@ -205,12 +205,12 @@ def main():
  global my_params
 
  my_params = []
- if (len(sys.argv) > 1):
+ if len(sys.argv) > 1:
    my_command = sys.argv[1]
  for my_idx in range(2, 6):
    if len(sys.argv) > my_idx:
      my_params += [ sys.argv[my_idx] ]
- if (my_command == ""):
+ if my_command == "":
    my_command = 'default'
 
  if 'rsa1024' in my_params:

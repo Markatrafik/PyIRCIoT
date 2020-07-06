@@ -1952,7 +1952,7 @@ class PyLayerIRC( irciot_shared_ ):
    if not self.irc_run:
      return
    self.irc_disconnect_()
-   self.to_log_("Connection closed, " \
+   self.to_log_(self.errors[self.CONST.err_CLOSED] + ", " \
     + "reconnecting to IRC (try: {}) ... ".format(self.__irc_recon))
    my_mult = self.__irc_recon
    if self.__join_retry > self.__join_retry_max:
@@ -2828,7 +2828,7 @@ class PyLayerIRC( irciot_shared_ ):
          irc_init += 1
 
        if irc_init == 1:
-         # self.to_log_("Connecting to " \
+         # self.to_log_(self.errors[self.CONST.err_CONNTO] \
          #  + "'{}:{}'".format(self.irc_server_ip, self.irc_port))
          self.__irc_silnece = 0
          try:

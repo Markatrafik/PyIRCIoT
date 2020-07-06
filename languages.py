@@ -128,6 +128,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   mod_BSHLEX = 'bashlex'
   mod_PHPLEX = 'phply.phplex'
   mod_PHPPAR = 'phply.phpparse'
+  mod_R_ROBJ = 'rpy2.robjects'
   mod_MATH = 'math'
   mod_JRE = 'py4j.java_gateway'
   mod_JS  = 'js2py'
@@ -162,6 +163,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
    'IS_GREATER', 'IS_SMALLER', 'LBRACE', 'RBRACE', 'NOT', 'XOR', 'FOR', 'WHILE',
    'QUOTE', 'ENCAPSED_AND_WHITESPACE', 'CONSTANT_ENCAPSED_STRING', 'IS_NOT_EQUAL' }
   lang_filter_PHP_regexps  = []
+  lang_filter_R_regexps    = []
   lang_filter_RUBY_regexps = []
   lang_filter_LUA_regexps  = []
   lang_filter_TCL_regexps  = [ '.*package\s*require.*', '.*vwait.*' ]
@@ -439,6 +441,12 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   return True
 
  # incomplete
+ def irciot_EL_check_R_code_(self, in_code):
+  if not self.irciot_EL_check_matchers_(in_code, self.__R_filter_matchers):
+    return False
+  return True
+
+ # incomplete
  def irciot_EL_check_code_(self, in_lang, in_code):
   if not self.irciot_EL_check_lang_(in_lang):
     return False
@@ -469,6 +477,8 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
     return self.irciot_EL_check_PHP_code_(in_code)
   elif in_lang == self.CONST.lang_PYTHON:
     return self.irciot_EL_check_Python_code_(in_code)
+  elif in_lang == self.CONST.lang_R:
+    return self.irciot_EL_check_R_code_(in_code)
   elif in_lang == self.CONST.lang_RUBY:
     return self.irciot_EL_check_Ruby_code_(in_code)
   elif in_lang == self.CONST.lang_TCL:
@@ -700,6 +710,13 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   # End of __irciot_EL_run_Ruby_code_()
 
  # incomplete
+ def __irciot_EL_run_R_code_(self, in_code, in_environment):
+
+  return None
+  #
+  # End of __irciot_EL_run_R_code_()
+
+ # incomplete
  def irciot_EL_run_code_(self, in_lang, in_code, in_environment = {}):
   def __timeout_signal_(in_signal, in_frame):
     self.__timeout_termination_()
@@ -738,7 +755,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
     elif in_lang == self.CONST.lang_PHP:
       my_out = self.__irciot_EL_run_PHP_code_(in_code, in_environment)
     elif in_lang == self.CONST.lang_R:
-      pass
+      my_out = self.__irciot_EL_run_R_code_(in_code, in_environment)
     elif in_lang == self.CONST.lang_PYTHON:
       my_out = self.__irciot_EL_run_Python_code_(in_code, in_environment)
     elif in_lang == self.CONST.lang_RUBY:
@@ -860,6 +877,9 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
       return True
     self.irciot_EL_error_(self.CONST.err_UNSUPPORTED_YET, None)
   elif in_lang == self.CONST.lang_R:
+    self.__R_filter_matchers = \
+     self.__irciot_EL_matchers_(self.CONST.lang_filter_R_regexps)
+    self.__R_ROBJ = self.irciot_EL_import(self.CONT.mod_R_ROBJ)
     self.irciot_EL_error_(self.CONST.err_UNSUPPORTED_YET, None)
   elif in_lang == self.CONST.lang_PYTHON:
     self.__PYTHON_filter_matchers = \
@@ -922,7 +942,8 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
       del self.__PHPLEX
       del self.__PHP_filter_matchers
     elif in_lang == self.CONST.lang_R:
-      pass
+      del self.__R_ROBJ
+      del self.__R_filter_matchers
     elif in_lang == self.CONST.lang_PYTHON:
       del self.__PYTHON_filter_matchers
     elif in_lang == self.CONST.lang_RUBY:
