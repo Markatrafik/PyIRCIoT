@@ -432,7 +432,8 @@ class PyLayerCOM( irciot_shared_ ):
      if com_out == "":
        return -1
      if self.com_debug:
-       self.to_log_("Sending to Serial over Network: [" + com_out + "]")
+       self.to_log_(self.errors[self.CONST.err_SENDTO] \
+        + "Serial over Network: [" + com_out + "]")
      #self.com_send(bytes(com_out + "\n", self.com_encoding))
      sleep(self.CONST.com_micro_wait)
      com_out = ""

@@ -11,6 +11,7 @@ export TEST_IRCIOTR_LIB="./irciot_router.py"
 export TEST_RFC1459_LIB="./rfc1459.py"
 export TEST_LANGUAGES_LIB="./languages.py"
 export PYTHON3_BINARY="/usr/bin/python3"
+export HEAD_BINARY="/usr/bin/head"
 export GREP_BINARY="/bin/grep"
 
 
@@ -20,6 +21,12 @@ if [ ! -x "${PYTHON3_BINARY}" ]; then
  echo "Cannot find Python interpreter: '${PYTHON3_BINARY}'."
  exit 1
 fi
+for THE_BINARY in "${HEAD_BINARY}" "${GREP_BINARY}" ; do
+ if [ ! -x "${THE_BINARY}" ]; then
+  echo "Cannot find executable binary: '${THE_BINARY}'"
+  exit 1
+ fi
+done
 
 for TEST_CMD in "${TEST_IRCIOT_CMD}" "${TEST_IRCIOTR_CMD}" \
  "${TEST_RFC1459_CMD}" "${TEST_LANGUAGES_CMD}" ; do
@@ -102,7 +109,7 @@ function run_tests () {
    export OUTDATA="$(checksyntax "${TEST_LIB}")"
  else export OUTDATA="$("${TEST_CMD}" \
   "${4}" "${1}" "${2}" "${3}" \
-   2>/dev/null | /usr/bin/head -n 4096 2>/dev/null)" ; fi
+   2>/dev/null | "${HEAD_BINARY}" -n 4096 2>/dev/null)" ; fi
  let TEST_COUNT=TEST_COUNT+1
  echo "${OUTDATA}" | "${GREP_BINARY}" -e "TEST_IS_OK" \
   1>/dev/null ; ERRLVOK=$?
@@ -131,7 +138,7 @@ for j in "" big_mtu ; do
 for k in "" ed25519 rsa1024 ; do
 for l in "" base64 base85 base32 cryptrsa cryptaes ; do
 for m in default libirciot multidatum multibigval multinextbig \
-new2018datums defrag3loop defrag1b64p bchsigning ; do
+new2018datums defrag3loop defrag1b64p defrag2b64z bchsigning ; do
  run_tests "${j}" "${k}" "${l}" "${m}" irciot
 done
 done

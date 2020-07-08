@@ -49,10 +49,10 @@ def to_log_(in_text):
 def JSON_TEST_is_irciot_(my_json_text):
  to_log_("Testing JSON for IRC-IoT: @\033[1m{}\033[0m@len={}@".format( \
    my_json_text, len(my_json_text)))
- if (len(my_json_text) > ii.irciot_get_mtu_()):
+ if len(my_json_text) > ii.irciot_get_mtu_():
    to_log_("IRC-IoT Message length out of MTU range.")
    return False
- if not ii.is_irciot_(my_json_text):
+ if (not ii.is_irciot_(my_json_text)):
    to_log_("is_irciot_() = *** This is not an IRC-IoT message ...")
    return False
  else:
@@ -62,7 +62,7 @@ def JSON_TEST_is_irciot_(my_json_text):
 def JSON_TEST_is_irciot_datumset_(my_datumset_text):
  to_log_("Testing Datums set: @\033[1m{}\033[0m@len={}@".format( \
    my_datumset_text, len(my_datumset_text)))
- if not ii.is_irciot_datumset_(my_datumset_text):
+ if (not ii.is_irciot_datumset_(my_datumset_text)):
    to_log_("is_irciot_datumset_() = *** This is not IRC-IoT datum set ...")
    return False
  else:

@@ -471,7 +471,7 @@ class PyLayerUDPb( irciot_shared_ ):
     if not self.is_ip_address_(my_addr):
       return False
   if self.udpb_debug:
-    self.to_log_("Sending to " \
+    self.to_log_(self.errors[self.CONST.err_SENDTO] \
      + "UDP({}:{}): <{}>".format(my_addr, self.udpb_port, in_string))
   my_data = bytes(in_string, self.udpb_encoding)
   self.__udpb_server_sock.sendto(my_data, (my_addr, self.udpb_port))

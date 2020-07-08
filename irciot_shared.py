@@ -254,6 +254,7 @@ class irciot_shared_(object):
    err_BYTES  = 8
    err_CLOSED = 10
    err_CONNTO = 12
+   err_SENDTO = 15
    #
    err_DESCRIPTIONS = {
      err_SEC:    " sec.",
@@ -261,7 +262,8 @@ class irciot_shared_(object):
      err_HOURS:  " hr.",
      err_BYTES:  " byte(s)",
      err_CLOSED: "Connection closed",
-     err_CONNTO: "Connecting to "
+     err_CONNTO: "Connecting to ",
+     err_SENDTO: "Sending to "
    }
    #
    def __setattr__(self, *_):

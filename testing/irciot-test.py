@@ -92,6 +92,10 @@ class PyLayerIRCIoTTest(unittest.TestCase):
     ii.irciot_enable_encryption_(ii.CONST.tag_ENC_BASE64)
     self.assertEqual(ii_test_defrag1b64p_(), True)
 
+  def test019_test_defrag2b64z_(self):
+    ii.irciot_enable_encryption_(ii.CONST.tag_ENC_B64_ZLIB)
+    self.assertEqual(ii_test_defrag2b64z_(), True)
+
   def test020_test_version_(self):
     self.assertEqual(ii_test_version_(), True)
 
@@ -106,7 +110,7 @@ def to_log_(in_text):
 def JSON_TEST_is_irciot_(my_json_text):
  to_log_("Testing JSON for IRC-IoT: @\033[1m{}\033[0m@len={}@".format( \
    my_json_text, len(my_json_text)))
- if (len(my_json_text) > ii.irciot_get_mtu_()):
+ if len(my_json_text) > ii.irciot_get_mtu_():
    to_log_("IRC-IoT Message length out of MTU range.")
    return False
  if not ii.is_irciot_(my_json_text):
@@ -601,6 +605,34 @@ def ii_test_defrag1b64p_():
   return False
   # End of ii_test_defrag1b64p_()
 
+def ii_test_defrag2b64z_():
+  to_log_("Input datums to irciot_deinencap_() functions")
+  msg_test  = '{"mid":"62742","o":{"oid":"1581","ot":"request",'
+  msg_test += '"d":{"bp":0,"ed":"'
+  msg_test += 'eJzFUrtSwzAQ/BXmapuxbCmJ1QAFFRQMHaVtnT2yZQnkR8xk8u+cEjJQMZA'
+  msg_test += 'ibHGS9la7ze5gmkCCgwhGOtOEbeJkE6fZFeOSb2SyvmZM5CInwZKC5KsI1B'
+  msg_test += 'CkT493L/fPtw9aDd65nvbT66h7XHFB25pAVGUVyB1MXhN3A/sICqWcnQvPi'
+  msg_test += 'JgLMyEj2awXXXlnKQCKslIhjARcRDD4isj+HW2jLYaFMCAZxkke/g3aWWeD'
+  msg_test += 'WRIQzErdkDExxtkmPoxDULxcCvPFks6JGtAOzp9e9icp/t3930EN6LVSBql'
+  msg_test += 'kVIIRlzH+5Qjt4iCFYBE0hS+L5tME2+5N1dsW6860285g3XZmi219m",'
+  msg_test += '"did":"687","bc":388}}}'
+  if JSON_TEST_is_irciot_(msg_test):
+    out_json  = ii.irciot_deinencap_(msg_test, \
+      ii.CONST.api_vuid_self)
+    if out_json == "[]":
+      msg_test  = '{"mid":"62743","o":{"oid":"1581","ot":"request",'
+      msg_test += '"d":{"bp":349,"ed":"'
+      msg_test += 'oFsa6QnfFU8PVY8/UZlRyoLSXTn6/0HJ/xj+Q=='
+      msg_test += '","did":"687","bc":388}}}'
+      if JSON_TEST_is_irciot_(msg_test):
+        out_json = ii.irciot_deinencap_(msg_test, \
+          ii.CONST.api_vuid_self)
+        if JSON_TEST_is_irciot_datumset_(out_json):
+          to_log_("TEST_IS_OK")
+          return True
+  return False
+  # End of ii_test_defrag2b64z_()
+
 my_command = ""
 my_params  = []
 
@@ -701,6 +733,14 @@ def main():
      to_log_("TEST_IS_SKIPPED")
      return
    ii_test_defrag1b64p_()
+
+ if my_command == 'defrag2b64z':
+   if ii.crypt_method != ii.CONST.tag_ENC_B64_ZLIB:
+     # The test is correct only for b64z encryption method:
+     # ZLIB + BASE64 required
+     to_log_("TEST_IS_SKIPPED")
+     return
+   ii_test_defrag2b64z_()
 
  if my_command == 'defrag3loop':
    # The following workarounds should be resolved:

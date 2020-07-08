@@ -1969,7 +1969,7 @@ class PyLayerIRC( irciot_shared_ ):
      if irc_out == "":
        return -1
      if self.irc_debug:
-       self.to_log_("Sending to IRC: [" \
+       self.to_log_(self.errors[self.CONST.err_SENDTO] + "IRC: [" \
          + irc_out.replace('\r','\\r').replace('\n','\\n') + "\\n]")
      self.irc.send(bytes(irc_out + "\n", self.irc_encoding))
      sleep(self.CONST.irc_micro_wait)
