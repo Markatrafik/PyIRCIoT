@@ -44,7 +44,7 @@ class PyLayerIRC( irciot_shared_ ):
    #
    irciot_protocol_version = '0.3.33'
    #
-   irciot_library_version  = '0.0.217'
+   irciot_library_version  = '0.0.218'
    #
    # Bot specific constants
    #
@@ -215,7 +215,7 @@ class PyLayerIRC( irciot_shared_ ):
    # 25. "ratbox"     -- ircd-ratbox, @ EFNet, ver. 3.0.8, '2006
    # 26. "Rock"       -- rock-ircd aka RockIRCd (UnrealIRCd fork), '2009
    # 27. "Rubi"       -- RubiIRCd, Ruby based '2009
-   # 28. "RusNet"     -- ircd RusNet, @ RusNet, ver. 1.4.19
+   # 28. "RusNet"     -- ircd RusNet, @ RusNet, ver. 1.4.25, '2011
    # 29. "seven"      -- ircd-seven, ver. 1.1.3, '2007-2019
    # 30. "Shadow"     -- ShadowIRCd, ver. 6.3.3, '2003
    # 31. "snircd"     -- snircd (ircu fork), @ QuakeNet, ver. 1.3.4

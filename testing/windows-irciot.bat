@@ -3,6 +3,8 @@ SET SCRIPT=firstrun
 SET ROUTE_TESTS=default forwarding translation
 SET ROUTE_TESTS=%ROUTE_TESTS% lmrstatuses gmrstatuses
 SET IRC_TESTS=default isitip nicks masks langenc
+SET SON_TESTS=default isitip
+SET UDP_TESTS=default isitip
 SET LANG_TESTS=default lua js python pyrangefor pycosinus
 SET BASE_TESTS=default multidatum multibigval multinextbig libirciot
 SET BASE_TESTS=%BASE_TESTS% new2018datums defrag1b64p defrag2b64z
@@ -15,6 +17,8 @@ SET DLM=~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ~~~~~~~~~~
 SETLOCAL EnableExtensions EnableDelayedExpansion
 IF "%1"=="test_base" SET SCRIPT=irciot-test.py
 IF "%1"=="test_irc" SET SCRIPT=rfc1459-test.py
+IF "%1"=="test_son" SET SCRIPT=rfc2217-test.py
+IF "%1"=="test_udp" SET SCRIPT=udpbrcst-test.py
 IF "%1"=="test_route" SET SCRIPT=irciot_router-test.py
 IF "%1"=="test_lang" SET SCRIPT=irciot_languages-test.py
 IF %SCRIPT%==firstrun GOTO maintag
@@ -45,11 +49,13 @@ ENDLOCAL & EXIT /B
 CALL :banfunc Performing IRC-IoT basic tests
 FOR /D %%i IN (%BASE_UNARY%) DO CALL %0 test_base %%i
 FOR /D %%i IN (%BASE_TESTS%) DO CALL %0 test_base %%i
-CALL :banfunc Performing trasnport layer IRC (RFC1459)
+CALL :banfunc Performing transport layer IRC (RFC1459)
 FOR /D %%i IN (%IRC_TESTS%) DO CALL %0 test_irc %%i
+CALL :banfunc Performing transport layer UDP broadcast
+FOR /D %%i IN (%UDP_TESTS%) DO CALL %0 test_udp %%i
 CALL :banfunc Performing IRC-IoT routing engine
 FOR /D %%i IN (%ROUTE_TESTS%) DO CALL %0 test_route %%i
-CALL :banfunc Performing Extrnal Languages (EL)
+CALL :banfunc Performing External Languages (EL)
 FOR /D %%i IN (%LANG_TESTS%) DO CALL %0 test_lang %%i
 ECHO .
 ECHO done

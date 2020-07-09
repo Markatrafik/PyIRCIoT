@@ -43,7 +43,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.33'
   #
-  irciot_library_version  = '0.0.217'
+  irciot_library_version  = '0.0.218'
   #
   # IRC-IoT characters
   #
@@ -300,14 +300,14 @@ class PyLayerIRCIoT(object):
   #
   if CAN_compress_datum:
     if CAN_encrypt_datum:
-      tag_ENC_default = tag_ENC_B64Z_RSA
+      tag_ENC_default = tag_ENC_B85Z_RSA
     else:
-      tag_ENC_default = tag_ENC_B64_ZLIB
+      tag_ENC_default = tag_ENC_B85_ZLIB
   else:
     if CAN_encrypt_datum:
-      tag_ENC_default = tag_ENC_B64_RSA
+      tag_ENC_default = tag_ENC_B85_RSA
     else:
-      tag_ENC_default = tag_ENC_BASE64
+      tag_ENC_default = tag_ENC_BASE85
   #
   if CAN_mid_blockchain:
     tag_mid_default = tag_mid_ED25519

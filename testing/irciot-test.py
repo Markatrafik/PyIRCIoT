@@ -85,7 +85,7 @@ class PyLayerIRCIoTTest(unittest.TestCase):
 
   def test017_test_defrag3loop_(self):
     ii.irciot_disable_blockchain_()
-    ii.irciot_enable_encryption_(ii.CONST.tag_ENC_B64_ZLIB)
+    ii.irciot_enable_encryption_(ii.CONST.tag_ENC_B85_ZLIB)
     self.assertEqual(ii_test_defrag3loop_(), True)
 
   def test018_test_defrag1b64p_(self):
@@ -744,7 +744,8 @@ def main():
 
  if my_command == 'defrag3loop':
    # The following workarounds should be resolved:
-   if 'rsa1024' in my_params and 'crypt2fish' in my_params:
+   if ('rsa1024' in my_params or 'gost12' in my_params) \
+    and 'crypt2fish' in my_params:
      to_log_("TEST_IS_SKIPPED")
      return
    ii_test_defrag3loop_()

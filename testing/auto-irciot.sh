@@ -5,10 +5,14 @@ export SCRIPT_DIR="$(/usr/bin/dirname "${SCRIPT_NAME}" 2>/dev/null)"
 export TEST_IRCIOT_CMD="${SCRIPT_DIR}/irciot-test.py"
 export TEST_IRCIOTR_CMD="${SCRIPT_DIR}/irciot_router-test.py"
 export TEST_RFC1459_CMD="${SCRIPT_DIR}/rfc1459-test.py"
+export TEST_RFC2217_CMD="${SCRIPT_DIR}/rfc2217-test.py"
+export TEST_UDPBRCST_CMD="${SCRIPT_DIR}/udpbrcst-test.py"
 export TEST_LANGUAGES_CMD="${SCRIPT_DIR}/languages-test.py"
 export TEST_IRCIOT_LIB="./irciot.py"
 export TEST_IRCIOTR_LIB="./irciot_router.py"
 export TEST_RFC1459_LIB="./rfc1459.py"
+export TEST_RFC2217_LIB="./rfc2217.py"
+export TEST_UDPBRCST_LIB="./udpbrcst.py"
 export TEST_LANGUAGES_LIB="./languages.py"
 export PYTHON3_BINARY="/usr/bin/python3"
 export HEAD_BINARY="/usr/bin/head"
@@ -17,10 +21,12 @@ export GREP_BINARY="/bin/grep"
 
 if [ ! -f "${GREP_BINARY}" -a -f "/usr/bin/grep" ]; then
  export GREP_BINARY="/usr/bin/grep" ; fi # Btw, MacOS
+
 if [ ! -x "${PYTHON3_BINARY}" ]; then
  echo "Cannot find Python interpreter: '${PYTHON3_BINARY}'."
  exit 1
 fi
+
 for THE_BINARY in "${HEAD_BINARY}" "${GREP_BINARY}" ; do
  if [ ! -x "${THE_BINARY}" ]; then
   echo "Cannot find executable binary: '${THE_BINARY}'"
@@ -91,6 +97,12 @@ function run_tests () {
  elif [ "x${5}x" == "xrfc1459x" ]; then
   export TEST_CMD="${TEST_RFC1459_CMD}"
   export TEST_LIB="${TEST_RFC1459_LIB}"
+ elif [ "x${5}x" == "xrfc2217x" ]; then
+  export TEST_CMD="${TEST_RFC2217_CMD}"
+  export TEST_LIB="${TEST_RFC2217_LIB}"
+ elif [ "x${5}x" == "xudpbrcstx" ]; then
+  export TEST_CMD="${TEST_UDPBRCST_CMD}"
+  export TEST_LIB="${TEST_UDPBRCST_LIB}"
  else echo "Unknown section: '${5}'" ; exit 1 ; fi
  if [ "x${1}x" != "xx" ]; then
   export TEST_NAME="${TEST_NAME}'${1}' " ; fi
@@ -152,6 +164,15 @@ echo -ne 'PyLayerIRC tests'
 echo -ne ' -------------------\033[0m\n'
 for m in syntax ascii isitip nicks masks langenc ; do
  run_tests "" "" "" "${m}" rfc1459
+done
+fi
+
+if [ -x "${TEST_UDPBRCST_CMD}" ]; then
+echo -ne '\033[1;36m------------------ '
+echo -ne 'PyLayerUDPb tests'
+echo -ne ' ------------------\033[0m\n'
+for m in syntax ascii isitip ; do
+ run_tests "" "" "" "${m}" udpbrcst
 done
 fi
 

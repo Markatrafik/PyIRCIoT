@@ -13,12 +13,6 @@
  ............: loading of dynamic modules is selected, provide
  ~ Must be ~ : for their automatic unloading by timeout.
 
-  2020-02-05 : It is need to debug the BASE85 base coding in
- ............: combination with RSA cryptographic encryption.
- ~ Urgent! ~ : BASE85 coding can be set by default, instead
- ............: of BESE64, since it saves 6%, it is still 7-bit
- ~ Must be ~ : and allows it to be placed in the JSON string.
-
   2020-02-08 : There is some warnings in the 'twofish' module:
  ............: PendingDeprecationWarning: import 'imp' module;
   Figure out : ResourceWarning: unclosed file 'BufferedReader'
@@ -68,4 +62,8 @@
   2020-07-01 : It will be useful to implement PEP 257 "Doctring
  ............: Conventions" recomendations from official Python
   ~ Useful ~ : Developer's Guide for PyIRCIoT demo library code.
+
+  2020-07-09 : It is need to create a set of functions to start
+ ............: working in the Docker environment when using the
+ ~ Must be ~ : PyLayerIRCIoT_EL_ class
 

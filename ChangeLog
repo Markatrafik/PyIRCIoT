@@ -155,7 +155,7 @@
 	the PyLayerIRCIoT.CONST class. Now the default value is 440 bytes.
 
 2020-05-24 23:53 GMT+7 PyIRCIoT 0.0.205 Alexey Y. Woronov <alexey@woronov.ru>
-	The constants with the prefix code_* in the class PyLayerIRC.CONST
+	* The constants with the prefix code_* in the class PyLayerIRC.CONST
 	are renamed to commonly accepted, with the prefixes RPL_* and ERR_*
 
 2020-05-28 07:35 GMT+7 PyIRCIoT 0.0.209 Alexey Y. Woronov <alexey@woronov.ru>
@@ -170,7 +170,7 @@
 	at the moment most of these changes are not involved, however, all of
 	them will be used, now, you also can use them for experimental purposes.
 
-2020-06-18 16:30 GMT+17 PyIRCIoT 0.0.215 Alexey Y. Woronov <alexey@woronov.ru>
+2020-06-18 16:30 GMT+7 PyIRCIoT 0.0.215 Alexey Y. Woronov <alexey@woronov.ru>
 	Starting with this version, in all interaсtive methods, logs, errors and
 	UI the construction ''.format() will be used, instead of %s but it will
 	remain in the dataflow methods until we make sure that the alternative
@@ -178,4 +178,10 @@
 	when Python version 3.7 and higher will gain great popularity, and
 	younger versions will no longer be used on a large amount of hardware,
 	we will move on to F-Strings.
+
+2020-07-09 09:35 GMT+7 PyIRCIoT 0.0.218 Alexey Y. Woronov <alexey@woronov.ru>
+	* Since Version 0.0.218 of PyIRCIoT library, BASE85 is taken as the base
+	coding instead of BASE64, if you still want to use BASE64, you need to
+	use the PyLayerIRCIoT.irciot_enable_encryption_() method with the appro-
+	priate parameters for backward compatibility.
 
