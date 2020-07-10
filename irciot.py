@@ -2594,7 +2594,7 @@ class PyLayerIRCIoT(object):
  def irciot_get_mtu_(self):
   return self.__message_MTU
 
- def irciot_get_imtu(self):
+ def irciot_get_imtu_(self):
   return self.__initial_MTU
 
  def is_irciot_ldict_type_(self, in_variable, in_type_id):
@@ -2676,41 +2676,41 @@ class PyLayerIRCIoT(object):
 
  def is_irciot_datum_(self, in_datum, in_ot, in_src, in_dst):
   if self.CONST.tag_ENC_DATUM in in_datum:
-     if isinstance(in_datum[self.CONST.tag_ENC_DATUM], str):
-        return True # Stub
+    if isinstance(in_datum[self.CONST.tag_ENC_DATUM], str):
+      return True # Stub
   # Object Type filed must exists or inherits
-  if not self.CONST.tag_OBJECT_TYPE in in_datum:
-     if in_ot == None:
-        return False
-     my_ot = in_ot
+  if self.CONST.tag_OBJECT_TYPE not in in_datum:
+    if in_ot == None:
+      return False
+    my_ot = in_ot
   else:
-     my_ot = in_datum[self.CONST.tag_OBJECT_TYPE]
+    my_ot = in_datum[self.CONST.tag_OBJECT_TYPE]
   if not isinstance(my_ot, str):
-     return False
+    return False
   # Fragmented message header:
   if self.CONST.tag_DATUM_BC in in_datum:
-     if not isinstance(in_datum[self.CONST.tag_DATUM_BC], int):
-        return False # Bytes Count must be int
-     if self.CONST.tag_DATUM_BP in in_datum:
-        if not isinstance(in_datum[self.CONST.tag_DATUM_BP], int):
-           return False # Bytes Passed must be int
-        if in_datum[self.CONST.tag_DATUM_BP] \
-         > in_datum[self.CONST.tag_DATUM_BC]:
-           return False
+    if not isinstance(in_datum[self.CONST.tag_DATUM_BC], int):
+      return False # Bytes Count must be int
+    if self.CONST.tag_DATUM_BP in in_datum:
+      if not isinstance(in_datum[self.CONST.tag_DATUM_BP], int):
+        return False # Bytes Passed must be int
+      if in_datum[self.CONST.tag_DATUM_BP] \
+       > in_datum[self.CONST.tag_DATUM_BC]:
+        return False
   # Source address field must exists or inherits
   if not self.CONST.tag_SRC_ADDR in in_datum:
-     if in_src == None:
-        return False
+    if in_src == None:
+      return False
   else:
-     if not isinstance(in_datum[self.CONST.tag_SRC_ADDR], str):
-        return False
+    if not isinstance(in_datum[self.CONST.tag_SRC_ADDR], str):
+      return False
   # Destination address field must exits or ihnerits
   if not self.CONST.tag_DST_ADDR in in_datum:
-     if in_dst == None:
-        return False
+    if in_dst == None:
+      return False
   else:
-     if not isinstance(in_datum[self.CONST.tag_DST_ADDR], str):
-        return False
+    if not isinstance(in_datum[self.CONST.tag_DST_ADDR], str):
+      return False
   #
   if self.irciot_ldict_get_item_by_ot_(my_ot) != None:
     if not self.is_irciot_ldict_object_(in_datum, None, my_ot):
@@ -2757,81 +2757,81 @@ class PyLayerIRCIoT(object):
   
   def is_irciot_object_(self, in_object):
     if not self.CONST.tag_OBJECT_ID in in_object: # IRC-IoT Object ID
-       return False
+      return False
     if in_object[self.CONST.tag_OBJECT_ID] == "":
-       return False
+      return False
     if not self.CONST.tag_OBJECT_TYPE in in_object:
-       in_object[self.CONST.tag_OBJECT_TYPE] = None
-       # it will test all datums for "object type"
+      in_object[self.CONST.tag_OBJECT_TYPE] = None
+      # it will test all datums for "object type"
     if in_object[self.CONST.tag_OBJECT_TYPE] == "":
-       return False
+      return False
     if not self.CONST.tag_DATUM in in_object:
-       return False
+      return False
     my_datums = in_object[self.CONST.tag_DATUM] 
     my_src = None
     if self.CONST.tag_SRC_ADDR in in_object:
-       my_src = in_object[self.CONST.tag_SRC_ADDR]
+      my_src = in_object[self.CONST.tag_SRC_ADDR]
     my_dst = None
     if self.CONST.tag_DST_ADDR in in_object:
-       my_dst = in_object[self.CONST.tag_DST_ADDR]
+      my_dst = in_object[self.CONST.tag_DST_ADDR]
     # Fragmented message header:
     if self.CONST.tag_OBJECT_DC in in_object:
-       if not isinstance(in_object[self.CONST.tag_OBJECT_DC], int):
-          return False # Datums Count must be int
-       if self.CONST.tag_DATUM_BP in in_object:
-          if not isinstance(in_datum[self.CONST.tag_OBJECT_DP], int):
-             return False # Datums Passed must be int
-          if in_object[self.CONST.tag_DATUM_BP] \
-           > in_object[self.CONST.tag_DATUM_BC]:
-             return False
+      if not isinstance(in_object[self.CONST.tag_OBJECT_DC], int):
+        return False # Datums Count must be int
+      if self.CONST.tag_DATUM_BP in in_object:
+        if not isinstance(in_datum[self.CONST.tag_OBJECT_DP], int):
+          return False # Datums Passed must be int
+        if in_object[self.CONST.tag_DATUM_BP] \
+         > in_object[self.CONST.tag_DATUM_BC]:
+          return False
     # Go deeper
     if isinstance(my_datums, dict):
-       my_datums = [ my_datums ]
+      my_datums = [ my_datums ]
     if isinstance(my_datums, list):
-       for my_datum in my_datums:
-          if not self.is_irciot_datum_(my_datum, \
-           in_object[self.CONST.tag_OBJECT_TYPE], my_src, my_dst):
-             return False
-       return True
+      for my_datum in my_datums:
+        if not self.is_irciot_datum_(my_datum, \
+          in_object[self.CONST.tag_OBJECT_TYPE], my_src, my_dst):
+            return False
+      return True
     return True
     #
     # End of is_irciot_() :: is_irciot_object_()
 
   def is_irciot_container_(self, in_container):
     if not self.CONST.tag_MESSAGE_ID in in_container:
-       return False
+      return False
     if in_container[self.CONST.tag_MESSAGE_ID] == "":
-       return False
+      return False
     if self.CONST.tag_MESSAGE_OC in in_container:
-       if not isinstance(in_container[self.CONST.tag_MESSAGE_OC], int):
-          return False # Objects Count must be int
+      if not isinstance(in_container[self.CONST.tag_MESSAGE_OC], int):
+        return False # Objects Count must be int
     else:
-       in_container[self.CONST.tag_MESSAGE_OC] = 1
+      in_container[self.CONST.tag_MESSAGE_OC] = 1
     if self.CONST.tag_MESSAGE_OP in in_container:
-       if not isinstance(in_container[self.CONST.tag_MESSAGE_OP], int):
-          return False # Objects Passed must be int
-       if in_container[self.CONST.tag_MESSAGE_OP] \
-        > in_container[self.CONST.tag_MESSAGE_OC]:
-          return False
+      if not isinstance(in_container[self.CONST.tag_MESSAGE_OP], int):
+        return False # Objects Passed must be int
+      if in_container[self.CONST.tag_MESSAGE_OP] \
+       > in_container[self.CONST.tag_MESSAGE_OC]:
+        return False
     else:
-       in_container[self.CONST.tag_MESSAGE_OP] = 1
+      in_container[self.CONST.tag_MESSAGE_OP] = 1
     if not self.CONST.tag_OBJECT in in_container:
-       if self.CONST.tag_VERSION in in_container:
-          in_container[self.CONST.tag_OBJECT] = []
-       elif self.CONST.tag_RETRY_LOST in in_container:
-          in_container[self.CONST.tag_OBJECT] = []
-          return True
-       else: # IRC-IoT Object must exists
-          return False
+      if self.CONST.tag_VERSION in in_container:
+        in_container[self.CONST.tag_OBJECT] = []
+      elif self.CONST.tag_RETRY_LOST in in_container:
+        in_container[self.CONST.tag_OBJECT] = []
+        return True
+      else: # IRC-IoT Object must exists
+        return False
     my_objects = in_container[self.CONST.tag_OBJECT]
     if isinstance(my_objects, list):
       for my_object in my_objects:
-         if not is_irciot_object_(self, my_object):
-           return False
+        if not is_irciot_object_(self, my_object):
+          return False
       return True
     elif isinstance(my_objects, dict):
       if not is_irciot_object_(self, my_objects):
-         return False
+        return False
       return True
     return False
     #
@@ -2876,8 +2876,8 @@ class PyLayerIRCIoT(object):
       (test_dt, test_ot, test_src, test_dst, \
        test_dc, test_dp, test_bc, test_bp, test_did) = test_header
       if in_did == test_did:
-         self.defrag_pool.remove(my_item)
-         break
+        self.defrag_pool.remove(my_item)
+        break
   except:
     pass
   self.__defrag_lock = False
@@ -3923,25 +3923,25 @@ class PyLayerIRCIoT(object):
         else:
            one_datum = 1 # One "Datum" in list, and it is too large
      if isinstance(my_datums, dict):
-        one_datum = 1    # One large "Datum" without list
+       one_datum = 1    # One large "Datum" without list
      if my_encrypt:
-        one_datum = 1
+       one_datum = 1
      if one_datum == 1:
-        self.current_mid = save_mid # Message ID rollback
-        (my_irciot, my_datums_part) \
-         = self.irciot_encap_bigdatum_(my_datums, in_part, in_vuid)
-        if my_datums_part == 0:
-          my_datums_skip += 1
+       self.current_mid = save_mid # Message ID rollback
+       (my_irciot, my_datums_part) \
+        = self.irciot_encap_bigdatum_(my_datums, in_part, in_vuid)
+       if my_datums_part == 0:
+         my_datums_skip += 1
   else:
-     my_datums_skip = my_total - in_skip
-     self.current_did += 1 # Default Datum ID changing method
+    my_datums_skip = my_total - in_skip
+    self.current_did += 1 # Default Datum ID changing method
   if my_datums_part == 0:
-     self.current_oid += 1
+    self.current_oid += 1
   if in_skip + my_datums_skip >= my_total:
-    in_skip = 0
-    my_datums_skip = 0
-    if CAN_encrypt_datum and my_datums_part == 0:
-      self.__crypt_cache = None
+   in_skip = 0
+   my_datums_skip = 0
+   if CAN_encrypt_datum and my_datums_part == 0:
+     self.__crypt_cache = None
   return my_irciot, in_skip + my_datums_skip, my_datums_part
   #
   # End of irciot_encap_()

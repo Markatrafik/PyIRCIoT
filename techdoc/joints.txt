@@ -1,0 +1,81 @@
+
+ Horizontal interaction interface beetwen PyLayerIRCIoT and PyLayerIRC classes
+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ Note: Horizontal joints can be spaced apart to different processes in the OS.
+
+ § A. Joint irc_pointer <-> irc_handler (Quick Message Gateway)
+
+  Inbound interface:
+   1. Compatibility (type 'tuple' with set of compatibility check options)
+    1.1. Protocol Version (type 'str', IRC-IoT protocol version)
+    1.2. Library Version (type 'str', PyIRCIoT library component version)
+   2. Message Pack (type 'tuple' or 'list' of 'tuple's)
+    when type is 'list' it is the IRC-IoT message set, each 'tuple' consist of
+    2.1. Message (type 'str', IRC-IoT message body)
+    2.2. VUID (type 'str', Virtual User ID, if one character - it is a mask)
+
+  Outbound interface:
+    type of 'bool', True when message processing was successful, False if not
+
+  To connect PyLayerIRCIoT with PyLayerIRC handler do something like this:
+    my_iot = PyLayerIRCIoT()
+    my_irc = PyLayerIRC()
+    // ...
+    my_iot.irc_pointer = my_irc.irc_handler
+    // ...
+    my_irc.start_IRC_()
+
+ § B. Joint user_pointer <-> user_handler (Virtual User Identification Database)
+
+  From the side of the high-level IRC-IoT protocol using the API calls of this
+  changes are made to VU DB, and on the side of the transport level VU DB keeps
+  "Tracker", for example, if the user disconnects from the server - deletes it,
+  if it gets caught, then - adds. If the user is initialized, according to the
+  configuration, it is assigned the value VUID: c<number>, part of the fields is
+  filled in from the configuration, otherwise t<number>, all fields are defined
+  in the course of work (so-called "temporary users" or "strangers"), for
+  PyLayerIRC to work with them there must be is set with:
+   irc_talk_with_stranges = True
+
+  Inbound interface:
+   1. Compatibility (type 'tuple' with set of compatibility check options)
+    1.1. Protocol Version (type 'str', IRC-IoT protocol version)
+    1.2. Library Version (type 'str', PyIRCIoT library component version)
+   2. Action - is API call variant (see below), 'int' type
+   3. VUID (type 'str', Virtual User ID, if one character - it is a mask)
+   4. Additional parametrs (the set of additional parameters depends on Action)
+
+  Outbound interface:
+    API returns a tuple: (
+     1. 'bool' type, whether the API call processing completed successfully
+     2. Single variable or tuple, the actual result returned by the API call,
+        this format depends on the API function number )
+
+  Variants of Actions for Virtual User Database (VU DB) and other API calls:
+
+    1. GET LMID, value: 101, Get Last IRC-IoT Message ID, 'str' type
+    2. SET LMID, value: 102, Set Last IRC-IoT Message ID, 'str' type
+    3. GET OMID, value: 111, Get the ID of last own IRC-IoT Message
+    4. SET OMID, value: 112, Set the ID of last own IRC-IoT Message
+    5. GET EKEY, value: 301, Get the Encryption public key itself
+    6. SET EKEY, value: 302, Set the Encryption public key itself
+    7. GET EKTO, value: 351, Get the Encryption public key life time (Timeout)
+    8. SET EKTO, value: 352, Set the Encryption public key life time (Timeout)
+    9. GET BKEY, value: 501, Get the Blockchain public key itself
+   10. SET BKEY, value: 502, Set the Blockchain public key itself
+   11. GET BKTO, value: 551, Get the Blockcahin public key life time (Timeout)
+   12. SET BKTO, value: 552, Set the Blockchain public key life time (Timeout)
+   13. GET iMTU, value: 600, Get initial Maximum Transmission Unit, 'int' type
+   14. GET iENC, value: 601, Get initial Encoding, 'str' type
+   15. GET VUID, value: 700, Get list of Virtual User IDs (VUID)
+    type 'list', list of values with type 'str'
+
+  To connect PyLayerIRCIoT with PyLayerIRC handler do something like this:
+    my_iot = PyLayerIRCIoT()
+    my_irc = PyLayerIRC()
+    // ...
+    my_iot.user_pointer = my_irc.user_handler
+    // ...
+    my_irc.start_IRC_()
+

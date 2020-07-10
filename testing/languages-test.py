@@ -41,6 +41,9 @@ class PyLayerIRCIoT_EL_Test(unittest.TestCase):
   def test104_test_Python_cosinus_(self):
     self.assertEqual(EL_test_Python_cosinus_(), True)
 
+  def test152_test_JS_arithmetics_(self):
+    self.assertEqual(EL_test_JS_arithmetics_(), True)
+
 _log_mode = 0
 
 def to_log_(in_text):
@@ -86,6 +89,10 @@ def EL_test_simple_LUA_():
 
 def EL_test_simple_JavaScript_():
   return EL_JS_("document.write('hello')", "hello")
+
+def EL_test_JS_arithmetics_():
+  my_script = "var a=12345+54321/333;var b=a-2509;b++;document.write(b*3|0)"
+  return EL_JS_(my_script, "30000")
 
 def EL_test_simple_BASIC_():
   return EL_BASIC_("10 PRINT 123", "123@")
@@ -136,6 +143,8 @@ def main():
    EL_test_Python_for_range_()
  if my_command == 'pycosinus':
    EL_test_Python_cosinus_()
+ if my_command == 'jsarith':
+   EL_test_JS_arithmetics_()
 
 if __name__ == '__main__':
   if len(sys.argv) == 1:

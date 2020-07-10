@@ -449,11 +449,14 @@ class PyLayerIRC( irciot_shared_ ):
    if irc_default_draft in ircd_Ch_se:
      RPL_CHANNELMLOCK    = "325"
      RPL_CHANNELURL      = "328"
+   else:
+     RPL_UNIQOPIS        = "325" # Unknown
    if irc_default_draft == "Insp":
      RPL_CHANNELCREATED  = "329"
-   RPL_NOTOPIC           = "331"
    if irc_default_draft == "Insp":
      RPL_NOTOPICSET      = "331"
+   else:
+     RPL_NOTOPIC         = "331"
    RPL_CURRENTTOPIC      = "332"
    RPL_TOPICINFO         = "333"
    if irc_default_draft in ircd_iu_sn:

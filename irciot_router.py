@@ -374,7 +374,8 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
     my_dt = my_dt[:11] # cut to POSIX timestamp
   if len(my_dt) > 20:
     my_dt = my_dt[:19] # cut to ISO 8601:2004
-  my_string = "%s" % in_vuid
+  if in_vuid == None: my_string = self.CONST.api_vuid_all
+  else: my_string = "{}".format(in_vuid)
   for my_key, my_value in sorted(my_datum.items()):
     my_string += "%s%s" % (my_key, my_value)
   del my_datum

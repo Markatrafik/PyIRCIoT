@@ -35,7 +35,7 @@ def main():
   
   random.seed()
 
-  # irciot.udpb_pointer = udpbot.udpb_handler
+  # irciot.irc_pointer = udpbot.udpb_handler
   # irciot.user_pointer = udpbot.user_handler
 
   irciot.ldict_file = "ldict.json"
