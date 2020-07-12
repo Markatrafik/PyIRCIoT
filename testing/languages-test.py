@@ -35,10 +35,13 @@ class PyLayerIRCIoT_EL_Test(unittest.TestCase):
   def test102_test_simple_JS_(self):
     self.assertEqual(EL_test_simple_JavaScript_(), True)
 
-  def test103_test_Python_for_range_(self):
+  def test103_test_simple_R_(self):
+    self.assertEqual(EL_test_simple_R_(), True)
+
+  def test121_test_Python_for_range_(self):
     self.assertEqual(EL_test_Python_for_range_(), True)
 
-  def test104_test_Python_cosinus_(self):
+  def test123_test_Python_cosinus_(self):
     self.assertEqual(EL_test_Python_cosinus_(), True)
 
   def test152_test_JS_arithmetics_(self):
@@ -78,6 +81,9 @@ def EL_LUA_(in_code, in_check):
 def EL_JS_(in_code, in_check):
   return EL_test_(in_code, in_check, EL.CONST.lang_JS)
 
+def EL_R_(in_code, in_check):
+  return EL_test_(in_code, in_check, EL.CONST.lang_R)
+
 def EL_python_(in_code, in_check):
   return EL_test_(in_code, in_check, EL.CONST.lang_PYTHON)
 
@@ -89,6 +95,9 @@ def EL_test_simple_LUA_():
 
 def EL_test_simple_JavaScript_():
   return EL_JS_("document.write('hello')", "hello")
+
+def EL_test_simple_R_():
+  return EL_R_("print(pi)", "3.141593")
 
 def EL_test_JS_arithmetics_():
   my_script = "var a=12345+54321/333;var b=a-2509;b++;document.write(b*3|0)"
@@ -139,6 +148,8 @@ def main():
    EL_test_simple_Python_()
  if my_command == 'basic':
    EL_test_simple_BASIC_()
+ if my_command == 'r':
+   EL_test_simple_R_()
  if my_command == 'pyrangefor':
    EL_test_Python_for_range_()
  if my_command == 'pycosinus':

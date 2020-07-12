@@ -88,5 +88,5 @@
     // ...
     my_iot.irc_pointer = my_udp.udpb_handler
     // ...
-    my_irc.start_udpb_()
+    my_udp.start_udpb_()
 

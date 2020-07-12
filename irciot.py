@@ -2970,10 +2970,10 @@ class PyLayerIRCIoT(object):
          #   break
   if self.defrag_pool == []:
     if len(in_enc) == my_bc:
-       defrag_buffer = in_enc
-       my_ok = 2
+      defrag_buffer = in_enc
+      my_ok = 2
     else:
-       my_new = True
+      my_new = True
   elif not my_fragments:
     my_new = True
   if my_err > 0:
@@ -3002,33 +3002,33 @@ class PyLayerIRCIoT(object):
             = self.irciot_crypto_wo_encryption_(self.crypt_method)
        my_base = self.irciot_crypto_get_base_(my_crypt_method)
        if my_base == self.CONST.base_BASE64:
-          try:
-            defrag_buffer = self.irciot_add_padding_(defrag_buffer, 4)
-            out_base = base64.b64decode(defrag_buffer)
-          except:
-            self.irciot_error_(self.CONST.err_BASE64_DECODING, 0)
-            return ""
+         try:
+           defrag_buffer = self.irciot_add_padding_(defrag_buffer, 4)
+           out_base = base64.b64decode(defrag_buffer)
+         except:
+           self.irciot_error_(self.CONST.err_BASE64_DECODING, 0)
+           return ""
        elif my_base == self.CONST.base_BASE85:
-          try:
-            out_base = base64.b85decode(defrag_buffer)
-          except:
-            self.irciot_error_(self.CONST.err_BASE85_DECODING, 0)
-            return ""
+         try:
+           out_base = base64.b85decode(defrag_buffer)
+         except:
+           self.irciot_error_(self.CONST.err_BASE85_DECODING, 0)
+           return ""
        elif my_base == self.CONST.base_BASE32:
-          try:
-            defrag_buffer = self.irciot_add_padding_(defrag_buffer, 8)
-            out_base = base64.b32decode(defrag_buffer)
-          except:
-            self.irciot_error_(self.CONST.err_BASE32_DECODING, 0)
-            return ""
+         try:
+           defrag_buffer = self.irciot_add_padding_(defrag_buffer, 8)
+           out_base = base64.b32decode(defrag_buffer)
+         except:
+           self.irciot_error_(self.CONST.err_BASE32_DECODING, 0)
+           return ""
        else:
-          out_base = bytes(defrag_buffer, self.__encoding)
+         out_base = bytes(defrag_buffer, self.__encoding)
        my_algo = self.irciot_crypto_get_algorithm_(my_crypt_method)
        #if DO_auto_encryption and my_algo != None:
        #   self.irciot_load_encryption_methods_(my_crypt_method)
        if my_algo == self.CONST.crypto_RSA:
-          out_base = self.irciot_crypto_RSA_decrypt_(out_base, \
-            self.__encryption_private_key)
+         out_base = self.irciot_crypto_RSA_decrypt_(out_base, \
+          self.__encryption_private_key)
        elif my_algo == self.CONST.crypto_AES:
           out_base = self.irciot_crypto_AES_decrypt_(out_base, \
             self.__encryption_private_key)
@@ -3041,58 +3041,58 @@ class PyLayerIRCIoT(object):
           out_json = str(out_base)[2:-1]
           del out_base
        elif my_compress == self.CONST.compress_ZLIB:
-          if DO_auto_compress and self.__crypt_ZLIB == None:
-            self.irciot_load_compression_methods_(my_crypt_method)
-          if self.__crypt_ZLIB == None:
-            return ""
-          try:
-            out_compress = str(self.__crypt_ZLIB.decompress(out_base))
-            del out_base
-          except self.__crypt_ZLIB.error as zlib_error:
-            if DO_debug_library:
-              print("\033[1;41m ZLIB ENCRIPION FAILED \33[0m")
-              print("\033[1;35m" + str(zlib_error) + "\033[0m")
-            if zlib_error.args[0].startswith("Error -3 "):
-              self.irciot_error_(self.CONST.err_COMP_ZLIB_HEADER, 0)
-            else:
-              self.irciot_error_(self.CONST.err_COMP_ZLIB_INCOMP, 0)
-            del zlib_error
-            return ""
-          except:
-            return ""
-          out_json = out_compress[2:-1]
-          del out_compress
+         if DO_auto_compress and self.__crypt_ZLIB == None:
+           self.irciot_load_compression_methods_(my_crypt_method)
+         if self.__crypt_ZLIB == None:
+           return ""
+         try:
+           out_compress = str(self.__crypt_ZLIB.decompress(out_base))
+           del out_base
+         except self.__crypt_ZLIB.error as zlib_error:
+           if DO_debug_library:
+             print("\033[1;41m ZLIB ENCRIPION FAILED \33[0m")
+             print("\033[1;35m" + str(zlib_error) + "\033[0m")
+           if zlib_error.args[0].startswith("Error -3 "):
+             self.irciot_error_(self.CONST.err_COMP_ZLIB_HEADER, 0)
+           else:
+             self.irciot_error_(self.CONST.err_COMP_ZLIB_INCOMP, 0)
+           del zlib_error
+           return ""
+         except:
+           return ""
+         out_json = out_compress[2:-1]
+         del out_compress
        elif my_compress == self.CONST.compress_BZIP2:
-          if DO_auto_compress and self.__crypt_BZ2 == None:
-            self.irciot_load_compression_methods_(my_crypt_method)
-          if self.__crypt_BZ2 == None:
-            return ""
-          out_compress = str(self.__crypt_BZ2.decompress(out_base))
-          out_json = out_compress[2:-1]
-          del out_compress
+         if DO_auto_compress and self.__crypt_BZ2 == None:
+           self.irciot_load_compression_methods_(my_crypt_method)
+         if self.__crypt_BZ2 == None:
+           return ""
+         out_compress = str(self.__crypt_BZ2.decompress(out_base))
+         out_json = out_compress[2:-1]
+         del out_compress
        else:
-          return ""
+         return ""
        try:
-          # Adding missing fields to the "Datum" from parent object
-          my_datum = json.loads(out_json)
-          if self.CONST.tag_OBJECT_TYPE not in my_datum \
-           and my_ot != None:
-              my_datum[self.CONST.tag_OBJECT_TYPE] = my_ot
-          if self.CONST.tag_DATE_TIME not in my_datum \
-           and my_dt != None:
-              my_datum[self.CONST.tag_DATE_TIME] = my_dt
-          if self.CONST.tag_SRC_ADDR not in my_datum \
-           and my_src != None:
-              my_datum[self.CONST.tag_SRC_ADDR] = my_src
-          if self.CONST.tag_DST_ADDR not in my_datum \
-           and my_dst != None:
-              my_datum[self.CONST.tag_DST_ADDR] = my_dst
-          self.irciot_check_datum_(my_datum, in_vuid, my_ot)
-          return json.dumps(my_datum, separators=(',',':'))
+         # Adding missing fields to the "Datum" from parent object
+         my_datum = json.loads(out_json)
+         if self.CONST.tag_OBJECT_TYPE not in my_datum \
+          and my_ot != None:
+            my_datum[self.CONST.tag_OBJECT_TYPE] = my_ot
+         if self.CONST.tag_DATE_TIME not in my_datum \
+          and my_dt != None:
+            my_datum[self.CONST.tag_DATE_TIME] = my_dt
+         if self.CONST.tag_SRC_ADDR not in my_datum \
+          and my_src != None:
+            my_datum[self.CONST.tag_SRC_ADDR] = my_src
+         if self.CONST.tag_DST_ADDR not in my_datum \
+          and my_dst != None:
+            my_datum[self.CONST.tag_DST_ADDR] = my_dst
+         self.irciot_check_datum_(my_datum, in_vuid, my_ot)
+         return json.dumps(my_datum, separators=(',',':'))
        except:
-          return ""
+         return ""
     else:
-       return ""
+      return ""
     self.irciot_clear_defrag_chain_(my_did)
     return ""
   if my_dup:
@@ -3108,42 +3108,42 @@ class PyLayerIRCIoT(object):
   my_bp  = None
   my_did = None
   if not self.CONST.tag_ENC_DATUM in in_datum.keys():
-     return ""
+    return ""
   if self.CONST.tag_DATUM_BC in in_datum.keys():
-     my_bc = in_datum[self.CONST.tag_DATUM_BC]
+    my_bc = in_datum[self.CONST.tag_DATUM_BC]
   if self.CONST.tag_DATUM_BP in in_datum.keys():
-     my_bp = in_datum[self.CONST.tag_DATUM_BP]
+    my_bp = in_datum[self.CONST.tag_DATUM_BP]
   if self.CONST.tag_DATUM_ID in in_datum.keys():
-     my_did = in_datum[self.CONST.tag_DATUM_ID]
-  if not self.CONST.tag_ENC_METHOD in in_datum.keys():
-     my_em = self.CONST.tag_ENC_BASE64
+    my_did = in_datum[self.CONST.tag_DATUM_ID]
+  if self.CONST.tag_ENC_METHOD not in in_datum.keys():
+    my_em = self.CONST.tag_ENC_BASE64
   else:
-     my_em = in_datum[self.CONST.tag_ENC_METHOD]
+    my_em = in_datum[self.CONST.tag_ENC_METHOD]
   my_defrag_header = (my_dt, my_ot, my_src, my_dst, \
    my_dc, my_dp, my_bc, my_bp, my_did)
   my_in = in_datum[self.CONST.tag_ENC_DATUM]
   return self.irciot_defragmentation_(my_in, \
-     my_defrag_header, orig_json, in_vuid)
+    my_defrag_header, orig_json, in_vuid)
   #
   # End of irciot_decrypt_datum_()
 
  def irciot_prepare_datum_(self, in_datum, in_header, \
    orig_json, in_vuid = None):
   if not self.CONST.tag_ENC_DATUM in in_datum.keys():
-     (my_dt, my_ot, my_src, my_dst, my_dc, my_dp) = in_header
-     if self.CONST.tag_DATE_TIME not in in_datum.keys():
-        in_datum[self.CONST.tag_DATE_TIME] = my_dt
-     if self.CONST.tag_OBJECT_TYPE not in in_datum.keys():
-        in_datum[self.CONST.tag_OBJECT_TYPE] = my_ot
-     if self.CONST.tag_SRC_ADDR not in in_datum.keys():
-        in_datum[self.CONST.tag_SRC_ADDR] = my_src
-     if self.CONST.tag_DST_ADDR not in in_datum.keys():
-        in_datum[self.CONST.tag_DST_ADDR] = my_dst
-     if in_datum[self.CONST.tag_DATE_TIME] == None:
-        del in_datum[self.CONST.tag_DATE_TIME]
+    (my_dt, my_ot, my_src, my_dst, my_dc, my_dp) = in_header
+    if self.CONST.tag_DATE_TIME not in in_datum.keys():
+      in_datum[self.CONST.tag_DATE_TIME] = my_dt
+    if self.CONST.tag_OBJECT_TYPE not in in_datum.keys():
+      in_datum[self.CONST.tag_OBJECT_TYPE] = my_ot
+    if self.CONST.tag_SRC_ADDR not in in_datum.keys():
+      in_datum[self.CONST.tag_SRC_ADDR] = my_src
+    if self.CONST.tag_DST_ADDR not in in_datum.keys():
+      in_datum[self.CONST.tag_DST_ADDR] = my_dst
+    if in_datum[self.CONST.tag_DATE_TIME] == None:
+      del in_datum[self.CONST.tag_DATE_TIME]
   else:
-     return self.irciot_decrypt_datum_(in_datum, in_header, \
-       orig_json, in_vuid)
+    return self.irciot_decrypt_datum_(in_datum, in_header, \
+     orig_json, in_vuid)
   return json.dumps(in_datum, separators=(',',':'))
   #
   # End of irciot_prepare_datum_()
@@ -3221,45 +3221,45 @@ class PyLayerIRCIoT(object):
   iot_dc  = None
   iot_dp  = None
   try:
-     iot_datums = in_object[self.CONST.tag_DATUM]
-     iot_ot = in_object[self.CONST.tag_OBJECT_TYPE]
-     if self.CONST.tag_DATE_TIME in in_object.keys():
-        iot_dt  = in_object[self.CONST.tag_DATE_TIME]
-     if self.CONST.tag_SRC_ADDR in in_object.keys():
-        iot_src = in_object[self.CONST.tag_SRC_ADDR]
-     if self.CONST.tag_DST_ADDR in in_object.keys():
-        iot_dst = in_object[self.CONST.tag_DST_ADDR]
+    iot_datums = in_object[self.CONST.tag_DATUM]
+    iot_ot = in_object[self.CONST.tag_OBJECT_TYPE]
+    if self.CONST.tag_DATE_TIME in in_object.keys():
+      iot_dt  = in_object[self.CONST.tag_DATE_TIME]
+    if self.CONST.tag_SRC_ADDR in in_object.keys():
+      iot_src = in_object[self.CONST.tag_SRC_ADDR]
+    if self.CONST.tag_DST_ADDR in in_object.keys():
+      iot_dst = in_object[self.CONST.tag_DST_ADDR]
   except:
-     return ""
+    return ""
   if self.CONST.tag_OBJECT_DC in in_object:
-     if not isinstance(in_object[self.CONST.tag_OBJECT_DC], int):
-        return ""
-     iot_dc = in_object[self.CONST.tag_OBJECT_DC]
+    if not isinstance(in_object[self.CONST.tag_OBJECT_DC], int):
+      return ""
+    iot_dc = in_object[self.CONST.tag_OBJECT_DC]
   else:
-     in_object[self.CONST.tag_OBJECT_DC] = None
-     iot_dc = None
+    in_object[self.CONST.tag_OBJECT_DC] = None
+    iot_dc = None
   if self.CONST.tag_OBJECT_DP in in_object:
-     if not isinstance(in_object[self.CONST.tag_OBJECT_DP], int):
-        return ""
-     iot_dp = in_object[self.CONST.tag_OBJECT_DP]
+    if not isinstance(in_object[self.CONST.tag_OBJECT_DP], int):
+      return ""
+    iot_dp = in_object[self.CONST.tag_OBJECT_DP]
   else:
-     in_object[self.CONST.tag_OBJECT_DP] = None
-     iot_dp = None
+    in_object[self.CONST.tag_OBJECT_DP] = None
+    iot_dp = None
   if isinstance(iot_datums, dict):
-     iot_datums = [ iot_datums ]
+    iot_datums = [ iot_datums ]
   if isinstance(iot_datums, list):
-     str_datums = ""
-     for iot_datum in iot_datums:
-       if in_vuid != None:
-         self.irciot_check_datum_(iot_datum, in_vuid, iot_ot)
-       str_datum = self.irciot_prepare_datum_(iot_datum, \
-         (iot_dt, iot_ot, iot_src, iot_dst, iot_dc, iot_dp), \
-            orig_json, in_vuid)
-       if str_datum != "":
-         if str_datums != "":
-           str_datums += ","
-         str_datums += str_datum
-     return str_datums
+    str_datums = ""
+    for iot_datum in iot_datums:
+      if in_vuid != None:
+        self.irciot_check_datum_(iot_datum, in_vuid, iot_ot)
+      str_datum = self.irciot_prepare_datum_(iot_datum, \
+        (iot_dt, iot_ot, iot_src, iot_dst, iot_dc, iot_dp), \
+          orig_json, in_vuid)
+      if str_datum != "":
+        if str_datums != "":
+          str_datums += ","
+        str_datums += str_datum
+    return str_datums
   return ""
   #
   # End of irciot_deinencap_object_()
@@ -3538,18 +3538,18 @@ class PyLayerIRCIoT(object):
 
  def is_irciot_datumset_(self, in_json):
   try:
-     my_datums = json.loads(in_json)
+    my_datums = json.loads(in_json)
   except ValueError:
-     return ""
+    return ""
   if isinstance(my_datums, list):
-     for my_datum in my_datums:
-        if not self.is_irciot_datum_(my_datum, None, None, None):
-           return False
-     return True
-  if isinstance(my_datums, dict):
-     if not self.is_irciot_datum_(my_datums, None, None, None):
+    for my_datum in my_datums:
+      if not self.is_irciot_datum_(my_datum, None, None, None):
         return False
-     return True
+    return True
+  if isinstance(my_datums, dict):
+    if not self.is_irciot_datum_(my_datums, None, None, None):
+      return False
+    return True
   return False
   #
   # End of is_irciot_datumset_()
@@ -3582,21 +3582,21 @@ class PyLayerIRCIoT(object):
      my_src_cnt = 0
      my_dst_cnt = 0
      for my_datum in my_datums:
-        if my_datums_cnt == 0:
-           my_ot  = my_datum[self.CONST.tag_OBJECT_TYPE]
-           my_ot_cnt  = 1
-           my_src = my_datum[self.CONST.tag_SRC_ADDR]
-           my_src_cnt = 1
-           my_dst = my_datum[self.CONST.tag_DST_ADDR]
-           my_dst_cnt = 1
-        else:
-           if my_ot  == my_datum[self.CONST.tag_OBJECT_TYPE]:
-              my_ot_cnt += 1
-           if my_src == my_datum[self.CONST.tag_SRC_ADDR]:
-              my_src_cnt += 1
-           if my_dst == my_datum[self.CONST.tag_DST_ADDR]:
-              my_dst_cnt += 1
-        my_datums_cnt += 1
+       if my_datums_cnt == 0:
+         my_ot  = my_datum[self.CONST.tag_OBJECT_TYPE]
+         my_ot_cnt  = 1
+         my_src = my_datum[self.CONST.tag_SRC_ADDR]
+         my_src_cnt = 1
+         my_dst = my_datum[self.CONST.tag_DST_ADDR]
+         my_dst_cnt = 1
+       else:
+         if my_ot  == my_datum[self.CONST.tag_OBJECT_TYPE]:
+            my_ot_cnt += 1
+         if my_src == my_datum[self.CONST.tag_SRC_ADDR]:
+            my_src_cnt += 1
+         if my_dst == my_datum[self.CONST.tag_DST_ADDR]:
+            my_dst_cnt += 1
+       my_datums_cnt += 1
      my_datums_cnt = len(my_datums)
      if my_ot_cnt  < my_datums_cnt:
         my_ot  = None
@@ -3608,7 +3608,7 @@ class PyLayerIRCIoT(object):
         if my_irciot != "":
            my_irciot += ","
         my_irciot += self.irciot_encap_datum_( \
-          my_datum, my_ot, my_src, my_dst)
+         my_datum, my_ot, my_src, my_dst)
      if my_datums_cnt > 1:
         my_irciot = "[" + my_irciot + "]"
      my_irciot = '"' + self.CONST.tag_DATUM + '":' + my_irciot
@@ -3628,14 +3628,14 @@ class PyLayerIRCIoT(object):
   str_object += '":{"' + self.CONST.tag_OBJECT_ID
   str_object += '":"' + str(self.current_oid) + '",'
   if my_ot  != None:
-     str_object += '"' + self.CONST.tag_OBJECT_TYPE
-     str_object += '":"'  + my_ot  + '",'
+    str_object += '"' + self.CONST.tag_OBJECT_TYPE
+    str_object += '":"'  + my_ot  + '",'
   if my_src != None:
-     str_object += '"' + self.CONST.tag_SRC_ADDR
-     str_object += '":"' + my_src + '",'
+    str_object += '"' + self.CONST.tag_SRC_ADDR
+    str_object += '":"' + my_src + '",'
   if my_dst != None:
-     str_object += '"' + self.CONST.tag_DST_ADDR
-     str_object += '":"' + my_dst + '",'
+    str_object += '"' + self.CONST.tag_DST_ADDR
+    str_object += '":"' + my_dst + '",'
   save_mid = self.current_mid
   sign_mid = self.current_mid
   if self.__mid_method in [
@@ -3724,25 +3724,25 @@ class PyLayerIRCIoT(object):
     self.CONST.ot_BCH_REQUEST ]:
      pass
   elif self.crypt_algo == self.CONST.crypto_RSA:
-     my_string_key \
-      = self.irciot_encryption_get_foreign_key_(in_vuid)
-     if not isinstance(my_string_key, str):
-        return ("", 0)
-     ( my_own, my_binary_key ) \
-       = self.irciot_crypto_str_to_hash_('__' + my_string_key)
-     try:
-        my_object_key = self.__crypt_RSA.importKey(my_binary_key)
-     except:
-        self.irciot_error_(self.CONST.err_RSA_KEY_FORMAT, 0)
-        return ("", 0)
-     if not isinstance(my_object_key, object):
-        self.irciot_error_(self.CONST.err_RSA_KEY_FORMAT, 0)
-        return ("", 0)
-     crypt_big_datum = self.irciot_crypto_RSA_encrypt_( \
-        bin_big_datum, my_object_key )
-     if crypt_big_datum == None:
-        return ("", 0)
-     bin_big_datum = crypt_big_datum
+    my_string_key \
+     = self.irciot_encryption_get_foreign_key_(in_vuid)
+    if not isinstance(my_string_key, str):
+      return ("", 0)
+    ( my_own, my_binary_key ) \
+      = self.irciot_crypto_str_to_hash_('__' + my_string_key)
+    try:
+      my_object_key = self.__crypt_RSA.importKey(my_binary_key)
+    except:
+      self.irciot_error_(self.CONST.err_RSA_KEY_FORMAT, 0)
+      return ("", 0)
+    if not isinstance(my_object_key, object):
+      self.irciot_error_(self.CONST.err_RSA_KEY_FORMAT, 0)
+      return ("", 0)
+    crypt_big_datum = self.irciot_crypto_RSA_encrypt_( \
+      bin_big_datum, my_object_key )
+    if crypt_big_datum == None:
+      return ("", 0)
+    bin_big_datum = crypt_big_datum
   elif self.crypt_algo == self.CONST.crypto_AES:
     crypt_big_datum = self.irciot_crypto_AES_encrypt_( \
      bin_big_datum, self.__encryption_private_key )
@@ -3826,13 +3826,13 @@ class PyLayerIRCIoT(object):
     in_datumset = [ in_datumset ]
   my_datumset = json.dumps(in_datumset, separators=(',',':'))
   if in_vuid in [
-    self.CONST.api_vuid_all,
-    self.CONST.api_vuid_cfg,
-    self.CONST.api_vuid_tmp ]:
+   self.CONST.api_vuid_all,
+   self.CONST.api_vuid_cfg,
+   self.CONST.api_vuid_tmp ]:
     if in_vuid == self.CONST.api_vuid_all \
      and self.crypt_model == self.CONST.crypt_NO_ENCRYPTION:
-        result += self.irciot_encap_all_(in_datumset, None)
-        return result
+      result += self.irciot_encap_all_(in_datumset, None)
+      return result
     # If the message is to be encrypted with end-to-end encryption
     # then it is need to create a separate message for each VUID
     # Also, the same when no encryption but type of VUID is defined

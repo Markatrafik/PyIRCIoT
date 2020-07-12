@@ -712,14 +712,29 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
 
  # incomplete
  def __irciot_EL_run_R_code_(self, in_code, in_environment = {}):
-  try:
-    my_out = self.__R_ROBJ.r(in_code)
-  except self.__R_INTF.RRuntimeError:
+  my_error = None
+  with self.python_stdout_() as my_out:
+    try:
+      self.__R_ROBJ.r(in_code)
+    except self.__R_INTF.RRuntimeError as my_ex:
+      my_split = str(my_ex).replace("\n", " ").split(':')
+      del my_split[0]
+      my_error = ""
+      for my_idx in range(len(my_split)):
+        my_error += " " + my_split[my_idx]
+      while "  " in my_error:
+        my_error = my_error.replace("  ", " ")
+    except Exception as my_ex:
+      my_error = self.errors[self.CONST.err_UNKNOWN] \
+       + ": {}".format(my_ex)
+  if isinstance(my_error, str):
+    self.irciot_EL_error_(self.CONST.err_CODE_EXECUTION, \
+     my_error.lstrip().rstrip())
     return None
-  except self.__R_INTF.RRuntimeWarning:
-    return None
-  except:
-    return None
+  my_out = my_out.getvalue()
+  for my_rep in [ ( '\n\n\n[1]\n ', '\n' ),
+   ( '[1]\n ', ''), ( '\n', '') ]:
+    my_out = my_out.replace(my_rep[0], my_rep[1])
   return my_out
   #
   # End of __irciot_EL_run_R_code_()

@@ -192,7 +192,7 @@ if [ -x "${TEST_RFC1459_CMD}" ]; then
 echo -ne '\033[1;36m-------------- '
 echo -ne 'PyLayerIRCIoT_EL_ tests'
 echo -ne ' ----------------\033[0m\n'
-for m in syntax ascii lua js python pyrangefor pycosinus \
+for m in syntax ascii lua js python r pyrangefor pycosinus \
  jsarith ; do
  run_tests "" "" "" "${m}" irciot_languages
 done
