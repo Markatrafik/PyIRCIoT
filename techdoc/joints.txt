@@ -1,5 +1,5 @@
 
- Horizontal interaction interface beetwen PyLayerIRCIoT and PyLayerIRC classes
+ Horizontal interaction interface between PyLayerIRCIoT and PyLayerIRC classes
  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
  Note: Horizontal joints can be spaced apart to different processes in the OS.
@@ -78,4 +78,15 @@
     my_iot.user_pointer = my_irc.user_handler
     // ...
     my_irc.start_IRC_()
+
+ Horizontal interaction interface between PyLayerIRCIoT and PyLayerUDPb classes
+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  To connect PyLayerIRCIoT with PyLayerUDPb handler do something like this:
+    my_iot = PyLayerIRCIoT()
+    my_udp = PyLayerUDPb()
+    // ...
+    my_iot.irc_pointer = my_udp.udpb_handler
+    // ...
+    my_irc.start_udpb_()
 

@@ -19,7 +19,7 @@
 2019-04-26 19:30 GMT+7 PyIRCIoT 0.0.107 Alexey Y. Woronov <alexey@woronov.ru>
 	* Since Version 0.0.107 in all methods of PyLayerIRCIoT new optional
 	parameter has been added: in_vuid (Virtual User ID), by default: None
-	In API beetwen PyLayerIRCIoT and any transport class new method added:
+	In API between PyLayerIRCIoT and any transport class new method added:
 	with index api_GET_VUID = 700, and optional parameters 'in_vuid':
 	'c': get configured VUIDs, 't': get temporal VUIDs, '*': get all VUIDs
 	Also, the new transport class PyLayerCOM added in the file rfc2217.py
@@ -31,7 +31,7 @@
 	parameters of PyLayerIRC.irc_handler_(). Please make the corrections.
 
 2019-05-01 15:00 GMT+7 PyIRCIoT 0.0.112 Alexey Y. Woronov <alexey@woronov.ru>
-	* In API beetwen PyLayerIRCIoT and transport classes new methods has
+	* In API between PyLayerIRCIoT and transport classes new methods has
 	been added: api_GET_OMID = 111, and api_SET_OMID = 112, argument: VUID
 	Methods api_GET_LMID, api_GET_OMID now returns the set, not a single
 	Message ID. In the PyLayerIRC class, a pipeline of Message IDs created
@@ -146,7 +146,7 @@
 	of direct access to the PyLayerIRCIoT.__blockchain_key_published.
 
 2020-05-17 18:30 GMT+7 PyIRCIoT 0.0.200 Alexey Y. Woronov <alexey@woronov.ru>
-	* Since Version 0.0.200 in API beetwen PyLayerIRCIoT class and any
+	* Since Version 0.0.200 in API between PyLayerIRCIoT class and any
 	transport class new method with index api_GET_iMTU = 600 has been
 	added. Each transport class, such as PyLayerIRC, PyLayerCOM, etc.,
 	can have its own value of the initial MTU, which will be requested
@@ -159,7 +159,7 @@
 	are renamed to commonly accepted, with the prefixes RPL_* and ERR_*
 
 2020-05-28 07:35 GMT+7 PyIRCIoT 0.0.209 Alexey Y. Woronov <alexey@woronov.ru>
-	* Since Version 0.0.209 in API beetwen PyLayerIRCIoT class and any
+	* Since Version 0.0.209 in API between PyLayerIRCIoT class and any
 	transport class new method with index api_GET_iENC = 601 has been
 	added. Exactly same as api_GET_iMTU. Default value is "utf-8".
 

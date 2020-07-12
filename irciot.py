@@ -3685,26 +3685,26 @@ class PyLayerIRCIoT(object):
   big_datum = {}
   big_ot = None
   if isinstance(my_bigdatum, dict):
-     big_datum = my_bigdatum
-     big_ot = my_bigdatum[self.CONST.tag_OBJECT_TYPE]
-     del my_datum[self.CONST.tag_OBJECT_TYPE]
+    big_datum = my_bigdatum
+    big_ot = my_bigdatum[self.CONST.tag_OBJECT_TYPE]
+    del my_datum[self.CONST.tag_OBJECT_TYPE]
   if isinstance(my_bigdatum, list):
-     for my_idx, my_datum in enumerate(my_bigdatum):
-        if my_idx == 0:
-           big_datum = my_datum
-           big_ot = my_datum[self.CONST.tag_OBJECT_TYPE]
-           del my_datum[self.CONST.tag_OBJECT_TYPE]
+    for my_idx, my_datum in enumerate(my_bigdatum):
+      if my_idx == 0:
+        big_datum = my_datum
+        big_ot = my_datum[self.CONST.tag_OBJECT_TYPE]
+        del my_datum[self.CONST.tag_OBJECT_TYPE]
   if big_ot == None:
-     return ("", 0)
+    return ("", 0)
   str_big_datum = json.dumps(big_datum, separators=(',',':'))
   if self.crypt_compress == self.CONST.compress_ZLIB:
-     if DO_auto_compress and self.__crypt_ZLIB == None:
-       self.irciot_load_compression_methods_(self.crypt_method)
-     if self.__crypt_ZLIB == None:
-       return ("", 0)
-     bin_big_datum \
-       = self.__crypt_ZLIB.compress(bytes(str_big_datum, \
-         self.__encoding))
+    if DO_auto_compress and self.__crypt_ZLIB == None:
+      self.irciot_load_compression_methods_(self.crypt_method)
+    if self.__crypt_ZLIB == None:
+      return ("", 0)
+    bin_big_datum \
+     = self.__crypt_ZLIB.compress(bytes(str_big_datum, \
+       self.__encoding))
   elif self.crypt_compress == self.CONST.compress_BZIP2:
      if DO_auto_compress and self.__crypt_BZ2 == None:
        self.irciot_load_compression_methods_(self.crypt_method)
@@ -3714,9 +3714,9 @@ class PyLayerIRCIoT(object):
        = self.__crypt_BZ2.compress(bytes(str_big_datum, \
          self.__encoding))
   elif self.crypt_compress == self.CONST.compress_NONE:
-     bin_big_datum = bytes(str_big_datum, self.__encoding)
+    bin_big_datum = bytes(str_big_datum, self.__encoding)
   else: # Unknwon compression
-     return ("", 0)
+    return ("", 0)
   if big_ot in [
     self.CONST.ot_ENC_INFO, self.CONST.ot_ENC_ACK,
     self.CONST.ot_BCH_INFO, self.CONST.ot_BCH_ACK,
@@ -3744,31 +3744,31 @@ class PyLayerIRCIoT(object):
         return ("", 0)
      bin_big_datum = crypt_big_datum
   elif self.crypt_algo == self.CONST.crypto_AES:
-     crypt_big_datum = self.irciot_crypto_AES_encrypt_( \
-        bin_big_datum, self.__encryption_private_key )
-     if crypt_big_datum == None:
-        return ("", 0)
-     bin_big_datum = crypt_big_datum
+    crypt_big_datum = self.irciot_crypto_AES_encrypt_( \
+     bin_big_datum, self.__encryption_private_key )
+    if crypt_big_datum == None:
+      return ("", 0)
+    bin_big_datum = crypt_big_datum
   elif self.crypt_algo == self.CONST.crypto_2FISH:
-     crypt_big_datum = self.irciot_crypto_2fish_encrypt_ ( \
-       bin_big_datum, self.__encryption_private_key )
-     if crypt_big_datum == None:
-        return ("", 0)
-     bin_big_datum = crypt_big_datum
+    crypt_big_datum = self.irciot_crypto_2fish_encrypt_ ( \
+      bin_big_datum, self.__encryption_private_key )
+    if crypt_big_datum == None:
+      return ("", 0)
+    bin_big_datum = crypt_big_datum
   if self.crypt_base == self.CONST.base_BASE64:
-     base_big_datum = base64.b64encode(bin_big_datum)
+    base_big_datum = base64.b64encode(bin_big_datum)
   elif self.crypt_base == self.CONST.base_BASE85:
-     base_big_datum = base64.b85encode(bin_big_datum)
+    base_big_datum = base64.b85encode(bin_big_datum)
   elif self.crypt_base == self.CONST.base_BASE32:
-     base_big_datum = base64.b32encode(bin_big_datum)
+    base_big_datum = base64.b32encode(bin_big_datum)
   else: # Unknown base encoding
-     return ("", 0)
+    return ("", 0)
   del bin_big_datum
   raw_big_datum  = str(base_big_datum)[2:-1]
   if self.crypt_base == self.CONST.base_BASE32 \
   or self.crypt_base == self.CONST.base_BASE64:
-     while (raw_big_datum[-1] == "="):
-       raw_big_datum = raw_big_datum[:-1]
+    while (raw_big_datum[-1] == "="):
+      raw_big_datum = raw_big_datum[:-1]
   del base_big_datum
   my_bc = len(raw_big_datum)
   out_big_datum  = '{"' + self.CONST.tag_ENC_DATUM
@@ -3802,7 +3802,7 @@ class PyLayerIRCIoT(object):
   my_okay = self.__message_MTU - out_head - 43 # Must be calculated
   my_size = my_bc - my_part
   if my_size > my_okay:
-     my_size = my_okay
+    my_size = my_okay
   out_big_datum += raw_big_datum[my_part:my_part + my_size] + '"}'
   my_irciot = self.irciot_encap_internal_(out_big_datum, in_vuid)
   if my_size < my_okay:
@@ -3875,63 +3875,63 @@ class PyLayerIRCIoT(object):
   save_mid  = self.current_mid
   my_irciot = ""
   try:
-     my_datums = json.loads(in_datumset)
+    my_datums = json.loads(in_datumset)
   except:
-     return "", 0, 0
+    return "", 0, 0
   my_total  = len(my_datums)
   if in_skip > 0:
-     my_datums_obj = []
-     my_datums_cnt = 0
-     for my_datum in my_datums:
-        my_datums_cnt += 1
-        if my_datums_cnt > in_skip:
-           my_datums_obj.append(my_datum)
-     my_datums_set = json.dumps(my_datums_obj, separators=(',',':'))
-     my_datums = json.loads(my_datums_set)
-     del my_datums_obj
-     del my_datums_cnt
+    my_datums_obj = []
+    my_datums_cnt = 0
+    for my_datum in my_datums:
+      my_datums_cnt += 1
+      if my_datums_cnt > in_skip:
+        my_datums_obj.append(my_datum)
+    my_datums_set = json.dumps(my_datums_obj, separators=(',',':'))
+    my_datums = json.loads(my_datums_set)
+    del my_datums_obj
+    del my_datums_cnt
   my_irciot = self.irciot_encap_internal_(my_datums_set, in_vuid)
   if (len(my_irciot) > self.__message_MTU) or my_encrypt:
-     if in_skip == 0:
-        self.current_mid = save_mid # mid rollback
-     my_datums = json.loads(my_datums_set)
-     one_datum = 0
-     if isinstance(my_datums, list):
-        my_datums_total = len(my_datums)
-        if my_datums_total > 1:
-           my_datums_skip = my_datums_total
-           while (len(my_irciot) > self.__message_MTU) \
-             and (my_datums_skip <= my_datums_total):
-              part_datums = []
-              my_datums_cnt = 0
-              for my_datum in my_datums:
-                 if my_datums_cnt < my_datums_skip:
-                    part_datums.append(my_datum)
-                 my_datums_cnt += 1
-              if part_datums == []:
-                 break
-              str_part_datums = json.dumps(part_datums, separators=(',',':'))
-              self.current_mid = save_mid # mid rollback
-              my_irciot = self.irciot_encap_internal_(str_part_datums, in_vuid)
-              if len(my_irciot) <= self.__message_MTU:
-                my_skip_out = in_skip + my_datums_skip
-                if my_skip_out >= my_total:
-                   my_skip_out = 0
-                return my_irciot, my_skip_out, 0
-              my_datums_skip -= 1
-           one_datum = 1 # Multidatum, but current "Datum" is too large
-        else:
-           one_datum = 1 # One "Datum" in list, and it is too large
-     if isinstance(my_datums, dict):
-       one_datum = 1    # One large "Datum" without list
-     if my_encrypt:
-       one_datum = 1
-     if one_datum == 1:
-       self.current_mid = save_mid # Message ID rollback
-       (my_irciot, my_datums_part) \
-        = self.irciot_encap_bigdatum_(my_datums, in_part, in_vuid)
-       if my_datums_part == 0:
-         my_datums_skip += 1
+    if in_skip == 0:
+      self.current_mid = save_mid # mid rollback
+    my_datums = json.loads(my_datums_set)
+    one_datum = 0
+    if isinstance(my_datums, list):
+      my_datums_total = len(my_datums)
+      if my_datums_total > 1:
+        my_datums_skip = my_datums_total
+        while (len(my_irciot) > self.__message_MTU) \
+         and (my_datums_skip <= my_datums_total):
+          part_datums = []
+          my_datums_cnt = 0
+          for my_datum in my_datums:
+            if my_datums_cnt < my_datums_skip:
+              part_datums.append(my_datum)
+            my_datums_cnt += 1
+          if part_datums == []:
+            break
+          str_part_datums = json.dumps(part_datums, separators=(',',':'))
+          self.current_mid = save_mid # mid rollback
+          my_irciot = self.irciot_encap_internal_(str_part_datums, in_vuid)
+          if len(my_irciot) <= self.__message_MTU:
+            my_skip_out = in_skip + my_datums_skip
+            if my_skip_out >= my_total:
+              my_skip_out = 0
+            return my_irciot, my_skip_out, 0
+          my_datums_skip -= 1
+        one_datum = 1 # Multidatum, but current "Datum" is too large
+      else:
+        one_datum = 1 # One "Datum" in list, and it is too large
+    if isinstance(my_datums, dict):
+      one_datum = 1    # One large "Datum" without list
+    if my_encrypt:
+      one_datum = 1
+    if one_datum == 1:
+      self.current_mid = save_mid # Message ID rollback
+      (my_irciot, my_datums_part) \
+       = self.irciot_encap_bigdatum_(my_datums, in_part, in_vuid)
+      if my_datums_part == 0:
+        my_datums_skip += 1
   else:
     my_datums_skip = my_total - in_skip
     self.current_did += 1 # Default Datum ID changing method
