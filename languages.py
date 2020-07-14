@@ -203,6 +203,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   self.errors = self.CONST.err_DESCRIPTIONS
   #
   self.irciot_set_locale_(self.lang)
+
   #
   # End of PyLayerIRCIoT_EL_.__init__()
 
@@ -748,6 +749,8 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   if not self.irciot_EL_check_environment_(in_lang, in_environment):
     self.irciot_EL_error_(self.CONST.err_BAD_ENVIRONMENT, None)
     return ""
+  if CAN_debug_library:
+    self.irciot_EL_error_(self.CONST.err_DEVEL, "EL")
   my_out = None
   if self.__os_name == self.CONST.os_windows:
     pass # Need a method to stop the script by timeout in the Windows

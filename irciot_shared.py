@@ -254,6 +254,7 @@ class irciot_shared_(object):
    err_BYTES   = 8
    err_CLOSED  = 10
    err_CONNTO  = 12
+   err_DEVEL   = 13
    err_SENDTO  = 15
    err_UNKNOWN = 100
    #
@@ -265,7 +266,10 @@ class irciot_shared_(object):
      err_CLOSED:  "Connection closed",
      err_CONNTO:  "Connecting to ",
      err_SENDTO:  "Sending to ",
-     err_UNKNOWN: "Unknown error"
+     err_UNKNOWN: "Unknown error",
+     err_DEVEL:   "You are using the test part of library code" \
+      + ", it may be unstable or insecure, if you are not sure" \
+      + " - disable it"
    }
    #
    def __setattr__(self, *_):
@@ -526,7 +530,7 @@ class irciot_shared_(object):
         my_gateway = None
       my_ip_mask = ipaddress.ip_address(my_netmask)
       my_netbase = ipaddress.ip_network(my_network \
-        + '/' + my_netmask)
+       + '/' + my_netmask)
       if my_check in my_netbase:
         my_get = False
         if my_route == None:
@@ -598,7 +602,7 @@ class irciot_shared_(object):
             my_ip_out = my_ip.ip
           else:
             my_netbase = ipaddress.ip_network(my_network \
-              + '/' + my_netmask)
+             + '/' + my_netmask)
             my_ip_check = ipaddress.ip_address(my_ip.ip)
             if my_ip_check in my_netbase:
               return my_ip.ip
@@ -615,7 +619,7 @@ class irciot_shared_(object):
               my_ip_out = my_ipv6
             else:
               my_netbase = ipaddress.ip_network(my_network \
-                + "/%d" % my_netmask, False)
+               + "/%d" % my_netmask, False)
               my_ip_check = ipaddress.ip_address(my_ipv6)
               if my_ip_check in my_netbase:
                 return my_ipv6

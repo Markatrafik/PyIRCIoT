@@ -201,7 +201,7 @@ class PyLayerIRC( irciot_shared_ ):
    # 11. "Insp"       -- Inspircd, ver. 2.0.20, '2015
    # 12. "IRCNet"     -- IRCNet ircd, @ IRCNet, ver. 2.12.2
    # 13. "IRCPlus"    -- IRCPlus, for Windows, ver. 5.0
-   # 14. "ircu"       -- ircd-ircu aka Undernet IRCd, ver. 2.10.12.10
+   # 14. "ircu"       -- ircd-ircu aka Undernet IRCd, ver. 2.10.12.15
    # 15. "Kine"       -- KineIRCd, C++, '2002-2005
    # 16. "miniircd"   -- miniircd, Python based, ver. 1.3, '2003
    # 17. "Nefarious"  -- Nefarious ircd
@@ -1022,7 +1022,7 @@ class PyLayerIRC( irciot_shared_ ):
    # This variable is not used to connect, if you don't have a server name
    # and you want to use the IP, put its text value into self.irc_server
    self.irc_server_ip = None
-   self.irc_local_port = 0
+   self.__irc_local_port = 0
    self.irc_network_name = None
    #
    self.irc_proxy = None
@@ -1182,8 +1182,8 @@ class PyLayerIRC( irciot_shared_ ):
                my_port = "%s" % self.irc_port
                if my_split[0] == "" or my_split[1] != my_port:
                  break
-               if self.is_ip_port_(self.irc_local_port):
-                 my_port = "%d" % self.irc_local_port
+               if self.is_ip_port_(self.__irc_local_port):
+                 my_port = "{}".format(self.__irc_local_port)
                  if my_split[0] != my_port:
                    my_ok = False
                my_out = "%s , %s : " % (my_split[0], my_split[1])
@@ -1531,6 +1531,12 @@ class PyLayerIRC( irciot_shared_ ):
 
  def irc_get_delta_(self):
    return self.__delta_time
+
+ def irc_get_local_port_(self):
+   if self.is_ip_port_(self.__irc_local_port):
+     return self.__irc_local_port
+   else:
+     return None
 
  def irc_check_mask_(self, in_from, in_mask):
    str_from = self.irc_tolower_(in_from)
@@ -2183,7 +2189,7 @@ class PyLayerIRC( irciot_shared_ ):
      self.irc.connect((in_server_ip, in_port))
    except:
      return
-   self.irc_local_port = self.irc.getsockname()[1]
+   self.__irc_local_port = self.irc.getsockname()[1]
    # self.irc.setblocking(False)
 
  def irc_check_queue_(self, in_queue_id):
