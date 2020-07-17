@@ -143,6 +143,10 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   #
   self.__dup_detection_pipeline = []
   #
+  self.__LMR_table = {}
+  #
+  self.__GMR_table = {}
+  #
   super(PyIRCIoT_router, self).__init__()
   #
   self.maximal_detect_dup_messages \
@@ -604,6 +608,8 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   if not self.__check_GMR_id_(my_GMR_id):
     return False
   self.__GMR_pool.pop(my_GMR_id)
+  del self.__GMR_table
+  self.__GMR_table = {}
   return True
 
  # incomplete

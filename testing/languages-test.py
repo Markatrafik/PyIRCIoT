@@ -19,6 +19,7 @@ class PyLayerIRCIoT_EL_Test(unittest.TestCase):
   def __init__(self, in_name):
    global _log_mode
    _log_mode = 1
+   EL._silence = True
    super(PyLayerIRCIoT_EL_Test, self).__init__(in_name)
    #
    # End of PyLayerIRCIoT_EL_Test.__init__()

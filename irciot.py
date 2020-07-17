@@ -1411,8 +1411,7 @@ class PyLayerIRCIoT(object):
     return
   self.__blockchain_key_published = self.CONST.BCHT
   self.irciot_blockchain_key_publication_( \
-  self.__blockchain_public_key, \
-  self.CONST.ot_BCH_INFO)
+  self.__blockchain_public_key, self.CONST.ot_BCH_INFO)
   #
   # End of irciot_blockchain_check_publication_()
 
@@ -1426,8 +1425,7 @@ class PyLayerIRCIoT(object):
     return
   self.__encryption_key_published = self.CONST.ENCT
   self.irciot_encryption_key_publication_( \
-  self.__encryption_public_key, \
-  self.CONST.ot_ENC_INFO)
+  self.__encryption_public_key, self.CONST.ot_ENC_INFO)
   #
   # End of irciot_encryption_check_publication_()
 
@@ -2314,7 +2312,7 @@ class PyLayerIRCIoT(object):
     return False
   my_item_parent = in_ldict_item[self.CONST.ldict_ITEM_PARENT]
   if not isinstance(my_item_parent, int) \
-     and my_item_parent != None:
+   and my_item_parent != None:
     return False
   if not self.CONST.ldict_ITEM_TYPEID in in_ldict_item.keys():
     return False
@@ -2325,31 +2323,31 @@ class PyLayerIRCIoT(object):
     return False
   my_item_type_pr = in_ldict_item[self.CONST.ldict_ITEM_TYPEPR]
   if not isinstance(my_item_type_pr, str) \
-     and my_item_type_pr != None:
+   and my_item_type_pr != None:
     return False
   if not self.CONST.ldict_ITEM_DEFVAL in in_ldict_item.keys():
     return False
   my_item_defval = in_ldict_item[self.CONST.ldict_ITEM_DEFVAL]
   if not isinstance(my_item_defval, str) \
-     and my_item_defval != None:
+   and my_item_defval != None:
     return False
   if not self.CONST.ldict_ITEM_CHILD in in_ldict_item.keys():
     return False
   my_item_child = in_ldict_item[self.CONST.ldict_ITEM_CHILD]
   if not isinstance(my_item_child, int) \
-     and my_item_child != None:
+   and my_item_child != None:
     return False
   if not self.CONST.ldict_ITEM_METHOD in in_ldict_item.keys():
     return False
   my_item_method = in_ldict_item[self.CONST.ldict_ITEM_METHOD]
   if not isinstance(my_item_method, str) \
-     and my_item_method != None:
+   and my_item_method != None:
     return False
   if not self.CONST.ldict_ITEM_LANG in in_ldict_item.keys():
     return False
   my_item_language = in_ldict_item[self.CONST.ldict_ITEM_LANG]
   if not isinstance(my_item_language, str) \
-     and my_item_language != None:
+   and my_item_language != None:
     return False
   if not self.CONST.ldict_ITEM_SECTS in in_ldict_item.keys():
     return False
@@ -2397,7 +2395,7 @@ class PyLayerIRCIoT(object):
     return False
   my_type_arrsize = in_ldict_type[self.CONST.ldict_TYPE_ARRSIZE]
   if not isinstance(my_type_arrsize, int) \
-     and my_type_arrsize != None:
+   and my_type_arrsize != None:
     return False
   if not self.CONST.ldict_TYPE_SIZE in in_ldict_type.keys():
     return False
@@ -2415,25 +2413,25 @@ class PyLayerIRCIoT(object):
     return False
   my_type_max = in_ldict_type[self.CONST.ldict_TYPE_MAX]
   if not isinstance(my_type_max, str) \
-     and my_type_max != None:
+   and my_type_max != None:
     return False
   if not self.CONST.ldict_TYPE_PRECIS in in_ldict_type.keys():
     return False
   my_type_precess = in_ldict_type[self.CONST.ldict_TYPE_PRECIS]
   if not isinstance(my_type_precess, str) \
-     and my_type_precess != None:
+   and my_type_precess != None:
     return False
   if not self.CONST.ldict_TYPE_ENDIAN in in_ldict_type.keys():
     return False
   my_type_endian = in_ldict_type[self.CONST.ldict_TYPE_ENDIAN]
   if not isinstance(my_type_endian, str) \
-     and my_type_endian != None:
+   and my_type_endian != None:
     return False
   if not self.CONST.ldict_TYPE_ENCODE in in_ldict_type.keys():
     return False
   my_type_encode = in_ldict_type[self.CONST.ldict_TYPE_ENCODE]
   if not isinstance(my_type_encode, str) \
-     and my_type_encode != None:
+   and my_type_encode != None:
     return False
   return True
   #
@@ -2618,7 +2616,7 @@ class PyLayerIRCIoT(object):
     if not isinstance(in_variable, list):
       return False
     if isinstance(my_array_size, int) \
-      and not my_is_dynarray == True:
+     and not my_is_dynarray == True:
       if len(in_variable) != my_array_size:
         return False
     for my_elemet in in_variable:
@@ -2668,7 +2666,6 @@ class PyLayerIRCIoT(object):
       return False
     if not self.is_irciot_ldict_type_(my_variable, my_item_type):
       return False
-  #
   return True
   #
   # End of is_irciot_ldict_object_()
@@ -2710,13 +2707,11 @@ class PyLayerIRCIoT(object):
   else:
     if not isinstance(in_datum[self.CONST.tag_DST_ADDR], str):
       return False
-  #
   if self.irciot_ldict_get_item_by_ot_(my_ot) != None:
     if not self.is_irciot_ldict_object_(in_datum, None, my_ot):
       self.irciot_error_( \
         self.CONST.err_LDICT_VERIFY_FAIL, 0, None, my_ot)
       return False
-  #
   return True
   #
   # End of is_irciot_datum_()
@@ -3191,7 +3186,7 @@ class PyLayerIRCIoT(object):
     for my_key in [
       self.CONST.tag_ENC_METHOD,
       self.CONST.tag_ENC_PUBKEY ]:
-      if not my_key in in_datum.keys():
+      if my_key not in in_datum.keys():
         return
     my_method = in_datum[self.CONST.tag_ENC_METHOD]
     if my_method != self.crypt_method and DO_auto_encryption:
@@ -3576,53 +3571,53 @@ class PyLayerIRCIoT(object):
   my_src = None
   my_dst = None
   if isinstance(my_datums, list):
-     my_datums_cnt = 0
-     my_ot_cnt  = 0
-     my_src_cnt = 0
-     my_dst_cnt = 0
-     for my_datum in my_datums:
-       if my_datums_cnt == 0:
-         my_ot  = my_datum[self.CONST.tag_OBJECT_TYPE]
-         my_ot_cnt  = 1
-         my_src = my_datum[self.CONST.tag_SRC_ADDR]
-         my_src_cnt = 1
-         my_dst = my_datum[self.CONST.tag_DST_ADDR]
-         my_dst_cnt = 1
-       else:
-         if my_ot  == my_datum[self.CONST.tag_OBJECT_TYPE]:
-            my_ot_cnt += 1
-         if my_src == my_datum[self.CONST.tag_SRC_ADDR]:
-            my_src_cnt += 1
-         if my_dst == my_datum[self.CONST.tag_DST_ADDR]:
-            my_dst_cnt += 1
-       my_datums_cnt += 1
-     my_datums_cnt = len(my_datums)
-     if my_ot_cnt  < my_datums_cnt:
-        my_ot  = None
-     if my_src_cnt < my_datums_cnt:
-        my_src = None
-     if my_dst_cnt < my_datums_cnt:
-        my_dst = None
-     for my_datum in my_datums:
-        if my_irciot != "":
-           my_irciot += ","
-        my_irciot += self.irciot_encap_datum_( \
-         my_datum, my_ot, my_src, my_dst)
-     if my_datums_cnt > 1:
-        my_irciot = "[" + my_irciot + "]"
-     my_irciot = '"' + self.CONST.tag_DATUM + '":' + my_irciot
+    my_datums_cnt = 0
+    my_ot_cnt  = 0
+    my_src_cnt = 0
+    my_dst_cnt = 0
+    for my_datum in my_datums:
+      if my_datums_cnt == 0:
+        my_ot  = my_datum[self.CONST.tag_OBJECT_TYPE]
+        my_ot_cnt  = 1
+        my_src = my_datum[self.CONST.tag_SRC_ADDR]
+        my_src_cnt = 1
+        my_dst = my_datum[self.CONST.tag_DST_ADDR]
+        my_dst_cnt = 1
+      else:
+        if my_ot  == my_datum[self.CONST.tag_OBJECT_TYPE]:
+           my_ot_cnt += 1
+        if my_src == my_datum[self.CONST.tag_SRC_ADDR]:
+           my_src_cnt += 1
+        if my_dst == my_datum[self.CONST.tag_DST_ADDR]:
+           my_dst_cnt += 1
+      my_datums_cnt += 1
+    my_datums_cnt = len(my_datums)
+    if my_ot_cnt  < my_datums_cnt:
+       my_ot  = None
+    if my_src_cnt < my_datums_cnt:
+       my_src = None
+    if my_dst_cnt < my_datums_cnt:
+       my_dst = None
+    for my_datum in my_datums:
+      if my_irciot != "":
+         my_irciot += ","
+      my_irciot += self.irciot_encap_datum_( \
+       my_datum, my_ot, my_src, my_dst)
+    if my_datums_cnt > 1:
+      my_irciot = "[" + my_irciot + "]"
+    my_irciot = '"' + self.CONST.tag_DATUM + '":' + my_irciot
   elif isinstance(my_datums, dict):
-     if self.CONST.tag_OBJECT_TYPE in my_datums.keys():
-        my_ot  = my_datums[self.CONST.tag_OBJECT_TYPE]
-        if self.CONST.tag_ENC_DATUM in my_datums.keys():
-           del my_datums[self.CONST.tag_OBJECT_TYPE]
-     if self.CONST.tag_SRC_ADDR in my_datums:
-         my_src = my_datums[self.CONST.tag_SRC_ADDR]
-     if self.CONST.tag_DST_ADDR in my_datums:
-         my_dst = my_datums[self.CONST.tag_DST_ADDR]
-     if self.is_irciot_datum_(my_datums, my_ot, my_src, my_dst):
-        my_irciot = '"' + self.CONST.tag_DATUM + '":' \
-         + self.irciot_encap_datum_(my_datums, my_ot, my_src, my_dst)
+    if self.CONST.tag_OBJECT_TYPE in my_datums.keys():
+      my_ot  = my_datums[self.CONST.tag_OBJECT_TYPE]
+      if self.CONST.tag_ENC_DATUM in my_datums.keys():
+        del my_datums[self.CONST.tag_OBJECT_TYPE]
+    if self.CONST.tag_SRC_ADDR in my_datums:
+       my_src = my_datums[self.CONST.tag_SRC_ADDR]
+    if self.CONST.tag_DST_ADDR in my_datums:
+       my_dst = my_datums[self.CONST.tag_DST_ADDR]
+    if self.is_irciot_datum_(my_datums, my_ot, my_src, my_dst):
+       my_irciot = '"' + self.CONST.tag_DATUM + '":' \
+        + self.irciot_encap_datum_(my_datums, my_ot, my_src, my_dst)
   str_object = '"' + self.CONST.tag_OBJECT \
    + '":{"' + self.CONST.tag_OBJECT_ID \
    + '":"' + str(self.current_oid) + '",'

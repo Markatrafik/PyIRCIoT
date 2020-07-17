@@ -203,7 +203,8 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   self.errors = self.CONST.err_DESCRIPTIONS
   #
   self.irciot_set_locale_(self.lang)
-
+  #
+  self._silence = not CAN_debug_library
   #
   # End of PyLayerIRCIoT_EL_.__init__()
 
@@ -239,7 +240,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
       my_descr += " ({})".format(in_addon)
   else:
     return
-  if CAN_debug_library:
+  if not self._silence:
     print(self.errors[self.CONST.err_EL_ERROR].format(in_error_code), my_descr)
   #
   # End of irciot_EL_error_()
@@ -456,7 +457,8 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
     return False
   if len(in_code) > self.__maximal_code_size:
     self.irciot_EL_error_(self.CONST.err_CODE_SIZE_LIMIT, \
-      '+{} byte(s)'.format(len(in_code) - self.__maximal_code_size))
+     '+{}{}'.format(len(in_code) - self.__maximal_code_size, \
+      errors[self.CONST.err_BYTES]))
   # Common filters:
   for my_re in self.__common_filter_matchers:
     if my_re.match(in_code):
