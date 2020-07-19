@@ -373,7 +373,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   if self.CONST.tag_DATE_TIME in in_datum:
     my_dt = my_datum.pop(self.CONST.tag_DATE_TIME)
   else:
-    my_dt = "%s" % time()
+    my_dt = "{}".format(time())
   if len(my_dt) > 11 and len(my_dt) < 21:
     my_dt = my_dt[:11] # cut to POSIX timestamp
   if len(my_dt) > 20:
@@ -384,8 +384,9 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
     my_string += "%s%s" % (my_key, my_value)
   del my_datum
   my_bytes = bytes(my_string, self.__encoding)
-  my_string = "%s" % self.irciot_crc16_(my_bytes)
-  my_string += "%s" % self.irciot_crc32_(my_bytes)
+  my_string = "{}{}".format( \
+   self.irciot_crc16_(my_bytes), \
+   self.irciot_crc32_(my_bytes))
   del my_bytes
   my_string += "%s" % my_dt
   if my_string in self.__dup_detection_pipeline:

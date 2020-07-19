@@ -195,13 +195,13 @@ class PyLayerIRC( irciot_shared_ ):
    #  5. "beware"     -- beware ircd, Delphi based, ver. 2.2.0
    #  6. "Charybdis"  -- charybdis-ircd, ver. 3.5.0, '2007-2020
    #  7. "ConfRoom"   -- Conference Room, ver. 1.7.6, '2014
-   #  8. "discord"    -- discordIRCd, js based, ver. 0.5.0
-   #  9. "Elemental"  -- Elemental-IRCd, ver. 6.6.2
+   #  8. "discord"    -- discordIRCd, js based, ver. 0.5.0 '2018
+   #  9. "Elemental"  -- Elemental-IRCd, ver. 6.6.2, '2016
    # 10. "hybrid"     -- ircd-hybrid, @ EFNet, ver. 8.2.29
    # 11. "Insp"       -- Inspircd, ver. 2.0.20, '2015
    # 12. "IRCNet"     -- IRCNet ircd, @ IRCNet, ver. 2.12.2
-   # 13. "IRCPlus"    -- IRCPlus, for Windows, ver. 5.0
-   # 14. "ircu"       -- ircd-ircu aka Undernet IRCd, ver. 2.10.12.15
+   # 13. "IRCPlus"    -- IRCPlus, for Windows, ver. 5.0, '2001
+   # 14. "ircu"       -- ircd-ircu aka Undernet IRCd, ver. 2.10.12.18
    # 15. "Kine"       -- KineIRCd, C++, '2002-2005
    # 16. "miniircd"   -- miniircd, Python based, ver. 1.3, '2003
    # 17. "Nefarious"  -- Nefarious ircd
@@ -1212,7 +1212,6 @@ class PyLayerIRC( irciot_shared_ ):
    # End of ident_server_()
 
  def start_IRC_(self):
-   #
    if self.__irc_layer_mode in [
     self.CONST.irc_mode_CLIENT,
     self.CONST.irc_mode_SERVICE ]:
@@ -1229,7 +1228,6 @@ class PyLayerIRC( irciot_shared_ ):
    # End of start_IRC_()
 
  def stop_IRC_(self):
-   #
    self.irc_run = False
    self.ident_run = False
    self.irc_debug = False
@@ -1474,6 +1472,8 @@ class PyLayerIRC( irciot_shared_ ):
        self.errors.update(my_desc)
    except:
      pass
+   #
+   # End of irciot_set_locale_()
 
  def irc_tolower_(self, in_input):
    return in_input.translate(self.CONST.irc_translation)
@@ -1557,7 +1557,7 @@ class PyLayerIRC( irciot_shared_ ):
      ( an_id, an_mask, an_chan, an_opt, \
        an_ekey, an_bkey, an_lmid, \
        an_ekto, an_bkto, an_omid ) = my_anon
-     an_vuid = "%s%s" % (self.CONST.api_vuid_tmp, str(an_id))
+     an_vuid = "{:s}{}".format(self.CONST.api_vuid_tmp, an_id)
      an_ok = False
      for my_nick in self.irc_nicks:
        (in_nick, my_mask, my_vuid, my_info) = my_nick
@@ -1854,7 +1854,7 @@ class PyLayerIRC( irciot_shared_ ):
      ( my_id,   my_mask, my_chan, my_opt,  \
        my_ekey, my_bkey, my_lmid, my_ekto, \
        my_bkto, my_omid ) = my_user
-     return "%s%d" % (self.CONST.api_vuid_cfg, my_id)
+     return "{:s}{:d}".format(self.CONST.api_vuid_cfg, my_id)
    except:
      return None
    #
@@ -1893,7 +1893,7 @@ class PyLayerIRC( irciot_shared_ ):
      if in_channel == "*" or \
       self.irc_compare_channels_(in_channel, my_chan):
        if self.irc_check_mask_(in_from, my_mask):
-         return "%s%d" % (self.CONST.api_vuid_cfg, my_uid)
+         return "{:s}{:d}".format(self.CONST.api_vuid_cfg, my_uid)
    return None
    #
    # End of irc_cfg_check_user_()
@@ -1916,7 +1916,7 @@ class PyLayerIRC( irciot_shared_ ):
      if my_id > max_id:
        max_id = my_id
    self.irc_last_temporal_vuid = tmp_id
-   return "%s%d" % (self.CONST.api_vuid_tmp, tmp_id)
+   return "{:s}{:d}".format(self.CONST.api_vuid_tmp, tmp_id)
 
  def irc_get_vuid_by_mask_(self, in_mask, in_channel):
    if not self.is_irc_channel_(in_channel):
@@ -2072,19 +2072,19 @@ class PyLayerIRC( irciot_shared_ ):
 
  def irc_op_(self, in_channel, in_nicks):
    return self.irc_umode_(in_channel, in_nicks, \
-      self.CONST.irc_mode_add, self.CONST.irc_umode_op)
+     self.CONST.irc_mode_add, self.CONST.irc_umode_op)
 
  def irc_deop_(self, in_channel, in_nicks):
    return self.irc_umode_(in_channel, in_nicks, \
-      self.CONST.irc_mode_del, self.CONST.irc_umode_op)
+     self.CONST.irc_mode_del, self.CONST.irc_umode_op)
 
  def irc_voice_(self, in_channel, in_nicks):
    return self.irc_umode_(in_channel, in_nicks, \
-      self.CONST.irc_mode_add, self.CONST.irc_umode_voice)
+     self.CONST.irc_mode_add, self.CONST.irc_umode_voice)
 
  def irc_devoice_(self, in_channel, in_nicks):
    return self.irc_umode_(in_channel, in_nicks, \
-      self.CONST.irc_mode_del, self.CONST.irc_umode_voice)
+     self.CONST.irc_mode_del, self.CONST.irc_umode_voice)
 
  def irc_extract_single_(self, in_string):
    try:
@@ -2203,7 +2203,7 @@ class PyLayerIRC( irciot_shared_ ):
        return (irc_message, irc_wait, irc_vuid)
      else:
        if old_queue_lock:
-          check_queue.task_done()
+         check_queue.task_done()
      self.__irc_queue_lock[in_queue_id] = old_queue_lock
    try:
      sleep(self.CONST.irc_micro_wait)
@@ -2512,7 +2512,7 @@ class PyLayerIRC( irciot_shared_ ):
      if len(my_mode_string) < 2:
        return (in_ret, in_init, in_wait)
      for my_char in my_mode_string:
-       if not my_char in self.CONST.irc_all_modes_chars:
+       if my_char not in self.CONST.irc_all_modes_chars:
          return (in_ret, in_init, in_wait)
      my_change = self.CONST.irc_mode_add
      my_index = 0
@@ -2588,7 +2588,7 @@ class PyLayerIRC( irciot_shared_ ):
  def func_on_error_(self, in_args):
    (in_string, in_ret, in_init, in_wait) = in_args
    if in_string.find("Closing ") or in_string.find("imeout"):
-      return (-1, 0, in_wait)
+     return (-1, 0, in_wait)
    return (in_ret, 1, self.CONST.irc_default_wait)
 
  # SERVICE Hooks:
@@ -2799,7 +2799,6 @@ class PyLayerIRC( irciot_shared_ ):
    #
    try:
      pass
-
    except:
      pass
 
@@ -2816,7 +2815,7 @@ class PyLayerIRC( irciot_shared_ ):
      irc_wait = self.CONST.irc_first_wait
      irc_input_buffer = ""
      irc_ret = 0
-     irc_vuid = "%s0" % self.CONST.api_vuid_cfg
+     irc_vuid = "{:s}0".format(self.CONST.api_vuid_cfg)
 
      self.__delta_time = 0
 
@@ -2826,7 +2825,7 @@ class PyLayerIRC( irciot_shared_ ):
      self.irc = self.irc_socket_(self.irc_server)
 
      while (self.irc_run):
-     
+
        if not self.irc:
          if self.__join_retry == 0:
            sleep(self.CONST.irc_first_wait)
@@ -2930,7 +2929,7 @@ class PyLayerIRC( irciot_shared_ ):
 
          if irc_input_split[:5] == self.CONST.cmd_PING + " ":
            self.__delta_ping \
-             = self.td2ms_(self.time_now - self.__time_ping)
+            = self.td2ms_(self.time_now - self.__time_ping)
            self.__time_ping = self.time_now
            if self.irc_pong_(irc_input_split) == -1:
              self.irc_reconnect_()
@@ -2948,18 +2947,17 @@ class PyLayerIRC( irciot_shared_ ):
            for irc_cod_pack in self.irc_codes:
              (irc_code, code_name, irc_function)  = irc_cod_pack
              if irc_function != None:
-                if irc_input_cmd == irc_code:
-                  irc_args = (irc_input_split, \
-                   irc_ret, irc_init, irc_wait)
-                  (irc_ret, irc_init, irc_wait) = irc_function(irc_args)
+               if irc_input_cmd == irc_code:
+                 irc_args = (irc_input_split, \
+                  irc_ret, irc_init, irc_wait)
+                 (irc_ret, irc_init, irc_wait) = irc_function(irc_args)
 
          for irc_cmd_pack in self.irc_commands:
            (irc_cmd, irc_function) = irc_cmd_pack
            if irc_function != None:
-              if irc_input_cmd == irc_cmd:
-                irc_args = (irc_input_split, \
-                 irc_ret, irc_init, irc_wait)
-                (irc_ret, irc_init, irc_wait) = irc_function(irc_args)
+             if irc_input_cmd == irc_cmd:
+               irc_args = (irc_input_split, irc_ret, irc_init, irc_wait)
+               (irc_ret, irc_init, irc_wait) = irc_function(irc_args)
 
          if irc_input_cmd == self.CONST.cmd_PRIVMSG \
           or irc_input_split == "":
@@ -2971,7 +2969,7 @@ class PyLayerIRC( irciot_shared_ ):
 
            if irc_input_split != "":
              (irc_nick, irc_mask) \
-               = self.irc_extract_nick_mask_(irc_input_split)
+              = self.irc_extract_nick_mask_(irc_input_split)
              self.irc_track_fast_nick_(irc_nick, irc_mask)
 
              self.time_now = datetime.datetime.now()
@@ -3002,17 +3000,17 @@ class PyLayerIRC( irciot_shared_ ):
            = self.irc_check_queue_(self.CONST.irc_queue_output)
           irc_message = str(irc_message)
           if irc_message != "":
-             my_private = False
-             if irc_vuid != self.CONST.api_vuid_all:
-               my_nick = self.irc_track_get_nick_by_vuid_(irc_vuid)
-               if self.is_irc_nick_(my_nick):
-                 my_private = True
-             if my_private:
-               self.irc_send_(self.CONST.cmd_PRIVMSG + " " \
-                 + my_nick + " :" + irc_message)
-             else:
-               self.irc_send_(self.CONST.cmd_PRIVMSG + " " \
-                 + self.irc_channel + " :" + irc_message)
+            my_private = False
+            if irc_vuid != self.CONST.api_vuid_all:
+              my_nick = self.irc_track_get_nick_by_vuid_(irc_vuid)
+              if self.is_irc_nick_(my_nick):
+                my_private = True
+            if my_private:
+              self.irc_send_(self.CONST.cmd_PRIVMSG + " " \
+               + my_nick + " :" + irc_message)
+            else:
+              self.irc_send_(self.CONST.cmd_PRIVMSG + " " \
+               + self.irc_channel + " :" + irc_message)
           irc_message = ""
           if self.td2ms_(self.time_now - self.__time_ping) \
            > self.__delta_ping * 2 and self.__delta_ping > 0:

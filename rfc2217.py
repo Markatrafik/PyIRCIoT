@@ -156,10 +156,12 @@ class PyLayerCOM( irciot_shared_ ):
    tel_2IAC = b'\xff\xff'
    #
    err_RECONNECTING   = 3007
+   err_SERIALOVERNET  = 3008
    #
    err_DESCRIPTIONS = irciot_shared_.CONST.err_DESCRIPTIONS
    err_DESCRIPTIONS.update({
-    err_RECONNECTING   : "reconnecting to Serial over Network, (try: {}) ..."
+    err_RECONNECTING   : "reconnecting to Serial over Network, (try: {}) ...",
+    err_SERIALOVERNET  : "Serial over Network"
    })
    #
    def __setattr__(self, *_):
@@ -420,7 +422,7 @@ class PyLayerCOM( irciot_shared_ ):
      return
    self.com_disconnect_()
    self.to_log_(self.errors[self.CONST.err_CLOSED] + ", " \
-     + self.errors[self.CONST.err_RECONNECTING].format(self.com_recon))
+    + self.errors[self.CONST.err_RECONNECTING].format(self.com_recon))
    # sleep(self.CONST.com_first_wait * self.com_recon)
    self.com_recon += 1
    if self.com_recon > self.CONST.com_recon_steps:
@@ -433,7 +435,8 @@ class PyLayerCOM( irciot_shared_ ):
        return -1
      if self.com_debug:
        self.to_log_(self.errors[self.CONST.err_SENDTO] \
-        + "Serial over Network: [" + com_out + "]")
+        + self.errors[self.CONST.err_SERIALOVERNET] \
+        + ": [{}]".format(com_out))
      #self.com_send(bytes(com_out + "\n", self.com_encoding))
      sleep(self.CONST.com_micro_wait)
      com_out = ""
@@ -464,7 +467,7 @@ class PyLayerCOM( irciot_shared_ ):
        return (com_message, com_wait, com_vuid)
      else:
        if old_queue_lock:
-          check_queue.task_done()
+         check_queue.task_done()
      self.__com_queue_lock[queue_id] = old_queue_lock
    try:
      sleep(self.CONST.com_micro_wait)
@@ -520,7 +523,7 @@ class PyLayerCOM( irciot_shared_ ):
      com_wait = self.CONST.com_first_wait
      com_input_buffer = ""
      com_ret = 0
-     com_vuid = "%s0" % self.CONST.api_vuid_cfg
+     com_vuid = "{:s}0".format(self.CONST.api_vuid_cfg)
 
      while (self.__com_run):
 
@@ -551,7 +554,7 @@ class PyLayerCOM( irciot_shared_ ):
      com_wait = self.CONST.com_first_wait
      com_input_buffer = ""
      com_ret = 0
-     com_vuid = "%s0" % self.CONST.api_vuid_cfg
+     com_vuid = "{:s}0".format(self.CONST.api_vuid_cfg)
 
      self.__delta_time = 0
 

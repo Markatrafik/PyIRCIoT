@@ -332,18 +332,18 @@ class PyLayerUDPb( irciot_shared_ ):
  def udpb_cfg_get_user_struct_by_vuid_(in_vuid):
   for my_user in self.udpb_users:
     ( my_id, my_ip, my_opt ) = my_user
-    if in_vuid == "%c%d" % (self.CONST.aip_vuid_cfg, my_id):
+    if in_vuid == "{:s}{:d}".format(self.CONST.api_vuid_cfg, my_id):
       return my_user
   return None
 
  def udpb_track_get_ip_by_vuid_(self, in_vuid):
   for my_user in self.udpb_users:
     ( my_id, my_ip, my_opt ) = my_user
-    if in_vuid == "%c%d" % (self.CONST.api_vuid_cfg, my_id):
+    if in_vuid == "{:s}{:d}".format(self.CONST.api_vuid_cfg, my_id):
       return my_ip
   for my_anon in self.udpb_anons:
     ( my_id, my_ip, my_time ) = my_anon
-    if in_vuid == "%c%d" % (self.CONST.api_vuid_tmp, my_id):
+    if in_vuid == "{:s}{:d}".format(self.CONST.api_vuid_tmp, my_id):
       return my_ip
   return ""
 
@@ -353,11 +353,11 @@ class PyLayerUDPb( irciot_shared_ ):
   for my_user in self.udpb_users:
     ( my_id, my_ip, my_opt ) = my_user
     if in_ip == my_ip:
-      return "%c%d" % (self.CONST.api_vuid_cfg, my_id)
+      return "{:s}{:d}".format(self.CONST.api_vuid_cfg, my_id)
   for my_anon in self.udpb_anons:
     ( my_id, my_ip, my_time ) = my_anon
     if in_ip == my_ip:
-      return "%c%d" % (self.CONST.api_vuid_tmp, my_id)
+      return "{:s}{:d}".format(self.CONST.api_vuid_tmp, my_id)
   return None
 
  def udpb_track_add_vuid_by_ip_(self, in_ip):
@@ -370,7 +370,7 @@ class PyLayerUDPb( irciot_shared_ ):
       new_id = my_id
   my_time = int(time())
   self.udpb_anons.append(( new_id, in_ip, my_time ))
-  return "%c%d" % (self.CONST.api_vuid_tmp, new_id)
+  return "{:s}{:d}".format(self.CONST.api_vuid_tmp, new_id)
 
  def udpb_track_clear_anons_(self):
   self.udpb_anons = []
@@ -508,7 +508,7 @@ class PyLayerUDPb( irciot_shared_ ):
    udpb_message = ""
    udpb_ret = 0
    udpb_ip = ""
-   udpb_vuid = "%s0" % self.CONST.api_vuid_cfg
+   udpb_vuid = "{:s}0".format(self.CONST.api_vuid_cfg)
    #
    while (self.udpb_run):
      try:

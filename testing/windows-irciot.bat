@@ -8,6 +8,7 @@ SET UDP_TESTS=default isitip
 SET LANG_TESTS=default lua js python r pyrangefor pycosinus jsarith
 SET BASE_TESTS=default multidatum multibigval multinextbig libirciot
 SET BASE_TESTS=%BASE_TESTS% new2018datums defrag1b64p defrag2b64z
+SET BASE_TESTS=%BASE_TESTS% datatrans
 SET BASE_TESTS=%BASE_TESTS% defrag3loop test4rsa test4aes test2fish
 SET BASE_ARGS1=base64 base85 base32 cryptrsa cryptaes crypt2fish
 SET BASE_ARGS1=%BASE_ARGS1% cryptbz2
