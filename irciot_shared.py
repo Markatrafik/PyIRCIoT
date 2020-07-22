@@ -472,7 +472,7 @@ class irciot_shared_(object):
       my_netmask = int(my_netmask)
       my_metric  = int(my_fields[5], 16)
       my_netbase = ipaddress.ip_network(my_iunpack \
-        + "/%d" % my_netmask, False)
+        + "/{:d}".format(my_netmask), False)
       my_gateway = ipaddress.ip_address(my_gunpack)
       my_network = my_iunpack
       my_if_name = my_fields[9]
@@ -593,7 +593,8 @@ class irciot_shared_(object):
     for my_ip in my_adapter.ips:
       if self.is_ipv4_address_(my_ip.ip) \
        and my_ipv4_route != None:
-        my_network_str = my_ip.ip + "/%d" % my_ip.network_prefix
+        my_network_str \
+         = "{}/{:d}".format(my_ip.ip, my_ip.network_prefix)
         my_netbase = ipaddress.ip_network(my_network_str, False)
         if my_ip_mask in my_netbase:
           return my_ip.ip
@@ -610,7 +611,8 @@ class irciot_shared_(object):
        and my_ipv6_route != None:
         ( my_ipv6, my_ipv6_flowinfo, my_ipv6_scope_id ) = my_ip.ip
         if self.is_ipv6_address_(my_ipv6):
-          my_network_str = my_ipv6 + "/%d" % my_ip.network_prefix
+          my_network_str \
+           = "{}/{:d}".format(my_ipv6, my_ip.network_prefix)
           my_netbase = ipaddress.ip_network(my_network_str, False)
           if my_ip_mask in my_netbase:
             return my_ipv6
@@ -619,7 +621,7 @@ class irciot_shared_(object):
               my_ip_out = my_ipv6
             else:
               my_netbase = ipaddress.ip_network(my_network \
-               + "/%d" % my_netmask, False)
+               + "/{:d}".format(my_netmask), False)
               my_ip_check = ipaddress.ip_address(my_ipv6)
               if my_ip_check in my_netbase:
                 return my_ipv6

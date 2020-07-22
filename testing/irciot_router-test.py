@@ -137,9 +137,9 @@ def ii_test_translation_():
   # End of ii_test_translation_()
 
 def ii_test_LMR_statuses_():
- my_message  = '{"mid":"111","o":{"oid":"123","ot":"testing",'
- my_message += '"src":"abcdef@efgh","dst":"eklmn@oprst",'
- my_message += '"d":{"test":"testing"}}}'
+ my_message = '{"mid":"111","o":{"oid":"123","ot":"testing",' \
+  + '"src":"abcdef@efgh","dst":"eklmn@oprst",' \
+  + '"d":{"test":"testing"}}}'
  to_log_("\nINPUT MESSAGE: @\033[1m{}\033[0m@".format(my_message))
  my_LMR_id = ii.init_LMR_(in_src = "include@efgh")
  if ii.get_LMR_list_() != [ my_LMR_id ]:
@@ -167,9 +167,9 @@ def ii_test_LMR_statuses_():
  # End of ii_test_MR_statuses_()
 
 def ii_test_GMR_statuses_():
- my_message  = '{"mid":"111","o":{"oid":"123","ot":"testing",'
- my_message += '"src":"abcdef@efgh","dst":"eklmn@oprst",'
- my_message += '"d":{"test":"testing"}}}'
+ my_message = '{"mid":"111","o":{"oid":"123","ot":"testing",' \
+  + '"src":"abcdef@efgh","dst":"eklmn@oprst",' \
+  + '"d":{"test":"testing"}}}'
  to_log_("\nINPUT MESSAGE: @\033[1m%s\033[0m@" % my_message)
  my_GMR_id = ii.init_GMR_(in_src = "include@efgh")
  if ii.get_GMR_list_() != [ my_GMR_id ]:

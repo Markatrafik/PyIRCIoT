@@ -776,6 +776,8 @@ def main():
    ii.irciot.crc32_init_()
    ii.integrity_check = 2
    ii.integrity_stamp = 2
+ if 'locale' in my_params:
+   ii.irciot_set_locale_('ru')
 
  to_log_("TEST NAME: '{}'".format(my_command))
 

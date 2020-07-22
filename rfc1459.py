@@ -1179,7 +1179,7 @@ class PyLayerIRC( irciot_shared_ ):
                  my_data = my_data.replace(my_char, '')
                my_split = my_data.split(',')
                my_ok = True
-               my_port = "%s" % self.irc_port
+               my_port = "{}".format(self.irc_port)
                if my_split[0] == "" or my_split[1] != my_port:
                  break
                if self.is_ip_port_(self.__irc_local_port):
@@ -1580,7 +1580,7 @@ class PyLayerIRC( irciot_shared_ ):
        my_ekey, my_bkey, my_lmid, \
        my_ekto, my_bkto, my_omid ) = my_ucfg
      my_vuid  = self.CONST.api_vuid_cfg
-     my_vuid += "%d" % my_id
+     my_vuid += "{:d}".format(my_id)
      if in_vuid == my_vuid:
        # Updating crypto keys only if they are not defined
        if my_ekey == None and isinstance(in_ekey, str):
@@ -2149,7 +2149,7 @@ class PyLayerIRC( irciot_shared_ ):
    random.seed()
    irc_nick = self.irc_tomock_(in_nick)
    if irc_nick == in_nick:
-     irc_nick = in_nick + "%d" % random.randint(0, 999)
+     irc_nick = "{}{:d}".format(in_nick, random.randint(0, 999))
    if self.__join_retry > 2 or in_force:
      nick_length = random.randint(2, self.irc_nick_length)
      irc_nick = random.choice(self.CONST.irc_nick_first_char)

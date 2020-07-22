@@ -880,8 +880,7 @@ class PyLayerIRCIoT(object):
       my_tab = self.__crc16_table[my_idx]
       my_crc = my_rot ^ int(my_tab, 0)
     my_crc = my_crc.to_bytes(2,'little')
-    return "%2.2x%2.2x" \
-      % (my_crc[1], my_crc[0])
+    return "%2.2x%2.2x" % (my_crc[1], my_crc[0])
   except:
     return None
   #
@@ -927,8 +926,7 @@ class PyLayerIRCIoT(object):
   # End of irciot_init_encryption_method_()
 
  def __check_crypto_key_(self, in_key):
-  if in_key is None:
-    return False
+  if in_key is None: return False
   if not isinstance(in_key, object):
     return False
   return True
@@ -3463,9 +3461,9 @@ class PyLayerIRCIoT(object):
       # Protocol Version Reply
       if self.__mid_method == "":
         self.current_mid += 1
-        my_mid = "%d" % self.current_mid
-        my_message = '{"mid":"%s","%s":"%s"}' % (my_mid, \
-          self.CONST.tag_VERSION, \
+        my_mid = "{}".format(self.current_mid)
+        my_message = '{"mid":"%s","%s":"%s"}' \
+          % (my_mid, self.CONST.tag_VERSION, \
           self.CONST.irciot_protocol_version)
         if len(in_container) == 2:
           return my_message

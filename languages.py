@@ -48,7 +48,6 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   lang_ANSYML = 'yml' # Ansible YAML
   lang_BASH   = 'sh'  # Bash Script
   lang_BASIC  = 'bas' # BASIC
-  lang_CS     = 'cs'  # C Sharp
   lang_CSP    = 'csp' # Cache Server Pages
   lang_GO     = 'go'  # Google Golang
   lang_JRE    = 'jre' # Java (Runtime Enivronment)
@@ -67,10 +66,9 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
     lang_ALL = [ lang_PYTHON ] # More safer but still dangerous
   else:
     lang_ALL = [
-     lang_ANSYML, lang_BASH,   lang_BASIC, lang_CS,  lang_CSP,
-     lang_GO,     lang_JRE,    lang_JS,    lang_LUA, lang_PERL,
-     lang_PHP,    lang_PYTHON, lang_RUBY,  lang_R,   lang_SWIFT,
-     lang_TCL
+     lang_ANSYML, lang_BASH, lang_BASIC, lang_CSP,   lang_GO,
+     lang_JRE,    lang_JS,   lang_LUA,   lang_PERL,  lang_PHP,
+     lang_PYTHON, lang_RUBY, lang_R,     lang_SWIFT, lang_TCL
     ]
   #
   err_EL_ERROR         = 1000
@@ -122,6 +120,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   mod_ANSPLY = 'ansible.playbook.play'
   mod_ANSTQM = 'ansible.executor.task_queue_manager'
   mod_ANSCBP = 'ansible.plugins.callback'
+  mod_CSPSYS = 'intersys.pythonbind'
   mod_BASTOK = 'PyBasic.basictoken'
   mod_BASLEX = 'PyBasic.lexer'
   mod_BASPRG = 'PyBasic.program'
@@ -145,7 +144,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   lang_filter_BASH_funcs   = { 'printf', 'echo' }
   lang_filter_BASIC_regexps = []
   lang_filter_PYTHON_regexps = [ '.*__[a-z]*__.*' ]
-  lang_filter_PYTHON_types = {  'Add', 'And', 'Assign', 'Attribute', 'Slice',
+  lang_filter_PYTHON_types = { 'Add', 'And', 'Assign', 'Attribute', 'Slice',
    'BinOp', 'BitAnd', 'BitOr', 'BitXor', 'BoolOp', 'Dict', 'Div', 'Else', 'Eq',
    'Expr', 'For', 'If', 'Index', 'keyword', 'List', 'Load', 'Mod', 'Module',
    'Mult', 'NameConstant', 'Not', 'Num', 'Or', 'Pass', 'Set', 'Store', 'Str',
@@ -264,13 +263,11 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   return True
 
  def irciot_EL_set_timeout_(in_timeout):
-  if not isinstance(in_timeout, int):
-    return
+  if not isinstance(in_timeout, int): return
   self.__execution_timeout = in_timeout
 
  def irciot_EL_set_code_size_(in_size):
-  if not isinstance(in_size, int):
-    return
+  if not isinstance(in_size, int): return
   self.__maximal_code_size = in_size
 
  # incomplete
@@ -588,7 +585,6 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
  # incomplete
  def __irciot_EL_run_BASH_code_(self, in_code, in_environment = {}):
 
-
   return ""
 
  # incomplete
@@ -766,8 +762,6 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
       my_out = self.__irciot_EL_run_BASH_code_(in_code, in_environment)
     elif in_lang == self.CONST.lang_BASIC:
       my_out = self.__irciot_EL_run_BASIC_code_(in_code, in_environment)
-    elif in_lang == self.CONST.lang_CS:
-      pass
     elif in_lang == self.CONST.lang_CSP:
       pass
     elif in_lang == self.CONST.lang_GO:
@@ -817,10 +811,9 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
  def irciot_EL_admit_language_(self, in_lang):
   if in_lang in self.__allowed_EL:
     return True
-  else:
-    if self.irciot_EL_check_lang_(in_lang):
-      self.__allowed_EL += [ in_lang ]
-      return True
+  elif self.irciot_EL_check_lang_(in_lang):
+    self.__allowed_EL += [ in_lang ]
+    return True
   return False
 
  def irciot_EL_revoke_language_(self, in_lang):
@@ -850,15 +843,13 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
     self.__ANSCBP = self.irciot_EL_import_(self.CONST.mod_ANSCBP)
     for my_item in [ self.__ANSTQM, self.__ANSPLY, self.__ANSLDR, \
      self.__ANSINV, self.__ANSVAR, self.__ANSCBP ]:
-      if my_item == None:
-        return False
+      if my_item == None: return False
     return True
   elif in_lang == self.CONST.lang_BASH:
     self.__BASH_filter_matchers = \
      self.__irciot_EL_matchers_(self.CONST.lang_filter_BASH_regexps)
     self.__BSHLEX = self.irciot_EL_import_(self.CONST.mod_BSHLEX)
-    if self.__BSHLEX == None:
-      return False
+    if self.__BSHLEX == None: return False
     return True
   elif in_lang == self.CONST.lang_BASIC:
     self.__BASIC_filter_matchers = \
@@ -867,11 +858,8 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
     self.__BASLEX = self.irciot_EL_import_(self.CONST.mod_BASLEX)
     self.__BASPRG = self.irciot_EL_import_(self.CONST.mod_BASPRG)
     for my_item in [ self.__BASTOK, self.__BASLEX, self.__BASPRG ]:
-      if my_item == None:
-        return False
+      if my_item == None: return False
     return True
-  elif in_lang == self.CONST.lang_CS:
-    self.irciot_EL_error_(self.CONST.err_UNSUPPORTED_YET, None)
   elif in_lang == self.CONST.lang_CSP:
     self.irciot_EL_error_(self.CONST.err_UNSUPPORTED_YET, None)
   elif in_lang == self.CONST.lang_GO:
@@ -880,20 +868,17 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
     self.__JAVA_filter_matchers = \
      self.__irciot_EL_matchers_(self.CONST.lang_filter_JAVA_regexps)
     self.__JRE = self.irciot_EL_import_(self.CONST.mod_JRE)
-    if self.__JRE != None:
-      return True
+    if self.__JRE != None: return True
   elif in_lang == self.CONST.lang_JS:
     self.__JS_filter_matchers = \
      self.__irciot_EL_matchers_(self.CONST.lang_filter_JS_regexps)
     self.__JS  = self.irciot_EL_import_(self.CONST.mod_JS)
-    if self.__JS  != None:
-      return True
+    if self.__JS  != None: return True
   elif in_lang == self.CONST.lang_LUA:
     self.__LUA_filter_matchers = \
      self.__irciot_EL_matchers_(self.CONST.lang_filter_LUA_regexps)
     self.__LUA = self.irciot_EL_import_(self.CONST.mod_LUA)
-    if self.__LUA != None:
-      return True
+    if self.__LUA != None: return True
   elif in_lang == self.CONST.lang_PERL:
     self.irciot_EL_error_(self.CONST.err_UNSUPPORTED_YET, None)
   elif in_lang == self.CONST.lang_PHP:
@@ -934,6 +919,11 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   # End of irciot_EL_init_language_()
 
  def irciot_EL_finish_language_(self, in_lang):
+  ''' This method terminates the processes necessary for the
+      given Embedded Language to work and frees memory
+      in: in_lang -- Embedded Language code of 'str' type
+      out: value with type 'bool', True when successfuly finished
+  '''
   if not self.irciot_EL_check_lang_(in_lang):
     return False
   try:
@@ -952,8 +942,6 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
       del self.__BASLEX
       del self.__BASPRG
       del self.__BASIC_filter_matchers
-    elif in_lang == self.CONST.lang_CS:
-      pass
     elif in_lang == self.CONST.lang_CSP:
       pass
     elif in_lang == self.CONST.lang_GO:

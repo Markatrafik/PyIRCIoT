@@ -388,7 +388,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
    self.irciot_crc16_(my_bytes), \
    self.irciot_crc32_(my_bytes))
   del my_bytes
-  my_string += "%s" % my_dt
+  my_string += "{}".format(my_dt)
   if my_string in self.__dup_detection_pipeline:
     return True # Drop duplicate messages
   self.__dup_detection_pipeline.append(my_string)
