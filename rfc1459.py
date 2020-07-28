@@ -207,7 +207,7 @@ class PyLayerIRC( irciot_shared_ ):
    # 17. "Nefarious"  -- Nefarious ircd
    # 18. "Nefarious2" -- Nefarious IRCu (ircu fork) '2020
    # 19. "ng"         -- ngIRCd aka Next Generation IRCd, ver. 25, '2019
-   # 20. "Oragono"    -- Oragono, Golang based, ver. 2.1.0, '2012-2020
+   # 20. "Oragono"    -- Oragono, Golang based, ver. 2.2.0, '2012-2020
    # 21. "plexus"     -- PleXusIRCd, C++, '2003-2006
    # 22. "pircd"      -- Perl IRCd, Perl based, '2002
    # 23. "Provision"  -- ProvisionIRCd, Python based, '2006
@@ -2526,14 +2526,14 @@ class PyLayerIRC( irciot_shared_ ):
          self.to_log_( \
            "mode change '{}','{}' for '{}' on '{}'".format( \
              my_change, my_char, my_mask, my_channel))
-         if ((my_change == self.CONST.irc_mode_del) \
-           and (my_char == self.CONST.irc_umode_op)):
+         if my_change == self.CONST.irc_mode_del \
+          and my_char == self.CONST.irc_umode_op:
            my_vuid = self.irc_get_vuid_by_mask_(irc_mask, \
              self.irc_channel)
            self.irc_umode_by_nick_mask_(my_mask, irc_mask, \
              my_vuid)
-         if ((my_change == self.CONST.irc_mode_add) \
-           and (my_char == self.CONST.irc_umode_ban)):
+         if my_change == self.CONST.irc_mode_add \
+          and my_char == self.CONST.irc_umode_ban:
            my_mask_array = my_mask.split("!")
            my_pseudo  = self.__irc_nick + '!'
            my_pseudo += my_mask_array[1]
@@ -2982,8 +2982,8 @@ class PyLayerIRC( irciot_shared_ ):
            if irc_message != None:
              irc_vuid = self.irc_get_vuid_by_mask_(irc_mask, self.irc_channel)
 
-           if ((irc_vuid != None) and (irc_init > 3) \
-             and (self.is_json_(irc_message))):
+           if irc_vuid != None and irc_init > 3 \
+            and self.is_json_(irc_message):
              if self.irc_talk_with_strangers:
                self.irc_track_update_anons_by_vuid_(irc_vuid, \
                 irc_mask, self.irc_channel, \

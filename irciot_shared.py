@@ -115,7 +115,11 @@ class irciot_shared_(object):
    hl_Polish   = 'pl'
    hl_Romanian = 'ro'
    hl_Russian  = 'ru'
+   hl_Sanskrit = 'sa'
    hl_Serbian  = 'rs'
+   hl_Slovak   = 'sk'
+   hl_Somali   = 'so'
+   hl_Swahili  = 'sw'
    hl_Swedish  = 'se'
    hl_Spanish  = 'es'
    hl_Tajik    = 'tg'
@@ -237,7 +241,11 @@ class irciot_shared_(object):
     hl_Romanian : [ enc_ISO2 ],
     hl_Russian  : [ enc_ISO5, enc_855, enc_866, enc_1251,
      enc_880, enc_KOI8C, enc_KOI8R, enc_KOI8RU ],
+    hl_Sanskrit : [],
     hl_Serbian  : [ enc_1025 ],
+    hl_Slovak   : [],
+    hl_Somali   : [],
+    hl_Swahili  : [],
     hl_Swedish  : [ enc_ISO1, enc_278 ],
     hl_Spanish  : [ enc_ISO1 ],
     hl_Tajik    : [ enc_KOI8T ],

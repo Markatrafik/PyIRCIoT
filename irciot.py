@@ -2887,10 +2887,10 @@ class PyLayerIRCIoT(object):
    orig_json, in_vuid = None):
   (my_dt, my_ot, my_src, my_dst, \
    my_dc, my_dp, my_bc, my_bp, my_did) = in_header
-  if ((my_dc == None) and (my_dp != None)) or \
-     ((my_dc != None) and (my_dp == None)) or \
-     ((my_bc == None) and (my_bp != None)) or \
-     ((my_bc != None) and (my_bp == None)):
+  if (my_dc == None and my_dp != None) or \
+     (my_dc != None and my_dp == None) or \
+     (my_bc == None and my_bp != None) or \
+     (my_bc != None and my_bp == None):
     return ""
   if not isinstance(self.defrag_pool, list):
     self.defrag_pool = [] # Drop broken defrag_pool
@@ -2914,16 +2914,16 @@ class PyLayerIRCIoT(object):
         if test_ot  == my_ot and \
            test_src == my_src and \
            test_dst == my_dst:
-          if ((test_dc == my_dc) and (test_dp == my_dp) and \
-              (test_bp == my_bp) and (test_bc == my_bc)):
+          if test_dc == my_dc and test_dp == my_dp and \
+             test_bp == my_bp and test_bc == my_bc:
             if test_enc == in_enc:
               my_dup = True
             else:
               my_err = self.CONST.err_DEFRAG_MISSMATCH
               break
           else:
-            if ((test_dc != None) and (test_dp != None) and \
-                (test_bc == None) and (test_bp == None)):
+            if test_dc != None and test_dp != None and \
+               test_bc == None and test_bp == None:
               if my_dp == None:
                 my_err = self.CONST.err_DEFRAG_DP_MISSING
                 break
@@ -2938,8 +2938,8 @@ class PyLayerIRCIoT(object):
               elif len(defrag_array) > my_dc:
                 my_err = self.CONST.err_DEFRAG_DC_EXCEEDED
                 break
-            elif ((test_bc != None) and (test_bp != None) and \
-                  (test_dc == None) and (test_dp == None)):
+            elif test_bc != None and test_bp != None and \
+                 test_dc == None and test_dp == None:
               if my_bp == None:
                 my_err = self.CONST.err_DEFRAG_BP_MISSING
                 break
@@ -3843,7 +3843,7 @@ class PyLayerIRCIoT(object):
    = self.irciot_encap_(my_datumset, 0, 0, in_vuid)
   if json_text != "":
     result.append((json_text, in_vuid))
-  while ((my_skip > 0) or (my_part > 0)):
+  while (my_skip > 0 or my_part > 0):
     json_text, my_skip, my_part \
      = self.irciot_encap_(my_datumset, my_skip, my_part, in_vuid)
     if json_text != "":

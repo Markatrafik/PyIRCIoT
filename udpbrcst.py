@@ -221,7 +221,7 @@ class PyLayerUDPb( irciot_shared_ ):
           new_ip_addresses += [ my_ip.ip ]
           my_net = ipaddress.IPv4Network(my_ip.ip \
             + '/{:d}'.format(my_ip.network_prefix), strict = False)
-          my_broadcast = '%s' % my_net.broadcast_address
+          my_broadcast = '{}'.format(my_net.broadcast_address)
           new_ip_broadcasts += [ my_broadcast ]
           del my_broadcast
           del my_net
@@ -254,7 +254,8 @@ class PyLayerUDPb( irciot_shared_ ):
             self.udpb_ip = my_ip.ip
             my_net = ipaddress.IPv4Network(my_ip.ip \
               + '/{:d}'.format(my_ip.network_prefix), strict = False)
-            self.udpb_ip_broadcast = '%s' % my_net.broadcast_address
+            self.udpb_ip_broadcast \
+              = '{}'.format(my_net.broadcast_address)
             break
           elif in_ipv6 and isinstance(my_ip.ip, tuple):
             ( my_ipv6, my_ipv6p1, my_ipv6p2 ) = my_ip.ip
