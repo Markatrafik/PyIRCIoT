@@ -41,7 +41,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   #
   irciot_protocol_version = '0.3.33'
   #
-  irciot_library_version  = '0.0.218'
+  irciot_library_version  = '0.0.219'
   #
   # IRC-IoT Embedded Languages tags:
   #
@@ -921,7 +921,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
  def irciot_EL_finish_language_(self, in_lang):
   ''' This method terminates the processes necessary for the
       given Embedded Language to work and frees memory
-      in: in_lang -- Embedded Language code of 'str' type
+      in: in_lang -- Embedded Language ID of 'str' type
       out: value with type 'bool', True when successfuly finished
   '''
   if not self.irciot_EL_check_lang_(in_lang):

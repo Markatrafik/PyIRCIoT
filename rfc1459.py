@@ -44,7 +44,7 @@ class PyLayerIRC( irciot_shared_ ):
    #
    irciot_protocol_version = '0.3.33'
    #
-   irciot_library_version  = '0.0.218'
+   irciot_library_version  = '0.0.219'
    #
    # Bot specific constants
    #
@@ -101,12 +101,12 @@ class PyLayerIRC( irciot_shared_ ):
    # Deault Message ID pipeline size:
    irc_default_mid_pipeline_size = 16
    #
-   irc_default_users = [ \
-    ( 1, "iotBot!*irc@irc-iot.nsk.ru",    irc_default_channel, \
-      None, None, None, None, None, None, None ), \
-    ( 2, "FaceBot!*irc@faceserv*.nsk.ru", irc_default_channel, \
-      irc_aop, None, None, None, None, None, None ), \
-    ( 3, "noobot!*bot@irc-iot.nsk.ru",    irc_default_channel, \
+   irc_default_users = [
+    ( 1, "iotBot!*irc@irc-iot.nsk.ru",    irc_default_channel,
+      None, None, None, None, None, None, None ),
+    ( 2, "FaceBot!*irc@faceserv*.nsk.ru", irc_default_channel,
+      irc_aop, None, None, None, None, None, None ),
+    ( 3, "noobot!*bot@irc-iot.nsk.ru",    irc_default_channel,
       [ irc_aop, irc_unban ], None, None, None, None, None, None ) ]
    #
    irc_default_talk_with_strangers = False
@@ -986,7 +986,7 @@ class PyLayerIRC( irciot_shared_ ):
    def __setattr__(self, *_):
       pass
 
- def __init__(self):
+ def __init__(self, in_mode = None):
    #
    self.CONST = self.CONST()
    #
@@ -1077,7 +1077,10 @@ class PyLayerIRC( irciot_shared_ ):
    self.irc_codes    = []
    self.irc_features = []
    #
-   self.__irc_layer_mode = self.CONST.irc_default_mode
+   if in_mode in self.CONST.irc_layer_modes:
+     self.__irc_layer_mode = in_mode
+   else:
+     self.__irc_layer_mode = self.CONST.irc_default_mode
    #
    self.__irc_task = None
    self.irc_run   = False
@@ -1371,8 +1374,8 @@ class PyLayerIRC( irciot_shared_ ):
          if not self.irc_talk_with_strangers:
            if my_vuid[0] != self.CONST.api_vuid_cfg:
              continue
-         if my_vt in [ \
-           self.CONST.api_vuid_cfg, \
+         if my_vt in [
+           self.CONST.api_vuid_cfg,
            self.CONST.api_vuid_tmp ]:
            if my_vuid[0] != my_vt:
              continue
@@ -1864,9 +1867,8 @@ class PyLayerIRC( irciot_shared_ ):
    if not isinstance(in_vuid, str):
      return None
    for my_user in self.irc_users:
-     my_vuid = self.CONST.api_vuid_cfg
-     my_vuid += "%d" % my_user[0]
-     if my_vuid == in_vuid:
+     if in_vuid == "{:s}{:d}".format( \
+      self.CONST.api_vuid_cfg, my_user[0]):
        return my_user
    return None
    #

@@ -77,9 +77,9 @@ def ii_test_forwarding_():
   ii_router_graphs = [ ( ii.do_router_forwarding_, {} ) ]
   my_src = '@myflat/esp8266@bedroom/humidity'
   my_message  = '{"mid":101,"oc":1,"op":1,"o":{"ot":"mainfo",'
-  my_message += '"src":"%s",' % my_src
+  my_message += '"src":"{}",'.format(my_src)
   my_message += '"dst":"","d":{"value":57,"unit":"percent"}}}'
-  to_log_("\nInput message(lanif): '%s'\n" % my_message)
+  to_log_("\nInput message(lanif): '{}'\n".format(my_message))
   my_message  = ii.do_router_(my_message, ii.CONST.dir_in, None)
   if not JSON_TEST_is_irciot_(my_message):
     return False
@@ -111,7 +111,8 @@ def ii_test_translation_():
   my_message  = '{"mid":"1","oc":1,"op":1,"o":'
   my_message += '[{"oid":"x","ot":"maireq","dst":"%s","d":' % my_dst
   my_message += '[{"src":"%s/xxx","help":"super-string"}]}]}' % my_from
-  to_log_("\nPASS(1) :: from insdie\n\nInput message(lanif): '%s'" % my_message)
+  to_log_("\nPASS(1) :: from insdie\n\n" \
+   + "Input message(lanif): '{}'".format(my_message))
   my_message  = ii.do_router_(my_message, ii.CONST.dir_in, None)
   to_log_("\nOutput message(wanif): '{}'".format(my_message))
   if not JSON_TEST_is_irciot_(my_message):
@@ -119,7 +120,8 @@ def ii_test_translation_():
   my_message  = '{"mid":"2","oc":1,"op":1,"o":'
   my_message += '[{"oid":"y","ot":"maiack","src":"%s",' % my_dst
   my_message += '"dst":"%s/xxx","d":{"help":"not-super-string"}}]}' % my_to
-  to_log_("\nPASS(2) :: from outside\n\nInput message(wanif):  '%s'" % my_message)
+  to_log_("\nPASS(2) :: from outside\n\n" \
+   + "Input message(wanif):  '{}'".format(my_message))
   my_message = ii.do_router_(my_message, ii.CONST.dir_out, None)
   to_log_("\nOutput message(lanif): '{}'\n".format(my_message))
   if not JSON_TEST_is_irciot_(my_message):
@@ -170,7 +172,7 @@ def ii_test_GMR_statuses_():
  my_message = '{"mid":"111","o":{"oid":"123","ot":"testing",' \
   + '"src":"abcdef@efgh","dst":"eklmn@oprst",' \
   + '"d":{"test":"testing"}}}'
- to_log_("\nINPUT MESSAGE: @\033[1m%s\033[0m@" % my_message)
+ to_log_("\nINPUT MESSAGE: @\033[1m{}\033[0m@".format(my_message))
  my_GMR_id = ii.init_GMR_(in_src = "include@efgh")
  if ii.get_GMR_list_() != [ my_GMR_id ]:
    to_log_('\n\033[1;41mNO GMR ID in dynamic pool\033[0m')
