@@ -58,7 +58,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   lang_PYTHON = 'py'  # Python
   lang_R      = 'r'   # GNU R
   lang_RUBY   = 'rb'  # Ruby
-  lang_SMTLK  = 'st'  # GNU SmallTalk
+  lang_SMTLK  = 'gst' # GNU SmallTalk
   lang_SWIFT  = 'swt' # Apple Swift
   lang_TCL    = 'tcl' # TCL Script
   #

@@ -214,9 +214,9 @@ class irciot_shared_(object):
    default_encoding = enc_UTF8
    #
    hl_old_enc = {
-    hl_Arabic   : [],
+    hl_Arabic   : [ enc_ISO6 ],
     hl_Armenian : [ enc_ArmSCII7, enc_ArmSCII8, enc_ArmSCII8A ],
-    hl_Basque   : [],
+    hl_Basque   : [ enc_ISO1 ],
     hl_Bashkir  : [],
     hl_Chinese  : [ enc_935 ],
     hl_Church   : [],

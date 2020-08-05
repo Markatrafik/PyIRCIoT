@@ -1976,7 +1976,10 @@ class PyLayerIRC( irciot_shared_ ):
    self.irc = self.irc_socket_(self.irc_server)
 
  def irc_send_(self, irc_out):
+   if not isinstance(irc_out, str):
+     return -1
    try:
+
      if irc_out == "":
        return -1
      if self.irc_debug:
@@ -2040,13 +2043,13 @@ class PyLayerIRC( irciot_shared_ ):
 
  def irc_pong_(self, irc_input):
    irc_string = irc_input.split(":")
-   ret = self.irc_send_("%s %s\r" \
-     % (self.CONST.cmd_PONG, irc_string[1]))
+   ret = self.irc_send_("{} {}\r".format( \
+     self.CONST.cmd_PONG, irc_string[1]))
    return ret
 
  def irc_quit_(self):
-   ret = self.irc_send_("%s :%s\r" \
-     % (self.CONST.cmd_QUIT, self.irc_quit))
+   ret = self.irc_send_("{} :{}\r".format( \
+     self.CONST.cmd_QUIT, self.irc_quit))
    sleep(self.CONST.irc_latency_wait)
    return ret
 

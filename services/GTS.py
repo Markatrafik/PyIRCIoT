@@ -16,13 +16,16 @@
 import sys
 
 from PyIRCIoT.irciot import PyLayerIRCIoT
+from PyIRCIoT.rfc1459 import PyLayerIRC
 
 def main():
   #
   irciot = PyLayerIRCIoT()
+  irc = PyLayerIRC(PyLayerIRC.CONST.irc_mode_SERVICE)
   #
 
   #
+  del irc
   del irciot
   #
   sys.exit(0)

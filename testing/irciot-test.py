@@ -315,7 +315,7 @@ def ii_test_bchsigning_():
       = ii.irciot_blockchain_save_defaults_()
     my_hash = ii.irciot_blockchain_sign_string_( \
      my_str, my_private_key)
-    to_log_("Sign Hash: %s<%d>" % (my_hash, len(my_hash)))
+    to_log_("Sign Hash: {}<{:d}>".format(my_hash, len(my_hash)))
     my_ok = ii.irciot_blockchain_verify_string_( \
      my_str, my_hash, my_public_key)
     if my_ok:
@@ -781,6 +781,12 @@ def main():
 
  to_log_("TEST NAME: '{}'".format(my_command))
 
+ def test_unary_():
+  if len(sys.argv) > 2 and my_params != []:
+    to_log_("TEST_IS_SKIPPED")
+    return False
+  return True
+
  if my_command == 'default':
    ii_test_default_()
 
@@ -808,14 +814,17 @@ def main():
  if my_command == 'c2integrity':
    ii_test_c2integrity_()
 
+ if my_command == 'test2fish':
+   if not test_unary_(): return
+   ii_test_unary_2fish_()
+
  if my_command == 'test4rsa':
+   if not test_unary_(): return
    ii_test_unary_rsa_()
 
  if my_command == 'test4aes':
+   if not test_unary_(): return
    ii_test_unary_aes_()
-
- if my_command == 'test2fish':
-   ii_test_unary_2fish_()
 
  if my_command == 'bchsigning':
    # The test is correct only if the appropriate

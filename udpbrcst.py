@@ -50,7 +50,7 @@ class PyLayerUDPb( irciot_shared_ ):
   udpb_default_debug = DO_debug_library
   #
   udpb_default_port = 12345
-  udpb_default_ip   = ''
+  udpb_default_ip = ""
   udpb_default_ip_broadcast = '<broadcast>'
   # ^ this is must be a Brodacast IP address of Network interface
   #

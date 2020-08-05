@@ -186,7 +186,7 @@
 	priate parameters for backward compatibility.
 
 2020-07-31 10:05 GMT+7 PyIRCIoT 0.0.219 Alexey Y. Woronov <alexey@woronov.ru>
-	Starting with this viersion, the PyLayerIRCIoT class has an input para-
+	Starting with this viersion, the PyLayerIRC class has an input para-
 	meter "in_mode" - the class operation mode. It can take the following
 	values: "CLIENT" act as an IRC client (RFC2812), "SERVICE" or "SERVER"
 	(RFC2813). Now only the default mode works, rest are under development.
