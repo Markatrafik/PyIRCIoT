@@ -3265,7 +3265,7 @@ class PyLayerIRCIoT(object):
    for my_item in in_tags:
      if not isinstance(my_item, str):
        continue
-     my_mark = '"%s":' % my_item
+     my_mark = '"{}":'.format(my_item)
      my_parts = my_json.split(my_mark)
      if len(my_parts) != 2:
        continue

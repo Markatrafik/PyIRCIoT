@@ -383,8 +383,12 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
 
  # incomplete
  def irciot_EL_check_TCL_code_(self, in_code):
+  class TCL_checker_(ast.NodeVisitor):
+    def check(self, in_code):
+      pass
   if not self.irciot_EL_check_matchers_(in_code, self.__TCL_filter_matchers):
     return False
+
   return True
 
  # incomplete

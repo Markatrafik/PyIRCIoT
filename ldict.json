@@ -370,7 +370,7 @@
       "default_value": null,
       "item_id": 29,
       "item_name": "t",
-      "item_ot": "lmrhi",
+      "item_ot": "lmrnfo",
       "method": null,
       "method_language": null,
       "parent_item_id": null,
@@ -383,7 +383,7 @@
       "default_value": null,
       "item_id": 30,
       "item_name": "t",
-      "item_ot": "mainfo",
+      "item_ot": "lmrreq",
       "method": null,
       "method_language": null,
       "parent_item_id": null,
@@ -395,6 +395,97 @@
       "child_object_id": null,
       "default_value": null,
       "item_id": 31,
+      "item_name": "t",
+      "item_ot": "lmrack",
+      "method": null,
+      "method_language": null,
+      "parent_item_id": null,
+      "sections": [],
+      "type_id": 103,
+      "type_parameters": null
+    },
+    {
+      "child_object_id": null,
+      "default_value": null,
+      "item_id": 32,
+      "item_name": "t",
+      "item_ot": "lmrupd",
+      "method": null,
+      "method_language": null,
+      "parent_item_id": null,
+      "sections": [],
+      "type_id": 103,
+      "type_parameters": null
+    },
+    {
+      "child_object_id": null,
+      "default_value": null,
+      "item_id": 33,
+      "item_name": "t",
+      "item_ot": "lmradv",
+      "method": null,
+      "method_language": null,
+      "parent_item_id": null,
+      "sections": [],
+      "type_id": 103,
+      "type_parameters": null
+    },
+    {
+      "child_object_id": null,
+      "default_value": null,
+      "item_id": 34,
+      "item_name": "t",
+      "item_ot": "gmrnfo",
+      "method": null,
+      "method_language": null,
+      "parent_item_id": null,
+      "sections": [],
+      "type_id": 103,
+      "type_parameters": null
+    },
+    {
+      "child_object_id": null,
+      "default_value": null,
+      "item_id": 35,
+      "item_name": "t",
+      "item_ot": "gmrupd",
+      "method": null,
+      "method_language": null,
+      "parent_item_id": null,
+      "sections": [],
+      "type_id": 103,
+      "type_parameters": null
+    },
+    {
+      "child_object_id": null,
+      "default_value": null,
+      "item_id": 36,
+      "item_name": "t",
+      "item_ot": "gmrcon",
+      "method": null,
+      "method_language": null,
+      "parent_item_id": null,
+      "sections": [],
+      "type_id": 103,
+      "type_parameters": null
+    },
+    {
+      "child_object_id": null,
+      "default_value": null,
+      "item_id": 37,
+      "item_name": "t",
+      "item_ot": "mainfo",
+      "method": null,
+      "method_language": null,
+      "parent_item_id": null,
+      "sections": [],
+      "type_id": 103,
+      "type_parameters": null
+    },
+    {
+      "child_object_id": null,
+      "default_value": null,
+      "item_id": 38,
       "item_name": "d",
       "item_ot": "mainfo",
       "method": null,
@@ -407,7 +498,7 @@
     {
       "child_object_id": null,
       "default_value": null,
-      "item_id": 32,
+      "item_id": 39,
       "item_name": "dt",
       "item_ot": "mainfo",
       "method": null,
@@ -420,7 +511,7 @@
     {
       "child_object_id": null,
       "default_value": null,
-      "item_id": 33,
+      "item_id": 40,
       "item_name": "t",
       "item_ot": "maireq",
       "method": null,
@@ -433,7 +524,7 @@
     {
       "child_object_id": null,
       "default_value": "?",
-      "item_id": 34,
+      "item_id": 41,
       "item_name": "d",
       "item_ot": "maireq",
       "method": null,
@@ -446,7 +537,7 @@
     {
       "child_object_id": null,
       "default_value": null,
-      "item_id": 35,
+      "item_id": 42,
       "item_name": "dt",
       "item_ot": "maireq",
       "method": null,
@@ -459,7 +550,7 @@
     {
       "child_object_id": null,
       "default_value": null,
-      "item_id": 36,
+      "item_id": 43,
       "item_name": "t",
       "item_ot": "maiack",
       "method": null,
@@ -472,7 +563,7 @@
     {
       "child_object_id": null,
       "default_value": null,
-      "item_id": 37,
+      "item_id": 44,
       "item_name": "d",
       "item_ot": "maiack",
       "method": null,
@@ -485,7 +576,7 @@
     {
       "child_object_id": null,
       "default_value": null,
-      "item_id": 38,
+      "item_id": 45,
       "item_name": "dt",
       "item_ot": "maiack",
       "method": null,
@@ -498,7 +589,7 @@
     {
       "child_object_id": null,
       "default_value": null,
-      "item_id": 39,
+      "item_id": 46,
       "item_name": "t",
       "item_ot": "maicmd",
       "method": null,
@@ -511,7 +602,7 @@
     {
       "child_object_id": null,
       "default_value": null,
-      "item_id": 40,
+      "item_id": 47,
       "item_name": "d",
       "item_ot": "maicmd",
       "method": null,
@@ -524,7 +615,7 @@
     {
       "child_object_id": null,
       "default_value": "0",
-      "item_id": 41,
+      "item_id": 48,
       "item_name": "ui",
       "item_ot": "modbus01",
       "method": null,
@@ -537,7 +628,7 @@
     {
       "child_object_id": null,
       "default_value": "0",
-      "item_id": 42,
+      "item_id": 49,
       "item_name": "crc",
       "item_ot": "modbus01",
       "method": null,
@@ -550,7 +641,7 @@
     {
       "child_object_id": null,
       "default_value": null,
-      "item_id": 43,
+      "item_id": 50,
       "item_name": "t",
       "item_ot": "noocmd",
       "method": null,
@@ -563,7 +654,7 @@
     {
       "child_object_id": null,
       "default_value": null,
-      "item_id": 44,
+      "item_id": 51,
       "item_name": "id",
       "item_ot": "noocmd",
       "method": null,
@@ -576,7 +667,7 @@
     {
       "child_object_id": null,
       "default_value": null,
-      "item_id": 45,
+      "item_id": 52,
       "item_name": "chn",
       "item_ot": "noocmd",
       "method": null,
@@ -589,7 +680,7 @@
     {
       "child_object_id": null,
       "default_value": null,
-      "item_id": 46,
+      "item_id": 53,
       "item_name": "cmd",
       "item_ot": "noocmd",
       "method": null,
@@ -602,7 +693,7 @@
     {
       "child_object_id": null,
       "default_value": null,
-      "item_id": 47,
+      "item_id": 54,
       "item_name": "t",
       "item_ot": "jmapsess",
       "method": null,
@@ -615,7 +706,7 @@
     {
       "child_object_id": null,
       "default_value": null,
-      "item_id": 48,
+      "item_id": 55,
       "item_name": "capabilities",
       "item_ot": "jmapsess",
       "method": null,
@@ -628,7 +719,7 @@
     {
       "child_object_id": null,
       "default_value": null,
-      "item_id": 49,
+      "item_id": 56,
       "item_name": "accounts",
       "item_ot": "jmapsess",
       "method": null,
@@ -641,7 +732,7 @@
     {
       "child_object_id": null,
       "default_value": null,
-      "item_id": 50,
+      "item_id": 57,
       "item_name": "primaryAccounts",
       "item_ot": "jmapsess",
       "method": null,
@@ -654,7 +745,7 @@
     {
       "child_object_id": null,
       "default_value": null,
-      "item_id": 51,
+      "item_id": 58,
       "item_name": "username",
       "item_ot": "jmapsess",
       "method": null,
@@ -667,7 +758,7 @@
     {
       "child_object_id": null,
       "default_value": null,
-      "item_id": 52,
+      "item_id": 59,
       "item_name": "apiUrl",
       "item_ot": "jmapsess",
       "method": null,
@@ -680,7 +771,7 @@
     {
       "child_object_id": null,
       "default_value": null,
-      "item_id": 53,
+      "item_id": 60,
       "item_name": "downloadUrl",
       "item_ot": "jmapsess",
       "method": null,
@@ -693,7 +784,7 @@
     {
       "child_object_id": null,
       "default_value": null,
-      "item_id": 54,
+      "item_id": 61,
       "item_name": "uploadUrl",
       "item_ot": "jmapsess",
       "method": null,
@@ -706,7 +797,7 @@
     {
       "child_object_id": null,
       "default_value": null,
-      "item_id": 55,
+      "item_id": 62,
       "item_name": "eventSourceUrl",
       "item_ot": "jmapsess",
       "method": null,
@@ -719,7 +810,7 @@
     {
       "child_object_id": null,
       "default_value": null,
-      "item_id": 56,
+      "item_id": 63,
       "item_name": "state",
       "item_ot": "jmapsess",
       "method": null,
@@ -732,7 +823,7 @@
     {
       "child_object_id": null,
       "default_value": null,
-      "item_id": 57,
+      "item_id": 64,
       "item_name": "t",
       "item_ot": "jmapreq",
       "method": null,
@@ -745,7 +836,7 @@
     {
       "child_object_id": null,
       "default_value": null,
-      "item_id": 58,
+      "item_id": 65,
       "item_name": "t",
       "item_ot": "jmapresp",
       "method": null,

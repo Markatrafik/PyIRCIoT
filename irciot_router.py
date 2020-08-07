@@ -107,6 +107,16 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   state_GMR_running = 1
   state_GMR_paused  = 3
   #
+  ot_LMR_INFO    = 'lmrnfo'
+  ot_LMR_REQUEST = 'lmrreq'
+  ot_LMR_ACK     = 'lmrack'
+  ot_LMR_UPDATE  = 'lmrupd'
+  ot_LMR_ADVERT  = 'lmradv'
+  #
+  ot_GMR_INFO    = 'gmrnfo'
+  ot_GMR_UPDATE  = 'gmrupd'
+  ot_GMR_CONNECT = 'gmrcon'
+  #
   # End of PyIRCIoT_router.CONST()
 
  def __init__(self):
@@ -381,7 +391,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   if in_vuid == None: my_string = self.CONST.api_vuid_all
   else: my_string = "{}".format(in_vuid)
   for my_key, my_value in sorted(my_datum.items()):
-    my_string += "%s%s" % (my_key, my_value)
+    my_string += "{}{}".format(my_key, my_value)
   del my_datum
   my_bytes = bytes(my_string, self.__encoding)
   my_string = "{}{}".format( \
@@ -414,6 +424,54 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
     # is not guaranteed and the routing protocol
     # may not work correctly !!!
     self.output_pool.append(my_pack)
+
+ def __make_LMR_information_message_(self, in_LMR_id = None):
+  if not self.__check_LMR_id_(in_LMR_id):
+    return None
+  my_message = { self.CONST.tag_OBJECT_TYPE: self.CONST.ot_LMR_INFO }
+  return my_message
+
+ def __make_LMR_request_message_(self, in_LMR_id = None):
+  if not self.__check_LMR_id_(in_LMR_id):
+    return None
+  my_message = { self.CONST.tag_OBJECT_TYPE: self.CONST.ot_LMR_REQUEST }
+  return my_message
+
+ def __make_LMR_update_message_(self, in_LMR_id = None):
+  if not self.__check_LMR_id_(in_LMR_id):
+    return None
+  my_message = { self.CONST.tag_OBJECT_TYPE: self.CONST.ot_LMR_UPDATE }
+  return my_message
+
+ def __make_LMR_acknowledgement_message_(self, in_LMR_id = None):
+  if not self.__check_LMR_id_(in_LMR_id):
+    return None
+  my_message = { self.CONST.tag_OBJECT_TYPE: self.CONST.ot_LMR_ACK }
+  return my_message
+
+ def __make_LMR_advertisment_message_(self, in_LMR_id = None):
+  if not self.__check_LMR_id_(in_LMR_id):
+    return None
+  my_message = { self.CONST.tag_OBJECT_TYPE: self.CONST.ot_LMR_ADVERT }
+  return my_message
+
+ def __make_GMR_connect_message_(self, in_GMR_id = None):
+  if not self.__check_GMR_id_(in_GMR_id):
+    return None
+  my_message = { self.CONST.tag_OBJECT_TYPE: self.CONST.ot_GMR_CONNECT }
+  return my_message
+
+ def __make_GMR_information_message_(self, in_GMR_id = None):
+  if not self.__check_GMR_id_(in_GMR_id):
+    return None
+  my_message = { self.CONST.tag_OBJECT_TYPE: self.CONST.ot_GMR_INFO }
+  return my_message
+
+ def __make_GMR_update_message_(self, in_GMR_id = None):
+  if not self.__check_GMR_id_(in_GMR_id):
+    return None
+  my_message = { self.CONST.tag_OBJECT_TYPE: self.CONST.ot_GMR_UPDATE }
+  return my_message
 
  # incomplete
  def local_message_router_(self):
@@ -507,7 +565,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
     my_GMR_list.append(my_key)
   return my_GMR_list
 
- def __check_LMR_id_(self, in_LMR_id):
+ def __check_LMR_id_(self, in_LMR_id = None):
   if in_LMR_id == None:
     return False
   if not isinstance(in_LMR_id, int):
@@ -518,7 +576,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
     return False
   return True
 
- def __check_GMR_id_(self, in_GMR_id):
+ def __check_GMR_id_(self, in_GMR_id = None):
   if in_GMR_id == None:
     return False
   if not isinstance(in_GMR_id, int):

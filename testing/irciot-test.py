@@ -324,10 +324,10 @@ def ii_test_bchsigning_():
       to_log_("Verifying failed")
       return False
     to_log_("")
-  to_log_("Using PyLayerIRCIoT: \033[1m%s\033[0m" \
-    % ii.CONST.irciot_library_version)
-  to_log_("Protocol: %s\n" \
-    % ii.CONST.irciot_protocol_version)
+  to_log_("Using PyLayerIRCIoT: \033[1m{}\033[0m".format( \
+    ii.CONST.irciot_library_version))
+  to_log_("Protocol: {}\n".format( \
+    ii.CONST.irciot_protocol_version))
   to_log_("TEST_IS_OK")
   return True
   # End of ii_test_bchsigning_()

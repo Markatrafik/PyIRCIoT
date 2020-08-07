@@ -6,7 +6,9 @@ def irciot_get_common_error_descriptions_(in_human_language):
      6: " мин.",
      7: " ч.",
      8: " байт",
+     9: ", (попытка: {})",
     10: "Соединение закрыто",
+    11: "переподключаемся к ",
     12: "Подключаемся к ",
     13: "Вы используете тестовую часть кода библиотеки" \
       + ", она может быть нестабильной или небезопасной" \
@@ -52,7 +54,9 @@ def irciot_get_common_error_descriptions_(in_human_language):
      6: " Min.",
      7: " St.",
      8: " Byte(s)",
+     9: ", (Versuch: {})",
     10: "Verbindung geschlossen",
+    11: "wiederanschluss an das ",
     12: "Verbindung zum ",
     13: "Sie verwenden den Testteil des Bibliothekscodes" \
       + ", er kann instabil oder unsicher sein" \
@@ -152,11 +156,11 @@ def irciot_get_rfc1459_error_descriptions_(in_human_language):
 def irciot_get_rfc2217_error_descriptions_(in_human_language):
  if in_human_language == "ru": # Russian Language
   return {
-   3007: "переподключаемся к COM порту через сеть, (попытка: {}) ..."
+   3008: "COM порт через сеть"
  }
  elif in_human_language == "de": # Deutsch
   return {
-   3007: "Stellt Verbindung zu COM über Netzwerk, (Versuch: {}) ..."
+   3008: "COM über Netzwerk"
  }
  return {}
 

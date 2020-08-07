@@ -1189,7 +1189,7 @@ class PyLayerIRC( irciot_shared_ ):
                  my_port = "{}".format(self.__irc_local_port)
                  if my_split[0] != my_port:
                    my_ok = False
-               my_out = "%s , %s : " % (my_split[0], my_split[1])
+               my_out = "{} , {} : ".format(my_split[0], my_split[1])
                if my_ok:
                  my_out += "USERID : UNIX : {}\n".format(self.irc_user)
                else:
@@ -1964,7 +1964,9 @@ class PyLayerIRC( irciot_shared_ ):
      return
    self.irc_disconnect_()
    self.to_log_(self.errors[self.CONST.err_CLOSED] + ", " \
-    + "reconnecting to IRC (try: {}) ... ".format(self.__irc_recon))
+    + self.errors[self.CONST.err_RECONN] + "IRC" \
+    + self.errors[self.CONST.err_TRY].format( \
+     self.__irc_recon) + " ...")
    my_mult = self.__irc_recon
    if self.__join_retry > self.__join_retry_max:
      my_mult = 1
@@ -1979,7 +1981,6 @@ class PyLayerIRC( irciot_shared_ ):
    if not isinstance(irc_out, str):
      return -1
    try:
-
      if irc_out == "":
        return -1
      if self.irc_debug:

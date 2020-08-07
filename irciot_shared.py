@@ -260,7 +260,9 @@ class irciot_shared_(object):
    err_MIN     = 6
    err_HOURS   = 7
    err_BYTES   = 8
+   err_TRY     = 9
    err_CLOSED  = 10
+   err_RECONN  = 11
    err_CONNTO  = 12
    err_DEVEL   = 13
    err_SENDTO  = 15
@@ -271,7 +273,9 @@ class irciot_shared_(object):
      err_MIN:     " min.",
      err_HOURS:   " hr.",
      err_BYTES:   " byte(s)",
+     err_TRY:     " (try: {})",
      err_CLOSED:  "Connection closed",
+     err_RECONN:  "reconnecting to ",
      err_CONNTO:  "Connecting to ",
      err_SENDTO:  "Sending to ",
      err_UNKNOWN: "Unknown error",
