@@ -3461,10 +3461,9 @@ class PyLayerIRCIoT(object):
       # Protocol Version Reply
       if self.__mid_method == "":
         self.current_mid += 1
-        my_mid = "{}".format(self.current_mid)
-        my_message = '{"mid":"%s","%s":"%s"}' \
-          % (my_mid, self.CONST.tag_VERSION, \
-          self.CONST.irciot_protocol_version)
+        my_message = '{{"{}":"{}","{}":"{}"}}'.format( \
+         self.CONST.tag_MESSAGE_ID, self.current_mid, \
+         self.CONST.tag_VERSION, self.CONST.irciot_protocol_version)
         if len(in_container) == 2:
           return my_message
         else:

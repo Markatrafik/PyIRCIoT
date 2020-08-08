@@ -271,7 +271,8 @@ def ii_test_c1integrity_():
     json_calc, len(json_calc)))
   my_crc16  = ii.irciot_crc16_(bytes(json_calc, 'utf-8'))
   to_log_("Calculated CRC16: 0x{}".format(my_crc16))
-  json_test = json_lead + "abcdef" + json_text + '"c1":"%s"}' % my_crc16
+  json_test = json_lead + "abcdef" + json_text \
+   + '"c1":"{}"}}'.format(my_crc16)
   to_log_("Tested JSON: #\033[2;36m{}\033[0m#len={}#".format( \
     json_test, len(json_test)))
   if ii.is_irciot_(json_test) and my_crc16 == 'f564':
@@ -294,7 +295,8 @@ def ii_test_c2integrity_():
     json_calc, len(json_calc)))
   my_crc32  = ii.irciot_crc32_(bytes(json_calc, 'utf-8'))
   to_log_("Calculated CRC32: 0x{}".format(my_crc32))
-  json_test = json_lead + "abcdef" + json_text + '"c1":"%s"}' % my_crc32
+  json_test = json_lead + "abcdef" + json_text \
+   + '"c1":"{}"}}'.format(my_crc32)
   to_log_("Tested JSON: #\033[2;36m{}\033[0m#len={}#".format( \
     json_test, len(json_test)))
   if ii.is_irciot_(json_test) and my_crc32 == 'fa7fda88':

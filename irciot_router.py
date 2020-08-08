@@ -56,6 +56,8 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   tag_OUT_SCOPE = 'oscp'
   tag_LMR_ID = 'lmri'
   tag_GMR_ID = 'gmri'
+  tag_LMR_ver = 'ver'
+  tag_GMR_ver = 'ver'
   #
   err_ROUTER_DUP_DETECT = 10015
   err_MISSING_PARAMETER = 10505
@@ -428,49 +430,106 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
  def __make_LMR_information_message_(self, in_LMR_id = None):
   if not self.__check_LMR_id_(in_LMR_id):
     return None
-  my_message = { self.CONST.tag_OBJECT_TYPE: self.CONST.ot_LMR_INFO }
+  try:
+    my_LMR = self.__LMR_pool[in_LMR_id]
+    my_src = my_LMR[self.CONST.tag_SRC_ADDR]
+  except:
+    return None
+  my_message = { self.CONST.tag_OBJECT_TYPE: self.CONST.ot_LMR_INFO,
+   self.CONST.tag_DATE_TIME: self.irciot_get_current_datetime_(),
+   self.CONST.tag_SRC_ADDR: my_src }
   return my_message
 
  def __make_LMR_request_message_(self, in_LMR_id = None):
   if not self.__check_LMR_id_(in_LMR_id):
     return None
-  my_message = { self.CONST.tag_OBJECT_TYPE: self.CONST.ot_LMR_REQUEST }
+  try:
+    my_LMR = self.__LMR_pool[in_LMR_id]
+    my_src = my_LMR[self.CONST.tag_SRC_ADDR]
+  except:
+    return None
+  my_message = { self.CONST.tag_OBJECT_TYPE: self.CONST.ot_LMR_REQUEST,
+   self.CONST.tag_DATE_TIME: self.irciot_get_current_datetime_(),
+   self.CONST.tag_SRC_ADDR: my_src }
   return my_message
 
  def __make_LMR_update_message_(self, in_LMR_id = None):
   if not self.__check_LMR_id_(in_LMR_id):
     return None
-  my_message = { self.CONST.tag_OBJECT_TYPE: self.CONST.ot_LMR_UPDATE }
+  try:
+    my_LMR = self.__LMR_pool[in_LMR_id]
+    my_src = my_LMR[self.CONST.tag_SRC_ADDR]
+  except:
+    return None
+  my_message = { self.CONST.tag_OBJECT_TYPE: self.CONST.ot_LMR_UPDATE,
+   self.CONST.tag_DATE_TIME: self.irciot_get_current_datetime_(),
+   self.CONST.tag_SRC_ADDR: my_src }
   return my_message
 
  def __make_LMR_acknowledgement_message_(self, in_LMR_id = None):
   if not self.__check_LMR_id_(in_LMR_id):
     return None
-  my_message = { self.CONST.tag_OBJECT_TYPE: self.CONST.ot_LMR_ACK }
+  try:
+    my_LMR = self.__LMR_pool[in_LMR_id]
+    my_src = my_LMR[self.CONST.tag_SRC_ADDR]
+  except:
+    return None
+  my_message = { self.CONST.tag_OBJECT_TYPE: self.CONST.ot_LMR_ACK,
+   self.CONST.tag_DATE_TIME: self.irciot_get_current_datetime_(),
+   self.CONST.tag_SRC_ADDR: my_src }
   return my_message
 
  def __make_LMR_advertisment_message_(self, in_LMR_id = None):
   if not self.__check_LMR_id_(in_LMR_id):
     return None
-  my_message = { self.CONST.tag_OBJECT_TYPE: self.CONST.ot_LMR_ADVERT }
+  try:
+    my_LMR = self.__LMR_pool[in_LMR_id]
+    my_src = my_LMR[self.CONST.tag_SRC_ADDR]
+  except:
+    return None
+  my_message = { self.CONST.tag_OBJECT_TYPE: self.CONST.ot_LMR_ADVERT,
+   self.CONST.tag_DATE_TIME: self.irciot_get_current_datetime_(),
+   self.CONST.tag_SRC_ADDR: my_src }
   return my_message
 
  def __make_GMR_connect_message_(self, in_GMR_id = None):
   if not self.__check_GMR_id_(in_GMR_id):
     return None
-  my_message = { self.CONST.tag_OBJECT_TYPE: self.CONST.ot_GMR_CONNECT }
+  try:
+    my_GMR = self._GMR_pool[in_GMR_id]
+    my_src = my_GMR[self.CONST.tag_SRC_ADDR]
+  except:
+    return None
+  my_message = { self.CONST.tag_OBJECT_TYPE: self.CONST.ot_GMR_CONNECT,
+   self.CONST.tag_DATE_TIME: self.irciot_get_current_datetime_(),
+   self.CONST.tag_GMR_VER: self.irciot_protocol_version_(),
+   self.CONST.tag_SRC_ADDR: my_src }
   return my_message
 
  def __make_GMR_information_message_(self, in_GMR_id = None):
   if not self.__check_GMR_id_(in_GMR_id):
     return None
-  my_message = { self.CONST.tag_OBJECT_TYPE: self.CONST.ot_GMR_INFO }
+  try:
+    my_GMR = self.__GMR_pool[in_GMR_id]
+    my_src = my_GMR[self.CONST.tag_SRC_ADDR]
+  except:
+    return None
+  my_message = { self.CONST.tag_OBJECT_TYPE: self.CONST.ot_GMR_INFO,
+   self.CONST.tag_DATE_TIME: self.irciot_get_current_datetime_(),
+   self.CONST.tag_SRC_ADDR: my_src }
   return my_message
 
  def __make_GMR_update_message_(self, in_GMR_id = None):
   if not self.__check_GMR_id_(in_GMR_id):
     return None
-  my_message = { self.CONST.tag_OBJECT_TYPE: self.CONST.ot_GMR_UPDATE }
+  try:
+    my_GMR = self.__GMR_pool[in_GMR_id]
+    my_src = my_GMR[self.CONST.tag_SRC_ADDR]
+  except:
+    return None
+  my_message = { self.CONST.tag_OBJECT_TYPE: self.CONST.ot_GMR_UPDATE,
+   self.CONST.tag_DATE_TIME: self.irciot_get_current_datetime_(),
+   self.CONST.tag_SRC_ADDR: my_src }
   return my_message
 
  # incomplete
@@ -520,7 +579,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
     return None
   self.__LMR_pool.update({
     my_LMR_id: {
-     'src': my_src,
+     self.CONST.tag_SRC_ADDR: my_src,
      'status': self.CONST.state_LMR_stopped
     }
   })
@@ -547,7 +606,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
     return None
   self.__GMR_pool.update({
     my_GMR_id: {
-     'src': my_src,
+     self.CONST.tag_SRC_ADDR: my_src,
      'status': self.CONST.state_GMR_stopped
     }
   })

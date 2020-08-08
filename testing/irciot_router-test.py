@@ -108,8 +108,8 @@ def ii_test_translation_():
       ii.CONST.tag_IN_SCOPE  : my_from,
       ii.CONST.tag_OUT_SCOPE : my_to
   } ) ]
-  my_message  = '{"mid":"1","oc":1,"op":1,"o":'
-  my_message += '[{"oid":"x","ot":"maireq","dst":"%s","d":' % my_dst
+  my_message  = '{"mid":"1","oc":1,"op":1,"o":' \
+   + '[{{"oid":"x","ot":"maireq","dst":"{}","d":'.format(my_dst)
   my_message += '[{"src":"%s/xxx","help":"super-string"}]}]}' % my_from
   to_log_("\nPASS(1) :: from insdie\n\n" \
    + "Input message(lanif): '{}'".format(my_message))
