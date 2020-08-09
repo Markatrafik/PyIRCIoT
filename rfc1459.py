@@ -1315,8 +1315,8 @@ class PyLayerIRC( irciot_shared_ ):
    if in_vuid in self.CONST.api_vuid_not_srv:
      my_vt = in_vuid
    else:
-     my_re = re.search("%s(\d+)" \
-       % self.CONST.api_vuid_cfg, in_vuid)
+     my_re = re.search("{}(\d+)".format( \
+      self.CONST.api_vuid_cfg), in_vuid)
      if my_re:
        my_vt = self.CONST.api_vuid_cfg
        my_user = self.irc_cfg_get_user_struct_by_vuid_(in_vuid)
@@ -1325,8 +1325,8 @@ class PyLayerIRC( irciot_shared_ ):
            my_ekey, my_bkey, my_lmid, \
            my_ekto, my_bkto, my_omid ) = my_user
      else:
-       my_re = re.search("%s(\d+)" \
-         % self.CONST.api_vuid_tmp, in_vuid)
+       my_re = re.search("{}(\d+)".format( \
+        self.CONST.api_vuid_tmp), in_vuid)
        if my_re:
          my_vt = self.CONST.api_vuid_tmp
          my_anon = self.irc_track_get_anons_by_vuid_(in_vuid)
@@ -1624,8 +1624,8 @@ class PyLayerIRC( irciot_shared_ ):
   in_lmid, in_ekto, in_bkto, in_omid ):
    if not isinstance(in_vuid, str):
      return
-   my_re = re.search("%s(\d+)" \
-     % self.CONST.api_vuid_tmp, in_vuid)
+   my_re = re.search("{}(\d+)".format( \
+    self.CONST.api_vuid_tmp), in_vuid)
    if my_re:
      my_id = my_re.group(1)
    else:
@@ -1691,8 +1691,8 @@ class PyLayerIRC( irciot_shared_ ):
  def irc_track_get_anons_by_vuid_(self, in_vuid):
    if not isinstance(in_vuid, str):
      return None
-   my_re = re.search("%s(\d+)" \
-     % self.CONST.api_vuid_tmp, in_vuid)
+   my_re = re.search("{}(\d+)".format( \
+    self.CONST.api_vuid_tmp), in_vuid)
    if my_re:
      my_id = my_re.group(1)
    else:
@@ -1908,8 +1908,8 @@ class PyLayerIRC( irciot_shared_ ):
      (my_nick, my_mask, my_vuid, my_info) = my_nick_struct
      if not isinstance(my_vuid, str):
        continue
-     my_re = re.search("%s(\d+)" \
-       % self.CONST.api_vuid_tmp, my_vuid)
+     my_re = re.search("{}(\d+)".format( \
+      self.CONST.api_vuid_tmp), my_vuid)
      if my_re:
        if my_mask == in_mask:
          return my_vuid
@@ -2070,8 +2070,8 @@ class PyLayerIRC( irciot_shared_ ):
      my_str += in_umode
    for my_nick in my_nicks:
      my_str += ' ' + my_nick
-   ret = self.irc_send_("%s %s %s%s\r\n" \
-     % (self.CONST.cmd_MODE, in_channel, in_change, my_str))
+   ret = self.irc_send_("{} {} {}{}\r\n".format( \
+    self.CONST.cmd_MODE, in_channel, in_change, my_str))
    return ret
    #
    # End of irc_umode_()
@@ -2577,10 +2577,10 @@ class PyLayerIRC( irciot_shared_ ):
          if my_user != None:
            my_opts = self.irc_get_useropts_from_user_struct_(my_user)
            if self.CONST.irc_unban in my_opts:
-             in_ret = self.irc_send_("%s %s %s%s %s\r\n" \
-               % (self.CONST.cmd_MODE, my_channel, \
-                  self.CONST.irc_mode_del, \
-                  self.CONST.irc_umode_ban, my_mask))
+             in_ret = self.irc_send_("{} {} {}{} {}\r\n".format( \
+              self.CONST.cmd_MODE, my_channel, \
+              self.CONST.irc_mode_del, \
+              self.CONST.irc_umode_ban, my_mask))
        if my_nick:
          self.irc_random_nick_(self.__irc_nick, True)
        if my_nick or my_unban:
@@ -2886,8 +2886,8 @@ class PyLayerIRC( irciot_shared_ ):
          irc_wait = self.CONST.irc_default_wait
          self.__join_retry += 1
          if self.irc_send_(self.CONST.cmd_JOIN \
-          + " " + self.irc_channel + "%s\r" % str(" " \
-          + self.irc_chankey if self.irc_chankey else "")) == -1:
+          + " {}{}\r".format(self.irc_channel, str(" " \
+          + self.irc_chankey if self.irc_chankey else ""))) == -1:
            irc_init = 0
 
        elif irc_init == 6:

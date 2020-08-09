@@ -110,7 +110,11 @@ class irciot_shared_(object):
    hl_Hebrew   = 'il'
    hl_Italian  = 'it'
    hl_Kazakh   = 'kk'
+   hl_Korean   = 'ko'
+   hl_Kurdish  = 'ku'
    hl_Kyrgyz   = 'ky'
+   hl_Latvian  = 'lv'
+   hl_Maltese  = 'mt'
    hl_Persian  = 'ir'
    hl_Polish   = 'pl'
    hl_Romanian = 'ro'
@@ -135,6 +139,8 @@ class irciot_shared_(object):
    for enc in [ "7", "8", "8a", "16u" ]:
      locals()["enc_ArmSCII{}".format(enc.upper())] \
       = "armscii-{}".format(enc)
+   for enc in [ "CN", "TW", "JP", "KR" ]:
+     locals()["enc_EUC{}".format(enc)] = "EUC-{}".format(enc)
    for enc in [ "c", "r", "ru", "t", "u" ]:
      locals()["enc_KOI8{}".format(enc.upper())] \
       = "koi8-{}".format(enc)
@@ -191,6 +197,10 @@ class irciot_shared_(object):
     enc_1257  : [ "cp-1257", "windows-1257" ],
     enc_1258  : [ "cp-1258", "windows-1258" ],
     enc_1259  : [ "cp-1259", "windows-1259" ],
+    enc_EUCCN : [ "euc_cn" ],
+    enc_EUCTW : [ "euc_tw" ],
+    enc_EUCJP : [ "euc_jp" ],
+    enc_EUCKR : [ "euc_kr", "cp970" ],
     enc_ISO1  : [ "iso8859-1", "latin1", "ibm819", "ibm-819" ],
     enc_ISO2  : [ "iso8859-2", "latin2", "ibm912", "ibm-912" ],
     enc_ISO3  : [ "iso8859-3", "latin3", "ibm913", "ibm-913" ],
@@ -218,14 +228,14 @@ class irciot_shared_(object):
     hl_Armenian : [ enc_ArmSCII7, enc_ArmSCII8, enc_ArmSCII8A ],
     hl_Basque   : [ enc_ISO1 ],
     hl_Bashkir  : [],
-    hl_Chinese  : [ enc_935 ],
+    hl_Chinese  : [ enc_935, enc_EUCTW ],
     hl_Church   : [],
     hl_Croatian : [ enc_ISO2 ],
     hl_Czech    : [ enc_ISO2 ],
     hl_Danish   : [ enc_ISO1 ],
     hl_Deutsch  : [ enc_ISO1, enc_273 ],
     hl_English  : [ enc_ISO1, enc_437, enc_UTF7, enc_ASCII ],
-    hl_Estonian : [ enc_ISO15, enc_ISO13, enc_922 ],
+    hl_Estonian : [ enc_ISO15, enc_ISO13, enc_922, enc_775 ],
     hl_Finnish  : [ enc_ISO1, enc_278 ],
     hl_French   : [ enc_ISO1, enc_863, enc_297 ],
     hl_Georgian : [],
@@ -235,7 +245,11 @@ class irciot_shared_(object):
     hl_Hebrew   : [ enc_ISO8, enc_862, enc_856, enc_1255 ],
     hl_Italian  : [ enc_ISO1, enc_280 ],
     hl_Kazakh   : [],
+    hl_Korean   : [ enc_EUCKR ],
+    hl_Kurdish  : [],
     hl_Kyrgyz   : [],
+    hl_Latvian  : [ enc_1257, enc_ISO13, enc_775 ],
+    hl_Maltese  : [ enc_ISO3 ],
     hl_Persian  : [ enc_1097 ],
     hl_Polish   : [ enc_ISO2 ],
     hl_Romanian : [ enc_ISO2 ],
@@ -253,7 +267,7 @@ class irciot_shared_(object):
     hl_Turkish  : [ enc_ISO9, enc_857, enc_905, enc_1254 ],
     hl_Turkmen  : [],
     hl_Uzbek    : [],
-    hl_Japanese : []
+    hl_Japanese : [ enc_EUCJP ]
    }
    #
    err_SEC     = 5

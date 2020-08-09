@@ -184,8 +184,8 @@ class PyLayerUDPb( irciot_shared_ ):
   if in_vuid in self.CONST.api_vuid_not_srv:
     my_vt = in_vuid
   else:
-    my_re = re.search("%s(\d+)" \
-      % self.CONST.api_vuid_cfg, in_vuid)
+    my_re = re.search("{}(\d+)".format( \
+     self.CONST.api_vuid_cfg), in_vuid)
     if my_re:
       my_vt = self.CONST.api_vuid_cfg
       my_user = self.udpb_cfg_get_user_struct_by_vuid_(in_vuid)
@@ -193,8 +193,8 @@ class PyLayerUDPb( irciot_shared_ ):
         my_time = self.CONST.api_epoch_maximal
         ( my_uid, my_ip, my_opt ) = my_user
     else:
-      my_re = re.search("%s(\d+)" \
-        % self.CONST.api_vuid_tmp, in_vuid)
+      my_re = re.search("{}(\d+)".format( \
+       self.CONST.api_vuid_tmp), in_vuid)
       if my_re:
         my_vt = self.CONST.api_vuid_tmp
         my_anon = self.udpb_track_get_anons_by_vuid_(in_vuid)

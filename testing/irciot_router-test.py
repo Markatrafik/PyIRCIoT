@@ -110,16 +110,18 @@ def ii_test_translation_():
   } ) ]
   my_message  = '{"mid":"1","oc":1,"op":1,"o":' \
    + '[{{"oid":"x","ot":"maireq","dst":"{}","d":'.format(my_dst)
-  my_message += '[{"src":"%s/xxx","help":"super-string"}]}]}' % my_from
+  my_message += '[{{"src":"{}/xxx",'.format(my_from)
+  my_message += '"help":"super-string"}]}]}'
   to_log_("\nPASS(1) :: from insdie\n\n" \
    + "Input message(lanif): '{}'".format(my_message))
   my_message  = ii.do_router_(my_message, ii.CONST.dir_in, None)
   to_log_("\nOutput message(wanif): '{}'".format(my_message))
   if not JSON_TEST_is_irciot_(my_message):
     return False
-  my_message  = '{"mid":"2","oc":1,"op":1,"o":'
-  my_message += '[{"oid":"y","ot":"maiack","src":"%s",' % my_dst
-  my_message += '"dst":"%s/xxx","d":{"help":"not-super-string"}}]}' % my_to
+  my_message  = '{"mid":"2","oc":1,"op":1,"o":' \
+   + '[{{"oid":"y","ot":"maiack","src":"{}",'.format(my_dst)
+  my_message += '"dst":"{}/xxx",'.format(my_to)
+  my_message += '"d":{"help":"not-super-string"}}]}'
   to_log_("\nPASS(2) :: from outside\n\n" \
    + "Input message(wanif):  '{}'".format(my_message))
   my_message = ii.do_router_(my_message, ii.CONST.dir_out, None)
