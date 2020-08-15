@@ -49,7 +49,7 @@
  ............: for example: RSA + AES and RSA + Twofish, etc.
 
   2020-05-16 : When IRC-IoT nodes exchanging messages thru IRC
- ............: with a maximum fixed MTU, problems with triming
+ ............: with a maximum fixed MTU, problems with trimming
  ~ Urgent! ~ : the tails of messages appears, this depends on
  ............: the length of the Nickname, the hostname and on
  the server settings. The MTU negotiation algorithm is required.

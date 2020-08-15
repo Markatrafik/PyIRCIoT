@@ -189,7 +189,7 @@ def ii_test_GMR_statuses_():
  ii.start_GMR_()
  my_message = ii.do_router_(my_message, ii.CONST.dir_both, None)
  to_log_('\nOUTPUT MESSAGE @\033[1;39m{}\033[0m@\n'.format(my_message))
- if ii.get_GMR_status_() != ii.CONST.state_GMR_running:
+ if ii.get_GMR_status_() != ii.CONST.state_GMR_connecting:
    # only ONE item ^^^ must be in the pool, no parameters - first item
    to_log_('\n\033[1;41mincorrect GMR status\033[0m')
    return False

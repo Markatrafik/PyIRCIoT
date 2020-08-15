@@ -154,6 +154,7 @@ class irciot_shared_(object):
      locals()["enc_{}".format(enc)] = "cp{}".format(enc)
    for enc in [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 15 ]:
      locals()["enc_ISO{}".format(enc)] = "iso-8859-{}".format(enc)
+   enc_ISO22 = "iso-2022"
    #
    enc_aliases = {
     enc_ASCII : [ "cp-367", "cp367", "us-ascii" ],
@@ -213,6 +214,7 @@ class irciot_shared_(object):
     enc_ISO10 : [ "iso8859-10", "latin6" ],
     enc_ISO13 : [ "iso8859-13", "cp921", "cp-921" ],
     enc_ISO15 : [ "iso8859-15", "latin9", "ibm923", "ibm-923" ],
+    enc_ISO22 : [ "iso2022" ],
     enc_KOI8R : [ "koi8r", "cp878", "ibm-878" ],
     enc_KOI8U : [ "koi8u", "cp1168", "ibm-1168" ],
     enc_UTF7  : [ "utf7"  ],

@@ -105,9 +105,11 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   state_LMR_running = 1
   state_LMR_paused  = 3
   #
-  state_GMR_stopped = 0
-  state_GMR_running = 1
-  state_GMR_paused  = 3
+  state_GMR_stopped    = 0
+  state_GMR_connecting = 1
+  state_GMR_connected  = 2
+  state_GMR_paused     = 3
+  state_GMR_stalled    = 5
   #
   ot_LMR_INFO    = 'lmrnfo'
   ot_LMR_REQUEST = 'lmrreq'
@@ -427,6 +429,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
     # may not work correctly !!!
     self.output_pool.append(my_pack)
 
+ # incomplete
  def __make_LMR_information_message_(self, in_LMR_id = None):
   if not self.__check_LMR_id_(in_LMR_id):
     return None
@@ -440,6 +443,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
    self.CONST.tag_SRC_ADDR: my_src }
   return my_message
 
+ # incomplete
  def __make_LMR_request_message_(self, in_LMR_id = None):
   if not self.__check_LMR_id_(in_LMR_id):
     return None
@@ -453,6 +457,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
    self.CONST.tag_SRC_ADDR: my_src }
   return my_message
 
+ # incomplete
  def __make_LMR_update_message_(self, in_LMR_id = None):
   if not self.__check_LMR_id_(in_LMR_id):
     return None
@@ -466,6 +471,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
    self.CONST.tag_SRC_ADDR: my_src }
   return my_message
 
+ # incomplete
  def __make_LMR_acknowledgement_message_(self, in_LMR_id = None):
   if not self.__check_LMR_id_(in_LMR_id):
     return None
@@ -479,6 +485,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
    self.CONST.tag_SRC_ADDR: my_src }
   return my_message
 
+ # incomplete
  def __make_LMR_advertisment_message_(self, in_LMR_id = None):
   if not self.__check_LMR_id_(in_LMR_id):
     return None
@@ -492,6 +499,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
    self.CONST.tag_SRC_ADDR: my_src }
   return my_message
 
+ # incomplete
  def __make_GMR_connect_message_(self, in_GMR_id = None):
   if not self.__check_GMR_id_(in_GMR_id):
     return None
@@ -506,6 +514,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
    self.CONST.tag_SRC_ADDR: my_src }
   return my_message
 
+ # incomplete
  def __make_GMR_information_message_(self, in_GMR_id = None):
   if not self.__check_GMR_id_(in_GMR_id):
     return None
@@ -519,6 +528,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
    self.CONST.tag_SRC_ADDR: my_src }
   return my_message
 
+ # incomplete
  def __make_GMR_update_message_(self, in_GMR_id = None):
   if not self.__check_GMR_id_(in_GMR_id):
     return None
@@ -534,7 +544,13 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
 
  # incomplete
  def local_message_router_(self):
-  pass
+  for my_LMR_id in self.__LMR_pool.keys():
+    my_LMR = self.__LMR_pool[ my_LMR_id ]
+    my_status = my_LMR['status']
+    if my_status in [
+     self.CONST.state_LMR_stopped,
+     self.CONST.state_LMR_paused ]:
+      continue
   #
   # timer-generated LMR messages will pass
   # to function self.__direct_router_message_()
@@ -543,7 +559,13 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
 
  # incomplete
  def global_message_router_(self):
-  pass
+  for my_GMR_id in self.__GMR_pool.keys():
+    my_GMR = self.__GMR_pool[ my_GMR_id ]
+    my_status = my_GMR['status']
+    if my_status in [
+     self.CONST.state_GMR_stopped,
+     self.CONST.state_GMR_paused ]:
+      continue
   #
   # timer-generated GMR messages will pass
   # to function self.__direct_router_message_()
@@ -688,7 +710,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   if not self.__check_GMR_id_(my_GMR_id):
     return False
   self.__GMR_pool[my_GMR_id].update({
-    'status': self.CONST.state_GMR_running
+    'status': self.CONST.state_GMR_connecting
   })
   return True
 
@@ -745,7 +767,8 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
     self.__invalid_LMR_id_(my_id)
     return in_datum
   my_LMR = self.__LMR_pool[my_id]
-  if my_LMR['status'] in [
+  my_status = my_LMR['status']
+  if my_status in [
    self.CONST.state_LMR_stopped,
    self.CONST.state_LMR_paused ]:
     return in_datum
@@ -769,10 +792,15 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
     self.__invalid_GMR_id_(my_id)
     return in_datum
   my_GMR = self.__GMR_pool[my_id]
-  if my_GMR['status'] in [
+  my_status = my_GMR['status']
+  if my_status in [
    self.CONST.state_GMR_stopped,
    self.CONST.state_GMR_paused ]:
     return in_datum
+  elif my_status in [
+   self.CONST.state_GMR_connecting,
+   self.CONST.state_GMR_stalled ]:
+    pass
 
   return in_datum
   #
