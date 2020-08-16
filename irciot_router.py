@@ -20,7 +20,9 @@ try: # insecure, but for development
 except:
  from PyIRCIoT.irciot import PyLayerIRCIoT
 from copy import deepcopy
+from time import sleep
 from time import time
+import threading
 import random
 try:
  import json
@@ -100,6 +102,15 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   #
   default_LMR_id = 1000
   default_GMR_id = 5000
+  #
+  # permanent delay between iterations (in seconds):
+  default_LMR_latency = 0.1
+  default_GMR_latency = 0.5
+  # allowed values of latency:
+  min_LMR_latency = 0.01
+  max_LMR_latency = 3
+  min_GMR_latency = 0.3
+  max_LMR_latency = 30
   #
   state_LMR_stopped = 0
   state_LMR_running = 1
@@ -191,13 +202,60 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   self.__LMR_pool = {}
   self.__GMR_pool = {}
   #
+  self.__LMR_task = None
+  self.__GMR_task = None
+  #
+  self.__LMR_run = False
+  self.__GMR_run = False
+  #
+  self.__LMR_latency = self.CONST.default_LMR_latency
+  self.__GMR_latency = self.CONST.default_GMR_latency
+  #
   self.__primary_irciot_address = ""
   #
   # End of PyIRCIoT_router.__init__()
 
+ def __del__(self):
+   if self.__LMR_run: self.__stop_LMR_()
+   if self.__GMR_run: self.__stop_GMR_()
+
  def router_pointer (self, in_compatibility, in_messages_pack):
-  # Warning: interface may be changed while developing
-  return False
+   # Warning: interface may be changed while developing
+   return False
+
+ def __start_LMR_(self):
+   if self.__LMR_run: return
+   if self.__LMR_task != None: return
+   self.__LMR_task = threading.Thread(target = self.__local_message_router_)
+   self.__LMR_run = True
+   self.__LMR_task.start()
+
+ def __start_GMR_(self):
+   if self.__GMR_run: return
+   if self.__GMR_task != None: return
+   self.__GMR_task = threading.Thread(target = self.__global_message_router_)
+   self.__GMR_run = True
+   self.__GMR_task.start()
+
+ def __stop_LMR_(self):
+   self.__LMR_run = False
+   if self.__LMR_task != None:
+     sleep(self.__LMR_latecny)
+     try:
+       self.__LMR_task.join()
+     except:
+       pass
+     self.__LMR_task = None
+
+ def __stop_GMR_(self):
+   self.__GMR_run = False
+   if self.__GMR_task != None:
+     sleep(self.__GMR_latency)
+     try:
+       self.__GMR_task.join()
+     except:
+       pass
+     self.__GMR_task = None
 
  def irciot_set_locale_(self, in_lang):
   if not isinstance(in_lang, str):
@@ -223,6 +281,26 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
       self.errors.update(my_desc)
   except:
     pass
+
+ def irciot_get_LMR_latency_(self):
+   return self.__LMR_latency
+
+ def iricot_get_GMR_latency_(self):
+   return self.__GMR_latency
+
+ def irciot_set_LMR_latency_(self, in_latency):
+   if type(in_latency) not in [ int, float ]: return False
+   if in_latecny < self.CONST.min_LMR_latency \
+   or in_latency > self.CONST.max_LMR_latency: return False
+   self.__LMR_latency = in_latency
+   return True
+
+ def irciot_set_GMR_latency_(self, in_latency):
+   if type(in_latency) not in [ int, float ]: return False
+   if in_latency < self.CONST.min_GMR_latency \
+   or in_latency > self.CONST.max_GMR_latency: return False
+   self.__GMR_latency = in_latency
+   return True
 
  def router_error_(self, in_error_code, in_addon = None):
   # Warning: interface may be changed while developing
@@ -543,32 +621,44 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   return my_message
 
  # incomplete
- def local_message_router_(self):
-  for my_LMR_id in self.__LMR_pool.keys():
-    my_LMR = self.__LMR_pool[ my_LMR_id ]
-    my_status = my_LMR['status']
-    if my_status in [
-     self.CONST.state_LMR_stopped,
-     self.CONST.state_LMR_paused ]:
-      continue
-  #
-  # timer-generated LMR messages will pass
-  # to function self.__direct_router_message_()
+ def __local_message_router_(self):
+  while self.__LMR_run:
+    for my_LMR_id in self.__LMR_pool.keys():
+      my_LMR = self.__LMR_pool[ my_LMR_id ]
+      my_status = my_LMR['status']
+      if my_status in [
+       self.CONST.state_LMR_stopped,
+       self.CONST.state_LMR_paused ]:
+        continue
+       #
+       # timer-generated LMR messages will pass
+       # to function self.__direct_router_message_()
+       #
+    sleep(self.__LMR_latency)
   #
   # End of PyIRCIoT_router.local_message_router_()
 
  # incomplete
- def global_message_router_(self):
-  for my_GMR_id in self.__GMR_pool.keys():
-    my_GMR = self.__GMR_pool[ my_GMR_id ]
-    my_status = my_GMR['status']
-    if my_status in [
-     self.CONST.state_GMR_stopped,
-     self.CONST.state_GMR_paused ]:
-      continue
-  #
-  # timer-generated GMR messages will pass
-  # to function self.__direct_router_message_()
+ def __global_message_router_(self):
+  while self.__GMR_run:
+    for my_GMR_id in self.__GMR_pool.keys():
+      my_GMR = self.__GMR_pool[ my_GMR_id ]
+      my_status = my_GMR['status']
+      if my_status == self.CONST.state_GMR_connected:
+        pass
+      elif my_status == self.CONST.state_GMR_connecting:
+        pass
+      elif my_status == self.CONST.state_GMR_stalled:
+        pass
+      elif my_status in [
+       self.CONST.state_GMR_stopped,
+       self.CONST.state_GMR_paused ]:
+        continue
+      #
+      # timer-generated GMR messages will pass
+      # to function self.__direct_router_message_()
+      #
+    sleep(self.__GMR_latency)
   #
   # End of PyIRCIoT_router.global_message_router_()
 
@@ -712,6 +802,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   self.__GMR_pool[my_GMR_id].update({
     'status': self.CONST.state_GMR_connecting
   })
+  if not self.__GMR_run: self.__start_GMR_()
   return True
 
  # incomplete
@@ -722,6 +813,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   self.__LMR_pool[my_LMR_id].update({
     'status': self.CONST.state_LMR_running
   })
+  if not self.__GMR_run: self.__start_LMR_()
   return True
 
  # incomplete
@@ -740,6 +832,8 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   if not self.__check_LMR_id_(my_LMR_id):
     return False
   self.__LMR_pool.pop(my_LMR_id)
+  if self.__LMR_pool == {}:
+    self.__stop_LMR_()
   return True
 
  # incomplete
@@ -750,6 +844,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   self.__GMR_pool.pop(my_GMR_id)
   del self.__GMR_table
   self.__GMR_table = {}
+  self.__stop_GMR_()
   return True
 
  # incomplete

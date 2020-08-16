@@ -147,10 +147,12 @@ def ii_test_LMR_statuses_():
  to_log_("\nINPUT MESSAGE: @\033[1m{}\033[0m@".format(my_message))
  my_LMR_id = ii.init_LMR_(in_src = "include@efgh")
  if ii.get_LMR_list_() != [ my_LMR_id ]:
+   ii.drop_LMR_(my_LMR_id)
    to_log_('\n\033[1;41mNO LMR ID in dynamic pool\033[0m')
    return False
  if ii.get_LMR_status_(my_LMR_id) != ii.CONST.state_LMR_stopped:
    to_log_('\n\033[1;41mincorrect GMR status\033[0m')
+   ii.drop_LMR_(my_LMR_id)
    return False
  ii.router_graphs = [
    ( ii.do_router_LMR_, {
@@ -162,11 +164,14 @@ def ii_test_LMR_statuses_():
  if ii.get_LMR_status_() != ii.CONST.state_LMR_running:
    # only ONE item ^^^ must be in the pool, no parameters - first item
    to_log_('\n\033[1;43mincorrect LMR status\033[0m')
+   ii.drop_LMR_(my_LMR_id)
    return False
  if not ii.is_irciot_(my_message):
    to_log_('\n\033[1;43mNot an IRC-IoT message\033[0m')
+   ii.drop_LMR_(my_LMR_id)
    return False
  to_log_("TEST_IS_OK")
+ ii.drop_LMR_(my_LMR_id)
  return True
  # End of ii_test_MR_statuses_()
 
@@ -178,9 +183,11 @@ def ii_test_GMR_statuses_():
  my_GMR_id = ii.init_GMR_(in_src = "include@efgh")
  if ii.get_GMR_list_() != [ my_GMR_id ]:
    to_log_('\n\033[1;41mNO GMR ID in dynamic pool\033[0m')
+   ii.drop_GMR_(my_GMR_id)
    return False
  if ii.get_GMR_status_(my_GMR_id) != ii.CONST.state_GMR_stopped:
    to_log_('\n\033[1;41mincorrect GMR status\033[0m')
+   ii.drop_GMR_(my_GMR_id)
    return False
  ii.router_graphs = [
    ( ii.do_router_GMR_, {
@@ -192,11 +199,14 @@ def ii_test_GMR_statuses_():
  if ii.get_GMR_status_() != ii.CONST.state_GMR_connecting:
    # only ONE item ^^^ must be in the pool, no parameters - first item
    to_log_('\n\033[1;41mincorrect GMR status\033[0m')
+   ii.drop_GMR_(my_GMR_id)
    return False
  if not ii.is_irciot_(my_message):
    to_log_("\n\033[1;41mNot an IRC-IoT message\033[0m")
+   ii.drop_GMR_(my_GMR_id)
    return False
  to_log_("TEST_IS_OK")
+ ii.drop_GMR_(my_GMR_id)
  return True
  # End of ii_test_MR_statuses_()
 
@@ -265,4 +275,6 @@ if __name__ == '__main__':
     unittest.main(verbosity=2)
     sys.exit(0)
   main()
+  del ii
+  sys.exit(0)
 
