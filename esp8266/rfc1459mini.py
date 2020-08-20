@@ -47,31 +47,27 @@ class PyLayerIRC(object):
   try:
    self.i.shutdown()
    self.i.close()
-  except:
-   pass
+  except: pass
  def i_reconnect_(self):
-  if not self.i_run:
-   return
+  if not self.i_run: return
   self.i_disconnect_()
   time.sleep(self.CONST.i_big_wait)
   self.i_recon=1
  def i_socket_(self):
   try:
    i_s=socket.socket()
-  except:
-   return N
+  except: return N
   return i_s
  def i_conn_(self,i_srv,i_prt):
   i_addr=socket.getaddrinfo(i_srv,i_prt)
   self.i.connect(i_addr[0][-1])
  def i_send_(self,i_out):
   try:
-   self.i.send(bytes(i_out+'\n','UTF-8'))
+   self.i.send(bytes(i_out+'\n','utf-8'))
    print('send: '+i_out)
    time.sleep(self.CONST.i_min_wait)
    return 0
-  except:
-   return -1
+  except: return -1
  def i_recv_(self,i_w):
   try:
    r=select.select([self.i],[],[],0)
@@ -83,11 +79,10 @@ class PyLayerIRC(object):
     time.sleep(1)
     w+=1
    if r[0]:
-    inp=self.i.recv(self.CONST.i_buf_size).decode('UTF-8')
+    inp=self.i.recv(self.CONST.i_buf_size).decode('utf-8')
     inp=inp.strip('\r').strip('\n')
     return (0,inp,w)
-  except:
-   return(-1,'',0)
+  except: return(-1,'',0)
   return (0,'',0)
  def i_pong_(self,inp):
   str=inp.split(':')
@@ -110,8 +105,7 @@ class PyLayerIRC(object):
   try:
    i_msg = in_str.split('PRIVMSG',1)[1].split(':',1)[1]
    return i_msg.strip()
-  except:
-   return N
+  except: return N
  def i_process_(self):
   try:
    i_i=0
@@ -124,8 +118,7 @@ class PyLayerIRC(object):
     if not self.i:
      time.sleep(self.CONST.i_big_wait)
      i_i=0
-    if i_i<6:
-     i_i+=1
+    if i_i<6: i_i+=1
     if i_i==1:
      try:
       self.i_conn_(self.i_server,self.i_port)
@@ -134,15 +127,12 @@ class PyLayerIRC(object):
       self.i=self.i_socket_()
       i_i=0
     elif i_i==2:
-     if self.i_send_('USER '+self.i_user+' '+self.i_host+' 1 :'+self.i_info)==-1:
-      i_i=0
+     if self.i_send_('USER '+self.i_user+' '+self.i_host+' 1 :'+self.i_info)==-1: i_i=0
     elif i_i==3:
-     if self.i_send_('NICK '+self.i_nick)==-1:
-      i_i=0
+     if self.i_send_('NICK '+self.i_nick)==-1: i_i=0
     elif i_i in [4,5]:
      i_w=self.CONST.i_min_wait
-     if self.i_join_(self.i_channel)==-1:
-      i_i=0
+     if self.i_join_(self.i_channel)==-1: i_i=0
     i_dt=0
     if i_i>0:
      (i_r,i_buf,i_dt)=self.i_recv_(i_w)
@@ -150,13 +140,11 @@ class PyLayerIRC(object):
       if i_buf=='':
        i=self.i_keep+1
        if i>self.CONST.i_keep_cnt:
-        if self.i_join_(self.i_channel)==-1:
-         i_i=0
+        if self.i_join_(self.i_channel)==-1: i_i=0
         i=0
        self.i_keep=i
        continue
-      else:
-       self.i_keep=0
+      else: self.i_keep=0
       print(i_buf)
     i_w=self.CONST.i_big_wait
     if (i_dt>0):
@@ -180,17 +168,14 @@ class PyLayerIRC(object):
       i_i=0
      try:
       i_cmd=i_item.split(' ')[1]
-     except:
-      i_cmd=''
+     except: i_cmd=''
      if i_item[:i_pref_l]==i_pref:
       print('pref: '+i_cmd)
-      if i_cmd=='451':
-       i_i=1
+      if i_cmd=='451': i_i=1
      if i_cmd=='PRIVMSG':
       (i_n,i_m)=self.i_extract_nm_(i_item)
       i_msg=self.i_extract_msg_(i_item)
-      if i_msg!=N:
-       self.i_handler(i_msg,i_n,i_m)
+      if i_msg!=N: self.i_handler(i_msg,i_n,i_m)
   except:
    self.i_disconnect_()
    i_i=0

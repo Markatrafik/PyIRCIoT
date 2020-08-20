@@ -33,19 +33,16 @@ class PyLayerUDPb(object):
  def u_handler(self,in_msg):
   pass
  def u_pointer(self,in_msg):
-  if not isinstance(in_msg,str):
-   return -1
+  if not isinstance(in_msg,str): return -1
   return self.u_send_(in_msg)
  def u_disconnect_(self):
   try:
    for u in [self.us,self.uc]:
     u.shutdown()
     u.close()
-  except:
-   pass
+  except: pass
  def u_reconnect_(self):
-  if not self.u_run:
-   return
+  if not self.u_run: return
   self.u_disconnect_()
   time.sleep(self.CONST.u_big_wait)
  def u_setup_(self):
@@ -58,22 +55,19 @@ class PyLayerUDPb(object):
    self.uc=u_sock_()
    self.uc.bind((self.u_ip_b,self.u_port))
    self.us=u_sock_()
-  except:
-   pass
+  except: pass
  def u_send_(self,u_out):
   try:
    self.uc.send(bytes(u_out,'utf-8'))
    print('send: '+u_out)
    time.sleep(self.CONST.u_min_wait)
    return 0
-  except:
-   return -1
+  except: return -1
  def u_recv_(self,u_w):
   try:
    r=select.select([self.us],[],[],0)
    w=0
-   if u_w==0:
-    u_w=self.CONST.u_big_wait
+   if u_w==0: u_w=self.CONST.u_big_wait
    while r[0]==[] and w<u_w:
     r=select.select([self.us],[],[],0)
     time.sleep(1)
@@ -82,8 +76,7 @@ class PyLayerUDPb(object):
     inp=self.us.recv(self.CONST.u_buf_size).decode('utf-8')
     inp=inp.strip('\r').strip('\n')
     return (0,inp,w)
-  except:
-   return(-1,'',0)
+  except: return(-1,'',0)
   return (0,'',0)
  def u_process_(self):
   try:
@@ -98,11 +91,9 @@ class PyLayerUDPb(object):
      self.u_setup_()
      time.sleep(self.CONST.u_big_wait)
      u_i=0
-    if u_i<2:
-     u_i+=1
+    if u_i<2: u_i+=1
     u_dt=0
-    if u_i>0:
-     (u_r,u_buf,u_dt)=self.u_recv_(u_w)
+    if u_i>0: (u_r,u_buf,u_dt)=self.u_recv_(u_w)
     u_w=self.CONST.u_big_wait
     if (u_dt>0):
      u_w=u_dt
@@ -117,8 +108,7 @@ class PyLayerUDPb(object):
        print(u_buf)
        self.u_handler(u_buf)
        u_buf=''
-     except:
-      u_buf=''
+     except: u_buf=''
   except:
    self.u_disconnect_()
    u_i=0

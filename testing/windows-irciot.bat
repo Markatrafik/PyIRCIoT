@@ -21,7 +21,7 @@ IF "%1"=="test_irc" SET SCRIPT=rfc1459-test.py
 IF "%1"=="test_son" SET SCRIPT=rfc2217-test.py
 IF "%1"=="test_udp" SET SCRIPT=udpbrcst-test.py
 IF "%1"=="test_route" SET SCRIPT=irciot_router-test.py
-IF "%1"=="test_lang" SET SCRIPT=irciot_languages-test.py
+IF "%1"=="test_lang" SET SCRIPT=languages-test.py
 IF %SCRIPT%==firstrun GOTO maintag
 SET MYT=%2
 FOR /L %%A IN (0,1,30) DO IF NOT "%MYT%"=="!MYT:~0,%%A!" (

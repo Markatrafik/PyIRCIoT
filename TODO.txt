@@ -67,3 +67,7 @@
  ............: working in the Docker environment when using the
  ~ Must be ~ : PyLayerIRCIoT_EL_ class.
 
+  2020-08-19 : It would be useful to create or use an existing
+ ............: library to implement the IRC client and IRC-IoT
+  ~ Useful ~ : protocol stack on Arduino and Atmel controllers
+

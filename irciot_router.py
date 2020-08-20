@@ -110,7 +110,11 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   min_LMR_latency = 0.01
   max_LMR_latency = 3
   min_GMR_latency = 0.3
-  max_LMR_latency = 30
+  max_GMR_latency = 30
+  # protocol speceific delays:
+  min_LMR_announce_interval = max_LMR_latency
+  max_LMR_announce_interval = 600
+  default_LMR_announce_interval = 10
   #
   state_LMR_stopped = 0
   state_LMR_running = 1
@@ -211,6 +215,8 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   self.__LMR_latency = self.CONST.default_LMR_latency
   self.__GMR_latency = self.CONST.default_GMR_latency
   #
+  self.__LMR_announce_interval = self.CONST.default_LMR_announce_interval
+  #
   self.__primary_irciot_address = ""
   #
   # End of PyIRCIoT_router.__init__()
@@ -300,6 +306,16 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
    if in_latency < self.CONST.min_GMR_latency \
    or in_latency > self.CONST.max_GMR_latency: return False
    self.__GMR_latency = in_latency
+   return True
+
+ def irciot_get_LMR_announce_interval_(self):
+   return self.__LMR_announce_interval
+
+ def irciot_set_LMR_announce_interval_(self, in_delay):
+   if type(in_delay) not in [ int, float ]: return False
+   if in_delay < self.CONST.min_LMR_announce_interval \
+   or in_delay > self.CONST.max_LMR_announce_interval: return False
+   self.__LMR_announce_interval = in_delay
    return True
 
  def router_error_(self, in_error_code, in_addon = None):
@@ -626,14 +642,18 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
     for my_LMR_id in self.__LMR_pool.keys():
       my_LMR = self.__LMR_pool[ my_LMR_id ]
       my_status = my_LMR['status']
-      if my_status in [
+      if my_status == self.CONST.state_LMR_running:
+        my_time = time()
+        my_announce = my_LMR['announce']
+        if my_time - my_announce > self.__LMR_announce_interval:
+          my_LMR['announce'] = my_time
+        my_message = self.__make_LMR_information_message_(my_LMR_id)
+        self.__direct_router_message_(my_message, \
+         self.CONST.api_vuid_all)
+      elif my_status in [
        self.CONST.state_LMR_stopped,
        self.CONST.state_LMR_paused ]:
         continue
-       #
-       # timer-generated LMR messages will pass
-       # to function self.__direct_router_message_()
-       #
     sleep(self.__LMR_latency)
   #
   # End of PyIRCIoT_router.local_message_router_()
@@ -692,7 +712,8 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   self.__LMR_pool.update({
     my_LMR_id: {
      self.CONST.tag_SRC_ADDR: my_src,
-     'status': self.CONST.state_LMR_stopped
+     'status': self.CONST.state_LMR_stopped,
+     'announce': 0
     }
   })
   return my_LMR_id
@@ -790,7 +811,8 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   if not self.__check_LMR_id_(my_LMR_id):
     return False
   self.__LMR_pool[my_LMR_id].update({
-    'status': self.CONST.state_LMR_running
+    'status': self.CONST.state_LMR_running,
+    'announce': time()
   })
   return True
 
