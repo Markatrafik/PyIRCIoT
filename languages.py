@@ -41,7 +41,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   #
   irciot_protocol_version = '0.3.33'
   #
-  irciot_library_version  = '0.0.219'
+  irciot_library_version  = '0.0.221'
   #
   # IRC-IoT Embedded Languages tags:
   #
@@ -385,6 +385,8 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
  def irciot_EL_check_TCL_code_(self, in_code):
   class TCL_checker_(ast.NodeVisitor):
     def check(self, in_code):
+      pass
+    def visit(self, in_node):
       pass
   if not self.irciot_EL_check_matchers_(in_code, self.__TCL_filter_matchers):
     return False

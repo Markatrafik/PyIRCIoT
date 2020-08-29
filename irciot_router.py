@@ -36,7 +36,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   #
   irciot_router_protocol_version = '0.3.33'
   #
-  irciot_router_library_version = '0.0.219'
+  irciot_router_library_version = '0.0.221'
   #
   default_maximal_detect_dup_messages = 128
   #
@@ -885,8 +885,8 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   my_GMR_id = self.__get_GMR_id_(in_GMR_id)
   if not self.__check_GMR_id_(my_GMR_id):
     return False
-  self.__LMR_pool[my_LMR_id].update({
-    self.CONST.intag_LMR_status: self.CONST.state_LMR_pasued
+  self.__GMR_pool[my_GMR_id].update({
+    self.CONST.intag_GMR_status: self.CONST.state_GMR_pasued
   })
   return True
 
@@ -1065,6 +1065,5 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   return out_datum
   #
   # End of do_router_forwarding_()
-
 
 
