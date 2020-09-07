@@ -207,7 +207,7 @@ class PyLayerIRC( irciot_shared_ ):
    # 17. "Nefarious"  -- Nefarious ircd
    # 18. "Nefarious2" -- Nefarious IRCu (ircu fork) '2020
    # 19. "ng"         -- ngIRCd aka Next Generation IRCd, ver. 25, '2019
-   # 20. "Oragono"    -- Oragono, Golang based, ver. 2.2.0, '2012-2020
+   # 20. "Oragono"    -- Oragono, Golang based, ver. 2.3.0, '2012-2020
    # 21. "plexus"     -- PleXusIRCd, C++, '2003-2006
    # 22. "pircd"      -- Perl IRCd, Perl based, '2002
    # 23. "Provision"  -- ProvisionIRCd, Python based, '2006
@@ -2816,21 +2816,22 @@ class PyLayerIRC( irciot_shared_ ):
    #
    self.init_rfc1459_()
    #
-   try:
-     irc_init = 0
-     irc_wait = self.CONST.irc_first_wait
-     irc_input_buffer = ""
-     irc_ret = 0
-     irc_vuid = "{:s}0".format(self.CONST.api_vuid_cfg)
+   irc_init = 0
+   irc_wait = self.CONST.irc_first_wait
+   irc_input_buffer = ""
+   irc_ret = 0
+   irc_vuid = "{:s}0".format(self.CONST.api_vuid_cfg)
 
-     self.__delta_time = 0
+   self.__delta_time = 0
 
-     # app.run(host='0.0.0.0', port=50000, debug=True)
-     # must be FIXed for Unprivileged user
+   # app.run(host='0.0.0.0', port=50000, debug=True)
+   # must be FIXed for Unprivileged user
 
-     self.irc = self.irc_socket_(self.irc_server)
+   self.irc = self.irc_socket_(self.irc_server)
 
-     while (self.irc_run):
+   while (self.irc_run):
+
+     try:
 
        if not self.irc:
          if self.__join_retry == 0:
@@ -3027,9 +3028,10 @@ class PyLayerIRC( irciot_shared_ ):
                self.irc_check_and_restore_nick_()
              self.__delta_ping = 0
 
-   except socket.error:
-     self.irc_disconnect()
-     self.irc_run = False
+     except socket.error:
+       self.irc_disconnect()
+       self.irc = None
+
    #
    # End of irc_process_client_()
 

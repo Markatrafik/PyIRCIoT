@@ -334,7 +334,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
    self.__LMR_announce_interval = in_delay
    return True
 
- def irciot_set_GMR_connect_try_interval_(self):
+ def irciot_get_GMR_connect_try_interval_(self):
    return self.__GMR_connect_try_interval
 
  def irciot_set_GMR_connect_try_interval_(self, in_delay):

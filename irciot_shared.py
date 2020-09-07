@@ -282,6 +282,9 @@ class irciot_shared_(object):
    err_CONNTO  = 12
    err_DEVEL   = 13
    err_SENDTO  = 15
+   err_USAGE   = 16
+   err_OPTIONS = 17
+   err_BASEDON = 64
    err_UNKNOWN = 100
    #
    err_DESCRIPTIONS = {
@@ -294,6 +297,9 @@ class irciot_shared_(object):
      err_RECONN:  "reconnecting to ",
      err_CONNTO:  "Connecting to ",
      err_SENDTO:  "Sending to ",
+     err_USAGE:   "Usage: ",
+     err_OPTIONS: "[<options>]",
+     err_BASEDON: "based on IRC-IoT demo library",
      err_UNKNOWN: "Unknown error",
      err_DEVEL:   "You are using the test part of library code" \
       + ", it may be unstable or insecure, if you are not sure" \
@@ -693,8 +699,16 @@ class irciot_shared_(object):
     pass
 
  def bot_usage_handler (self):
-  print('{} (based on IRC-IoT demo library)'.format(self.bot_name))
-  print('\nUsage: {} [<options>]\n'.format(sys.argv[0]))
+  print('{} ({})'.format(self.bot_name, \
+   self.errors[self.CONST.err_BASEDON]))
+  print('\n{}{} {}\n'.format( \
+   self.errors[self.CONST.err_USAGE], \
+   sys.argv[0], self.errors[self.CONST.err_OPTIONS]))
+
+ def bot_set_options_(self, in_options):
+  if not isinstance(in_options, str): return False
+  self.errors[self.CONST.err_OPTIONS] = in_options
+  return True
 
  def bot_redirect_output_(self, in_filename):
   if not isinstance(in_filename, str):

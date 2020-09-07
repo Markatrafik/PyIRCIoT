@@ -550,19 +550,20 @@ class PyLayerCOM( irciot_shared_ ):
    #
    self.init_rfc2217_()
    #
-   try:
-     com_init = 0
-     com_wait = self.CONST.com_first_wait
-     com_input_buffer = ""
-     com_ret = 0
-     com_vuid = "{:s}0".format(self.CONST.api_vuid_cfg)
+   com_init = 0
+   com_wait = self.CONST.com_first_wait
+   com_input_buffer = ""
+   com_ret = 0
+   com_vuid = "{:s}0".format(self.CONST.api_vuid_cfg)
 
-     self.__delta_time = 0
+   self.__delta_time = 0
 
-     # app.run(host='0.0.0.0', port=50000, debug=True)
-     # must be FIXed for Unprivileged user
+   # app.run(host='0.0.0.0', port=50000, debug=True)
+   # must be FIXed for Unprivileged user
 
-     while (self.__com_run):
+   while (self.__com_run):
+
+     try:
 
        if not self.__com_sock:
          sleep(self.CONST.com_first_wait)
@@ -582,8 +583,10 @@ class PyLayerCOM( irciot_shared_ ):
 
        sleep(self.CONST.com_micro_wait)
 
-   except socket.error:
-     self.com_disconnect()
+     except socket.error:
+       self.com_disconnect()
+       self.__com_sock = None
+
    self.__com_run = False
    #
    # End of com_process_client_()

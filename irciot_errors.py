@@ -13,6 +13,10 @@ def irciot_get_common_error_descriptions_(in_human_language):
     13: "Вы используете тестовую часть кода библиотеки" \
       + ", она может быть нестабильной или небезопасной" \
       + ", если Вы не уверены - отключите её",
+    15: "Отправка в ",
+    16: "Использование: ",
+    17: "[<опции>]",
+    64: "базируется на демонстрационной библиотеке IRC-IoT",
    100: "Неизвестная ошибка",
    101: "Несоответствие версии протокола",
    102: "Несоответствие версии библиотеки",
@@ -61,6 +65,10 @@ def irciot_get_common_error_descriptions_(in_human_language):
     13: "Sie verwenden den Testteil des Bibliothekscodes" \
       + ", er kann instabil oder unsicher sein" \
       + ", wenn Sie sich nicht sicher sind - deaktivieren Sie ihn",
+    15: "Senden an ",
+    16: "Verwendung: ",
+    17: "[<Optionen>]",
+    64: "basiert auf der IRC-IoT-Demonstrationsbibliothek",
    100: "Unbekannter Fehler",
    101: "Nicht übereinstimmende Protokollversion",
    102: "Nicht übereinstimmende Bibliotheksversion",
