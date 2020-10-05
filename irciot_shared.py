@@ -324,6 +324,19 @@ class irciot_shared_(object):
    self.os_linux_proc_ipv6_route \
      = self.CONST.os_linux_proc_ipv6_route
 
+ def copy_string_(self, from_string):
+   if not isinstance(from_string, str):
+     return None
+   return '{}_'.format(from_string)[:-1]
+
+ def wipe_string_(self, in_hash):
+   try:
+     import SecureString
+     SecureString.clearmem(in_hash)
+   except:
+     pass
+   return "U" * 128
+
  def td2ms_(self, in_td):
    return in_td.days * 86400 \
         + in_td.seconds \

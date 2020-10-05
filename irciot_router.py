@@ -36,7 +36,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   #
   irciot_router_protocol_version = '0.3.33'
   #
-  irciot_router_library_version = '0.0.221'
+  irciot_router_library_version = '0.0.223'
   #
   default_maximal_detect_dup_messages = 128
   #
@@ -931,7 +931,6 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
    self.CONST.state_LMR_stopped,
    self.CONST.state_LMR_paused ]:
     return in_datum
-
   return in_datum
   #
   # End of do_router_LMR_()

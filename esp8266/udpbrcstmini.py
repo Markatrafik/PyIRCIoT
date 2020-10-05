@@ -7,7 +7,7 @@ N=None
 class PyLayerUDPb(object):
  class CONST(object):
   ii_proto_ver='0.3.33'
-  ii_lib_ver='0.0.221'
+  ii_lib_ver='0.0.223'
   u_big_wait=1
   u_min_wait=0.1
   u_port=12345

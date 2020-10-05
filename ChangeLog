@@ -191,3 +191,8 @@
 	values: "CLIENT" act as an IRC client (RFC2812), "SERVICE" or "SERVER"
 	(RFC2813). Now only the default mode works, rest are under development.
 
+2020-10-04 17:30 GMT+7 PyIRCIoT 0.0.223 Alexey Y. Woronov <alexey@woronov.ru>
+	* Sicne Version 0.0.223 of PyIRCIoT library, clearing passwords has been
+	added after using them, to activate this function, just install the
+	SecureString library from the PyPI repository: pip3 install SecureString
+

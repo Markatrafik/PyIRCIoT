@@ -71,3 +71,7 @@
  ............: library to implement the IRC client and IRC-IoT
   ~ Useful ~ : protocol stack on Arduino and Atmel controllers
 
+  2020-10-02 : It would be nice to create an data collecting
+ ............: module for the Telegraf and Dashboard for the
+  ~ Useful ~ : Grafana systems, displaying data from IRC-IoT
+

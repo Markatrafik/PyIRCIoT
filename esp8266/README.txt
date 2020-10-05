@@ -14,12 +14,18 @@ OK, let's add this Chip to IRC-IoT ecosystem
 
 2. Download MicroPython firmware, for example:
 > myfw="esp8266-20191220-v1.12.bin"
+or you can use this image to flash ESP32 module:
+> myfw="esp32-idf3-20200415-v1.12.bin"
 > wget http://micropython.org/resources/firmware/$myfw
 
-3. Write MicroPython firmware to your ESP8266:
+3. Write MicroPython firmware to your ESP8266,
+example for ESP8266 module (tested on ESP-01S and ESP-12E):
 > esptool.py --port $myport erase_flash
 > esptool.py --port $myport --baud 115200 write_flash \
 >  --flash_size=detect 0 $myfw
+example for ESP32 module (tested on ESP32-WROOM-32U):
+> esptool.py --chip esp32 --port $myport --baud 115200 \
+>  write_flash --flash_size=detect 0x1000 $myfw
 
 4. Edit file main.py, to change your settings
 

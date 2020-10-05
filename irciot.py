@@ -43,7 +43,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.33'
   #
-  irciot_library_version  = '0.0.221'
+  irciot_library_version  = '0.0.223'
   #
   # IRC-IoT characters
   #
@@ -2075,7 +2075,6 @@ class PyLayerIRCIoT(object):
     or my_algo == self.CONST.crypto_2FISH:
     crypto_private_key \
       = self.irciot_crypto_hasher_(None, 32).encode()
-  #
   return (crypto_private_key, crypto_public_key)
   #
   # End of irciot_crypto_generate_keys_()

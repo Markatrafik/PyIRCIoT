@@ -41,7 +41,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   #
   irciot_protocol_version = '0.3.33'
   #
-  irciot_library_version  = '0.0.221'
+  irciot_library_version  = '0.0.223'
   #
   # IRC-IoT Embedded Languages tags:
   #
@@ -206,6 +206,10 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   self._silence = not CAN_debug_library
   #
   # End of PyLayerIRCIoT_EL_.__init__()
+
+ def __del__(self):
+  self.__ansibe_vault_password \
+   = self.wipe_string_(self.__ansible_vault_password)
 
  def irciot_set_locale_(self, in_lang):
   if not isinstance(in_lang, str):
@@ -523,9 +527,9 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
  def irciot_EL_set_Ansible_Vault_(in_password):
   if not isinstance(in_password, str):
     return False
-  if in_password == "":
-    return False
-  self.__ansible_vault_password = in_password
+  if in_password == "": return False
+  self.__ansible_vault_passwod = self.copy_string_(in_password)
+  in_password = self.wipe_string_(in_password)
   return True
 
  # incomplete
@@ -583,7 +587,11 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   my_out = my_callback.result
   del my_callback
   if my_ret == -1:
+    my_passwords['vault_pass'] \
+     = self.wipe_string_(my_passwords['vault_pass'])
     raise Exception(str(my_ex))
+  my_passwords['vault_pass'] \
+   = self.wipe_string_(my_passwords['vault_pass'])
   return my_out
   #
   # End of __irciot_EL_run_ANSYML_code_()
@@ -940,6 +948,9 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
       del self.__ANSPLY
       del self.__ANSLDR
       del self.__ANSCBP
+      self.__ansible_vault_password \
+       = self.wipe_string_(self.__ansible_vault_password)
+      self.__ansible_vault_password = None
     elif in_lang == self.CONST.lang_BASH:
       del self.__BSHLEX
       del self.__BASH_filter_matchers

@@ -44,7 +44,7 @@ class PyLayerIRC( irciot_shared_ ):
    #
    irciot_protocol_version = '0.3.33'
    #
-   irciot_library_version  = '0.0.221'
+   irciot_library_version  = '0.0.223'
    #
    # Bot specific constants
    #
@@ -212,18 +212,19 @@ class PyLayerIRC( irciot_shared_ ):
    # 22. "pircd"      -- Perl IRCd, Perl based, '2002
    # 23. "Provision"  -- ProvisionIRCd, Python based, '2006
    # 24. "pure"       -- pureIRCd, CSharp based, '2008
-   # 25. "ratbox"     -- ircd-ratbox, @ EFNet, ver. 3.0.8, '2006
-   # 26. "Rock"       -- rock-ircd aka RockIRCd (UnrealIRCd fork), '2009
-   # 27. "Rubi"       -- RubiIRCd, Ruby based '2009
-   # 28. "RusNet"     -- ircd RusNet, @ RusNet, ver. 1.4.25, '2011
-   # 29. "seven"      -- ircd-seven, ver. 1.1.3, '2007-2019
-   # 30. "Shadow"     -- ShadowIRCd, ver. 6.3.3, '2003
-   # 31. "snircd"     -- snircd (ircu fork), @ QuakeNet, ver. 1.3.4
-   # 32. "solid"      -- solid-ircd (Bahamut fork), ver. 3.4.8 '2004-2013
-   # 33. "Synchronet" -- Synchronet IRCd, js based, '2010-2019
-   # 34. "Unreal"     -- UnrealIRCd, ver. 5.0.5, '1999-2020
-   # 35. "We"         -- WeIRCd, ver. 0.8.2, '2010
-   # 36. "PyIRCIoT" (when it works in IRC server mode)
+   # 25. "Rabbit"     -- RabbitIRCD, (UnrealIRCd fork), @ Wheresource '2014
+   # 26. "ratbox"     -- ircd-ratbox, @ EFNet, ver. 3.0.8, '2006
+   # 27. "Rock"       -- rock-ircd aka RockIRCd (UnrealIRCd fork), '2009
+   # 28. "Rubi"       -- RubiIRCd, Ruby based '2009
+   # 29. "RusNet"     -- ircd RusNet, @ RusNet, ver. 1.4.25, '2011
+   # 30. "seven"      -- ircd-seven, ver. 1.1.3, '2007-2019
+   # 31. "Shadow"     -- ShadowIRCd, ver. 6.3.3, '2003
+   # 32. "snircd"     -- snircd (ircu fork), @ QuakeNet, ver. 1.3.4
+   # 33. "solid"      -- solid-ircd (Bahamut fork), ver. 3.4.8, '2004-2013
+   # 34. "Synchronet" -- Synchronet IRCd, js based, ver. 3.11, '2010-2019
+   # 35. "Unreal"     -- UnrealIRCd, ver. 5.0.6, '1999-2020
+   # 36. "We"         -- WeIRCd, ver. 0.8.2, '2010
+   # 37. "PyIRCIoT" (when it works in IRC server mode)
    #
    # Additional drafts extending Internet Relay Chat protocol:
    irc_add_plus = "IRC+"  # IRC+ Services Protocol
@@ -1016,7 +1017,7 @@ class PyLayerIRC( irciot_shared_ ):
    self.irc_port = self.CONST.irc_default_port
    if self.irc_ssl:
      self.irc_port = self.CONST.irc_default_ssl_port
-   self.irc_password = self.CONST.irc_default_password
+   self.__irc_password = self.CONST.irc_default_password
    self.irc_ident = self.CONST.irc_default_ident
    #
    # This variable is not used to connect, if you don't have a server name
@@ -1029,7 +1030,7 @@ class PyLayerIRC( irciot_shared_ ):
    if self.CONST.irc_default_proxy != None:
      self.irc_proxy_server = self.CONST.irc_default_proxy_server
      self.irc_proxy_port = self.CONST.irc_default_proxy_port
-     self.irc_proxy_password = self.CONST.irc_default_proxy_password
+     self.__irc_proxy_password = self.CONST.irc_default_proxy_password
    #
    self.irc_status = 0
    self.__irc_recon = 1
@@ -1037,13 +1038,13 @@ class PyLayerIRC( irciot_shared_ ):
    #
    self.irc_servers = [ ( \
      self.irc_server, self.irc_port, \
-     self.irc_password, self.irc_ssl, 0, None ) ]
+     self.__irc_password, self.irc_ssl, 0, None ) ]
    #
    self.irc_proxies = []
    if self.irc_proxy != None:
      self.irc_proxies = [ ( \
      self.irc_proxy_server, self.irc_proxy_port, \
-     self.irc_proxy_password, 0, None ) ]
+     self.__irc_proxy_password, 0, None ) ]
    #
    self.irc_channel = self.CONST.irc_default_channel
    self.irc_chankey = self.CONST.irc_default_chankey
@@ -1234,6 +1235,10 @@ class PyLayerIRC( irciot_shared_ ):
    self.irc_run = False
    self.ident_run = False
    self.irc_debug = False
+   self.__irc_password \
+    = self.wipe_string_(self.__irc_password)
+   self.__irc_proxy_password \
+    = self.wipe_string_(self.__irc_proxy_password)
    sleep(self.CONST.irc_micro_wait)
    self.irc_disconnect_()
    self.stop_ident_()
@@ -1477,6 +1482,14 @@ class PyLayerIRC( irciot_shared_ ):
      pass
    #
    # End of irciot_set_locale_()
+
+ def irc_set_password_(self, in_password):
+   self.__irc_password = self.copy_string_(in_password)
+   in_password = self.wipe_string_(in_password)
+
+ def irc_set_proxy_password_(self, in_password):
+   self.__irc_proxy_password = self.copy_string_(in_password)
+   in_password = self.wipe_string_(in_password)
 
  def irc_tolower_(self, in_input):
    return in_input.translate(self.CONST.irc_translation)
@@ -2854,9 +2867,9 @@ class PyLayerIRC( irciot_shared_ ):
            irc_init = 0
 
        elif irc_init == 2:
-         if self.irc_password:
+         if self.__irc_password:
            self.irc_send_(self.CONST.cmd_PASS \
-            + " " + self.irc_password)
+            + " " + self.__irc_password)
          if self.__join_retry > self.__join_retry_max:
            self.irc_user = self.irc_random_user_()
            # Random username can override ban, but can
