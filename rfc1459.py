@@ -1237,8 +1237,9 @@ class PyLayerIRC( irciot_shared_ ):
    self.irc_debug = False
    self.__irc_password \
     = self.wipe_string_(self.__irc_password)
-   self.__irc_proxy_password \
-    = self.wipe_string_(self.__irc_proxy_password)
+   if self.CONST.irc_default_proxy != None:
+     self.__irc_proxy_password \
+      = self.wipe_string_(self.__irc_proxy_password)
    sleep(self.CONST.irc_micro_wait)
    self.irc_disconnect_()
    self.stop_ident_()
