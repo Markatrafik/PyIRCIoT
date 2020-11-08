@@ -44,7 +44,7 @@ class PyLayerIRC( irciot_shared_ ):
    #
    irciot_protocol_version = '0.3.33'
    #
-   irciot_library_version  = '0.0.223'
+   irciot_library_version  = '0.0.225'
    #
    # Bot specific constants
    #
@@ -207,7 +207,7 @@ class PyLayerIRC( irciot_shared_ ):
    # 17. "Nefarious"  -- Nefarious ircd
    # 18. "Nefarious2" -- Nefarious IRCu (ircu fork) '2020
    # 19. "ng"         -- ngIRCd aka Next Generation IRCd, ver. 25, '2019
-   # 20. "Oragono"    -- Oragono, Golang based, ver. 2.3.0, '2012-2020
+   # 20. "Oragono"    -- Oragono, Golang based, ver. 2.4.0, '2012-2020
    # 21. "plexus"     -- PleXusIRCd, C++, '2003-2006
    # 22. "pircd"      -- Perl IRCd, Perl based, '2002
    # 23. "Provision"  -- ProvisionIRCd, Python based, '2006

@@ -91,6 +91,9 @@ def EL_python_(in_code, in_check):
 def EL_BASIC_(in_code, in_check):
   return EL_test_(in_code, in_check, EL.CONST.lang_BASIC)
 
+def EL_TCL_(in_code, in_check):
+  return EL_test_(in_code, in_check, EL.CONST.lang_TCL)
+
 def EL_test_simple_LUA_():
   return EL_LUA_("assert(os.setlocale('C'))", "C")
 
@@ -99,6 +102,9 @@ def EL_test_simple_JavaScript_():
 
 def EL_test_simple_R_():
   return EL_R_("print(pi)", "3.141593")
+
+def EL_test_simple_TCL_():
+  return EL_TCL_("set aaa hello;return $aaa", "hello")
 
 def EL_test_JS_arithmetics_():
   my_script = "var a=12345+54321/333;var b=a-2509;b++;document.write(b*3|0)"
@@ -151,6 +157,8 @@ def main():
    EL_test_simple_BASIC_()
  if my_command == 'r':
    EL_test_simple_R_()
+ if my_command == 'tcl':
+   EL_test_simple_TCL_()
  if my_command == 'pyrangefor':
    EL_test_Python_for_range_()
  if my_command == 'pycosinus':
