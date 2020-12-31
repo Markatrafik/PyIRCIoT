@@ -75,3 +75,10 @@
  ............: module for the Telegraf and Dashboard for the
   ~ Useful ~ : Grafana systems, displaying data from IRC-IoT
 
+  2020-12-27 : It would be great to provide in IRC-IoT endpoint
+ ............: robots implementing interaction over different IoT
+  ~ Useful ~ : protocols, such as MQTT, CoAP, KNX, Z-Wave, etc.
+ ............: a kind of "anti-virus" that checks the connected
+ IoT devices for vulnerabilities to known exploints, so that int-
+ ruders through such devices can not affect the IRC-IoT network.
+

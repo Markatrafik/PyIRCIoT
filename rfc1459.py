@@ -191,7 +191,7 @@ class PyLayerIRC( irciot_shared_ ):
    #  1. "RFC1459" Internet Relay Chat Protocol '1993
    #  2. "RFC2812" IRC Draft: Client Protocol '2000
    #  3. "asp"        -- AspIRCd (Charybdis fork) '2019
-   #  4. "Bahamut"    -- Bahamut, ver. 2.0.7, '1999-2020
+   #  4. "Bahamut"    -- Bahamut, @ DALnet, ver. 2.1.5, '1999-2020
    #  5. "beware"     -- beware ircd, Delphi based, ver. 2.2.0
    #  6. "Charybdis"  -- charybdis-ircd, ver. 3.5.0, '2007-2020
    #  7. "ConfRoom"   -- Conference Room, ver. 1.7.6, '2014
@@ -205,7 +205,7 @@ class PyLayerIRC( irciot_shared_ ):
    # 15. "Kine"       -- KineIRCd, C++, '2002-2005
    # 16. "miniircd"   -- miniircd, Python based, ver. 1.3, '2003
    # 17. "Nefarious"  -- Nefarious ircd
-   # 18. "Nefarious2" -- Nefarious IRCu (ircu fork) '2020
+   # 18. "Nefarious2" -- Nefarious IRCu (ircu fork), ver. 2.0-288, '2020
    # 19. "ng"         -- ngIRCd aka Next Generation IRCd, ver. 25, '2019
    # 20. "Oragono"    -- Oragono, Golang based, ver. 2.4.0, '2012-2020
    # 21. "plexus"     -- PleXusIRCd, C++, '2003-2006
