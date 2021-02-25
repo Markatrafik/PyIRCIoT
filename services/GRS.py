@@ -18,6 +18,11 @@ import sys
 from PyIRCIoT.irciot import PyLayerIRCIoT
 from PyIRCIoT.rfc1459 import PyLayerIRC
 
+default_config_file = "/etc/irciot/GRS.conf"
+
+config_set = {
+}
+
 def main():
   #
   irciot = PyLayerIRCIoT()

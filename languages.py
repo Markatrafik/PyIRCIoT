@@ -846,6 +846,12 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
 
  # incomplete
  def irciot_EL_init_language_(self, in_lang):
+  ''' This method initializes all the necessary components for the
+      required Embedded Language, loads the necessary modules,
+      allocates memory and starts the necessary child processes
+      in: in_lang -- Embedded Language ID of 'str' type
+      out: value with type 'bool', True when seccessfuly initialized
+  '''
   if in_lang not in self.__allowed_EL:
     return False
   if in_lang == self.CONST.lang_ANSYML:

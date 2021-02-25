@@ -931,6 +931,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
    self.CONST.state_LMR_stopped,
    self.CONST.state_LMR_paused ]:
     return in_datum
+
   return in_datum
   #
   # End of do_router_LMR_()
@@ -1037,7 +1038,6 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
     if my_key in self.__connections_tracking.keys():
       ( my_src_addr, my_time ) = self.__connections_tracking[ my_key ]
       out_datum[ self.CONST.tag_DST_ADDR ] = my_src_addr
-  #
   return out_datum
   #
   # End of do_router_translation_()

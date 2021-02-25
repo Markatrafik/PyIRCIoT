@@ -711,6 +711,14 @@ class irciot_shared_(object):
   except:
     pass
 
+ # incomplete
+ def load_config_file_(self, in_filename, in_config_set):
+  if not isinstance(in_filename, str): return None
+  if not isinstance(in_config_set, dict): return None
+  if not os.path.exists(in_filename): return None
+
+  return None
+
  def bot_usage_handler (self):
   print('{} ({})'.format(self.bot_name, \
    self.errors[self.CONST.err_BASEDON]))

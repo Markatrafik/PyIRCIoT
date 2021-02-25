@@ -3042,7 +3042,7 @@ class PyLayerIRCIoT(object):
         except self.__crypt_ZLIB.error as zlib_error:
           if DO_debug_library:
             print("\033[1;41m ZLIB ENCRIPION FAILED \33[0m")
-            print("\033[1;35m" + str(zlib_error) + "\033[0m")
+            print("\033[1;35m{}\033[0m".format(zlib_error))
           if zlib_error.args[0].startswith("Error -3 "):
             self.irciot_error_(self.CONST.err_COMP_ZLIB_HEADER, 0)
           else:

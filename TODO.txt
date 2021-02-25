@@ -82,3 +82,9 @@
  IoT devices for vulnerabilities to known exploints, so that int-
  ruders through such devices can not affect the IRC-IoT network.
 
+  2021-02-25 : It's reasonable to implement zigbee2irciot gateway
+ ............: by analogy with zigbee2mqtt gateway for similar
+  ~ Useful ~ : radio module firmwares without using MQTT protocol
+ ............: It would also be useful to implement this function
+ for the ESP8266/ESP32 modules, as it is done in the SLS project.
+
