@@ -2493,55 +2493,64 @@ class PyLayerIRCIoT(object):
   # End of irciot_ldict_validate_json_by_ot_()
 
  def irciot_ldict_load_from_file_(self, in_filename):
-  if not isinstance(in_filename, str):
+  if not isinstance(in_filename, str): return False
+  ldict_addon = 'local dictionary: {}'.format(in_filename)
+  if not os.path.isfile(in_filename):
+    #
     return False
-  if os.path.isfile(in_filename):
-    try:
-      load_fd = open(in_filename, 'r')
-      load_json = load_fd.read()
-      load_dict = json.loads(load_json)
-    except:
-      return False
+  if not os.access(in_filename, os.R_OK):
+    #
+    return False
+  try:
+    load_fd = open(in_filename, 'r')
+    load_json = load_fd.read()
+    load_dict = json.loads(load_json)
     load_fd.close()
-    if not isinstance(load_dict, dict):
-      return False
-    if not self.CONST.ldict_VERSION in load_dict.keys():
-      return False
-    my_ldict_version = load_dict[self.CONST.ldict_VERSION]
-    if my_ldict_version != self.CONST.irciot_protocol_version:
-      return False
-    if self.CONST.ldict_ITEMS_TABLE in load_dict.keys():
-      my_ldict_items = load_dict[self.CONST.ldict_ITEMS_TABLE]
-      for my_ldict_item in my_ldict_items:
-        if not self.irciot_ldict_check_item_(my_ldict_item):
-          return False
-    else:
-      my_ldict = []
-    if self.CONST.ldict_TYPES_TABLE in load_dict.keys():
-      my_ldict_types = load_dict[self.CONST.ldict_TYPES_TABLE]
-      for my_ldict_type in my_ldict_types:
-        if not self.irciot_ldict_check_type_(my_ldict_type):
-          return False
-    else:
-      my_ldict_types = []
-    if self.CONST.ldict_SECTS_TABLE in load_dict.keys():
-      my_ldict_sections = load_dict[self.CONST.ldict_SECTS_TABLE]
-      for my_ldict_section in my_ldict_sections:
-        if not self.irciot_ldict_check_section_(my_ldict_section):
-          return False
-    else:
-      my_ldict_sections = []
-    my_lock = 0
-    while self.__ldict_lock and my_lock < 8:
-      random.seed()
-      my_lock += 1
-    if self.__ldict_lock:
-      return False
-    self.ldict_lock  = True
-    self.ldict       = my_ldict_items
-    self.ldict_types = my_ldict_types
-    self.ldict_sections = my_ldict_sections
-    self.ldict_lock  = False
+  except:
+    #
+    return False
+  if not isinstance(load_dict, dict):
+    return False
+  if not self.CONST.ldict_VERSION in load_dict.keys():
+    #
+    return False
+  my_ldict_version = load_dict[self.CONST.ldict_VERSION]
+  if my_ldict_version != self.CONST.irciot_protocol_version:
+    self.irciot_error_(self.CONST.err_PROTO_VER_MISMATCH, 0, \
+      in_addon = ldict_addon)
+    return False
+  if self.CONST.ldict_ITEMS_TABLE in load_dict.keys():
+    my_ldict_items = load_dict[self.CONST.ldict_ITEMS_TABLE]
+    for my_ldict_item in my_ldict_items:
+      if not self.irciot_ldict_check_item_(my_ldict_item):
+        return False
+  else:
+    my_ldict = []
+  if self.CONST.ldict_TYPES_TABLE in load_dict.keys():
+    my_ldict_types = load_dict[self.CONST.ldict_TYPES_TABLE]
+    for my_ldict_type in my_ldict_types:
+      if not self.irciot_ldict_check_type_(my_ldict_type):
+        return False
+  else:
+    my_ldict_types = []
+  if self.CONST.ldict_SECTS_TABLE in load_dict.keys():
+    my_ldict_sections = load_dict[self.CONST.ldict_SECTS_TABLE]
+    for my_ldict_section in my_ldict_sections:
+      if not self.irciot_ldict_check_section_(my_ldict_section):
+        return False
+  else:
+    my_ldict_sections = []
+  my_lock = 0
+  while self.__ldict_lock and my_lock < 8:
+    random.seed()
+    my_lock += 1
+  if self.__ldict_lock:
+    return False
+  self.ldict_lock  = True
+  self.ldict       = my_ldict_items
+  self.ldict_types = my_ldict_types
+  self.ldict_sections = my_ldict_sections
+  self.ldict_lock  = False
   return True
   #
   # End of irciot_ldict_load_from_file_()
@@ -3041,7 +3050,7 @@ class PyLayerIRCIoT(object):
           del out_base
         except self.__crypt_ZLIB.error as zlib_error:
           if DO_debug_library:
-            print("\033[1;41m ZLIB ENCRIPION FAILED \33[0m")
+            print("\033[1;41m ZLIB COMPRESSION FAILED \33[0m")
             print("\033[1;35m{}\033[0m".format(zlib_error))
           if zlib_error.args[0].startswith("Error -3 "):
             self.irciot_error_(self.CONST.err_COMP_ZLIB_HEADER, 0)

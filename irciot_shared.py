@@ -715,7 +715,19 @@ class irciot_shared_(object):
  def load_config_file_(self, in_filename, in_config_set):
   if not isinstance(in_filename, str): return None
   if not isinstance(in_config_set, dict): return None
-  if not os.path.exists(in_filename): return None
+  if not os.path.isfile(in_filename):
+    #
+    return None
+  if not os.access(in_filename, os.R_OK):
+    #
+    return None
+  try:
+    file_fd = open(in_filename, 'r')
+
+    file_fd.close()
+  except:
+    #
+    return None
 
   return None
 

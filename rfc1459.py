@@ -207,7 +207,7 @@ class PyLayerIRC( irciot_shared_ ):
    # 17. "Nefarious"  -- Nefarious ircd
    # 18. "Nefarious2" -- Nefarious IRCu (ircu fork), ver. 2.0-288, '2020
    # 19. "ng"         -- ngIRCd aka Next Generation IRCd, ver. 25, '2019
-   # 20. "Oragono"    -- Oragono, Golang based, ver. 2.5.0, '2012-2021
+   # 20. "Oragono"    -- Oragono, Golang based, ver. 2.6.0, '2012-2021
    # 21. "plexus"     -- PleXusIRCd, C++, '2003-2006
    # 22. "pircd"      -- Perl IRCd, Perl based, '2002
    # 23. "Provision"  -- ProvisionIRCd, Python based, '2006
