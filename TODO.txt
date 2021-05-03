@@ -88,3 +88,7 @@
  ............: It would also be useful to implement this function
  for the ESP8266/ESP32 modules, as it is done in the SLS project.
 
+  2021-04-22 : It is necessary to debug the PyIRCIoT library to
+ ............: work under Ubuntu Touch (UBports) system and
+ ~ Must be ~ : Termux sandbox under Android OS
+

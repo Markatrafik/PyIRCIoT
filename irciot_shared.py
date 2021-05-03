@@ -63,6 +63,8 @@ class irciot_shared_(object):
    default_bot_python = 'python3'
    default_bot_background_parameter = 'background'
    #
+   default_max_config_size = 1024 * 1024 # bytes
+   #
    ### OS depended:
    #
    os_aix     = 'AIX'
@@ -284,6 +286,8 @@ class irciot_shared_(object):
    err_SENDTO  = 15
    err_USAGE   = 16
    err_OPTIONS = 17
+   err_LOADING = 18
+   err_IMPORT  = 19
    err_BASEDON = 64
    err_UNKNOWN = 100
    #
@@ -299,6 +303,8 @@ class irciot_shared_(object):
      err_SENDTO:  "Sending to ",
      err_USAGE:   "Usage: ",
      err_OPTIONS: "[<options>]",
+     err_LOADING: "Problem reading a configuration file",
+     err_IMPORT:  "Library import error",
      err_BASEDON: "based on IRC-IoT demo library",
      err_UNKNOWN: "Unknown error",
      err_DEVEL:   "You are using the test part of library code" \
@@ -316,6 +322,7 @@ class irciot_shared_(object):
    self.bot_background_parameter \
      = self.CONST.default_bot_background_parameter
    self.errors = self.CONST.err_DESCRIPTIONS
+   self.max_config_size = self.CONST.default_max_config_size
    self.lang = self.CONST.hl_default
    # Only for testing:
    self.os_override = None
@@ -323,6 +330,7 @@ class irciot_shared_(object):
      = self.CONST.os_linux_proc_ipv4_route
    self.os_linux_proc_ipv6_route \
      = self.CONST.os_linux_proc_ipv6_route
+   self._config_parser = None
 
  def copy_string_(self, from_string):
    if not isinstance(from_string, str):
@@ -712,24 +720,31 @@ class irciot_shared_(object):
     pass
 
  # incomplete
- def load_config_file_(self, in_filename, in_config_set):
-  if not isinstance(in_filename, str): return None
-  if not isinstance(in_config_set, dict): return None
+ def load_config_file_(self, in_filename):
+  if not isinstance(in_filename, str): return False
   if not os.path.isfile(in_filename):
-    #
-    return None
+    return False
   if not os.access(in_filename, os.R_OK):
     #
-    return None
+    return False
+  try:
+    import configparser
+    import random
+  except Exception as my_ex:
+    self.irciot_error_(self.CONST.err_IMPORT, str(my_ex))
+    return False
+  random.seed()
+  my_dummy = '[dummy{:d}]'.format(random.randint(10000, 99999))
+  my_parser = configparser.ConfigParser()
   try:
     file_fd = open(in_filename, 'r')
-
+    my_config = my_dummy + file_fd.read(self.max_config_size)
     file_fd.close()
-  except:
-    #
-    return None
-
-  return None
+    self.config_parser = my_parser.read_string(my_config)
+  except Exception as my_ex:
+    self.irciot_error_(self.CONST.err_LOADING, str(my_ex))
+    return False
+  return True
 
  def bot_usage_handler (self):
   print('{} ({})'.format(self.bot_name, \

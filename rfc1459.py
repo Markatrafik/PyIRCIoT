@@ -191,7 +191,7 @@ class PyLayerIRC( irciot_shared_ ):
    #  1. "RFC1459" Internet Relay Chat Protocol '1993
    #  2. "RFC2812" IRC Draft: Client Protocol '2000
    #  3. "asp"        -- AspIRCd (Charybdis fork) '2019
-   #  4. "Bahamut"    -- Bahamut, @ DALnet, ver. 2.1.5, '1999-2020
+   #  4. "Bahamut"    -- Bahamut, @ DALnet, ver. 2.1.6, '1999-2020
    #  5. "beware"     -- beware ircd, Delphi based, ver. 2.2.0
    #  6. "Charybdis"  -- charybdis-ircd, ver. 3.5.0, '2007-2020
    #  7. "ConfRoom"   -- Conference Room, ver. 1.7.6, '2014
@@ -222,7 +222,7 @@ class PyLayerIRC( irciot_shared_ ):
    # 32. "snircd"     -- snircd (ircu fork), @ QuakeNet, ver. 1.3.4
    # 33. "solid"      -- solid-ircd (Bahamut fork), ver. 3.4.8, '2004-2013
    # 34. "Synchronet" -- Synchronet IRCd, js based, ver. 3.11, '2010-2019
-   # 35. "Unreal"     -- UnrealIRCd, ver. 5.0.6, '1999-2020
+   # 35. "Unreal"     -- UnrealIRCd, ver. 5.0.9, '1999-2021
    # 36. "We"         -- WeIRCd, ver. 0.8.2, '2010
    # 37. "PyIRCIoT" (when it works in IRC server mode)
    #

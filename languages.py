@@ -148,7 +148,8 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
    'BinOp', 'BitAnd', 'BitOr', 'BitXor', 'BoolOp', 'Dict', 'Div', 'Else', 'Eq',
    'Expr', 'For', 'If', 'Index', 'keyword', 'List', 'Load', 'Mod', 'Module',
    'Mult', 'NameConstant', 'Not', 'Num', 'Or', 'Pass', 'Set', 'Store', 'Str',
-   'Sub', 'Subscript', 'Tuple', 'UAdd', 'UnaryOp', 'USub', 'While', 'Compare' }
+   'Sub', 'Subscript', 'Tuple', 'UAdd', 'UnaryOp', 'USub', 'While', 'Compare',
+   'Constant' }
   lang_filter_PYTHON_maths = { 'acos', 'asin', 'atan', 'atan2', 'ceil', 'cos',
    'cosh', 'degrees', 'e', 'exp', 'fabs', 'floor', 'fmod', 'frexp', 'hypot',
    'ldexp', 'log', 'log10', 'modf', 'pi', 'pow', 'radians', 'sin', 'sinh',

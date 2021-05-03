@@ -28,6 +28,7 @@ def main():
   irciot = PyLayerIRCIoT()
   irc = PyLayerIRC(PyLayerIRC.CONST.irc_mode_SERVICE)
   #
+  irc.load_config_file_(default_config_file)
 
   #
   del irc
