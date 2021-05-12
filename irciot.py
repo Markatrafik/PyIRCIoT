@@ -1,7 +1,7 @@
 '''
 '' PyIRCIoT (PyLayerIRCIoT class)
 ''
-'' Copyright (c) 2018-2020 Alexey Y. Woronov
+'' Copyright (c) 2018-2021 Alexey Y. Woronov
 ''
 '' By using this file, you agree to the terms and conditions set
 '' forth in the LICENSE file which can be found at the top level
@@ -716,6 +716,8 @@ class PyLayerIRCIoT(object):
   self.errors = self.CONST.err_DESCRIPTIONS
   #
   self.irciot_set_locale_(self.lang)
+  #
+  self._error_handler_ = self.irciot_error_
   #
   # End of PyLayerIRCIoT.__init__()
 

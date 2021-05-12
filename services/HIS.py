@@ -3,7 +3,7 @@
 '''
 '' PyIRCIoT (HIS : Hardware Identification Service)
 ''
-'' Copyright (c) 2020 Alexey Y. Woronov
+'' Copyright (c) 2020-2021 Alexey Y. Woronov
 ''
 '' By using this file, you agree to the terms and conditions set
 '' forth in the LICENSE file which can be found at the top level
@@ -19,8 +19,10 @@ from PyIRCIoT.irciot import PyLayerIRCIoT
 from PyIRCIoT.rfc1459 import PyLayerIRC
 
 default_config_file = "/etc/irciot/HIS.conf"
-
-config_set = {
+default_config_values = {
+  'irc_server': 'localhost',
+  'irc_port':   '6667',
+  'irc_mode':   'bot'
 }
 
 def main():
@@ -28,7 +30,7 @@ def main():
   irciot = PyLayerIRCIoT()
   irc = PyLayerIRC(PyLayerIRC.CONST.irc_mode_SERVICE)
   #
-  irc.load_config_file_(default_config_file)
+  irc.load_config_file_(default_config_file, default_config_values)
   #
 
   #

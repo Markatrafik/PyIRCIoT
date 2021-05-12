@@ -286,7 +286,7 @@ class irciot_shared_(object):
    err_SENDTO  = 15
    err_USAGE   = 16
    err_OPTIONS = 17
-   err_LOADING = 18
+   err_LOADCFG = 18
    err_IMPORT  = 19
    err_BASEDON = 64
    err_UNKNOWN = 100
@@ -303,7 +303,7 @@ class irciot_shared_(object):
      err_SENDTO:  "Sending to ",
      err_USAGE:   "Usage: ",
      err_OPTIONS: "[<options>]",
-     err_LOADING: "Problem reading a configuration file",
+     err_LOADCFG: "Problem reading the configuration file",
      err_IMPORT:  "Library import error",
      err_BASEDON: "based on IRC-IoT demo library",
      err_UNKNOWN: "Unknown error",
@@ -330,7 +330,20 @@ class irciot_shared_(object):
      = self.CONST.os_linux_proc_ipv4_route
    self.os_linux_proc_ipv6_route \
      = self.CONST.os_linux_proc_ipv6_route
-   self._config_parser = None
+   self._config = None
+   self._error_handler_ = self._default_error_handler_
+
+ def _default_error_handler_(self, in_error_code, in_mid, \
+   in_vuid = None, in_addon = None):
+  # Warning: This version of error handler is made for
+  # testing and does not comply with the specification
+  my_descr = ""
+  if in_error_code in self.errors.keys():
+   my_descr = self.errors[in_error_code]
+   if isinstance(in_addon, str):
+     my_descr += " ({})".format(in_addon)
+  if my_descr != "":
+    print('PyIRCIoT error:', my_descr)
 
  def copy_string_(self, from_string):
    if not isinstance(from_string, str):
@@ -719,30 +732,52 @@ class irciot_shared_(object):
   except:
     pass
 
+ def get_config_value_(self, in_item, in_section = None):
+  if not isinstance(self._config, dict): return None
+  if not isinstance(in_item, str): return None
+  if not in_item in self._config.keys(): return None
+  return self._config[in_item]
+
+ def set_config_value_(self, in_item, in_value, in_section = None):
+  if not isinstance(in_item, str): return False
+  if not isinstance(self._config, dict): self._config = {}
+  self._config[in_item] = in_value
+  return True
+
+ def load_config_defaults_(self, in_defaults):
+  if not isinstance(in_defaults, dict): return False
+  self._config = in_defaults
+  return True
+
  # incomplete
- def load_config_file_(self, in_filename):
+ def load_config_file_(self, in_filename, in_defaults = None):
+  if self._config is None: self._config = {}
+  if isinstance(in_defaults, dict):
+    self.load_config_defaults_(in_defaults)
   if not isinstance(in_filename, str): return False
   if not os.path.isfile(in_filename):
     return False
   if not os.access(in_filename, os.R_OK):
-    #
+    self._error_handler_(self.CONST.err_LOADCFG, 0, in_addon = str(my_ex))
     return False
   try:
     import configparser
     import random
   except Exception as my_ex:
-    self.irciot_error_(self.CONST.err_IMPORT, str(my_ex))
+    self._error_handler_(self.CONST.err_IMPORT, 0, in_addon = str(my_ex))
     return False
   random.seed()
-  my_dummy = '[dummy{:d}]'.format(random.randint(10000, 99999))
+  my_dummy = 'dummy{:d}'.format(random.randint(10000, 99999))
   my_parser = configparser.ConfigParser()
   try:
     file_fd = open(in_filename, 'r')
-    my_config = my_dummy + file_fd.read(self.max_config_size)
+    my_cfg_str = '[{}]\n'.format(my_dummy)
+    my_cfg_str += file_fd.read(self.max_config_size)
     file_fd.close()
-    self.config_parser = my_parser.read_string(my_config)
+    my_parser.read_string(my_cfg_str)
+    self._config = my_parser._sections[my_dummy]
   except Exception as my_ex:
-    self.irciot_error_(self.CONST.err_LOADING, str(my_ex))
+    self._error_handler_(self.CONST.err_LOADCFG, 0, in_addon = str(my_ex))
     return False
   return True
 
