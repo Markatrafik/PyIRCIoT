@@ -752,13 +752,11 @@ class irciot_shared_(object):
  # incomplete
  def load_config_file_(self, in_filename, in_defaults = None):
   if self._config is None: self._config = {}
-  if isinstance(in_defaults, dict):
-    self.load_config_defaults_(in_defaults)
+  self.load_config_defaults_(in_defaults)
   if not isinstance(in_filename, str): return False
-  if not os.path.isfile(in_filename):
-    return False
+  if not os.path.isfile(in_filename): return False
   if not os.access(in_filename, os.R_OK):
-    self._error_handler_(self.CONST.err_LOADCFG, 0, in_addon = str(my_ex))
+    self._error_handler_(self.CONST.err_LOADCFG, 0)
     return False
   try:
     import configparser
@@ -775,7 +773,11 @@ class irciot_shared_(object):
     my_cfg_str += file_fd.read(self.max_config_size)
     file_fd.close()
     my_parser.read_string(my_cfg_str)
-    self._config = my_parser._sections[my_dummy]
+    my_config = my_parser._sections[my_dummy]
+    if isinstance(my_config, dict):
+      for config_key in my_config.keys():
+        self._config[config_key] = my_config[config_key]
+      del my_config
   except Exception as my_ex:
     self._error_handler_(self.CONST.err_LOADCFG, 0, in_addon = str(my_ex))
     return False

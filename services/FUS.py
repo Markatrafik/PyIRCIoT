@@ -22,7 +22,8 @@ default_config_file = "/etc/irciot/FUS.conf"
 default_config_values = {
   'irc_server': 'localhost',
   'irc_port':   '6667',
-  'irc_mode':   'bot'
+  'irc_mode':   'bot',
+  'irc_nick':   'FUS'
 }
 
 def main():
