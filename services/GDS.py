@@ -28,10 +28,18 @@ default_config_values = {
 
 def main():
   #
+  def my_usage_handler_():
+    print("Usage: {} [start]".format(sys.argv[0]))
+    sys.exit(0)
+  #
   irciot = PyLayerIRCIoT()
   irc = PyLayerIRC(PyLayerIRC.CONST.irc_mode_SERVICE)
   #
   irc.load_config_file_(default_config_file, default_config_values)
+  #
+  irc.bot_name = irc.get_config_value_('irc_nick')
+  irc.bot_usage_handler = my_usage_handler_
+  #
 
   #
   del irc

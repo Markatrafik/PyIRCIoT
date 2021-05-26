@@ -110,6 +110,8 @@ class irciot_shared_(object):
    hl_Greek    = 'gr'
    hl_Hrvatski = 'hr'
    hl_Hebrew   = 'il'
+   hl_Ido      = 'io'
+   hl_Irish    = 'ga'
    hl_Italian  = 'it'
    hl_Kazakh   = 'kk'
    hl_Korean   = 'ko'
@@ -117,8 +119,10 @@ class irciot_shared_(object):
    hl_Kyrgyz   = 'ky'
    hl_Latvian  = 'lv'
    hl_Maltese  = 'mt'
-   hl_Persian  = 'ir'
+   hl_Nauru    = 'na'
+   hl_Persian  = 'fa'
    hl_Polish   = 'pl'
+   hl_Pushto   = 'ps'
    hl_Romanian = 'ro'
    hl_Russian  = 'ru'
    hl_Sanskrit = 'sa'
@@ -128,10 +132,12 @@ class irciot_shared_(object):
    hl_Swahili  = 'sw'
    hl_Swedish  = 'se'
    hl_Spanish  = 'es'
+   hl_Tamil    = 'ta'
    hl_Tajik    = 'tg'
    hl_Thai     = 'th'
    hl_Turkish  = 'tr'
    hl_Turkmen  = 'tk'
+   hl_Urdu     = 'ur'
    hl_Uzbek    = 'uz'
    hl_Japanese = 'jp'
    #
@@ -154,7 +160,7 @@ class irciot_shared_(object):
     1025, 1097, 1250, 1251, 1252, 1253, 1254, 1255, 1256, 1257,
     1258, 1259 ]:
      locals()["enc_{}".format(enc)] = "cp{}".format(enc)
-   for enc in [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 15 ]:
+   for enc in [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 14, 15 ]:
      locals()["enc_ISO{}".format(enc)] = "iso-8859-{}".format(enc)
    enc_ISO22 = "iso-2022"
    #
@@ -247,6 +253,8 @@ class irciot_shared_(object):
      enc_875, enc_1253 ],
     hl_Hrvatski : [ enc_ISO1 ],
     hl_Hebrew   : [ enc_ISO8, enc_862, enc_856, enc_1255 ],
+    hl_Ido      : [],
+    hl_Irish    : [ enc_ISO14 ],
     hl_Italian  : [ enc_ISO1, enc_280 ],
     hl_Kazakh   : [],
     hl_Korean   : [ enc_EUCKR ],
@@ -254,8 +262,10 @@ class irciot_shared_(object):
     hl_Kyrgyz   : [],
     hl_Latvian  : [ enc_1257, enc_ISO13, enc_775 ],
     hl_Maltese  : [ enc_ISO3 ],
+    hl_Nauru    : [],
     hl_Persian  : [ enc_1097 ],
     hl_Polish   : [ enc_ISO2 ],
+    hl_Pushto   : [],
     hl_Romanian : [ enc_ISO2 ],
     hl_Russian  : [ enc_ISO5, enc_855, enc_866, enc_1251,
      enc_880, enc_KOI8C, enc_KOI8R, enc_KOI8RU ],
@@ -266,10 +276,12 @@ class irciot_shared_(object):
     hl_Swahili  : [],
     hl_Swedish  : [ enc_ISO1, enc_278 ],
     hl_Spanish  : [ enc_ISO1 ],
+    hl_Tamil    : [],
     hl_Tajik    : [ enc_KOI8T ],
     hl_Thai     : [ enc_874 ],
     hl_Turkish  : [ enc_ISO9, enc_857, enc_905, enc_1254 ],
     hl_Turkmen  : [],
+    hl_Urdu     : [],
     hl_Uzbek    : [],
     hl_Japanese : [ enc_EUCJP ]
    }
@@ -330,10 +342,10 @@ class irciot_shared_(object):
      = self.CONST.os_linux_proc_ipv4_route
    self.os_linux_proc_ipv6_route \
      = self.CONST.os_linux_proc_ipv6_route
-   self._config = None
-   self._error_handler_ = self._default_error_handler_
+   self.__config = None
+   self.__error_handler_ = self.__default_error_handler_
 
- def _default_error_handler_(self, in_error_code, in_mid, \
+ def __default_error_handler_(self, in_error_code, in_mid, \
    in_vuid = None, in_addon = None):
   # Warning: This version of error handler is made for
   # testing and does not comply with the specification
@@ -718,8 +730,7 @@ class irciot_shared_(object):
   return my_dict
 
  def irciot_set_locale_(self, in_lang):
-  if not isinstance(in_lang, str):
-    return
+  if not isinstance(in_lang, str): return
   self.lang = in_lang
   my_desc = {}
   try:
@@ -733,25 +744,25 @@ class irciot_shared_(object):
     pass
 
  def get_config_value_(self, in_item, in_section = None):
-  if not isinstance(self._config, dict): return None
+  if not isinstance(self.__config, dict): return None
   if not isinstance(in_item, str): return None
-  if not in_item in self._config.keys(): return None
-  return self._config[in_item]
+  if not in_item in self.__config.keys(): return None
+  return self.__config[in_item]
 
  def set_config_value_(self, in_item, in_value, in_section = None):
   if not isinstance(in_item, str): return False
-  if not isinstance(self._config, dict): self._config = {}
-  self._config[in_item] = in_value
+  if not isinstance(self.__config, dict): self.__config = {}
+  self.__config[in_item] = in_value
   return True
 
  def load_config_defaults_(self, in_defaults):
   if not isinstance(in_defaults, dict): return False
-  self._config = in_defaults
+  self.__config = in_defaults
   return True
 
  # incomplete
  def load_config_file_(self, in_filename, in_defaults = None):
-  if self._config is None: self._config = {}
+  if self.__config is None: self.__config = {}
   self.load_config_defaults_(in_defaults)
   if not isinstance(in_filename, str): return False
   if not os.path.isfile(in_filename): return False
@@ -776,10 +787,10 @@ class irciot_shared_(object):
     my_config = my_parser._sections[my_dummy]
     if isinstance(my_config, dict):
       for config_key in my_config.keys():
-        self._config[config_key] = my_config[config_key]
+        self.__config[config_key] = my_config[config_key]
       del my_config
   except Exception as my_ex:
-    self._error_handler_(self.CONST.err_LOADCFG, 0, in_addon = str(my_ex))
+    self.__error_handler_(self.CONST.err_LOADCFG, 0, in_addon = str(my_ex))
     return False
   return True
 
@@ -818,8 +829,7 @@ class irciot_shared_(object):
     os.kill(os.getpid(), signal.SIGKILL)
 
  def bot_process_kill_timeout_(self, in_timeout):
-  if type(in_timeout) not in [ int, float ]:
-    return
+  if type(in_timeout) not in [ int, float ]: return
   if self.get_os_name_() in self.CONST.os_all_UNIX \
    and in_timeout > 0:
     import signal
