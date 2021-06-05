@@ -18,12 +18,16 @@ import sys
 from PyIRCIoT.irciot import PyLayerIRCIoT
 from PyIRCIoT.rfc1459 import PyLayerIRC
 
+from time import sleep
+
+default_latency_wait = 0.1
 default_config_file = "/etc/irciot/GTS.conf"
 default_config_values = {
   'irc_server': 'localhost',
   'irc_port':   '6667',
   'irc_mode':   'bot',
-  'irc_nick':   'GTS'
+  'irc_nick':   'GTS',
+  'irc_info':   'IRC-IoT GTS Service'
 }
 
 def main():
@@ -32,15 +36,37 @@ def main():
     print("Usage: {} [start]".format(sys.argv[0]))
     sys.exit(0)
   #
-  irciot = PyLayerIRCIoT()
-  irc = PyLayerIRC(PyLayerIRC.CONST.irc_mode_SERVICE)
+  irc = PyLayerIRC(PyLayerIRC.CONST.irc_mode_CLIENT)
   #
   irc.load_config_file_(default_config_file, default_config_values)
   #
-  irc.bot_name = irc.get_config_value_('irc_nick')
-  irc.bot_usage_handler = my_usage_handler_
+  irc_serv = irc.get_config_value_('irc_server')
+  irc_port = irc.get_config_value_('irc_port')
+  irc_nick = irc.get_config_value_('irc_nick')
+  irc_info = irc.get_config_value_('irc_info')
   #
+  irc.irc_server = irc_serv
+  irc.irc_port = int(irc_port)
+  irc.irc_info = irc_info
+  irc.irc_define_nick_(irc_nick)
+  #
+  irc.bot_name = irc_nick
+  irc.bot_usage_handler = my_usage_handler_
+  irc.bot_background_start_()
+  #
+  irciot = PyLayerIRCIoT()
+  #
+  irc.start_IRC_()
+  #
+  while (irc.irc_run):
+    (irc_msg, irc_wait, irc_vuid) \
+      = irc.irc_check_queue_(irc.CONST.irc_queue_input)
+    if (irciot.is_irciot_(irc_msg)):
+      pass
 
+    if irc_wait <= 0:
+      irc_wait = default_latency_wait
+    sleep(irc_wait)
   #
   del irc
   del irciot

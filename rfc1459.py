@@ -197,17 +197,17 @@ class PyLayerIRC( irciot_shared_ ):
    #  7. "ConfRoom"   -- Conference Room, ver. 1.7.6, '2014
    #  8. "discord"    -- discordIRCd, js based, ver. 0.5.0 '2018
    #  9. "Elemental"  -- Elemental-IRCd, ver. 6.6.2, '2016
-   # 10. "hybrid"     -- ircd-hybrid, @ EFNet, ver. 8.2.29
-   # 11. "Insp"       -- Inspircd, ver. 2.0.20, '2015
-   # 12. "IRCNet"     -- IRCNet ircd, @ IRCNet, ver. 2.12.2
-   # 13. "IRCPlus"    -- IRCPlus, for Windows, ver. 5.0, '2001
-   # 14. "ircu"       -- ircd-ircu aka Undernet IRCd, ver. 2.10.12.18
-   # 15. "Kine"       -- KineIRCd, C++, '2002-2005
-   # 16. "miniircd"   -- miniircd, Python based, ver. 1.3, '2003
-   # 17. "Nefarious"  -- Nefarious ircd
-   # 18. "Nefarious2" -- Nefarious IRCu (ircu fork), ver. 2.0-288, '2020
-   # 19. "ng"         -- ngIRCd aka Next Generation IRCd, ver. 25, '2019
-   # 20. "Oragono"    -- Oragono, Golang based, ver. 2.6.0, '2012-2021
+   # 10. "Ergo"       -- Ergo (was Oragono), Golang based, ver. 2.7.0, '2012-2021
+   # 11. "hybrid"     -- ircd-hybrid, @ EFNet, ver. 8.2.29
+   # 12. "Insp"       -- Inspircd, ver. 2.0.20, '2015
+   # 13. "IRCNet"     -- IRCNet ircd, @ IRCNet, ver. 2.12.2
+   # 14. "IRCPlus"    -- IRCPlus, for Windows, ver. 5.0, '2001
+   # 15. "ircu"       -- ircd-ircu aka Undernet IRCd, ver. 2.10.12.18
+   # 16. "Kine"       -- KineIRCd, C++, '2002-2005
+   # 17. "miniircd"   -- miniircd, Python based, ver. 1.3, '2003
+   # 18. "Nefarious"  -- Nefarious ircd
+   # 19. "Nefarious2" -- Nefarious IRCu (ircu fork), ver. 2.0-288, '2020
+   # 20. "ng"         -- ngIRCd aka Next Generation IRCd, ver. 25, '2019
    # 21. "plexus"     -- PleXusIRCd, C++, '2003-2006
    # 22. "pircd"      -- Perl IRCd, Perl based, '2002
    # 23. "Provision"  -- ProvisionIRCd, Python based, '2006
@@ -2742,7 +2742,7 @@ class PyLayerIRC( irciot_shared_ ):
       (C.cmd_QUIT,    self.func_on_quit_),
       (C.cmd_ERROR,   self.func_on_error_) ]
    #
-   elif self.irc_layer_mode == self.CONST.irc_mode_SERVER: # RFC 2813
+   elif self.__irc_layer_mode == self.CONST.irc_mode_SERVER: # RFC 2813
      self.irc_cmmands = [
       (C.cmd_PASS,    None), (C.cmd_SERVER,     None),
       (C.cmd_NICK,    None), (C.cmd_QUIT,       None),

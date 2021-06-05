@@ -96,6 +96,7 @@ class irciot_shared_(object):
    hl_Armenian = 'hy'
    hl_Basque   = 'eu'
    hl_Bashkir  = 'ba'
+   hl_Bengali  = 'bn'
    hl_Chinese  = 'cn' # Simplified
    hl_Church   = 'cu' # Slavonic
    hl_Croatian = 'hr'
@@ -238,6 +239,7 @@ class irciot_shared_(object):
     hl_Armenian : [ enc_ArmSCII7, enc_ArmSCII8, enc_ArmSCII8A ],
     hl_Basque   : [ enc_ISO1 ],
     hl_Bashkir  : [],
+    hl_Bengali  : [],
     hl_Chinese  : [ enc_935, enc_EUCTW ],
     hl_Church   : [],
     hl_Croatian : [ enc_ISO2 ],
