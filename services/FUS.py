@@ -49,6 +49,7 @@ def main():
   irc.irc_port = int(irc_port)
   irc.irc_info = irc_info
   irc.irc_define_nick_(irc_nick)
+  irc.irc_channel = None
   #
   irc.bot_name = irc_nick
   irc.bot_usage_handler = my_usage_handler_

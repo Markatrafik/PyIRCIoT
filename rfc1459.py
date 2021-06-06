@@ -44,7 +44,7 @@ class PyLayerIRC( irciot_shared_ ):
    #
    irciot_protocol_version = '0.3.33'
    #
-   irciot_library_version  = '0.0.225'
+   irciot_library_version  = '0.0.227'
    #
    # Bot specific constants
    #
@@ -2890,6 +2890,7 @@ class PyLayerIRC( irciot_shared_ ):
            irc_init = 0
 
        elif irc_init == 4:
+         if not self.is_irc_channel_(self.irc_channel): continue
          irc_wait = self.CONST.irc_default_wait
          self.__join_retry += 1
          if self.irc_send_(self.CONST.cmd_JOIN \
@@ -2898,6 +2899,7 @@ class PyLayerIRC( irciot_shared_ ):
            irc_init = 0
 
        elif irc_init == 5:
+         if not self.is_irc_channel_(self.irc_channel): continue
          irc_wait = self.CONST.irc_default_wait
          self.__join_retry += 1
          if self.irc_send_(self.CONST.cmd_JOIN \
@@ -2916,7 +2918,8 @@ class PyLayerIRC( irciot_shared_ ):
 
        irc_wait = self.CONST.irc_default_wait
 
-       if irc_init > 3 and self.__irc_silence >= self.irc_silence_max:
+       if irc_init > 3 and self.__irc_silence >= self.irc_silence_max \
+        and self.is_irc_channel_(self.irc_channel):
          if self.__irc_silence == self.irc_silence_max:
            # To provoke TCP interaction, we take some action
            if self.irc_who_channel_(self.irc_channel) == -1:

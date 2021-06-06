@@ -196,3 +196,10 @@
 	added after using them, to activate this function, just install the
 	SecureString library from the PyPI repository: pip3 install SecureString
 
+2021-06-06 15:30 GMT+7 PyIRCIoT 0.0.227 Alexey Y. Woronov <alexey@woronov.ru>
+	* Since Version 0.0.227 new methods based on ConfigParser library has
+	been added to the extention of PyIRCIoT classes: load_config_file_(),
+	load_config_defaults_(), get_config_value_() and set_config_value_().
+	When variable irc_channel of the PyIRCIoT class is set to None, the
+	IRC client will not join to any of IRC channels.
+

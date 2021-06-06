@@ -45,7 +45,7 @@ class PyLayerUDPb( irciot_shared_ ):
   #
   irciot_protocol_version = '0.3.33'
   #
-  irciot_library_version  = '0.0.225'
+  irciot_library_version  = '0.0.227'
   #
   udpb_default_debug = DO_debug_library
   #
