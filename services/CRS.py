@@ -27,7 +27,9 @@ default_config_values = {
   'irc_port':   '6667',
   'irc_mode':   'bot',
   'irc_nick':   'CRS',
-  'irc_info':   'IRC-IoT CRS Service'
+  'irc_info':   'IRC-IoT CRS Service',
+  'main_key':   '/etc/irciot/keys/CRS.key',
+  'main_cert':  '/etc/irciot/keys/CRS.crt'
 }
 
 def main():

@@ -27,7 +27,8 @@ default_config_values = {
   'irc_port':   '6667',
   'irc_mode':   'bot',
   'irc_nick':   'GDS',
-  'irc_info':   'IRC-IoT GDS Service'
+  'irc_info':   'IRC-IoT GDS Service',
+  'gdict_file': '/etc/irciot/gdict.json'
 }
 
 def main():

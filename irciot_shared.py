@@ -826,17 +826,22 @@ class irciot_shared_(object):
 
  def bot_process_kill_(self):
   if self.get_os_name_() in self.CONST.os_all_UNIX:
-    from time import sleep
-    import signal
-    os.kill(os.getpid(), signal.SIGKILL)
+    try:
+      import signal
+      os.kill(os.getpid(), signal.SIGKILL)
+    except:
+      pass
 
  def bot_process_kill_timeout_(self, in_timeout):
   if type(in_timeout) not in [ int, float ]: return
   if self.get_os_name_() in self.CONST.os_all_UNIX \
    and in_timeout > 0:
-    import signal
-    signal.signal(signal.SIGALRM, self.bot_process_kill_)
-    signal.alarm(in_timeout)
+    try:
+      import signal
+      signal.signal(signal.SIGALRM, self.bot_process_kill_)
+      signal.alarm(in_timeout)
+    except:
+      pass
 
  def bot_background_start_(self):
   import subprocess
