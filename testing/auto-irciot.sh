@@ -62,14 +62,14 @@ function checksyntax () {
 }
 
 function resultat () {
- RESULT="\033[1;36m--- total: performed ${TEST_COUNT} tests"
+ RESULT="\033[1;36m----- total: performed ${TEST_COUNT} tests"
  RESULT="${RESULT}, \033[1;32m${TEST_OK} ok\033[1;36m, \033[1;3"
  if [ ${TEST_FAILED} -eq 0 ]; then
   RESULT="${RESULT}6" ; else RESULT="${RESULT}1" ; fi
  RESULT="${RESULT}m${TEST_FAILED} failed \033[1;36m"
  while export RESULT="${RESULT}-" ; do
   RESLEN="${#RESULT}"
-  if [ ${RESLEN} -gt 104 ]; then break ; fi
+  if [ ${RESLEN} -gt 107 ]; then break ; fi
  done
  RESULT="${RESULT}\033[0m\n"
  echo -ne "${RESULT}\n"
@@ -112,9 +112,10 @@ function run_tests () {
   export TEST_NAME="${TEST_NAME}'${3}' " ; fi
  while export TEST_NAME="${TEST_NAME}-" ; do
  TEST_LEN="${#TEST_NAME}"
- if [ ${TEST_LEN} -gt 49 ]; then break ; fi
+ if [ ${TEST_LEN} -gt 47 ]; then break ; fi
  done
- echo -ne "Test ${TEST_NAME} "
+ OUT_COUNT="$(printf "%-4.4d" ${TEST_COUNT})"
+ echo -ne "Test ${OUT_COUNT} ${TEST_NAME} "
  if [ "x${TEST_NAME:0:7}x" == "x'ascii'x" ]; then
    export OUTDATA="$(checkascii "${TEST_LIB}")"
  elif [ "x${TEST_NAME:0:8}x" == "x'syntax'x" ]; then
@@ -139,9 +140,9 @@ function run_tests () {
 }
 
 if [ -x "${TEST_IRCIOT_CMD}" ]; then
-echo -ne '\033[1;36m---------------- '
+echo -ne '\033[1;36m------------------ '
 echo -ne 'PyLayerIRCIoT tests'
-echo -ne ' ------------------\033[0m\n'
+echo -ne ' -------------------\033[0m\n'
 for m in syntax ascii crc c1integrity c2integrity version \
  test4rsa test4aes test2fish ; do
  run_tests "" "" "" "${m}" irciot
@@ -160,27 +161,27 @@ done
 fi
 
 if [ -x "${TEST_RFC1459_CMD}" ]; then
-echo -ne '\033[1;36m------------------ '
+echo -ne '\033[1;36m-------------------- '
 echo -ne 'PyLayerIRC tests'
-echo -ne ' -------------------\033[0m\n'
+echo -ne ' --------------------\033[0m\n'
 for m in syntax ascii isitip nicks masks langenc ; do
  run_tests "" "" "" "${m}" rfc1459
 done
 fi
 
 if [ -x "${TEST_UDPBRCST_CMD}" ]; then
-echo -ne '\033[1;36m------------------ '
+echo -ne '\033[1;36m-------------------- '
 echo -ne 'PyLayerUDPb tests'
-echo -ne ' ------------------\033[0m\n'
+echo -ne ' -------------------\033[0m\n'
 for m in syntax ascii isitip ; do
  run_tests "" "" "" "${m}" udpbrcst
 done
 fi
 
 if [ -x "${TEST_IRCIOTR_CMD}" ]; then
-echo -ne '\033[1;36m--------------- '
+echo -ne '\033[1;36m----------------- '
 echo -ne 'PyIRCIoT_router tests'
-echo -ne ' -----------------\033[0m\n'
+echo -ne ' ------------------\033[0m\n'
 for j in "" big_mtu ; do
 for m in syntax ascii forwarding translation lmrstatuses \
  gmrstatuses ; do
@@ -190,9 +191,9 @@ done
 fi
 
 if [ -x "${TEST_RFC1459_CMD}" ]; then
-echo -ne '\033[1;36m-------------- '
+echo -ne '\033[1;36m---------------- '
 echo -ne 'PyLayerIRCIoT_EL_ tests'
-echo -ne ' ----------------\033[0m\n'
+echo -ne ' -----------------\033[0m\n'
 for m in syntax ascii lua js python r pyrangefor pycosinus \
  jsarith ; do
  run_tests "" "" "" "${m}" irciot_languages
