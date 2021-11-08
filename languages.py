@@ -29,7 +29,9 @@ except:
 from io import StringIO
 import tracemalloc
 import contextlib
-import signal
+try:
+ import signal
+except: pass
 try: # insecure, but for development
  from irciot_shared import *
 except:
@@ -747,7 +749,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
     return None
   my_out = my_out.getvalue()
   for my_rep in [ ( '\n\n\n[1]\n ', '\n' ),
-   ( '[1]\n ', ''), ( '\n', '') ]:
+   ( '[1]\n ', '' ), ( '[1] ', '' ), ( '\n', '' ) ]:
     my_out = my_out.replace(my_rep[0], my_rep[1])
   return my_out
   #
@@ -768,8 +770,11 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   if self.__os_name == self.CONST.os_windows:
     pass # Need a method to stop the script by timeout in the Windows
   else:
-    signal.signal(signal.SIGALRM, __timeout_signal_)
-    signal.alarm(self.__execution_timeout)
+    try:
+      signal.signal(signal.SIGALRM, __timeout_signal_)
+      signal.alarm(self.__execution_timeout)
+    except:
+      pass
   try:
     if in_lang == self.CONST.lang_ANSYML:
       my_out = self.__irciot_EL_run_ANSYML_code_(in_code, in_environment)
@@ -804,7 +809,9 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   except Exception as my_ex:
     self.irciot_EL_error_(self.CONST.err_CODE_EXECUTION, str(my_ex))
   if self.__os_name != self.CONST.os_windows:
-    signal.alarm(0)
+    try:
+      signal.alarm(0)
+    except: pass
   if my_out == None:
     my_out = ""
   elif not isinstance(my_out, str):
