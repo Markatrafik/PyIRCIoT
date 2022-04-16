@@ -94,7 +94,7 @@
 
   2021-10-31 : It is necessary to consider the possibility of
  ............: integration with the following platforms, make
- ~ Must be ~ : appropriate Global Dictionary secrtions for:
+ ~ Must be ~ : appropriate Global Dictionary sections for:
  Apache Pulsar, AWS IoT, AWS Kinesis, AWS SOS, Azure Event HUB,
  Azure IoT HUB, IBM Watson IoT, Kafka, OPC Unified Architecture
 

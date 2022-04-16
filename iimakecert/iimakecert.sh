@@ -42,6 +42,8 @@ CLIENT_TMP="${F_NAME}.csr"
 CLIENT_CRT="${F_NAME}.crt"
 CLINET_CRL="${F_NAME}.crl"
 
+DH_PEM="${F_NAME}-dh.pem"
+
 BASENAME_BIN="/usr/bin/basename"
 DIRNAME_BIN="/usr/bin/dirname"
 MV_BIN="/bin/mv"
@@ -98,6 +100,7 @@ if [ "${1}" == "" ]; then
  echo " ${0} NEW-CA"
  echo " ${0} NEW-SERVICE-CERT [<service name>] [<index>]"
  echo " ${0} NEW-CLIENT-CERT [<client name>] [<life in days>]"
+ echo " ${0} GEN-DH [<service name>]"
  echo " ${0} CRL <certificate file name>"
  echo
  exit 0
@@ -168,6 +171,9 @@ elif [ "${1}" == "NEW-CLIENT-CERT" ]; then
   "${RM_BIN}" -f "${CLIENT_KEY}" 2>/dev/null
   err_msg "${0}" "client certificate" ${ERRLV} 12
  fi
+elif [ "${1}" == "GEN-DH" ]; then
+ "${MV_BIN}" -f "${DH_PEM}" "${DH_PEM}.old" 2>/dev/null
+ "${OPENSSL_BIN}" dhparam -out "${DH_PEM}" ${SERVICE_SIZE}
 elif [ "${1}" == "CRL" -a -f "${2}" ]; then
  DIR_NAME="$("${DIRNAME_BIN}" "${2}" 2>/dev/null)"
  if [ "${DIR_NAME}" == "" ]; then DIR_NAME="." ; fi
