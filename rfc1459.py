@@ -197,7 +197,7 @@ class PyLayerIRC( irciot_shared_ ):
    #  7. "ConfRoom"   -- Conference Room, ver. 1.7.6, '2014
    #  8. "discord"    -- discordIRCd, js based, ver. 0.5.0 '2018
    #  9. "Elemental"  -- Elemental-IRCd, ver. 6.6.2, '2016
-   # 10. "Ergo"       -- Ergo (was Oragono), Golang based, ver. 2.9.1, '2012-2022
+   # 10. "Ergo"       -- Ergo (was Oragono), Golang based, ver. 2.12.0, '2012-2023
    # 11. "hybrid"     -- ircd-hybrid, @ EFNet, ver. 8.2.29
    # 12. "Insp"       -- Inspircd, ver. 2.0.20, '2015
    # 13. "IRCNet"     -- IRCNet ircd, @ IRCNet, ver. 2.12.2
