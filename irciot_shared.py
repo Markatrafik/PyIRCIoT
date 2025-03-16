@@ -68,6 +68,7 @@ class irciot_shared_(object):
    ### OS depended:
    #
    os_aix     = 'AIX'
+   os_android = 'Android'
    os_freebsd = 'FreeBSD'
    os_hpux    = 'HP-UX'
    os_hurd    = 'GNU'

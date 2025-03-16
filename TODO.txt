@@ -79,7 +79,7 @@
  ............: robots implementing interaction over different IoT
   ~ Useful ~ : protocols, such as MQTT, CoAP, KNX, Z-Wave, etc.
  ............: a kind of "anti-virus" that checks the connected
- IoT devices for vulnerabilities to known exploints, so that int-
+ IoT devices for vulnerabilities to known exploits, so that int-
  ruders through such devices can not affect the IRC-IoT network.
 
   2021-02-25 : It's reasonable to implement zigbee2irciot gateway

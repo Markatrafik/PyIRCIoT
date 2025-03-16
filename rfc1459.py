@@ -44,7 +44,7 @@ class PyLayerIRC( irciot_shared_ ):
    #
    irciot_protocol_version = '0.3.33'
    #
-   irciot_library_version  = '0.0.229'
+   irciot_library_version  = '0.0.231'
    #
    # Bot specific constants
    #
@@ -197,7 +197,7 @@ class PyLayerIRC( irciot_shared_ ):
    #  7. "ConfRoom"   -- Conference Room, ver. 1.7.6, '2014
    #  8. "discord"    -- discordIRCd, js based, ver. 0.5.0 '2018
    #  9. "Elemental"  -- Elemental-IRCd, ver. 6.6.2, '2016
-   # 10. "Ergo"       -- Ergo (was Oragono), Golang based, ver. 2.12.0, '2012-2023
+   # 10. "Ergo"       -- Ergo (was Oragono), Golang based, ver. 2.15.0, '2012-2025
    # 11. "hybrid"     -- ircd-hybrid, @ EFNet, ver. 8.2.29
    # 12. "Insp"       -- Inspircd, ver. 2.0.20, '2015
    # 13. "IRCNet"     -- IRCNet ircd, @ IRCNet, ver. 2.12.2
@@ -2613,8 +2613,43 @@ class PyLayerIRC( irciot_shared_ ):
 
  # SERVICE Hooks:
 
- def func_on_srv_info_(self, in_args):
-   (in_string, in_ret, in_init, in_wait) = in_args 
+ # incomplete
+
+ # SERVER Hooks:
+
+ # incomplete
+ def func_on_server_info_(self, in_args):
+   (in_string, in_ret, in_init, in_wait) = in_args
+   return (in_ret, in_init, in_wait)
+
+ # incomplete
+ def func_on_server_quit_(self, in_args):
+   (in_string, in_ret, in_init, in_wait) = in_args
+   return (in_ret, in_init, in_wait)
+
+ # incomplete
+ def func_on_server_join_():
+   (in_string, in_ret, in_init, in_wait) = in_args
+   return (in_ret, in_init, in_wait)
+
+ # incomplete
+ def func_on_server_register_():
+   (in_string, in_ret, in_init, in_wait) = in_args
+   return (in_ret, in_init, in_wait)
+
+ # incomplete
+ def func_on_server_ping_():
+   (in_string, in_ret, in_init, in_wait) = in_args
+   return (in_ret, in_init, in_wait)
+
+ # incomplete
+ def func_on_server_pong_():
+   (in_string, in_ret, in_init, in_wait) = in_args
+   return (in_ret, in_init, in_wait)
+
+ # incomplete
+ def func_on_server_part_():
+   (in_string, in_ret, in_init, in_wait) = in_args
    return (in_ret, in_init, in_wait)
 
  def init_rfc1459_(self):
@@ -2727,7 +2762,10 @@ class PyLayerIRC( irciot_shared_ ):
      pass
 
    #
-   if self.__irc_layer_mode == self.CONST.irc_mode_CLIENT:
+   if self.__irc_layer_mode in [ \
+    self.CONST.irc_mode_CLIENT, \
+    self.CONST.irc_mode_SERVICE ]:
+
      self.irc_commands = [
       (C.cmd_INVITE,  None),
       (C.cmd_JOIN,    self.func_on_join_),
@@ -2741,28 +2779,37 @@ class PyLayerIRC( irciot_shared_ ):
       (C.cmd_PRIVMSG, None),
       (C.cmd_QUIT,    self.func_on_quit_),
       (C.cmd_ERROR,   self.func_on_error_) ]
+
+     if self.__irc_layer_mode == self.CONST.irc_mode_CLIENT:
+       pass
+
+     elif self.__irc_layer_mode == self.CONST.irc_mode_SERVICE:
+       self.irc_comands.append([
+        (C.cmd_SERVICE, None)
+       ])
    #
-   elif self.__irc_layer_mode == self.CONST.irc_mode_SERVER: # RFC 2813
+   elif self.__irc_layer_mode in self.CONST.irc_mode_SERVER: # RFC 2813
      self.irc_cmmands = [
       (C.cmd_PASS,    None), (C.cmd_SERVER,     None),
-      (C.cmd_NICK,    None), (C.cmd_QUIT,       None),
-      (C.cmd_SQUIT,   None), (C.cmd_JOIN,       None),
-      (C.cmd_NJOIN,   None), (C.cmd_MODE,       None),
+      (C.cmd_NICK,    None), (C.cmd_QUIT,       self.func_on_server_quit_),
+      (C.cmd_SQUIT,   None), (C.cmd_JOIN,       self.func_on_server_join_),
+      (C.cmd_NJOIN,   None), (C.cmd_REGISTER,   self.func_on_server_register_),
       (C.cmd_LINKS,   None), (C.cmd_KILL,       None),
       (C.cmd_NAMES,   None), (C.cmd_INVITE,     None),
       (C.cmd_STATS,   None), (C.cmd_CONNECT,    None),
       (C.cmd_TRACE,   None), (C.cmd_ADMIN,      None),
-      (C.cmd_WHO,     None), (C.cmd_INFO,       self.func_on_srv_info_),
+      (C.cmd_WHO,     None), (C.cmd_INFO,       self.func_on_server_info_),
       (C.cmd_WHOIS,   None), (C.cmd_WHOWAS,     None),
       (C.cmd_AWAY,    None), (C.cmd_RESTART,    None),
-      (C.cmd_SUMMON,  None), (C.cmd_USERS,      None),
+      (C.cmd_SUMMON,  None), (C.cmd_PING,       self.func_on_server_ping_),
       (C.cmd_WALLOPS, None), (C.cmd_USERHOST,   None),
-      (C.cmd_TOPIC,   None), (C.cmd_KICK,       None),
-      (C.cmd_PONG,    None), (C.cmd_PART,       None),
+      (C.cmd_TOPIC,   None), (C.cmd_PONG,       self.func_on_server_pong_),
+      (C.cmd_KICK,    None), (C.cmd_PART,       self.func_on_server_part_),
       (C.cmd_ERROR,   None), (C.cmd_PRIVMSG,    None),
       (C.cmd_PUBMSG,  None), (C.cmd_PUBNOTICE,  None),
       (C.cmd_NOTICE,  None), (C.cmd_PRIVNOTICE, None),
-      (C.cmd_ISON,    None), (C.cmd_REHASH,     None) ]
+      (C.cmd_ISON,    None), (C.cmd_REHASH,     None),
+      (C.cmd_USERS,   None), (C.cmd_MODE,       None) ]
    #
    self.irc_features = [
       (C.feature_CASEMAPPING, C.featt_STRING, None),

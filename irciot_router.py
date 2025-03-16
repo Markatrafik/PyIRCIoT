@@ -36,7 +36,7 @@ class PyIRCIoT_router( PyLayerIRCIoT ):
   #
   irciot_router_protocol_version = '0.3.33'
   #
-  irciot_router_library_version = '0.0.229'
+  irciot_router_library_version = '0.0.231'
   #
   default_maximal_detect_dup_messages = 128
   #
