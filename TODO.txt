@@ -98,3 +98,7 @@
  Apache Pulsar, AWS IoT, AWS Kinesis, AWS SOS, Azure Event HUB,
  Azure IoT HUB, IBM Watson IoT, Kafka, OPC Unified Architecture
 
+  2025-03-31 : It is necessary to make integration with the
+ ............: Matter protocol, for example in the form of
+ ~ Must be ~ : the microservice gateway, IRC-IoT client
+

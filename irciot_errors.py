@@ -105,6 +105,60 @@ def irciot_get_common_error_descriptions_(in_human_language):
    811: "Bestätigt mit dem Lokalen Wörterbuch",
    812: "Validierungsfehler mit dem Lokalen Wörterbuch"
   }
+ elif in_human_language == "it": # Italian
+  return {
+     5: " sec.",
+     6: " min.",
+     7: " ore",
+     8: " byte",
+     9: ", (tentativo: {})",
+    10: "Connessione chiusa",
+    11: "riconnessione a ",
+    12: "Connessione a ",
+    13: "Stai utilizzando la parte di codice di test della libreria" \
+      + ", potrebbe essere instabile o non sicura" \
+      + ", se non sei sicuro - disabilitala",
+    15: "Invio a ",
+    16: "Utilizzo: ",
+    17: "[<opzioni>]",
+    18: "Problema nella lettura del file di configurazione",
+    19: "Errore di importazione della libreria",
+    64: "basato sulla libreria dimostrativa IRC-IoT",
+   100: "Errore sconosciuto",
+   101: "Versione del protocollo non corrispondente",
+   102: "Versione della libreria non corrispondente",
+   103: "Valore del campo 'dp' non valido durante la deframmentazione",
+   104: "Incoerenza del contenuto",
+   111: "Manca il tag 'op' durante la deframmentazione",
+   112: "Manca il tag 'dp' durante la deframmentazione",
+   113: "Manca il tag 'bp' durante la deframmentazione",
+   121: "Valore del campo 'oc' superato",
+   122: "Valore del campo 'dc' superato",
+   123: "Valore del campo 'bc' superato",
+   131: "Incongruenza dei frammenti sovrapposti",
+   133: "Incoerenza del contenuto della deframmentazione",
+   251: "Problema nella decodifica BASE64",
+   252: "Problema nella decodifica BASE32",
+   253: "Problema nella decodifica BASE85",
+   254: "Problema nella decodifica BASE122",
+   300: "Metodo di crittografia non ancora implementato",
+   301: "Intestazione Zlib non valida",
+   303: "Blocco Zlib incompleto",
+   351: "Formato della chiave RSA non valido",
+   501: "Formato del messaggio IRC-IoT non valido",
+   503: "Formato dell'indirizzo IRC-IoT non valido",
+   701: "Problema nel caricamento del modulo Zlib",
+   702: "Problema nel caricamento del modulo BZIP2",
+   731: "Problema nel caricamento del modulo RSA",
+   732: "Problema nel caricamento del modulo AES",
+   733: "Problema nel caricamento del modulo Twofish",
+   735: "Problema nel caricamento del modulo GOST 3410",
+   737: "Problema nel caricamento del modulo GOST 3411",
+   755: "Problema nel caricamento del modulo UserSign",
+   777: "Problema nel caricamento del modulo UserCrypt",
+   811: "Confermato dal Dizionario Locale",
+   812: "Errore di verifica con il Dizionario Locale"
+  }
  return {}
 
 def irciot_get_EL_error_descriptions_(in_human_language):
@@ -152,6 +206,28 @@ def irciot_get_EL_error_descriptions_(in_human_language):
    1131: "Der Name '{}' ist reserviert",
    1151: "Nicht identifizierbare Eingabe: '{}'"
   }
+ elif in_human_language == "it": # Italian
+  return {
+   1000: "Errore EL ({}):",
+   1001: "Linguaggio di programmazione sconosciuto",
+   1002: "Questo linguaggio non è ancora supportato",
+   1003: "Ambiente non valido per il linguaggio",
+   1004: "Codice vietato dal filtro generale",
+   1005: "Codice vietato dal filtro del linguaggio",
+   1007: "Sintassi non corretta per questo linguaggio",
+   1008: "Dimensione del codice ha superato il limite",
+   1009: "Impossibile caricare i moduli richiesti",
+   1010: "Problema durante l'esecuzione del codice",
+   1024: "Tempo di esecuzione scaduto",
+   1025: "Analisi lessicale non superata",
+   1100: "L'uso del tipo '{}' non è consentito",
+   1101: "Sostituzione di comandi non ammessa",
+   1103: "Funzione '{}' non consentita",
+   1121: "Operatore 'import' non ammesso",
+   1122: "Costrutto 'import' 'from' non ammesso",
+   1131: "Nome '{}' riservato",
+   1151: "Input non riconosciuto: '{}'"
+  }
  return {}
 
 def irciot_get_rfc1459_error_descriptions_(in_human_language):
@@ -163,17 +239,25 @@ def irciot_get_rfc1459_error_descriptions_(in_human_language):
   return {
    2019: "Warnung! Kein IRC-IoT Netzwerk: '{}'"
   }
+ elif in_human_language == "it": # Italian
+  return {
+   2019: "Attenzione! Non è una rete IRC-IoT: '{}'"
+  }
  return {}
 
 def irciot_get_rfc2217_error_descriptions_(in_human_language):
  if in_human_language == "ru": # Russian Language
   return {
    3008: "COM порт через сеть"
- }
+  }
  elif in_human_language == "de": # Deutsch
   return {
    3008: "COM über Netzwerk"
- }
+  }
+ elif in_human_language == "it": # Italian
+  return {
+   3008: "Porta COM tramite rete"
+  }
  return {}
 
 def irciot_get_router_error_descriptions_(in_human_language):
@@ -202,6 +286,19 @@ def irciot_get_router_error_descriptions_(in_human_language):
    10701: "Falsche Protokollversion für die Interkommunikation von GMR-Routern",
    10707: "GMR kann nicht erstellt werden, maximale Anzahl von Instanzen erreicht",
    10708: "Ungültiger LMR-Instanz-Identifikator"
+  }
+ elif in_human_language == "it": # Italian
+  return {
+   10015: "Il router ha rilevato un duplicato durante l'inoltro del messaggio",
+   10505: "Parametro obbligatorio mancante per il nodo nel grafo di instradamento",
+   10507: "Valore non valido per un parametro obbligatorio del nodo nel grafo di instradamento",
+   10508: "Parametro di direzione errato per il nodo nel grafo di instradamento",
+   10601: "Versione del protocollo errata per l'intercomunicazione dei router LMR",
+   10607: "Impossibile creare LMR, raggiunto il numero massimo di istanze",
+   10608: "Identificatore dell'istanza LMR non valido",
+   10701: "Versione del protocollo errata per l'intercomunicazione dei router GMR",
+   10707: "Impossibile creare GMR, raggiunto il numero massimo di istanze",
+   10708: "Identificatore dell'istanza GMR non valido"
   }
  return {}
 

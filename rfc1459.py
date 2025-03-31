@@ -1,7 +1,7 @@
 '''
 '' PyIRCIoT (PyLayerIRC class)
 ''
-'' Copyright (c) 2018-2020 Alexey Y. Woronov
+'' Copyright (c) 2018-2025 Alexey Y. Woronov
 ''
 '' By using this file, you agree to the terms and conditions set
 '' forth in the LICENSE file which can be found at the top level
@@ -44,7 +44,7 @@ class PyLayerIRC( irciot_shared_ ):
    #
    irciot_protocol_version = '0.3.33'
    #
-   irciot_library_version  = '0.0.231'
+   irciot_library_version  = '0.0.233'
    #
    # Bot specific constants
    #
@@ -817,9 +817,9 @@ class PyLayerIRC( irciot_shared_ ):
      RPL_LOADEDMODULE    = "975"
    elif irc_default_draft == "Bahamut":
      ERR_NUMERICERROR    = "999"
-   #
-   # v this set will be regrouped ...
-   #
+   # |
+   # | this set will be regrouped ...
+   # v
    cmd_ADMIN      = "ADMIN"
    cmd_AWAY       = "AWAY"
    cmd_CACTION    = "CACTION"
