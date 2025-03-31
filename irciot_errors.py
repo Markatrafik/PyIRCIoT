@@ -285,7 +285,7 @@ def irciot_get_router_error_descriptions_(in_human_language):
    10608: "Ungültiger LMR-Instanz-Identifikator",
    10701: "Falsche Protokollversion für die Interkommunikation von GMR-Routern",
    10707: "GMR kann nicht erstellt werden, maximale Anzahl von Instanzen erreicht",
-   10708: "Ungültiger LMR-Instanz-Identifikator"
+   10708: "Ungültiger GMR-Instanz-Identifikator"
   }
  elif in_human_language == "it": # Italian
   return {

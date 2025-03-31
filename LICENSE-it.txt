@@ -1,0 +1,27 @@
+
+Licenza MIT
+
+Copyright (c) 2018-2025 Alexey Y. Woronov
+
+La presente licenza concede, a titolo gratuito, alle persone che
+hanno ricevuto una copia di questo software e della relativa
+documentazione (di seguito denominati "Software"), il diritto di
+utilizzare il Software senza restrizioni, inclusi il diritto
+illimitato di utilizzo, copia, modifica, fusione, pubblicazione,
+distribuzione, sublicenza e/o vendita di copie del Software,
+nonché di concedere tali diritti alle persone a cui il Software
+viene fornito, a condizione che vengano rispettate le seguenti
+condizioni:
+
+Il suddetto avviso di copyright e le presenti condizioni devono
+essere inclusi in tutte le copie o parti significative del Software.
+
+IL SOFTWARE VIENE FORNITO "COSÌ COM'È", SENZA ALCUN TIPO DI GARANZIA,
+ESPRESSA O IMPLICITA, INCLUSE, MA NON LIMITATE A, GARANZIE DI
+COMMERCIABILITÀ, IDONEITÀ PER UNO SCOPO SPECIFICO O NON VIOLAZIONE
+DI DIRITTI. IN NESSUN CASO GLI AUTORI O I TITOLARI DEI DIRITTI
+SARANNO RESPONSABILI PER RIVENDICAZIONI DI DANNI, PERDITE O ALTRE
+PRETESE DERIVANTI DA CONTRATTI IN CORSO, ILLECITI O ALTRO, CHE SIANO
+CONSEGUENZA DI, ABBIANO CAUSA IN O SIANO CONNESSI AL SOFTWARE,
+ALL'USO DEL SOFTWARE O AD ALTRE AZIONI RIGUARDANTI IL SOFTWARE.
+
