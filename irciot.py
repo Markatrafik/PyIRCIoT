@@ -1,7 +1,7 @@
 '''
 '' PyIRCIoT (PyLayerIRCIoT class)
 ''
-'' Copyright (c) 2018-2021 Alexey Y. Woronov
+'' Copyright (c) 2018-2025 Alexey Y. Woronov
 ''
 '' By using this file, you agree to the terms and conditions set
 '' forth in the LICENSE file which can be found at the top level
@@ -43,7 +43,7 @@ class PyLayerIRCIoT(object):
   #
   irciot_protocol_version = '0.3.33'
   #
-  irciot_library_version  = '0.0.235'
+  irciot_library_version  = '0.0.237'
   #
   # IRC-IoT characters
   #

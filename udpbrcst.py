@@ -1,7 +1,7 @@
 '''
 '' PyIRCIoT (PyLayerUDPb class)
 ''
-'' Copyright (c) 2019-2020 Alexey Y. Woronov
+'' Copyright (c) 2019-2025 Alexey Y. Woronov
 ''
 '' By using this file, you agree to the terms and conditions set
 '' forth in the LICENSE file which can be found at the top level
@@ -45,7 +45,7 @@ class PyLayerUDPb( irciot_shared_ ):
   #
   irciot_protocol_version = '0.3.33'
   #
-  irciot_library_version  = '0.0.235'
+  irciot_library_version  = '0.0.237'
   #
   udpb_default_debug = DO_debug_library
   #
@@ -161,6 +161,8 @@ class PyLayerUDPb( irciot_shared_ ):
     my_message_pack = [ in_message_pack ]
   if isinstance(my_message_pack, list):
     for my_pack in my_message_pack:
+      if not isinstance(my_pack, tuple): continue
+      if len(my_pack) != 2: continue
       (my_message, my_vuid) = my_pack
       self.udpb_add_to_queue_( \
       self.CONST.udpb_queue_output, my_message, \
@@ -264,7 +266,7 @@ class PyLayerUDPb( irciot_shared_ ):
               break
   except:
     return False
-  return False
+  return True
   #
   # End of udpb_init_by_interface_()
 
@@ -305,6 +307,7 @@ class PyLayerUDPb( irciot_shared_ ):
     self.__udpb_server_sock = my_init_socket_(my_af_inet, self.__os_name)
     self.__udpb_server_sock.settimeout(self.CONST.udpb_default_wait)
   except:
+    self.to_log_("Failed to bind({}:{}) socket".format(my_bind_ip, self.udpb_port))
     return
   #
   # End of udpb_setup_()
@@ -326,6 +329,8 @@ class PyLayerUDPb( irciot_shared_ ):
       self.__udpb_task.join()
     except:
       pass
+    finally:
+      self.__udpb_task = None
   #
   # End of stop_udpb_()
 
@@ -473,8 +478,12 @@ class PyLayerUDPb( irciot_shared_ ):
   if self.udpb_debug:
     self.to_log_(self.errors[self.CONST.err_SENDTO] \
      + "UDP({}:{}): <{}>".format(my_addr, self.udpb_port, in_string))
-  my_data = bytes(in_string, self.udpb_encoding)
-  self.__udpb_server_sock.sendto(my_data, (my_addr, self.udpb_port))
+  try:
+    my_data = bytes(in_string, self.udpb_encoding)
+    self.__udpb_server_sock.sendto(my_data, (my_addr, self.udpb_port))
+  except Exception as my_ex:
+    self.to_log_("Failed to send UDP packet: {}".format(my_ex))
+    return False
   sleep(self.CONST.udpb_micro_wait)
   return True
   #
@@ -510,7 +519,7 @@ class PyLayerUDPb( irciot_shared_ ):
    udpb_ip = ""
    udpb_vuid = "{:s}0".format(self.CONST.api_vuid_cfg)
    #
-   while (self.udpb_run):
+   while self.udpb_run:
      try:
        if not self.__udpb_client_sock or not self.__udpb_server_sock:
          self.udpb_setup_()
@@ -522,7 +531,7 @@ class PyLayerUDPb( irciot_shared_ ):
        if udpb_init > 0:
          ( udpb_ret, udpb_message, self.__delta_time, udpb_ip ) \
            = self.udpb_receive_(udpb_wait)
-         if self.is_json_(udpb_message):
+         if udpb_message and self.is_json_(udpb_message):
            udpb_vuid = self.udpb_track_get_vuid_by_ip_( udpb_ip )
            if udpb_vuid == None:
              udpb_vuid = self.udpb_track_add_vuid_by_ip_( udpb_ip )

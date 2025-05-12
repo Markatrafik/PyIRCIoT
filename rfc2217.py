@@ -42,7 +42,7 @@ class PyLayerCOM( irciot_shared_ ):
    #
    irciot_protocol_version = '0.3.33'
    #
-   irciot_library_version  = '0.0.235'
+   irciot_library_version  = '0.0.237'
    #
    com_default_debug = DO_debug_library
    #
@@ -410,7 +410,15 @@ class PyLayerCOM( irciot_shared_ ):
 
  # incomplete
  def com_disconnect_(self):
-   pass
+   if self.__com_sock:
+     try:
+       self.__com_sock.shutdown(socket.SHUT_RDWR)
+       self.__com_sock.close()
+     excpet:
+       pass
+     finnaly:
+       self.__com_sock = None
+       self.__com_status = 0
    #
    # End of com_disconnect_()
 
@@ -431,6 +439,7 @@ class PyLayerCOM( irciot_shared_ ):
 
  # incomplete
  def com_send_(self, com_out):
+   if not instance(com_out, str): return -1;
    try:
      if com_out == "":
        return -1
@@ -463,7 +472,10 @@ class PyLayerCOM( irciot_shared_ ):
      check_queue = self.__com_queue[queue_id]
      self.__com_queue_lock[queue_id] = True
      if not check_queue.empty():
-       (com_message, com_wait, com_vuid) = check_queue.get()
+       get_item = check_queue.get()
+       if not_instance(get_item, tuple) or len(get_item) != 3:
+         return ("", self.CONST.com_default_wait, self.CONST.api_vuid_all)
+       (com_message, com_wait, com_vuid) = get_item
        self.__com_queue_lock[queue_id] = old_queue_lock
        return (com_message, com_wait, com_vuid)
      else:
@@ -526,7 +538,7 @@ class PyLayerCOM( irciot_shared_ ):
      com_ret = 0
      com_vuid = "{:s}0".format(self.CONST.api_vuid_cfg)
 
-     while (self.__com_run):
+     while self.__com_run:
 
        if not self.__com_sock:
          sleep(self.CONST.com_first_wait)
@@ -561,7 +573,7 @@ class PyLayerCOM( irciot_shared_ ):
    # app.run(host='0.0.0.0', port=50000, debug=True)
    # must be FIXed for Unprivileged user
 
-   while (self.__com_run):
+   while self.__com_run:
 
      try:
 

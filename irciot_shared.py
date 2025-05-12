@@ -284,8 +284,8 @@ class irciot_shared_(object):
     hl_Thai     : [ enc_874 ],
     hl_Turkish  : [ enc_ISO9, enc_857, enc_905, enc_1254 ],
     hl_Turkmen  : [],
-    hl_Urdu     : [],
-    hl_Uzbek    : [],
+    hl_Urdu     : [ enc_1256 ],
+    hl_Uzbek    : [ enc_1254 ],
     hl_Japanese : [ enc_EUCJP ]
    }
    #
@@ -470,6 +470,8 @@ class irciot_shared_(object):
    return True
 
  def is_hostname_(self, in_name):
+   if not isinstance(in_name, str):
+     return False
    try:
      socket.gethostbyname(in_name)
      return True
@@ -510,13 +512,13 @@ class irciot_shared_(object):
    return in_server_ip
 
  def get_os_name_(self):
-   if self.os_override != None:
+   if self.os_override is not None:
      return self.os_override
    try:
-     return os.uname()[0]
-   except:
      if os.name == 'nt':
        return self.CONST.os_windows
+     return os.uname()[0]
+   except:
      return None
 
  def get_ipv6_route_linux_(self, in_server_ip):
@@ -760,7 +762,7 @@ class irciot_shared_(object):
 
  def load_config_defaults_(self, in_defaults):
   if not isinstance(in_defaults, dict): return False
-  self.__config = in_defaults
+  self.__config = in_defaults.copy()
   return True
 
  # incomplete

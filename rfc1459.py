@@ -44,7 +44,7 @@ class PyLayerIRC( irciot_shared_ ):
    #
    irciot_protocol_version = '0.3.33'
    #
-   irciot_library_version  = '0.0.235'
+   irciot_library_version  = '0.0.237'
    #
    # Bot specific constants
    #
@@ -197,7 +197,7 @@ class PyLayerIRC( irciot_shared_ ):
    #  7. "ConfRoom"   -- Conference Room, ver. 1.7.6, '2014
    #  8. "discord"    -- discordIRCd, js based, ver. 0.5.0 '2018
    #  9. "Elemental"  -- Elemental-IRCd, ver. 6.6.2, '2016
-   # 10. "Ergo"       -- Ergo (was Oragono), Golang based, ver. 2.15.0, '2012-2025
+   # 10. "Ergo"       -- Ergo (was Oragono), Golang based, ver. 2.16.0, '2012-2025
    # 11. "hybrid"     -- ircd-hybrid, @ EFNet, ver. 8.2.29
    # 12. "Insp"       -- Inspircd, ver. 2.0.20, '2015
    # 13. "IRCNet"     -- IRCNet ircd, @ IRCNet, ver. 2.12.2
@@ -1146,7 +1146,7 @@ class PyLayerIRC( irciot_shared_ ):
      return
    if not self.is_ip_port_(self.ident_port):
      return
-   while (self.ident_run):
+   while self.ident_run:
      try:
        if self.is_ipv4_address_(self.ident_ip):
          my_af_inet = socket.AF_INET
@@ -2890,7 +2890,7 @@ class PyLayerIRC( irciot_shared_ ):
 
    self.irc = self.irc_socket_(self.irc_server)
 
-   while (self.irc_run):
+   while self.irc_run:
 
      try:
 

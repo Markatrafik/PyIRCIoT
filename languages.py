@@ -1,7 +1,7 @@
 '''
 '' PyIRCIoT_EL_ (IRC-IoT Embedded Languages class)
 ''
-'' Copyright (c) 2019-2021 Alexey Y. Woronov
+'' Copyright (c) 2019-2025 Alexey Y. Woronov
 ''
 '' By using this file, you agree to the terms and conditions set
 '' forth in the LICENSE file which can be found at the top level
@@ -43,7 +43,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   #
   irciot_protocol_version = '0.3.33'
   #
-  irciot_library_version  = '0.0.235'
+  irciot_library_version  = '0.0.237'
   #
   # IRC-IoT Embedded Languages tags:
   #
@@ -60,18 +60,21 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   lang_PYTHON = 'py'  # Python
   lang_R      = 'r'   # GNU R
   lang_RUBY   = 'rb'  # Ruby
+  long_RUST   = 'rst' # Rust
   lang_SMTLK  = 'gst' # GNU SmallTalk
   lang_SWIFT  = 'swt' # Apple Swift
   lang_TCL    = 'tcl' # TCL Script
   #
-  if not CAN_debug_library:
-    lang_ALL = [ lang_PYTHON ] # More safer but still dangerous
-  else:
-    lang_ALL = [
-     lang_ANSYML, lang_BASH, lang_BASIC, lang_CSP,   lang_GO,
-     lang_JRE,    lang_JS,   lang_LUA,   lang_PERL,  lang_PHP,
-     lang_PYTHON, lang_RUBY, lang_R,     lang_SWIFT, lang_TCL
-    ]
+  lang_ALL  = [
+    lang_ANSYML, lang_BASH, lang_BASIC, lang_CSP,   lang_GO,
+    lang_JRE,    lang_JS,   lang_LUA,   lang_PERL,  lang_PHP,
+    lang_PYTHON, lang_RUBY, lang_R,     lang_SWIFT, lang_TCL
+  ]
+  #
+  # More safer but still dangerous:
+  lang_SAFE = [ lang_PYTHON ]
+  #
+  if not CAN_debug_library: lang_ALL = lang_SAFE
   #
   err_EL_ERROR         = 1000
   err_UNKNOWN_LANGUAGE = 1001
@@ -131,6 +134,7 @@ class PyLayerIRCIoT_EL_( irciot_shared_ ):
   mod_PHPPAR = 'phply.phpparse'
   mod_R_ROBJ = 'rpy2.robjects'
   mod_R_INTF = 'rpy2.rinterface'
+  mod_RUST = 'rustpy'
   mod_MATH = 'math'
   mod_JRE = 'py4j.java_gateway'
   mod_JS  = 'js2py'
