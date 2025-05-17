@@ -155,13 +155,13 @@ elif [ "${1}" == "NEW-CLIENT-CERT" ]; then
  if [ ${ERRLV} -ne 0 ]; then
   err_msg "${0}" "client key" ${ERRLV} 11
  fi
- "${OPENSSL_BIN}" req -new -x509 -nodes -days ${SERVICE_DAYS} \
+ "${OPENSSL_BIN}" req -new -x509 -nodes -days ${CLIENT_DAYS} \
   -key "${CLIENT_KEY}" -out "${CLIENT_TMP}" \
   -config "${OPENSSL_CONF}"
  ERRLV=$?
  if [ ${ERRLV} -eq 0 ]; then
   "${OPENSSL_BIN}" x509 -days "${CLIENT_DAYS}" \
-   -inform PEM -in "${CLIENT_TMP}" -signkey "${SERVICE_KEY}" \
+   -inform PEM -in "${CLIENT_TMP}" -signkey "${CA_KEY}" \
    -out "${CLIENT_CRT}" -CA "${CA_CRT}" -CAkey "${CA_KEY}" \
    -CAserial "$(get_serial ca)"
    ERRLV=$?
@@ -179,6 +179,7 @@ elif [ "${1}" == "CRL" -a -f "${2}" ]; then
  if [ "${DIR_NAME}" == "" ]; then DIR_NAME="." ; fi
  export OPENSSL_CONF="$(get_conf ca)"
  REVOKE_NAME="${DIR_NAME}/$("${BASENAME_BIN}" "${2}" .crt).crl"
+ "${OPENSSL_BIN}" ca -gencrl -out "${REVOKE_NAME}" -config "${OPENSSL_CONF}"
 
 else err_exit "${0}: Incorrect parameters" 15 ; fi
 
